@@ -346,7 +346,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 class account_invoice_line(osv.osv):
 	def _amount_line(self, cr, uid, ids, prop, unknow_none, unknow_dict):
 		# print 'OVERIDEDDDDDD==================================>>>>>>>>'
-		# TEST AJA
+		# TEST AJA lagi
 		res = {}
 		tax_obj = self.pool.get('account.tax')
 		cur_obj = self.pool.get('res.currency')
