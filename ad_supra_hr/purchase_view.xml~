@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+
+        <record id="purchase_order_form_view_report" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form" />
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="jenis" on_change="type_change"/>
+                </field>
+                <field name="dest_address_id" position="after">
+                    <field name="port" />
+                </field>
+            	<xpath expr="/form/sheet/notebook/page[@string='Incoming Shipments &amp; Invoices']" position="after">
+                	<page string='Other Info' >
+                	    <separator string="Your ref"/>
+                		<field name="yourref" colspan="4" nolabel="1"/>
+                		<separator string="Note"/>
+                		<field name="note" colspan="4" nolabel="1"/>
+                		<newline />
+                		<separator string="Other"/>
+                		<field name="other" colspan="4" nolabel="1"/>
+                	</page>
+            	</xpath>
+			</field>
+		</record>
+
+        <record id="seq_type_eksport" model="ir.sequence.type">
+			<field name="name">Sequence PO Local</field>
+			<field name="code">purchase.order.local</field>
+		</record>
+		
+		<record id="seq_eksport" model="ir.sequence">
+			<field name="name">Sequence PO Local</field>
+			<field name="code">purchase.order.local</field>
+			<field name="prefix">PO/%(year)s/%(month)s/LOKAL/</field>
+			<field name="padding">5</field>
+		</record>
+        
+        <record id="seq_type_imports" model="ir.sequence.type">
+			<field name="name">Sequence PO Import S</field>
+			<field name="code">purchase.order.imports</field>
+		</record>
+		
+		<record id="seq_imports" model="ir.sequence">
+			<field name="name">Sequence PO Import S</field>
+			<field name="code">purchase.order.imports</field>
+			<field name="suffix"> S/ INDENT /%(month)s/%(year)s</field>
+			<field name="padding">5</field>
+		</record>
+        <record id="seq_type_importj" model="ir.sequence.type">
+			<field name="name">Sequence PO Import J</field>
+			<field name="code">purchase.order.importj</field>
+		</record>
+		
+		<record id="seq_importj" model="ir.sequence">
+			<field name="name">Sequence PO Import J</field>
+			<field name="code">purchase.order.importj</field>
+			<field name="suffix"> J/ INDENT /%(month)s/%(year)s</field>
+			<field name="padding">5</field>
+		</record>
+		
+	</data>
+</openerp>

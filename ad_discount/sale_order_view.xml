@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="view_order_form_11" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+            	<field name="amount_untaxed" position="replace">
+            		<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+            	</field>
+            	<field name="amount_tax" position="replace">
+            		<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+            	</field>
+            	<field name="amount_total" position="replace">
+            		<field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+            	</field>
+            	
+            	<xpath expr="//label[@for='discount']" position="replace">
+	                <label for="discount_type" />
+	            </xpath>
+            	<xpath expr="//div[@name='discount']" position="replace">
+	                <div name="discount_type">
+                    	<field name="discount_type" class="oe_inline"/>
+                    	<field name="discount1" class="oe_inline" attrs="{'invisible': [('discount_type','in',('disc2',''))]}" />
+                    	<field name="discount2" class="oe_inline" attrs="{'invisible': [('discount_type','in',('disc1',''))]}" />
+                    </div>
+	            </xpath>
+	            <xpath expr="//field[@name='discount']" position="replace">
+	                <field name="discount1"  />
+                    <field name="discount2"  />
+	            </xpath>
+	            <xpath expr="//field[@name='price_subtotal']" position="replace">
+	            	<field name="price_subtotal"/>
+	            </xpath>
+            </field>
+        </record>
+	</data>
+</openerp>

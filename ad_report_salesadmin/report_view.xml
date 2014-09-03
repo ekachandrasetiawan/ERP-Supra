@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+
+<openerp>
+	<data>
+		<!---Delivery Note BEGIN -->
+		<record model="ir.ui.view" id="view_wizard_print_dn">
+	    	<field name="name">Print Delivery Note</field>
+	        <field name="model">wizard.print.dn</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	        	<form string="Print Delivery Note" version="7.0">
+			    	<group>
+	              		<field name="size"/>
+	                    </group>
+	                    <footer>
+	                        <div>
+	                            <button type="object" name="do_print" string="Print" class="oe_highlight" icon="terp-gtk-go-back-rtl"/>              
+				    			or
+				    			<button special="cancel" string="Cancel" class="oe_link"/>
+	                        </div>
+	                    </footer>
+	                </form>
+	            </field>
+		</record>
+        
+    	<record model="ir.actions.act_window" id="action_view_wizard_print_dn">
+            <field name="name">Print Delivery Note</field>
+            <field name="res_model">wizard.print.dn</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_wizard_print_dn"/>
+        </record>
+		
+		<report auto="False" id="report_dn_A4" model="delivery.note" name="deliverynote.form.A4"
+            file="ad_report_salesadmin/dn/dn_form.mako" string="Delivery Note"
+            usage="default" menu="False" webkit_header="header_dn_A4" header='True'
+			report_type="webkit"/>
+			
+		<report auto="False" id="report_dn_A5" model="delivery.note" name="deliverynote.form.A5"
+            file="ad_report_salesadmin/dn/dn_form.mako" string="Delivery Note"
+            usage="default" menu="False" webkit_header="header_dn_A5" header='True'
+			report_type="webkit"/>
+			
+		<report auto="False" id="report_pl" model="delivery.note" name="pl.form.reguler"
+            file="ad_report_salesadmin/pl/pl_form.mako" string="Packing List Reguler"
+            usage="default" menu="True" webkit_header="header_pl_reguler" header="True"
+			report_type="webkit"/>
+			
+		<report auto="False" id="report_pl_1" model="delivery.note" name="pl.form.reguler"
+            file="ad_report_salesadmin/pl/pl_form.mako" string="Packing List Freeport"
+            usage="default" menu="True" webkit_header="header_pl_reguler" header="True"
+			report_type="webkit"/>
+		
+		<report auto="False" id="report_pl_2" model="delivery.note" name="pl.form.newmont"
+            file="ad_report_salesadmin/pl/pl_form.mako" string="Packing List Newmont"
+            usage="default" menu="True" webkit_header="header_pl_newmont" header="True"
+			report_type="webkit"/>
+				
+		<record id="view_delivery_note_form_1" model="ir.ui.view">
+            <field name="name">delivery.note.form</field>
+            <field name="model">delivery.note</field>
+            <field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="before">
+	                <button name="%(action_view_wizard_print_dn)d"
+	                        string="Print Surat Jalan" type="action"
+	                        states="approve,done" class="oe_highlight" />
+	            </xpath>
+            </field>
+        </record>
+		<!---Delivery Note END -->
+		<!---order packaging BEGIN -->
+		<report auto="False" id="report_do_A4" model="order.preparation" name="deliveryorder.form.A4"
+            file="ad_report_salesadmin/do/do_form.mako" string="Delivery Order"
+            usage="default" menu="False" webkit_header="header_do_A4" header='True'
+			report_type="webkit"/>
+			
+		<report auto="False" id="report_do_A5" model="order.preparation" name="deliveryorder.form.A5"
+            file="ad_report_salesadmin/do/do_form.mako" string="Delivery Order"
+            usage="default" menu="False" webkit_header="header_do_A5" header='True'
+			report_type="webkit"/>
+		
+		<record model="ir.ui.view" id="view_wizard_print_op">
+	    	<field name="name">Print Order Packaging</field>
+	        <field name="model">wizard.print.op</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	        	<form string="Print Order Packaging" version="7.0">
+			    	<group>
+	              		<field name="size"/>
+	                    </group>
+	                    <footer>
+	                        <div>
+	                            <button type="object" name="do_print" string="Print" class="oe_highlight" icon="terp-gtk-go-back-rtl"/>              
+				    			or
+				    			<button special="cancel" string="Cancel" class="oe_link"/>
+	                        </div>
+	                    </footer>
+	                </form>
+	            </field>
+		</record>
+        
+    	<record model="ir.actions.act_window" id="action_view_wizard_print_op">
+            <field name="name">Print Order Packaging</field>
+            <field name="res_model">wizard.print.op</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_wizard_print_op"/>
+        </record>
+		
+		<record id="view_order_preparation_form_1" model="ir.ui.view">
+            <field name="name">order.preparation.form</field>
+            <field name="model">order.preparation</field>
+            <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="before">
+	                <button name="%(action_view_wizard_print_op)d"
+	                        string="Print DO" type="action"
+	                        states="approve" class="oe_highlight" />
+	            </xpath>
+            </field>
+        </record>
+		<!---order packaging END -->		
+		
+		<report auto="False" id="report_inv" model="account.invoice" name="invoice2.form"
+            file="ad_report_salesadmin/inv/invoice_form.mako" string="Invoice"
+            usage="default" menu="False"
+			report_type="webkit"/>
+		
+		<report auto="False" id="report_kwitansi" model="account.invoice" name="kwitansi.form"
+            file="ad_report_salesadmin/kwi/kwitansi_form.mako" string="Kwitansi"
+            usage="default"
+			report_type="webkit"/>
+			
+		<report auto="False" id="report_po" model="purchase.order" name="poimport.form"
+            file="ad_report_salesadmin/po/po_form.mako" string="Purchase Order Import"
+            usage="default"
+			report_type="webkit"/>
+		
+		<report auto="False" id="report_spb" model="mrp.production" name="spb.form"
+            file="ad_report_salesadmin/spb/spb_form.mako" string="Surat Pengantar Barang"
+            usage="default"
+			report_type="webkit"/>
+			
+		<report auto="False" id="report_spk" model="perintah.kerja" name="spk.form"
+            file="ad_report_salesadmin/spk/spk_form.mako" string="Surat Perintah Kerja"
+            usage="default" menu="False" webkit_header='header_spk' header='True'
+			report_type="webkit"/>
+			
+		<record id="view_perintah_kerja_form_1" model="ir.ui.view">
+            <field name="name">perintah.kerja.form</field>
+            <field name="model">perintah.kerja</field>
+            <field name="inherit_id" ref="ad_perintah_kerja.view_perintah_kerja_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="before">
+	                <button name="%(report_spk)d"
+	                        string="Print SPK" type="action"
+	                        states="done" class="oe_highlight" />
+	            </xpath>
+            </field>
+        </record>
+			
+		<report auto="False" id="report_quotation" model="sale.order" name="quotation.form"
+            file="ad_report_salesadmin/quotation/quotation.mako" string="Penawaran"
+            usage="default" menu="False"
+			report_type="webkit"/>
+			
+		<record id="view_order_form_1" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="before">
+	                <button name="%(report_quotation)d"
+	                        string="Print Penawaran" type="action"
+	                        states="draft,sent" class="oe_highlight" />
+	            </xpath>
+            </field>
+        </record>
+			
+		<report auto="False" id="report_faktur_pajak" model="account.invoice" name="faktur.pajak.form"
+            file="ad_report_salesadmin/fp/faktur_pajak.mako" string="Faktur Pajak"
+            usage="default" report_type="webkit" menu="False"/>
+        <report auto="False" id="report_faktur_pajak_valas" model="account.invoice" name="faktur.pajak.valas.form"
+            file="ad_report_salesadmin/fp/faktur_pajak_valas.mako" string="Faktur Pajak
+            USD" usage="default" report_type="webkit"/>
+		
+		<record id="invoice_form_1" model="ir.ui.view">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="before">
+	                <button name="%(report_kwitansi)d"
+	                        string="Kwitansi" type="action"
+	                        attrs="{'invisible':[('state', '!=', 'open')]}"/>
+	                <button name="%(report_inv)d"
+	                        string="Invoice" type="action" class="oe_highlight"
+	                        attrs="{'invisible':[('state', '!=', 'open')]}"
+	                        />
+	                <button name="%(report_faktur_pajak)d"
+	                        string="Faktur Pajak" type="action" class="oe_highlight"
+	                        attrs="{'invisible':[('state', '!=', 'open')]}"/>
+	            </xpath>
+            </field>
+        </record>
+	</data>
+</openerp>

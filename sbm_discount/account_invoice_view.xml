@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="invoice_form_discount" model="ir.ui.view">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form" />
+            <field name="arch" type="xml">
+            	<field name="discount" position="replace">
+            		<field name="discount_type" class="oe_inline"/>
+                    <field name="discount1" class="oe_inline" attrs="{'invisible': [('discount_type','in',('disc2',''))]}" />
+                    <field name="discount2" class="oe_inline" attrs="{'invisible': [('discount_type','in',('disc1',''))]}" />
+            	</field>
+            	<field name="price_subtotal" position="replace">
+            		<field name="price_subtotal"/>
+            	</field>
+            </field>
+        </record>
+        
+        <record id="invoice_supplier_form" model="ir.ui.view">
+            <field name="name">account.invoice.supplier.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form" />
+            <field name="arch" type="xml">
+            	<field name="discount" position="replace">
+            		<field name="discount_type" class="oe_inline"/>
+                    <field name="discount1" class="oe_inline" attrs="{'invisible': [('discount_type','in',('disc2',''))]}" />
+                    <field name="discount2" class="oe_inline" attrs="{'invisible': [('discount_type','in',('disc1',''))]}" />
+            	</field>
+            	<field name="price_subtotal" position="replace">
+            		<field name="price_subtotal"/>
+            	</field>
+            </field>
+        </record>
+	</data>
+</openerp>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+       <report id="reportexspense" string="Report" model="hr.expense.dinas" name="report.exspense"
+        rml="addons/sbm_perjalanan_dinas/report/report_exspense.rml" auto="False" menu="False"/>
+		
+		<!-- Start View Tree -->
+		<record id="view_expense_dinas_tree" model="ir.ui.view">
+            <field name="name">hr.expense.dinas.tree</field>
+            <field name="model">hr.expense.dinas</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Expense Dinas">
+	                <field name="no_spk"/>
+	                <field name="employee_id"/>
+	                <field name="department_id"/>
+	                <field name="tanggal_keberangkatan"/>
+	                <field name="lama_perjalanan"/>
+	                <field name="lokasi_dinas"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <!-- End View Tree -->
+
+        <!-- Start View Form -->
+        <record id="view_expense_dinas_form" model="ir.ui.view">
+            <field name="name">hr.expense.dinas.form</field>
+            <field name="model">hr.expense.dinas</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Expense Dinas" version="7.0">
+            	<header>
+            		 <button name="submit" states="draft" string="Submit" type="object" class="oe_highlight" icon="gtk-apply"/>
+            		 <button name="submitticketing" states="ticketing" string="Submit Ticketing" type="object" class="oe_highlight" icon="gtk-apply"/>
+            		  <button name="setdraft" states="confirm" string="Set to Draft" type="object" class="oe_highlight" icon="gtk-jump-to"/>
+            		 <button name="confirm" states="confirm" string="confirm" type="object" class="oe_highlight"/>
+            		 <button name="%(reportexspense)d" states="done" string="Report" type="action" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,ticketing,done"/>
+                </header>
+            		<sheet>
+		            <separator string="Expense Dinas"/>
+						<group col="4" colspan="4">
+		            	 	<field name="name" colspan="4"/>
+			                <field name="no_spk"/>
+			                <field name="employee_id"/>
+			                <field name="department_id"/>
+			                <field name="golongan"/>
+			                <field name="tanggal_keberangkatan"/>
+			                <field name="tanggal_kepulangan"/>
+			                <field name="maksud_perjalanan_dinas"/>
+			                <field name="customer_id"/>
+			                <field name="status"/>
+			                <field name="dibebankan"/>
+			                <field name="lama_perjalanan" on_change="hitung_tunjangan(lokasi_dinas,employee_id,lama_perjalanan,status)"/>
+			                <field name="lokasi_dinas" on_change="hitung_tunjangan(lokasi_dinas,employee_id,lama_perjalanan,status)"/>
+			                <field name="real_lokasi" colspan="4"/>
+			            </group>
+			             <notebook colspan="4">
+					    	<page string="Tunjagan Transport">
+			                    <field name="tunjangan_transport_ids" nolabel="1" colspan="4">
+			                        <tree string="Tunjangan Transport">
+			                          	<field name="name"/>
+			                            <field name="tgl"/>
+			                            <field name="refference"/>
+			                            <field name="harga"/>
+			                            <field name="qty"/>
+			                            <field name="subtotal"/>
+			                            <button name="print_invoice" string="Invoice" type="object" icon="gtk-apply"/>
+			                        </tree>
+			                        <form string="Tunjangan Transport">
+			                            <field name="name"/>
+			                            <field name="tgl"/>
+			                            <field name="refference" colspan="4"/>
+			                            <field name="harga" on_change="hitung_subtotal(qty,harga)"/>
+			                            <field name="qty" on_change="hitung_subtotal(qty,harga)"/>
+			                            <field name="subtotal" on_change="hitung_subtotal(qty,harga)"/>
+			                        </form>
+			                    </field>
+			                </page>
+				            <page string="Meal dan Hotel">
+					    		<field name="tunjangan_meal_hotel_ids" nolabel="1" colspan="4">
+			                        <tree string="Meal dan Hotel" editable="top">
+			                          	<field name="name"/>
+			                            <field name="refference"/>
+			                            <field name="harga"/>
+			                            <field name="qty"/>
+			                            <field name="subtotal"/>
+			                        </tree>
+			                        <form string="Meal dan Hotel">
+			                            <field name="name" colspan="4"/>
+			                            <field name="refference" colspan="4"/>
+			                            <field name="harga"/>
+			                            <field name="qty"/>
+			                            <field name="subtotal"/>
+			                        </form>
+			                    </field>
+				            </page>
+			            </notebook>
+		            </sheet>
+            	</form>
+            </field>
+         </record>
+		<!-- End View Form -->
+		<record model="ir.actions.act_window" id="expense_dinas_list_action">
+			<field name="name">Expense Dinas</field>
+			<field name="res_model">hr.expense.dinas</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+
+		<record id="seq_type_expense_dinas_new" model="ir.sequence.type">
+			<field name="name">Expense Dinas</field>
+			<field name="code">hr.expense.dinas</field>
+		</record>
+		
+		<record id="seq_expense_dinas_new" model="ir.sequence">
+			<field name="name">Expense Dinas</field>
+			<field name="code">hr.expense.dinas</field>
+			<field name="prefix">TD/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+
+	<menuitem name="Expense Dinas" parent="hr_expense.next_id_49" id="menu_expense_dinas" action="expense_dinas_list_action"/>
+
+		<record id="view_master_dinas_tree" model="ir.ui.view">
+		    <field name="name">tunjangan.expense.tree</field>
+		    <field name="model">tunjangan.expense</field>
+		    <field name="type">tree</field>
+		    <field name="arch" type="xml">
+		        <tree string="Master Perjalanan Dinas">
+		        	<field name="name"/>
+		            <field name="lokasi_dinas"/>
+		            <field name="golongan"/>
+		            <field name="status"/>
+		        </tree>
+		    </field>
+		</record>
+		
+		<record id="view_master_dinas_form" model="ir.ui.view">
+			<field name="name">tunjangan.expense.form</field>
+			<field name="model">tunjangan.expense</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Master Tunjangan Dinas" version="7.0">
+					<sheet>
+			        <separator string="Master Tunjagan Dinas"/>
+						<group col="4" colspan="4">
+							<field name="name"/>
+							<field name="lokasi_dinas"/>
+			                <field name="golongan"/>
+			                <field name="status"/>
+			            </group>
+			            <notebook colspan="4">
+					    	<page string="Detail Tunjangan">
+			                    <field name="tunjangan_detail_dinas_ids" nolabel="1" colspan="4">
+			                        <tree string="Detail Tunjangan" editable="top">
+			                          	<field name="name"/>
+			                          	<field name="jumlah_tunjangan"/>
+			                        </tree>
+			                        <form string="Detail Tunjangan">
+			                          	<field name="name"/>
+			                          	<field name="jumlah_tunjangan"/>
+			                        </form>
+			                    </field>
+			                </page>
+			            </notebook>
+			    	</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="master_dinas_list_action">
+			<field name="name">Master Tunjangan Dinas</field>
+			<field name="res_model">tunjangan.expense</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+
+		<record id="seq_type_tunjangan_dinas_new" model="ir.sequence.type">
+			<field name="name">Tunjangan Dinas</field>
+			<field name="code">tunjangan.dinas</field>
+		</record>
+		
+		<record id="seq_yunjangan_dinas_new" model="ir.sequence">
+			<field name="name">Tunjangan Dinas</field>
+			<field name="code">tunjangan.dinas</field>
+			<field name="prefix">TD/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+
+	<menuitem name="Master Tunjangan Dinas" parent="hr.menu_hr_configuration" id="menu_master_tunjangan" action="master_dinas_list_action"/>
+
+	</data>
+</openerp>

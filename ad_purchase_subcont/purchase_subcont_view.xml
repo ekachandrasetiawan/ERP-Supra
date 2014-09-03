@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="purchase_order_subcont_tree">
+	        <field name="name">purchase.order.subcont.tree</field>
+	        <field name="model">purchase.order</field>
+	        <field name="arch" type="xml">
+                <tree fonts="bold:message_unread==True" colors="grey:state=='cancel';blue:state in ('wait','confirmed');red:state in ('except_invoice','except_picking')" string="Purchase Order">
+                    <field name="message_unread" invisible="1"/>
+                    <field name="name" string="Reference"/>
+                    <field name="date_order" />
+                    <field name="partner_id"/>
+                    <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+                    <field name="minimum_planned_date" invisible="context.get('quotation_only', False)"/>
+                    <field name="origin"/>
+                    <field name="amount_untaxed" sum="Total Untaxed amount" string="Untaxed"/>
+                    <field name="amount_total" sum="Total amount"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+   		</record>
+		
+		<record model="ir.ui.view" id="purchase_order_subcont_form">
+	        <field name="name">purchase.order.subcont.form</field>
+	        <field name="model">purchase.order</field>
+	        <field name="inherit_id" ref="purchase.purchase_order_form" />
+	        <field name="arch" type="xml">
+	        	<xpath expr="//div[@class='oe_title']" position="before">
+	        		<div class="oe_right oe_button_box" name="import_buttons">
+	                    <button name="%(action_view_purchase_order_line_from_requisition_lines)d"
+	                            string="Import PB Subcont" type="action"
+	                            context="{'spk_list':pb_ids,'po_id':active_id}"
+	                            attrs="{'invisible':[('state','!=','draft')]}"/>
+	                </div>
+	            </xpath>
+	            <xpath expr="/form/sheet/notebook/page[@string='Incoming Shipments &amp; Invoices']" position="before">
+	            	<page string="Subcont">
+                        <group>
+                        	<field name="wo_ids" widget="many2many_tags" />
+		                	<field name="pb_ids" widget="many2many_tags" />
+		                	<field name="rm_sent" invisible="1" />
+                        </group>
+                        <separator string="Product to Send " />
+	                	<field name="product_sent_ids">
+		                	<tree string="Products to Sent" editable="bottom">
+		                    	<field name="product_id" />
+		                        <field name="product_qty" />
+		                        <field name="product_uom_id" groups="product.group_uom" />
+		                    </tree>
+		                    <form string="Products" version="7.0">
+		                    	<group>
+		                        	<field name="product_id" />
+		                            <field name="product_qty"/>
+		                            <field name="product_uom_id" />
+		                            <field name="company_id" groups="base.group_multi_company" widget="selection"/>
+		                        </group>
+		                   	</form>
+		                </field>
+		            </page>
+                </xpath>
+                <field name="product_qty" position="before">
+                	<field name="pb_id" />
+                	<field name="wo_id" />
+                </field>
+            </field>
+		</record>
+		
+        <record model="ir.actions.act_window" id="action_purchase_order_subcont">
+	        <field name="name">Purchase Order Subcont</field>
+	        <field name="type">ir.actions.act_window</field>
+	        <field name="res_model">purchase.order</field>
+	        <field name="domain">[('type_permintaan','=','3')]</field>
+	        <field name="view_type">form</field>
+	        <field name="view_mode">tree,form</field>
+	    </record>
+        
+        <menuitem
+	        id="menu_purchase_order_subcont_pro_mgt"
+	        sequence="10"
+	        parent="purchase.menu_procurement_management"
+	        action="action_purchase_order_subcont"/>
+	   	
+	</data>
+</openerp>  

@@ -1,0 +1,68 @@
+<openerp>
+	<data>
+
+			<record id="view_exspense_pisioktes_tree" model="ir.ui.view">
+		    <field name="name">Exspense Pisikotes</field>
+		    <field name="model">exspense.pisikotes</field>
+		    <field name="type">tree</field>
+		    <field name="arch" type="xml">
+		        <tree string="Exspense Pisikotes">
+		        	<field name="no_invoice" colspan="4"/>
+	        		<field name="tgl_awal_tes"/>
+		        	<field name="tgl_akhir_tes"/>
+		        	<field name="harga_pisikotes"/>
+		            <field name="jumlah_peserta"/>
+		        </tree>
+		    </field>
+		</record>
+		
+		<record id="form_exspense_pisioktes_form" model="ir.ui.view">
+			<field name="name">expense.pisikotesform</field>
+			<field name="model">exspense.pisikotes</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Master Tunjangan Dinas" version="7.0">
+					<sheet>
+			        <separator string="Exspense Pisikotes"/>
+					<group col="4" colspan="4">
+			        	<field name="no_invoice" colspan="4"/>
+			        	<field name="tgl_awal_tes"/>
+			        	<field name="tgl_akhir_tes"/>
+			        	<field name="harga_pisikotes"/>
+			            <field name="jumlah_peserta" on_change="proses(harga_pisikotes,jumlah_peserta)"/>
+			        </group>
+				    <notebook colspan="4">
+				    	<page string="Peserta Pisikotes">
+				    		<field name="peserta_pisikotes_ids" nolabel="1" colspan="4">
+		                        <tree string="Peserta Pisikotes" editable="top">
+		                          	<field name="nama_peserta"/>
+		                          	<field name="department_id"/>
+		                        </tree>
+		                        <form string="Peserta Pisikotes">
+		                            <field name="nama_peserta"/>
+		                            <field name="department_id"/>
+		                        </form>
+		                    </field>
+			            </page>
+		            </notebook>
+		            <group>
+			         	<group class="oe_subtotal_footer oe_right">
+	                                    <field name="total_harga" widget="monetary" class="oe_subtotal_footer_separator"/>
+	                                    <field name="ppn" widget="monetary" class="oe_subtotal_footer_separator"/>
+	                                    <field name="total_bayar" widget="monetary" class="oe_subtotal_footer_separator"/>
+						</group>
+					</group>
+			    	</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="exspense_pisikotes_list_action">
+			<field name="name"> Exspense Pisikotes</field>
+			<field name="res_model">exspense.pisikotes</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+			<menuitem name="Exspense Pisikotes" parent="hr_expense.next_id_49" id="menu_exspense_pisikotes" action="exspense_pisikotes_list_action"/>
+	</data>
+</openerp>

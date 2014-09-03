@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<record model="ir.ui.view" id="invoice_with_merged_delivery_orders_view">
+	        <field name="name">Form for Merged Invoice</field>
+	        <field name="model">account.invoice</field>
+	        <field name="type">form</field>
+	        <field name="inherit_id" ref="account.invoice_form"/>
+	        <field name="priority">2</field>
+	        <field name="arch" type="xml">
+	            <field name="move_id" position="after">
+	            	<separator colspan="4" string="Delivery Orders"/>
+	                <field name="picking_ids" nolabel="1" readonly="1" colspan="4"/>
+	            </field>
+	        </field>
+    	</record>
+    	
+  	   <record id="view_merge_do_form" model="ir.ui.view">
+            <field name="name">merge.pickings.form</field>
+            <field name="model">merge.pickings</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Consolidate Pickings to Invoice" version="7.0">
+                	<group colspan="4" >
+                     	<field name="type" on_change="type_change(type)"/>
+                     	<field name="partner_id" on_change="partner_id_change()"/>
+                    </group>
+                    <newline/>
+                    <separator string="Pickings" colspan="4"/>
+                    <group colspan="4" >
+                     	<field name="picking_ids" nolabel="1" width="800" height="500"/>
+                    </group>
+                    <footer>
+                        <button  icon="gtk-apply" string="Create Invoice" name="merge_orders" type="object"/>
+                    	or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                </footer>
+                </form>
+            </field>
+  	   </record>
+  	   
+       <record id="action_view_merge_do_form" model="ir.actions.act_window">
+           <field name="name">Consolidate Pickings into Invoice</field>
+           <field name="res_model">merge.pickings</field>
+           <field name="view_type">form</field>
+           <field name="view_mode">tree,form</field>
+          <field name="view_id" ref="view_merge_do_form"/>
+          <field name="target">new</field>
+       </record>
+       
+
+       <menuitem name="Consolidate Pickings"
+                  parent="base.menu_invoiced"
+                  id="menu_merge_picking_sales"
+                  action="action_view_merge_do_form"/>
+       
+       <menuitem name="Consolidate Pickings"
+                  parent="account.menu_finance_payables"
+                  id="menu_merge_picking_purchase"
+                  action="action_view_merge_do_form"/>
+                 
+    	
+    </data>
+</openerp>

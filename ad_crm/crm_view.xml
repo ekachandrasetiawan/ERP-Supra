@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+
+
+        <record id="view_crm_lead" model="ir.ui.view">
+            <field name="name">crm.lead.customize</field>
+            <field name="model">crm.lead</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="crm.crm_case_form_view_leads"/>
+			<field name="arch" type="xml">
+				<field name="partner_id" position="after">
+					<field name="product_id"/>
+					<field name="project"/>
+				</field>
+				<xpath expr="//page[@string='Internal Notes']" position="after">
+					<page string="Logged Calls">
+                        <field colspan="4" name="phone_lines" nolabel="1" widget="one2many_list">
+                            <tree string="Phone Calls">
+				                <field name="date"/>
+				                <field name="name"/>
+				                <field name="partner_id"/>
+				                <field name="partner_phone"/>
+				                <field name="description"/>
+				                <field name="state"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Meetings">
+                        <field colspan="4" name="meeting_lines" nolabel="1" widget="one2many_list">
+                            <tree string="Events">
+				                <field name="date"/>
+				                <field name="name"/>
+				                <field name="duration"/>
+				                <field name="location"/>
+				                <field name="description"/>
+				                <field name="state"/>
+                            </tree>
+                        </field>
+                    </page>
+				</xpath>		
+			</field>
+		</record>
+			
+
+
+        <record id="view_crm_opportunities" model="ir.ui.view">
+            <field name="name">crm.opportunities.customize</field>
+            <field name="model">crm.lead</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+			<field name="arch" type="xml">
+				<field name="partner_id" position="after">
+					<field name="product_id"/>
+					<field name="project"/>
+				</field>
+				<xpath expr="//page[@string='Internal Notes']" position="after">
+					<page string="Logged Calls">
+                        <field colspan="4" name="phone_lines" nolabel="1" widget="one2many_list">
+                            <tree string="Phone Calls">
+				                <field name="date"/>
+				                <field name="name"/>
+				                <field name="partner_id"/>
+				                <field name="partner_phone"/>
+				                <field name="description"/>
+				                <field name="state"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Meetings">
+                        <field colspan="4" name="meeting_lines" nolabel="1" widget="one2many_list">
+                            <tree string="Events">
+				                <field name="date"/>
+				                <field name="name"/>
+				                <field name="duration"/>
+				                <field name="location"/>
+				                <field name="description"/>
+				                <field name="state"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Status">
+                        <field colspan="4" name="status_lines" nolabel="1" widget="one2many_list">
+                            <form string="Status">
+				                <field name="month"/>
+				                <field name="week"/>
+				                <field name="name" colspan="4"/>
+                            </form>
+                            <tree string="Status">
+				                <field name="month"/>
+				                <field name="week"/>
+				                <field name="name" colspan="4"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Quotation">
+                        <field colspan="4" name="quotation_lines" nolabel="1" widget="one2many_list"/>
+                    </page>
+				</xpath>		
+			</field>
+		</record>
+			
+        <record id="view_crm_meeting" model="ir.ui.view">
+            <field name="name">crm.meeting.customize</field>
+            <field name="model">crm.meeting</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="base_calendar.view_crm_meeting_form"/>
+			<field name="arch" type="xml">
+				<field name="duration" position="after">
+					<field name="phonecall_id" invisible="1"/>
+					<field name="opportunity_id" invisible="1"/>
+				</field>
+			</field>
+		</record>
+	
+
+</data>
+</openerp>

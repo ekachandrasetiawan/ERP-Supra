@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<!-- Start View Tree -->
+		<record id="view_permission_employee_tree" model="ir.ui.view">
+            <field name="name">permission.employee.tree</field>
+            <field name="model">permission.employee</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Employee Permission">
+	                <field name="employee_id"/>
+	                <field name="dept_id"/>
+	                <field name="keperluan"/>
+	                <field name="kembali"/>
+	                <field name="tanggal_jam_keluar"/>
+	                <field name="tanggal_jam_masuk"/>
+	                <field name="security"/>
+                </tree>
+            </field>
+        </record>
+        <!-- End View Tree -->
+
+
+        <!-- Start View Form -->
+        <record id="view_permission_employee_form" model="ir.ui.view">
+            <field name="name">permission.employee.form</field>
+            <field name="model">permission.employee</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Employee Permission" version="7.0">
+            		<sheet>
+		            <separator string="Employee Permission"/>
+					<group col="4" colspan="4">
+							<field name="name" colspan="4"/>
+		            	 	<field name="employee_id" on_change="dept_change(employee_id)"/>
+			                <field name="dept_id"  on_change="dept_change(employee_id)"/>
+			                <field name="keperluan"/>
+			                <field name="kembali"/>
+			                <field name="tanggal_jam_keluar"/>
+			                <field name="tanggal_jam_masuk"/>
+			                <field name="security"/>
+		            	 </group>
+	            	</sheet>
+            	</form>
+            </field>
+         </record>
+		<!-- End View Form -->
+		<record model="ir.actions.act_window" id="permession_list_action">
+			<field name="name">Permission Employee</field>
+			<field name="res_model">permission.employee</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+		
+		<record id="seq_permesion_type_new" model="ir.sequence.type">
+			<field name="name">Permesion Employee</field>
+			<field name="code">permission.employee</field>
+		</record>
+		
+		<record id="seq_permesion_new" model="ir.sequence">
+			<field name="name">Permesion Employee</field>
+			<field name="code">permission.employee</field>
+			<field name="prefix">TD/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+
+		<menuitem name="Employee Permission" parent="hr_attendance.menu_hr_attendance" id="menu_employee_permission" action="permession_list_action" sequence="30"/>
+
+
+		<record model="ir.ui.view" id="view_permissionreport">
+	    	<field name="name">Permission Report</field>
+	        <field name="model">permission.wizard</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	        	<form string="Permission Report" version="7.0">
+			    	<group>
+	              		<field name="date_from"/>
+	              		<field name="date_to"/>
+						<field name="user_ids"/>
+	                    </group>
+	                    <footer>
+	                        <div>
+	                            <button type="object" name="print_permission_report" string="Print" icon="terp-gtk-go-back-rtl"/>              
+				    			or
+				    			<button special="cancel" string="Cancel" class="oe_link"/>
+	                        </div>
+	                    </footer>
+	                </form>
+	            </field>
+		</record>
+        
+    	<record model="ir.actions.act_window" id="action_view_permission_report">
+            <field name="name">Permission Report</field>
+            <field name="res_model">permission.wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_permissionreport"/>
+        </record>
+		
+		<menuitem id="menu_permission_report" parent="hr_attendance.menu_hr_attendance" sequence="40" action="action_view_permission_report"/>
+
+	</data>
+</openerp>

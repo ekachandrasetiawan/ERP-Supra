@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+
+		<report id="print_continue_spk" string="SPK Continue" 
+				model="perintah.kerja.internal" name="spk.continue" 
+				rml="sbm_spk_internal/report/spk_continue.rml"
+				auto="False" menu="False"/>
+
+		<report auto="False" id="form_quotation" model="sale.order" 
+				name="quotation.report" file="sbm_spk_internal/report/quotation.mako" 
+				string="Penawaran" usage="default" menu="False" report_type="webkit"/>
+			
+     <record id="view_sale_order_poc" model="ir.ui.view">
+            <field name="name">sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+			<field name="arch" type="xml">
+				<field name="date_order" position="after">
+					<field name="client_order_ref"/>
+				</field>		
+			</field>
+		</record>
+		
+       <record id="view_quotation_poc" model="ir.ui.view">
+            <field name="name">sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree"/>
+			<field name="arch" type="xml">
+				<field name="date_order" position="after">
+					<field name="client_order_ref"/>
+				</field>		
+			</field>
+		</record>
+			
+
+        <record id="view_perintah_kerja_tree" model="ir.ui.view">
+            <field name="name">perintah.kerja.tree</field>
+            <field name="model">perintah.kerja.internal</field>
+            <field name="arch" type="xml">
+                <tree string="Work Order">
+	                <field name="name"/>
+	                <field name="date"/>
+	                <field name="type"/>
+	                <field name="no_pb"/>
+	                <field name="kontrak"/>
+	                <field name="kontrakdate"/>
+	                <field name="partner_id"/>
+	                <field name="workshop"/>
+	                <field name="creator"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>	
+
+        <record id="view_perintah_kerja_form" model="ir.ui.view">
+            <field name="name">perintah.kerja.form</field>
+            <field name="model">perintah.kerja.internal</field>
+            <field name="arch" type="xml">
+                <form string="Work Order Internal" version="7.0">
+				<header>
+                        <button name="print_perintah" type="object" states="approve,done" string="Print" icon="gtk-print"/>
+	                    <button name="%(print_continue_spk)d" type="action" states="approve,done" string="Print Continuous" icon="gtk-print"/>
+	                    <button name="work_cancel" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
+	           			<button name="work_confirm" type="object" states="draft" string="Approve" icon="gtk-apply"/>
+                        <button name="work_validate" type="object" states="approve" string="Validate" groups="stock.group_stock_manager" icon="gtk-apply"/>
+	           			<field name="state" widget="statusbar" statusbar_visible="draft,approve,done" statusbar_colors='{"draft":"red","approve":"blue"}'/>
+                </header>                                
+				<sheet>
+                    <group col="4" colspan="4">
+		                <field name="name"/>
+		                <field name="date"/>
+		                <field name="type"/>
+	                	<!-- <field name="sale_id" on_change="sale_change(sale_id)"/> -->
+	                	<field name="no_pb"/>
+		                <field name="partner_id"/>
+		                <field name="kontrak"/>
+		                <field name="kontrakdate"/>
+		                <field name="workshop"/>
+		                <field name="delivery_date"/>
+		                <field name="location_src_id"/>
+		                <field name="location_dest_id"/>
+		            </group>
+                    <notebook colspan="5">
+                        <page string="Work Lines">
+                            <field colspan="4" name="perintah_lines" nolabel="1" widget="one2many_list">
+                                <form>
+					                <field name="no"/>
+					                <field name="product_id" on_change="product_change(product_id)"/>
+					                <field name="product_qty"/>
+					                <field name="product_uom"/>
+					                <field name="name" colspan="4"/>
+                                </form>
+                                <tree string="">
+                                    <field name="no"/>
+					                <field name="name"/>
+					                <field name="product_id"/>
+					                <field name="product_qty"/>
+					                <field name="product_uom"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="Person in Charge">
+                        	<group col="4" colspan="4">
+	                            <field name="creator" colspan="4"/>
+	                            <field name="checker" colspan="4"/>
+	                            <field name="approver" colspan="4"/>
+	                    	</group>
+                        </page>
+                        <page string="Notes">
+                            <field name="note" colspan="4" nolabel="1"/>
+                        </page>
+                    </notebook>
+                      <div class="oe_clear"/>
+                        <field name="terms" class="oe_inline" placeholder="Terms and conditions..."/>
+                </sheet>
+                </form>
+            </field>
+        </record>
+			
+		
+    	<record model="ir.actions.act_window" id="action_perintah_kerja_form">
+            <field name="name">Perintah Kerja Internal</field>
+            <field name="res_model">perintah.kerja.internal</field>
+        </record>
+        
+        <menuitem name="Work Order Internal" parent="base.menu_sales" id="sale_perintah_kerja" action="action_perintah_kerja_form"/>
+    
+
+	</data>
+</openerp>

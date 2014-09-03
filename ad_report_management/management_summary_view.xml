@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+
+		<!-- <record model="ir.ui.view" id="view_inherit_res_users_salesman">
+			<field name="name">res.users.salesman</field>
+			<field name="model">res.users</field>
+			<field name="inherit_id" ref="base.view_users_form" />
+			<field name="arch" type="xml">
+				<field name="active" position="after">
+                	<field name="salesman" />
+                </field>
+			</field>
+		</record> -->
+				 
+
+		<record model="ir.ui.view" id="view_management_summary">
+            <field name="name">Management Summary Report</field>
+            <field name="model">management.summary</field>
+            <field name="arch" type="xml">
+                <form col="4" string="Wizard Report" version="7.0">
+	                  <group col="4" colspan="4">
+	                  	<field name="name"/>
+	                  	<field name="partner_id" attrs="{'required':[('name', '=', 'prod')], 'invisible':[('name', 'in', ('quo', 'order', 'sum', 'sales'))]}"/>
+	                  </group>
+	                  <group colspan="4">
+	                  	<field name="period_id"/>
+	                  </group>
+	                  <group colspan="4" attrs="{'invisible':[('name', '!=', ('sum'))]}">
+	                  	<field name="salesman_id" attrs="{'required':[('name', '=', ('sum'))]}"/>
+	                  </group>
+	                  <footer>
+	                    <button name="report_summary" string="Print" type="object" class="oe_highlight"/>
+	                    or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                  </footer>
+                </form>
+            </field>
+        </record>
+              
+        <record model="ir.actions.act_window" id="action_management_summary">
+            <field name="name">Management Summary Report</field>
+            <field name="res_model">management.summary</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+       
+		<menuitem id="menu_management_summary" name="Management Summary" action="action_management_summary" parent="base.menu_sales"/>
+	</data>
+</openerp>
+
+
+<!--
+		<report id="report_summary_product" string="Report Summary Product" 
+			model="management.summary" name="management.summary.product"
+			file="ad_report_management/report/report_summary_product.mako" 
+			report_type="webkit" auto="False" menu="False"/>
+-->

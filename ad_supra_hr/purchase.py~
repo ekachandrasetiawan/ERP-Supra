@@ -1,0 +1,47 @@
+import time
+import calendar
+from osv import fields, osv
+
+class port(osv.osv):
+    _name = "port"
+    
+    _columns = {
+            'name' : fields.char("Port Name", size=200,required=True)
+    }
+port()
+
+class purchase_order(osv.osv):
+    _inherit = "purchase.order"
+    _columns = {
+            'jenis': fields.selection([('loc', 'Local'), ('imps', 'Import S'), ('impj', 'Import J')], 'Type', readonly=True, states={'draft':[('readonly',False)]}, select=True),
+            'port' : fields.many2one("port","Port Name"),
+            'note' : fields.text("Note"),
+            'yourref' : fields.text("Your ref"),
+            'other' : fields.text("Other")
+    }
+    
+    _defaults = {'jenis': 'imp'}
+
+    def create(self, cr, uid, vals, context=None):
+        try:
+            if vals['jenis'] == 'imps':
+                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
+            elif vals['jenis'] == 'impj':
+                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
+            else:
+                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.local')
+        except:
+            if vals.get('name','/')=='/':
+                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order') or '/'
+        order =  super(purchase_order, self).create(cr, uid, vals, context=context)
+        return order
+
+    def type_change(self, cr, uid, vals, context=None):
+	res = {}
+        if vals['jenis'] == 'imps':
+            res['port'] = (self.pool.get('port').get(cr, uid, 'Singapore')).name
+        else
+            res['port'] = (self.pool.get('port').get(cr, uid, 'Jakarta')).name
+        return {'value': res}
+purchase_order()
+

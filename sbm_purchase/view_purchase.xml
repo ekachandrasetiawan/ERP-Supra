@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+ <report id="reportpb" string="Report" model="pembelian.barang" name="print.pb"
+        rml="addons/sbm_purchase/report/report_pb.rml" auto="False" menu="True"/>
+    	<record id="view_pb_tree" model="ir.ui.view">
+            <field name="name">pembelian.barang.tree</field>
+            <field name="model">pembelian.barang</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Regular Requisition">
+                	<field name="name"/>
+                	<field name="ref_pb"/>
+	                <field name="tanggal"/>
+	                <field name="duedate"/>
+	                <field name="department_id"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_pb_form" model="ir.ui.view">
+            <field name="name">pembelian.barang</field>
+            <field name="model">pembelian.barang</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Regular Requisition New" version="7.0">
+            	<header>
+            		<button name="submit" states="draft" string="Submit" type="object" class="oe_highlight" icon="gtk-apply"/>
+            		<button name="setdraft" states="confirm" string="Set to Draft" type="object" class="oe_highlight" icon="gtk-jump-to"/>
+            		<button name="confirm" states="confirm" string="Approve" type="object" class="oe_highlight"/>
+            		<button name="confirm2" states="confirm2" string="Approve" type="object" class="oe_highlight"/>
+            		<button name="confirm3" states="edit" string="Update" type="object" class="oe_highlight"/>
+            		<button name="edit" states="purchase" string="Edit PB" type="object" class="oe_highlight"/>
+            		<button name="%(reportpb)d" states="purchase" string="Print" type="action" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,confirm2,purchase,done"/>
+                </header>
+            		<sheet>
+		            <separator string="Regular Requisition"/>
+						<group col="4" colspan="4">
+		            	 	<field name="name" colspan="4"/>
+			                <field name="employee_id" on_change="setDept(employee_id)"/>
+			                <field name="spk_no"/>
+			                <field name="department_id" on_change="setDept(employee_id)"/>
+			                <!--<field name="customer_id"/>-->
+			                <field name="tanggal" on_change="setDeuDate(tanggal)"/>
+			                <field name="duedate" on_change="setTanggal(tanggal,duedate)"/>
+			                <field name="ref_pb"/>
+			            </group>
+			             <notebook colspan="4">
+					    	<page string="Product Detail">
+			                    <field name="detail_pb_ids" nolabel="1" colspan="4">
+			                        <tree string="Product Detail" editable="buttom">
+			                          	<field name="name" on_change="cariproduct(name)"/>
+			                            <field name="part_no"/>
+			                            <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
+			                            <field name="qty_available" on_change="jmlQty(jumlah_diminta)"/>
+			                            <field name="satuan"/>
+			                            <field name="stok"/>
+						    <field name="keterangan"/>
+			                            <field name="state"/>
+			                        </tree>
+			                    </field>
+			                </page>
+			            </notebook>
+			            <div class="oe_clear"/>
+                            <field name="notes" class="oe_inline" placeholder="Terms and conditions..."/>
+		            </sheet><!-- 
+		         <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                  </div>
+ -->
+            	</form>
+            </field>
+         </record>
+		
+		<!-- Search -->
+		<record id="pembelian_barang_search" model="ir.ui.view">
+			<field name="name">pembelian.barang.search</field>
+			<field name="model">pembelian.barang</field>
+			<field name="arch" type="xml">
+				<search string="Search Requisition">
+					<field name="name"/>
+					<field name="ref_pb"/>
+				</search>
+			</field>
+		</record>
+		<!-- END OF SEARCH -->
+    	<record model="ir.actions.act_window" id="master_pb_list_action">
+			<field name="name">Regular Requisition</field>
+			<field name="res_model">pembelian.barang</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+		
+		<record id="seq_pb_new" model="ir.sequence.type">
+			<field name="name">Regular Requisition</field>
+			<field name="code">pembelian.barang</field>
+		</record>
+		
+		<record id="seq_set_pb_new" model="ir.sequence">
+			<field name="name">Regular Requisition</field>
+			<field name="code">pembelian.barang</field>
+			<!--<field name="prefix">PB/%(y)s/%(month)s/</field>-->
+			<field name="suffix">/PB/SBM/%(y)s/%(month)s</field>
+			<field name="padding">5</field>
+		</record>
+
+    	<record id="view_set_po_tree" model="ir.ui.view">
+            <field name="name">set.po.tree</field>
+            <field name="model">set.po</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Data Rekap PB">
+	                <field name="name"/>
+		            <field name="pricelist_id"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_set_po_form" model="ir.ui.view">
+            <field name="name">set.po.form</field>
+            <field name="model">set.po</field>
+            <field name="type">form</field>
+ 			<field name="arch" type="xml">
+            	<form string="Regular Requisition" version="7.0">
+            		<sheet>
+		            <separator string="Regular Requisition Order"/>
+						<group col="4" colspan="4">
+		            	 	<field name="name" />
+		            	 	<field name="pricelist_id"/>
+			            </group>
+		            	<notebook colspan="4">
+					    	<page string="Product Detail ">
+					    		<!--<button name="search_pb" string="Search Product" type="object"/>-->
+			                    <field name="detail_pb_ids" nolabel="1" colspan="4">
+			                    	<tree string="Detal Barang" editable="bottom">
+			                          	<field name="name" on_change="setProduct(name)"/>
+			                            <field name="product" on_change="setQty(product,name)"/>
+			                            <field name="qty"/>
+			                            <field name="price_unit"/>
+			                            <field name="id_product_detail" invisible="1"/>
+			                        </tree>
+			                    </field>
+			                </page>
+			            </notebook>
+		            </sheet>
+		            <footer>
+		            <button name="create_po" string="Create PO" type="object" class="oe_highlight" icon="gtk-apply"/>
+		            </footer>
+            	</form>
+            </field>
+         </record>
+
+		<record model="ir.actions.act_window" id="master_wizard_list_action">
+            <field name="name">Regular Requisition Process</field>
+            <field name="res_model">set.po</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_set_po_form"/>
+        </record>
+
+<!--        <record id="view_search_pb" model="ir.ui.view">
+        	<field name="name">search.pb.form</field>
+            <field name="model">search.pb</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Search Product" version="7.0">
+            	   <footer>
+		            <button name="create_po" string="Create PO" type="object" class="oe_highlight" icon="gtk-apply"/>
+		            </footer>
+            	</form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="search_action">
+            <field name="name">Search Product Permintaan Barang</field>
+            <field name="res_model">search.pb</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_search_pb"/>
+        </record>
+ -->
+		<record id="view_list_barang_tree" model="ir.ui.view">
+            <field name="name">detail.pb.tree</field>
+            <field name="model">detail.pb</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Regular Requisition">
+                	<field name="detail_pb_id"/>
+                	<field name="name"/>
+	                <field name="part_no"/>
+	                <field name="jumlah_diminta"/>
+	                <field name="satuan"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>
+		
+		<record id="view_list_barang_form" model="ir.ui.view">
+            <field name="name">detail.pb.form</field>
+            <field name="model">detail.pb</field>
+            <field name="type">form</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <form string="Product List Regular Requisition" version="7.0">
+					<sheet>
+		            <separator string="Product Detail"/>
+						<group col="4" colspan="4">
+		                	<field name="name" colspan="4"/>
+		                	<field name="detail_pb_id" colspan="4"/>
+			                <field name="part_no"/>
+			                <field name="jumlah_diminta"/>
+			                <field name="satuan" colspan="4"/>
+			                <field name="state"/>
+
+			            </group>
+			            <div class="oe_clear"/>
+                            <field name="keterangan" class="oe_inline" placeholder="Terms and conditions..."/>
+		            </sheet>
+                </form>
+            </field>
+        </record>
+
+
+		<record model="ir.actions.act_window" id="master_list_barang_action">
+			<field name="name">Product List Regular Requisition</field>
+			<field name="res_model">detail.pb</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+
+		<menuitem name="Product List Regular Requisition" parent="purchase.menu_procurement_management" id="list_barang" action="master_list_barang_action"/>
+    </data>
+</openerp>

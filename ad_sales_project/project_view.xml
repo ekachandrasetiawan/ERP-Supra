@@ -1,0 +1,1004 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_remainder_tree" model="ir.ui.view">
+            <field name="name">remainder.salesman.tree</field>
+            <field name="model">remainder.salesman</field>
+            <field name="arch" type="xml">
+                <tree string="Remainder Salesman">
+	                <field name="salesman_id"/>
+	                <field name="order_id"/>
+	                <field name="name"/>
+	                <field name="partner_id"/>
+	                <field name="currency_id"/>
+	                <field name="amount"/>
+                </tree>
+            </field>
+        </record>	
+
+
+		<record model="ir.ui.view" id="partner_week_status_form_view">
+            <field name="name">res.partner.week.status</field>            
+            <field name="model">res.partner</field>            
+            <field name="type">form</field>							
+			<field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+				<xpath expr="//page[@string='History']" position="after">
+					<page string="Weekly Status">
+                        <field colspan="4" name="week_line" nolabel="1" widget="one2many_list">
+                            <tree string="Weekly Status">
+				                <field name="begin"/>
+				                <field name="end"/>
+				                <field name="salesman_id"/>
+				                <field name="name"/>
+                            </tree>
+                        </field>
+                    </page>
+				</xpath>		
+            </field>		
+		</record>
+		
+		
+		<record id="view_sale_order_week" model="ir.ui.view">
+            <field name="name">sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+			<field name="arch" type="xml">
+				<field name="date_order" position="after">
+					<field name="week"/>
+				</field>		
+			</field>
+		</record>
+		
+       <record id="view_quotation_week" model="ir.ui.view">
+            <field name="name">sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree"/>
+			<field name="arch" type="xml">
+				<field name="date_order" position="after">
+					<field name="week"/>
+				</field>		
+			</field>
+		</record>
+		
+
+
+        <record id="view_sales_order_filter_week" model="ir.ui.view">
+            <field name="name">sale.order.list.select.week</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+			<field name="arch" type="xml">
+                <filter string="Order Date" position="after">
+					<filter string="Week" icon="terp-go-month" domain="[]" context="{'group_by':'week'}"/>
+				</filter>
+            </field>
+        </record>
+
+
+		<record model="ir.ui.view" id="view_sale_order_project">
+			<field name="name">sale.order.project</field>
+			<field name="model">sale.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="sale.view_order_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//tree[@string='Sales Order Lines']/field[@name='product_id']" position="before">
+                	<field name="sequence" string="No"/>
+                </xpath>
+				<xpath expr="//field[@name='product_id']" position="before">
+					<field name="sequence" string="No"/>
+				</xpath>
+				<field name="date_order" position="replace">
+					<field name="date_order" on_change="onchange_dateorder(date_order)"/>
+					<field name="week" on_change="onchange_dateorder(date_order)"/>
+				</field>
+				<field name="partner_id" position="after">
+					<field name="worktype"/>
+					<field name="attention"/>
+				</field>
+				<field name="client_order_ref" position="after">
+					<field name="due_date"/>
+					<field name="delivery_date"/>
+				</field>
+				<xpath expr="//button[@name='action_button_confirm']" position="replace">
+					<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager"/>
+		    	</xpath>
+		    	<xpath expr="//page[@string='Other Information']" position="after">
+		    		<page string="Order Packaging">
+                        <field colspan="4" name="preparation_line" nolabel="1" widget="one2many_list"/>
+                    </page>
+					<page string="Sales Activity">
+                        <field colspan="4" name="activity_line" nolabel="1" widget="one2many_list">
+                            <tree string="Activity">
+				                <field name="activity_id"/>
+				                <field name="date"/>
+				                <field name="day"/>
+				                <field name="lunch"/>
+				                <field name="salesman_id"/>
+				                <field name="name"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Scope of Work">
+                        <separator string="PT. Supra Bakti Mandiri"/>
+                        <group>
+                            <field name="scope_work_supra" nolabel="1"/>
+	                     </group>
+	                     <separator string="Customer"/>
+                         <group>
+	                     	<field name="scope_work_customer" nolabel="1"/>
+                    	</group>
+                    </page>
+                    <page string="Terms and Conditions">
+                         <group>
+	                     	<field name="term_condition" nolabel="1"/>
+                    	</group>
+                    </page>
+				</xpath>
+			</field>
+		</record>
+						
+
+		<record model="ir.ui.view" id="activity_search_week_status_line_view">
+			<field name="name">week.status.line.select</field>
+			<field name="model">week.status.line</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Status Search">
+					<filter string="Postpone" icon="terp-partner" name="postpone"  domain="[('state','=','post')]"/>
+				</search>
+			</field>
+		</record>
+		
+
+        <record id="view_week_status_tree" model="ir.ui.view">
+            <field name="name">week.status.tree</field>
+            <field name="model">week.status</field>
+            <field name="arch" type="xml">
+                <tree string="Week Status">
+	                <field name="name"/>
+	                <field name="user_id"/>
+	                <field name="type"/>
+                </tree>
+            </field>
+        </record>	
+
+        <record id="view_week_status_line_tree" model="ir.ui.view">
+            <field name="name">week.status.line.tree</field>
+            <field name="model">week.status.line</field>
+            <field name="arch" type="xml">
+                <tree string="Week Status Line">
+	                <field name="name"/>
+	                <field name="salesman_id"/>
+	                <field name="product_group"/>
+	                <field name="currency_id"/>
+	                <field name="amount"/>
+	                <field name="project"/>
+	                <field name="status"/>
+	                <field name="state"/>
+	                <button icon="gtk-ok" name="play_order" type="object" string="Activate" attrs="{'invisible':[('state','!=','post')]}"/>
+	                <button icon="gtk-convert" name="cancel_order" type="object" string="Cancel" attrs="{'invisible':[('state','!=','win')]}"/>
+	            </tree>
+            </field>
+        </record>	
+
+        <record id="view_week_status_form" model="ir.ui.view">
+            <field name="name">week.status.form</field>
+            <field name="model">week.status</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Week Status" version="7.0">
+				<header>
+					<button name="report_mingguan" type="object" states="draft" string="Print Report" icon="gtk-print"/>
+                	<field name="state" widget="statusbar" statusbar_visible="draft" statusbar_colors='{"draft":"red"}'/>
+                </header>                                                               
+				<sheet>
+                    <group col="4" colspan="4">
+		                <field name="name"/>
+		                <field name="user_id"/>
+		                <field name="type"/>
+		            </group>
+                    <notebook colspan="5">
+                        <page string="Weekly Status Lines">
+                            <field colspan="4" name="status_line" nolabel="1" widget="one2many_list">
+                                <form>
+					                <field name="name"/>
+					                <field name="product_group"/>
+					                <field name="currency_id"/>
+					                <field name="amount"/>
+					                <field name="project"/>
+					                <field name="order_id"/>
+					                <field name="status" colspan="4"/>
+					                <separator colspan="4"/>
+									<field colspan="4" name="update_line" nolabel="1" widget="one2many_list">
+		                                <form string="">
+		                                    <field name="begin"/>
+											<field name="end"/>
+											<field name="name"/>
+		                                </form>
+										<tree string="">
+		                                    <field name="begin"/>
+											<field name="end"/>
+											<field name="name"/>
+											<field name="state" invisible="True"/>
+		                                </tree>
+		                            </field>
+                                </form>
+                                <tree string="">
+                                    <field name="name"/>
+									<field name="order_id"/>
+					                <field name="quotation"/>
+									<field name="product_group"/>
+					                <field name="project"/>
+					                <field name="currency_id"/>
+					                <field name="amount"/>
+                                	<field name="status"/>
+                                	<field name="state"/>
+                                	<button icon="gtk-ok" name="play_order" type="object" string="Activate" attrs="{'invisible':[('state','!=','post')]}"/>
+					            	<button icon="terp-gtk-media-pause" name="post_order" type="object" string="Postpone" attrs="{'invisible':[('state','in',('post', 'lost', 'win'))]}"/>
+					            	<button icon="terp-document-new" name="create_order" type="object" string="Quotation" attrs="{'invisible':[('state','!=','nego')]}"/>
+					            	<button icon="gtk-apply" name="win_order" type="object" string="Win" attrs="{'invisible':[('state','!=','quo')]}"/>
+					            	<button icon="gtk-convert" name="cancel_order" type="object" string="Cancel" attrs="{'invisible':[('state','!=','win')]}"/>
+					            	<button icon="gtk-cancel" name="lost_order" type="object" string="Lost" attrs="{'invisible':[('state','in',('lost','win'))]}"/>
+                            	</tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+	
+
+        <record id="seq_type_week_status_new" model="ir.sequence.type">
+			<field name="name">Week Status</field>
+			<field name="code">week.status</field>
+		</record>
+		
+		<record id="seq_week_status_new" model="ir.sequence">
+			<field name="name">Week Status</field>
+			<field name="code">week.status</field>
+			<field name="prefix">WS/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>   
+
+		<record model="ir.ui.view" id="view_wizard_reset_status">
+            <field name="name">Reset Status</field>
+            <field name="model">reset.status</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form col="4" string="Reset Status" version="7.0">
+                    <group col="4">
+						<separator string="Reset status for all prospect/customer ?" colspan="4"/>
+					</group>
+					<footer>
+	                    <button name="action_reset" string="Reset" type="object" class="oe_highlight"/>
+	                    or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_sales_activity_form" model="ir.ui.view">
+            <field name="name">sales.activity.form</field>
+            <field name="model">sales.activity</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Sales Activity" version="7.0">
+				<header>
+					<button name="activity_cancel" type="object" states="done" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
+	           		<button name="activity_confirm" type="object" states="draft" string="Confirm" icon="gtk-apply"/>
+                    <button name="%(report_plan)d" type="action" states="draft" string="Report Plan" icon="gtk-print"/>
+	           		<button name="%(report_activity)d" type="action" states="done" string="Report Actual" icon="gtk-print"/>
+	           		<field name="state" widget="statusbar" statusbar_visible="draft,done" statusbar_colors='{"draft":"red","done":"blue"}'/>
+                </header>                                
+				<sheet>
+                    <group col="4" colspan="4">
+		                <field name="name"/>
+		                <field name="user_id"/>
+		                <field name="begin"/>
+		                <field name="end"/>
+		            </group>
+                    <notebook colspan="5">
+                        <page string="Monday">
+                        	<separator string="Before Lunch"/>
+                        	<group col="4" colspan="4">
+                        	    <h3><label string="Plan" colspan="4"/></h3>
+	                        	<field colspan="4" name="beforeplansenin" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+	                                    <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="beforeactualsenin" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+	                        <separator string="After Lunch"/>
+	                        <group col="4" colspan="4">
+	                        	<h3><label string="Plan" colspan="4"/></h3>
+                            	<field colspan="4" name="afterplansenin" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="afteractualsenin" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+                        </page>
+                        <page string="Tuesday">
+                            <separator string="Before Lunch"/>
+                        	<group col="4" colspan="4">
+                        	    <h3><label string="Plan" colspan="4"/></h3>
+	                        	<field colspan="4" name="beforeplanselasa" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="beforeactualselasa" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+	                        <separator string="After Lunch"/>
+	                        <group col="4" colspan="4">
+	                        	<h3><label string="Plan" colspan="4"/></h3>
+                            	<field colspan="4" name="afterplanselasa" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="afteractualselasa" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+                        </page>
+                        <page string="Wednesday">
+                        	<separator string="Before Lunch"/>
+                        	<group col="4" colspan="4">
+                        	    <h3><label string="Plan" colspan="4"/></h3>
+	                        	<field colspan="4" name="beforeplanrabu" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="beforeactualrabu" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+	                        <separator string="After Lunch"/>
+	                        <group col="4" colspan="4">
+	                        	<h3><label string="Plan" colspan="4"/></h3>
+                            	<field colspan="4" name="afterplanrabu" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="afteractualrabu" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+                        </page>
+                        <page string="Thursday">
+                            <separator string="Before Lunch"/>
+                        	<group col="4" colspan="4">
+                        	    <h3><label string="Plan" colspan="4"/></h3>
+	                        	<field colspan="4" name="beforeplankamis" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="beforeactualkamis" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+	                        <separator string="After Lunch"/>
+	                        <group col="4" colspan="4">
+	                        	<h3><label string="Plan" colspan="4"/></h3>
+                            	<field colspan="4" name="afterplankamis" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="afteractualkamis" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+                        </page>
+                        <page string="Friday">
+                        	<separator string="Before Lunch"/>
+                        	<group col="4" colspan="4">
+                        	    <h3><label string="Plan" colspan="4"/></h3>
+	                        	<field colspan="4" name="beforeplanjumat" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="beforeactualjumat" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+	                        <separator string="After Lunch"/>
+	                        <group col="4" colspan="4">
+	                        	<h3><label string="Plan" colspan="4"/></h3>
+                            	<field colspan="4" name="afterplanjumat" nolabel="1" widget="one2many_list">
+									<tree string="Plan" editable="bottom">
+	                                    <field name="partner_id"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field colspan="4" name="name"/>
+	                                </tree>
+                            	</field>
+                            	<h3><label string="Actual" colspan="4"/></h3>
+                            	<field colspan="4" name="afteractualjumat" nolabel="1" widget="one2many_list">
+									<tree string="Actual" editable="bottom" colors="red:batal == True">
+	                                    <field name="partner_id" on_change="onchange_rencana()"/>
+						                <field name="order_id"/>
+						                <field name="location"/>
+						                <field name="batal" on_change="onchange_cancel(batal)"/>
+						                <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+	                                </tree>
+                            	</field>
+	                        </group>
+                        </page>
+                        <page string="Saturday">
+                            <separator string="Before Lunch"/>
+                            <group col="4" colspan="4">
+                                <h3><label string="Plan" colspan="4"/></h3>
+                                <field colspan="4" name="beforeplansabtu" nolabel="1" widget="one2many_list">
+                                    <tree string="Plan" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name"/>
+                                    </tree>
+                                </field>
+                                <h3><label string="Actual" colspan="4"/></h3>
+                                <field colspan="4" name="beforeactualsabtu" nolabel="1" widget="one2many_list">
+                                    <tree string="Actual" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <separator string="After Lunch"/>
+                            <group col="4" colspan="4">
+                                <h3><label string="Plan" colspan="4"/></h3>
+                                <field colspan="4" name="afterplansabtu" nolabel="1" widget="one2many_list">
+                                    <tree string="Plan" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name"/>
+                                    </tree>
+                                </field>
+                                <h3><label string="Actual" colspan="4"/></h3>
+                                <field colspan="4" name="afteractualsabtu" nolabel="1" widget="one2many_list">
+                                    <tree string="Actual" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Sunday">
+                            <separator string="Before Lunch"/>
+                            <group col="4" colspan="4">
+                                <h3><label string="Plan" colspan="4"/></h3>
+                                <field colspan="4" name="beforeplanahad" nolabel="1" widget="one2many_list">
+                                    <tree string="Plan" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name"/>
+                                    </tree>
+                                </field>
+                                <h3><label string="Actual" colspan="4"/></h3>
+                                <field colspan="4" name="beforeactualahad" nolabel="1" widget="one2many_list">
+                                    <tree string="Actual" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+                                    </tree>
+                                </field>
+                            </group>
+                            <separator string="After Lunch"/>
+                            <group col="4" colspan="4">
+                                <h3><label string="Plan" colspan="4"/></h3>
+                                <field colspan="4" name="afterplanahad" nolabel="1" widget="one2many_list">
+                                    <tree string="Plan" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name"/>
+                                    </tree>
+                                </field>
+                                <h3><label string="Actual" colspan="4"/></h3>
+                                <field colspan="4" name="afteractualahad" nolabel="1" widget="one2many_list">
+                                    <tree string="Actual" editable="bottom">
+                                        <field name="partner_id"/>
+                                        <field name="order_id"/>
+						                <field name="location"/>
+                                        <field colspan="4" name="name" on_change="onchange_activity(order_id, parent.begin, name, parent.id)"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+		<record model="ir.ui.view" id="view_wizard_sales_activity">
+            <field name="name">Wizard.activity.form</field>
+            <field name="model">wizard.activity</field>
+            <field name="arch" type="xml">
+                <form col="4" string="Weekly Plan" version="7.0">
+                    <sheet>
+                    <group col="4">
+                        <field name="name" colspan="4"/>
+						<field name="begin" on_change="onchange_tanggal(begin, end)"/>
+						<field name="end" on_change="onchange_tanggal(begin, end)"/>
+					</group>
+					<notebook>
+					<page string="Monday">
+						<separator string="Monday"/>
+	                	<group colspan="4">
+	                	    <h3><label string="Plan - Before Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="beforeplansenin" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+	                        <h3><label string="Plan - After Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="afterplansenin" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+						</group>
+					</page>
+					<page string="Tuesday">
+						<separator string="Tuesday"/>
+	                	<group colspan="4">
+	                	    <h3><label string="Plan - Before Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="beforeplanselasa" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+	                        <h3><label string="Plan - After Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="afterplanselasa" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+						</group>
+					</page>
+					<page string="Wednesday">
+	                    <separator string="Wednesday"/>
+	                	<group colspan="4">
+	                	    <h3><label string="Plan - Before Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="beforeplanrabu" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+	                        <h3><label string="Plan - After Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="afterplanrabu" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+						</group>
+					</page>
+					<page string="Thursday">
+	                    <separator string="Thursday"/>
+	                	<group colspan="4">
+	                	    <h3><label string="Plan - Before Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="beforeplankamis" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+	                        <h3><label string="Plan - After Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="afterplankamis" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+						</group>
+					</page>
+					<page string="Friday">
+	                    <separator string="Friday"/>
+	                	<group colspan="4">
+	                	    <h3><label string="Plan - Before Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="beforeplanjumat" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+	                        <h3><label string="Plan - After Lunch" colspan="4"/></h3>
+	                    	<field colspan="4" name="afterplanjumat" nolabel="1" widget="one2many_list">
+								<tree string="Plan" editable="bottom">
+	                                <field name="partner_id"/>
+					                <field name="order_id"/>
+							        <field name="location"/>
+					                <field colspan="4" name="name"/>
+	                            </tree>
+	                    	</field>
+						</group>
+					</page>
+					</notebook>
+					</sheet>
+                    <footer>
+	                    <button name="create_activity" string="Create" type="object" class="oe_highlight"/>
+	                    or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                </footer>
+                </form>
+            </field>
+        </record>
+              
+        <record id="view_sales_activity_tree" model="ir.ui.view">
+            <field name="name">sales.activity.tree</field>
+            <field name="model">sales.activity</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Sales Activity">
+	                <field name="name"/>
+	                <field name="begin"/>
+	                <field name="end"/>
+	                <field name="user_id"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>	
+
+        <record id="seq_type_sales_activity_new" model="ir.sequence.type">
+			<field name="name">Sales Activity</field>
+			<field name="code">sales.activity</field>
+		</record>
+		
+		<record id="seq_sales_activity_new" model="ir.sequence">
+			<field name="name">Sales Activity</field>
+			<field name="code">sales.activity</field>
+			<field name="prefix">SA/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		        
+        <record model="ir.actions.act_window" id="action_wizard_activity">
+            <field name="name">Wizard Activity</field>
+            <field name="res_model">wizard.activity</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+       
+ 
+        <record model="ir.actions.act_window" id="action_reset_status">
+            <field name="name">Reset Status</field>
+            <field name="res_model">reset.status</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        
+
+
+
+        <record id="view_group_sales_form" model="ir.ui.view">
+            <field name="name">group.sales.form</field>
+            <field name="model">group.sales</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Group Sales" version="7.0">                               
+				<sheet>
+                    <group col="4" colspan="4">
+		                <field name="name"/>
+		            </group>
+                    <notebook colspan="5">
+                        <page string="List User">
+							<field colspan="4" name="users_line" nolabel="1" widget="one2many_list">
+								<tree string="List User" editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+	
+
+		<record model="ir.ui.view" id="view_inherit_res_users_kelompok">
+			<field name="name">res.users.form</field>
+			<field name="model">res.users</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="base.view_users_form" />
+			<field name="arch" type="xml">
+				<field name="active" position="before">
+                	<field name="kelompok_id" />
+                </field>
+			</field>
+		</record>
+				 
+		<record model="ir.actions.act_window" id="action_remainder_form">
+            <field name="name">Remainder Salesman</field>
+            <field name="res_model">remainder.salesman</field>
+        </record>
+
+		<record model="ir.actions.act_window" id="action_kelompok_form">
+            <field name="name">Group Sales</field>
+            <field name="res_model">group.sales</field>
+        </record>
+              
+    	<record model="ir.actions.act_window" id="action_week_status_form">
+            <field name="name">Week Status</field>
+            <field name="res_model">week.status</field>
+        </record>
+
+    	<record model="ir.actions.act_window" id="action_week_status_line_form">
+            <field name="name">Week Status Line</field>
+            <field name="res_model">week.status.line</field>
+			<field name="search_view_id" ref="activity_search_week_status_line_view"/>
+			<field name="context">{"search_default_postpone":1}</field>
+        </record>
+
+    	<record model="ir.actions.act_window" id="action_sales_activity_form">
+            <field name="name">Sales Activity</field>
+            <field name="res_model">sales.activity</field>
+			<field name="context">{"search_default_activity":1}</field>
+        </record>
+
+        
+        <menuitem id="activity_menu" name="Activity" parent="base.menu_base_partner" />
+        <menuitem id="sale_work_activity" name="Sales Activity" parent="activity_menu" action="action_sales_activity_form"/>
+        <menuitem id="menu_week_status" name="Weekly Status" parent="activity_menu" action="action_week_status_form"/>
+		<menuitem id="menu_wizard_activity" name="Create Plan Activity" parent="activity_menu" action="action_wizard_activity"/>
+		<menuitem id="menu_reset_status" name="Reset Status" parent="activity_menu" action="action_reset_status"/>
+		<menuitem id="menu_week_status_line" name="List Status" parent="activity_menu" action="action_week_status_line_form"/>
+		<menuitem id="menu_remainder_salesman" name="Remainder" parent="activity_menu" action="action_remainder_form"/>
+		<menuitem id="menu_group_salesman" name="Group Sales" parent="activity_menu" action="action_kelompok_form"/>
+		
+
+    	<record id="sale_activity_rule" model="ir.rule">
+	        <field name="name">All Sales Activity</field>
+	        <field ref="model_sales_activity" name="model_id"/>
+	        <field name="domain_force">['|',('user_id','=',[x.name.id for x in user.kelompok_id.users_line]),('user_id','=',False)]</field>
+	        <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+	    </record>
+	
+		<record id="week_status_rule" model="ir.rule">
+	        <field name="name">All Week Status</field>
+	        <field ref="model_week_status" name="model_id"/>
+	        <field name="domain_force">['|',('user_id','=',[x.name.id for x in user.kelompok_id.users_line]),('user_id','=',False)]</field>
+	        <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+	    </record>
+
+
+		<record id="sales_order_quotation_rule" model="ir.rule">
+	        <field name="name">Group Sales Order RMPSM</field>
+	        <field ref="model_sale_order" name="model_id"/>
+	        <field name="domain_force">['|',('user_id','=',[x.name.id for x in user.kelompok_id.users_line]),('user_id','=',False)]</field>
+	        <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+	    </record>
+		
+
+	 <record id="week_status_line_rule" model="ir.rule">
+	        <field name="name">All Week Status Line</field>
+	        <field ref="model_week_status_line" name="model_id"/>
+	        <field name="domain_force">['|',('salesman_id','=',[x.name.id for x in user.kelompok_id.users_line]),('salesman_id','=',False)]</field>
+	        <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+	    </record>	
+	    
+	</data>
+</openerp>
+
+
+
+
+        
+<!--
+    	<record model="ir.actions.act_window" id="action_week_status_form">
+            <field name="name">Week Status</field>
+            <field name="res_model">week.status</field>
+        </record>
+
+    	<record model="ir.actions.act_window" id="action_week_status_line_form">
+            <field name="name">Week Status Line</field>
+            <field name="res_model">week.status.line</field>
+			<field name="search_view_id" ref="activity_search_week_status_line_view"/>
+			<field name="context">{"search_default_postpone":1}</field>
+        </record>
+
+    	<record model="ir.actions.act_window" id="action_sales_activity_form">
+            <field name="name">Sales Activity</field>
+            <field name="res_model">sales.activity</field>
+			<field name="context">{"search_default_activity":1}</field>
+        </record>
+        
+
+
+
+
+    	<record model="ir.actions.act_window" id="action_week_status_form">
+            <field name="name">Week Status</field>
+            <field name="res_model">week.status</field>
+            <field name="domain">[('user_id','=',uid)]</field>
+        </record>
+
+    	<record model="ir.actions.act_window" id="action_week_status_line_form">
+            <field name="name">Week Status Line</field>
+            <field name="res_model">week.status.line</field>
+			<field name="search_view_id" ref="activity_search_week_status_line_view"/>
+			<field name="domain">[('salesman_id','=',uid)]</field>
+			<field name="context">{"search_default_postpone":1}</field>
+        </record>
+
+    	<record model="ir.actions.act_window" id="action_sales_activity_form">
+            <field name="name">Sales Activity</field>
+            <field name="res_model">sales.activity</field>
+			<field name="domain">[('user_id','=',uid)]</field>
+			<field name="context">{"search_default_activity":1}</field>
+        </record>
+
+
+		<record model="ir.ui.view" id="activity_search_view">
+			<field name="name">sales.activity.select</field>
+			<field name="model">sales.activity</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Session Search">
+					<filter string="My Activities" icon="terp-partner" name="activity"  domain="[('user_id','=',uid)]"/>
+					<field name="name"/>
+				</search>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="view_workshop_manufacture_order">
+			<field name="name">mrp.production.workshop</field>
+			<field name="model">mrp.production</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="mrp.mrp_production_form_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//page[@string='Extra Information']" position="after">
+					<page string="Cost Lines">
+                        <field colspan="4" name="biaya_lines" nolabel="1" widget="one2many_list">
+                            <tree string="Cost" editable="top">
+				                <field name="name"/>
+				                <field name="price_unit"/>
+                            </tree>
+                        </field>
+                    </page>
+				</xpath>
+			</field>
+		</record>
+		
+-->	
+

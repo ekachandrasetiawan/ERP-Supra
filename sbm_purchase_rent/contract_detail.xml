@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="ir.actions.act_window" id="rent_contract_detail_list_action">
+			<field name="name">Contract Detail</field>
+			<field name="res_model">rent.contract.detail</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record model="ir.ui.view" id="rent_contract_detail_view">
+			<field name="name">rent.contract.detail.list</field>
+			<field name="model">rent.contract.detail</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Contract Detail">
+					<field name="name"/>
+					<field name="item_code"/>
+					<field name="type"/>
+					<field name="brand"/>
+					<field name="notes"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="rent_contract_detail_form">
+			<field name="name">rent.contract.detail.form</field>
+			<field name="model">rent.contract.detail</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Contact Detail" version="7.0">
+					
+					<sheet>
+						<group>
+							<field name="name"/>
+							<field name="item_code"/>
+							<field name="type"/>
+							<field name="brand"/>
+							<field name="rent_requisition_detail_id"/>
+							<field name="notes"/>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+	</data>
+</openerp>

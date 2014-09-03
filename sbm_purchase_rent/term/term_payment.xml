@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="termpayment_inherit_view">
+			<field name="name" >res.partner.termpayment</field>
+			<field name="model">res.partner</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="ad_npwp_partner.partner_npwp_form_view"/>
+			<field name="arch" type="xml">
+				<!-- <field name="npwp" position="after">
+					<field name="term_payment" />
+				</field> -->
+				<page string="History" position="after" version="7.0">
+					<page string="Payment Term">
+						<field name="term_payment" placeholder="Put Term Of Payment Here" />
+					</page>
+				</page>
+			</field>
+		</record>
+
+
+
+
+		<!-- TERM OF PAYMENT PO -->
+		<record model="ir.ui.view" id="termpaymentpo_inherit_view">
+			<field name="name" >purchase.order.termpayment</field>
+			<field name="model">purchase.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
+			<field name="arch" type="xml">
+				<field name="origin" position="after">
+					<field name="term_of_payment" />
+				</field>
+			</field>
+		</record>
+
+	</data>
+</openerp>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="po_contract_inherit_view">
+			<field name="name">purchase.order.contract</field>
+			<field name="model">purchase.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"></field>
+			<field name="arch" type="xml">
+				<!-- <field name="origin" position="after">
+					<field name="contract_id" />
+				</field> -->
+				<page position="after" string="Purchase Order" version="7.0">
+					<page string="Contract">
+						<group>
+							<field name="contract_id" />
+							<field name="contract_no" />
+							<field name="start_contract" />
+							<field name="expire_contract" />
+							<field name="notes" />
+						</group>
+					</page>
+				</page>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="po_contract_data_list_action">
+			<field name="name">purchase.order.contract.data.action</field>
+			<field name="res_model">purchase.order.contract.data</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record model="ir.ui.view" id="po_contract_data_view">
+			<field name="name">purchase.order.contract.data.list</field>
+			<field name="model">purchase.order.contract.data</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Contract">
+					<field name="contract_no"/>
+					<field name="start_contract"/>
+					<field name="expire_contract"/>
+					<field name="notes"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="po_contract_data_form">
+			<field name="name">purchase.order.contract.data.form</field>
+			<field name="model">purchase.order.contract.data</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Contact" version="7.0">
+					<sheet>
+						<group>
+							<field name="contract_no"/>
+							<field name="start_contract"/>
+							<field name="expire_contract"/>
+							<field name="notes"/>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+	</data>
+</openerp>

@@ -1,0 +1,550 @@
+<openerp>
+	<data>
+		<record id="header_do_A4" model="ir.header_webkit">
+            <field name="footer_html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <body style="border:0; margin: 0;" onload="subst()">
+    	%for o in objects:
+    	<table class='footer' width='100%'>
+			<tr width='100%' height='30'>
+				<th colspan='4' width='60%'>
+					<a>a</a>
+				</th>
+				<th width='40%' colspan='3'>
+					<a>DIISI OLEH GUDANG</a>
+				</th>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='20%'>
+					<a>Dibuat oleh :</a>
+				</td>
+				<td width='20%' colspan='2'>
+					<a>Dicek oleh :</a>
+				</td>
+				<td width='20%'>
+					<a>Disetujui Oleh,<br/>General Manager,</a>
+				</td>
+				<td width='18%' valign='bottom'>
+					<a>No.BPB</a>
+				</td>
+				<td width='2%' valign='bottom'>
+					<a>:</a>
+				</td>
+				<td width='20%' valign='bottom'>
+				</t>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='60%' rowspan='2' colspan='4'>
+					<a> </a>
+				</td>
+				<td width='18%'>
+					<a>Tgl. Pengambilan</a>
+				</td>
+				<td width='2%'>
+					<a>:</a>
+				</td>
+				<td width='20%'>
+				</td>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='18%'>
+					<a>Diambil Oleh</a>
+				</td>
+				<td width='2%'>
+					<a>:</a>
+				</td>
+				<td width='20%'>
+				</td>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='100%' colspan='7'>
+					<a>.</a>
+				</td>
+			</tr>
+			<tr width='100%' height='25'>
+				<td width='30%' colspan='2'>
+					<a>No.SJ :</a>
+				</td>
+				<td width='30%' colspan='2'>
+					<a>Tgl. Kirim :</a>
+				</td>
+				<td width='40%' colspan='3'>
+					<a> </a>
+				</td>
+			</tr>
+		</table>
+		%endfor
+    </body>
+</html>]]></field>
+            <field eval="&quot;&quot;&quot;Portrait&quot;&quot;&quot;" name="orientation"/>
+            <field eval="&quot;&quot;&quot;A4&quot;&quot;&quot;" name="format"/>
+            <field name="html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <%
+    	import time
+    %>
+    %for o in objects:
+    <body style="border:0; margin: 0;" onload="subst()">
+        <table class='header' width='100%' >
+			<tr class='kopsurat' height='80px' width='100%'>
+				<td></td>
+			</tr>
+			<tr width='100%'>
+				<td width='100%'>
+					<table width='100%'>
+						<tr width='100%'>
+							<td width='70%' align='left'>
+								<a>Kepada Yth.<br/>
+								Sdr. Kepala Gudang<br/>
+								Di tempat<br/>
+								<br/>
+								<br/>
+								Harap disiapkan sejumlah barang dibawah ini :
+								</a>
+							</td>
+							<td width='30%'>
+								<br/>
+								${o.partner_id.name or '-'}<br/>
+								${o.partner_shipping_id.street or '-'}<br/>
+								${o.partner_shipping_id.city or '-'} ${o.partner_shipping_id.zip or '-'}<br>
+								Telp. ${o.partner_shipping_id.phone or '-'} 
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr width='100%'>
+				<td width='100%'>
+					<table width='100%'>
+						<tr width='100%' height='35px'>
+							<td width='12%' align='left'>
+								 <a>No.DO</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td  width='25%' align='left'>
+								<div class='nomer'>${o.name or '-'}</div> 
+							</td>
+							<td width='5%' align='left'>
+								 <a>No.SC</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='19%' align='left'>
+								 
+							</td>
+							<td width='10%' align='left'>
+								 <a>No.WC</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='23%' align='left'>
+								 
+							</td>
+						</tr>
+						<tr width='100%' height='35px'>
+							<td width='12%' align='left'>
+								 <a>Tanggal DO</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='25%' align='left'>
+								 ${o.tanggal!='False' and time.strftime('%d %B %Y', time.strptime(o.tanggal,'%Y-%m-%d')) or '-'}
+							</td>
+							<td width='5%' align='left'>
+								 <a>No.PO</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='19%' align='left'>
+								${o.poc or '-'} 
+							</td>
+							<td width='10%' align='left'>
+								 <a>No.SPK</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='23%' align='left'>
+								 
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		%endfor
+	${_debug or ''|n} </body>
+</html>]]>
+</field>
+            <field eval="84.0" name="margin_top"/>
+            <field eval="60.0" name="margin_bottom"/>
+            <field name="css" ><![CDATA[
+
+table {
+	border:0px solid #000;
+	padding:0px; 
+}
+table td{
+	border:0px solid #000; 
+	padding:0px;
+}
+table tr{
+	border:0px solid #000;
+	padding:0px; 
+}
+table th{
+	border:0px solid #000;
+	padding:0px; 
+}
+
+body {
+font-family:helvetica;
+font-size:13;
+font-type:bolt;
+}
+
+.footer td{
+font-size:13;
+}
+
+.header {
+margin-left:0;
+text-align:left;
+}
+
+.header td {
+font-size:13;
+}
+
+.nomer {
+font-size:11;
+}
+
+.listitem td{
+font-size:13;
+}
+
+.listitem th{
+font-size:13;
+}
+
+a{
+	font-size:13;
+	opacity:0;
+}
+
+]]> </field>
+            <field eval="&quot;&quot;&quot;Order Packaging A4 Template&quot;&quot;&quot;" name="name"/>
+        </record>
+        
+        <record id="header_do_A5" model="ir.header_webkit">
+            <field name="footer_html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <body style="border:0; margin: 0;" onload="subst()">
+    	%for o in objects:
+    	<table class='footer' width='100%'>
+			<tr width='100%' height='30'>
+				<th colspan='4' width='60%'>
+					<a>a</a>
+				</th>
+				<th width='40%' colspan='3'>
+					<a>DIISI OLEH GUDANG</a>
+				</th>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='20%'>
+					<a>Dibuat oleh :</a>
+				</td>
+				<td width='20%' colspan='2'>
+					<a>Dicek oleh :</a>
+				</td>
+				<td width='20%'>
+					<a>Disetujui Oleh,<br/>General Manager,</a>
+				</td>
+				<td width='18%' valign='bottom'>
+					<a>No.BPB</a>
+				</td>
+				<td width='2%' valign='bottom'>
+					<a>:</a>
+				</td>
+				<td width='20%' valign='bottom'>
+				</t>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='60%' rowspan='2' colspan='4'>
+					<a> </a>
+				</td>
+				<td width='18%'>
+					<a>Tgl. Pengambilan</a>
+				</td>
+				<td width='2%'>
+					<a>:</a>
+				</td>
+				<td width='20%'>
+				</td>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='18%'>
+					<a>Diambil Oleh</a>
+				</td>
+				<td width='2%'>
+					<a>:</a>
+				</td>
+				<td width='20%'>
+				</td>
+			</tr>
+			<tr width='100%' height='30'>
+				<td width='100%' colspan='7'>
+					<a>.</a>
+				</td>
+			</tr>
+			<tr width='100%' height='25'>
+				<td width='30%' colspan='2'>
+					<a>No.SJ :</a>
+				</td>
+				<td width='30%' colspan='2'>
+					<a>Tgl. Kirim :</a>
+				</td>
+				<td width='40%' colspan='3'>
+					<a> </a>
+				</td>
+			</tr>
+		</table>
+		%endfor
+    </body>
+</html>]]></field>
+            <field eval="&quot;&quot;&quot;Landscape&quot;&quot;&quot;" name="orientation"/>
+            <field eval="&quot;&quot;&quot;A5&quot;&quot;&quot;" name="format"/>
+            <field name="html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <%
+    	import time
+    %>
+    %for o in objects:
+    <body style="border:0; margin: 0;" onload="subst()">
+        <table class='header' width='100%' >
+			<tr class='kopsurat' height='5px' width='100%'>
+				<td></td>
+			</tr>
+			<tr width='100%'>
+				<td width='100%'>
+					<table width='100%'>
+						<tr width='100%'>
+							<td width='68%' align='left'>
+								<a>Kepada Yth.<br/>
+								Sdr. Kepala Gudang<br/>
+								Di tempat<br/>
+								<br/>
+								<br/>
+								Harap disiapkan sejumlah barang dibawah ini :
+								</a>
+							</td>
+							<td width='32%'>
+								${o.partner_id.name or '-'}<br/>
+								${o.partner_shipping_id.street or '-'}<br/>
+								${o.partner_shipping_id.city or '-'} ${o.partner_shipping_id.zip or '-'}<br>
+								Telp. ${o.partner_shipping_id.phone or '-'} 
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr width='100%'>
+				<td width='100%'>
+					<table width='100%'>
+						<tr width='100%' height='20px'>
+							<td width='10%' align='left'>
+								 <a>No.DO</a>
+							</td>
+							<td width='1%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='27%' align='left'>
+								${o.name or '-'} 
+							</td>
+							<td width='5%' align='left'>
+								 <a>No.SC</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='19%' align='left'>
+								 
+							</td>
+							<td width='10%' align='left'>
+								 <a>No.WC</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='23%' align='left'>
+								 
+							</td>
+						</tr>
+						<tr width='100%' height='20px'>
+							<td width='10%' align='left'>
+								 <a>Tanggal DO</a>
+							</td>
+							<td width='1%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='27%' align='left'>
+								 ${o.tanggal!='False' and time.strftime('%d %B %Y', time.strptime(o.tanggal,'%Y-%m-%d')) or '-'}
+							</td>
+							<td width='5%' align='left'>
+								 <a>No.PO</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='19%' align='left'>
+								${o.poc or '-'} 
+							</td>
+							<td width='10%' align='left'>
+								 <a>No.SPK</a>
+							</td>
+							<td width='2%' align='center'>
+								 <a>:</a>
+							</td>
+							<td width='23%' align='left'>
+								 
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		%endfor
+	${_debug or ''|n} </body>
+</html>]]>
+</field>
+            <field eval="70.0" name="margin_top"/>
+            <field eval="30.0" name="margin_bottom"/>
+            <field name="css" ><![CDATA[
+table {
+	border:0px solid #000;
+	padding:0px;
+}
+table td{
+	border:0px solid #000; 
+	padding:0px;
+}
+table tr{
+	border:0px solid #000;
+	padding:0px; 
+}
+table th{
+	border:0px solid #000;
+	padding:0px; 
+}
+
+body {
+font-family:helvetica;
+font-size:12;
+}
+
+.footer td{
+font-size:12;
+}
+
+.header {
+margin-left:0;
+text-align:left;
+}
+
+.header td {
+font-size:12;
+}
+
+.listitem td{
+font-size:12;
+}
+
+.listitem th{
+font-size:12;
+}
+
+a{
+	font-size:12;
+	opacity:0;
+}
+
+]]> </field>
+            <field eval="&quot;&quot;&quot;Order Packaging A5 Template&quot;&quot;&quot;" name="name"/>
+        </record>
+	</data>
+</openerp>

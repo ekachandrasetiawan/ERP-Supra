@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+     <data>
+          <report auto="False" id="printpo" menu="True" model="purchase.order" name="report.purchase.order" rml="addons/sbm_purchaseorder/report/report_purchaseorder.rml" string="Report"/>
+          <!-- <report auto="False" id="printpo" menu="True" model="purchase.order" name="report.purchase.order" rml="addons/sbm_purchaseorder/report/report_order_local.rml" string="Report"/> -->
+          <record id="view_po_form_set" model="ir.ui.view">
+               <field name="name">purchase.order.form</field>
+               <field name="model">purchase.order</field>
+               <field name="type">form</field>
+               <field name="inherit_id" ref="purchase.purchase_order_form"/>
+               <field name="arch" type="xml">
+                     <button name="print_quotation" position="replace">
+                         <button class="oe_highlight" name="%(printpo)d" states="approved,draft" string="Print Purchase Order" type="action"/>
+                     
+                    </button>
+                       
+                    <field name="name" position="replace">
+                         <field name="name"/>
+                    </field>
+                    <field name="partner_id" position="replace">
+                         <field name="partner_id" on_change="on_change_partner_id(partner_id)"/>
+                    </field>
+                    <field name="date_order" position="replace"/>
+                    <field name="company_id" position="replace"/>
+                    <field name="partner_ref" position="replace"/>
+                    <field name="warehouse_id" position="replace"/>
+                    <field name="partner_id" position="after">
+                         <field name="date_order"/>
+                         <field name="duedate"/>
+                    </field>
+                    <field name="origin" position="before">
+                         <field name="partner_ref"/>
+                    </field>
+                    <field name="partner_id" position="after">
+                         <field name="attention"/>
+                    </field>
+                    <field name="pricelist_id" position="after">
+                         <field name="type_permintaan"/>
+                    </field>
+                    <field name="price_subtotal" position="after">
+                         <field name="note_line" />
+                    </field>
+
+                    <field name="date_planned" position="before">
+                         <field name="part_number"/>
+                    </field>
+
+                    <xpath expr="//page[@string='Purchase Order']" position="after">
+                          <page string="Print Line">
+                              <group>
+                                   <field name='print_line'/>
+                              </group>
+                         </page>
+                    </xpath>
+               </field>
+          </record>
+
+
+          <record id="view_po_tree_set" model="ir.ui.view">
+               <field name="name">purchase.order.tree</field>
+               <field name="model">purchase.order</field>
+               <field name="type">form</field>
+               <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+               <field name="arch" type="xml">
+                    <xpath expr="//tree[@string='Purchase Order']" position="attributes">
+                         <attribute name="colors">#808000:state == 'draft' and stateAlert&lt;='7';</attribute>
+                    </xpath>
+                    <field name="partner_id" position="after">
+                         <field name="duedate" />
+                         <field name="stateAlert"/>
+                    </field>
+               </field>
+          </record>
+     </data>
+</openerp>

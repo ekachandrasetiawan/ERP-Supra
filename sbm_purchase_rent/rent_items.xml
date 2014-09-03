@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<!-- <record model="ir.actions.act_window" id="rent_items_list_action">
+			<field name="name">Rent Items</field>
+			<field name="res_model">rent.items</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<menuitem id="rent_items_menu" name="Master Rent Items" parent="purchase_rent_menu" action="rent_items_list_action"/>
+		<record model="ir.ui.view" id="rent_items_view">
+			<field name="name">rent_items.tree</field>
+			<field name="model">rent.items</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Rent Items">
+					<field name="name" />
+					<field name="type" />
+				</tree>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="rent_items_form">
+			<field name="name">rent_items.form</field>
+			<field name="model">rent.items</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Master Rent Items" version="7.0">>
+					<sheet>
+						<group>
+							<field name="name" />
+							<field name="type" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record> -->
+		<record model="ir.ui.view" id="product_rent_item_view">
+			<field name="name" >product.rent.item</field>
+			<field name="model">product.product</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="purchase.view_product_supplier_inherit" />
+			<field name="arch" type="xml">
+				<label for="purchase_ok" position="after">
+					<field name="is_rent_item" />
+					<label for="is_rent_item"/>
+				</label>
+			</field>
+		</record>
+	</data>
+</openerp>

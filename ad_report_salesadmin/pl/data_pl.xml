@@ -1,0 +1,331 @@
+<openerp>
+	<data>
+		<record id="header_pl_reguler" model="ir.header_webkit">
+            <field name="footer_html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <body style="border:0; margin: 0;" onload="subst()">
+    	<%
+    		pl=get_object(data)[0]
+    	%>
+    	%for o in get_dn(pl.note_id.id):
+    	<table class='footer' width='100%'>
+			<tr width="100%">
+				<td width="22%"></td>
+				<td width="50%">
+					<b>Purchase Order No : </b>${o.poc or '-'}, ${o.prepare_id.sale_id.date_order!='False' and time.strftime('%d %B %Y', time.strptime(o.prepare_id.sale_id.date_order,'%Y-%m-%d')) or '-'}<br>
+					<b>Color Code :</b> ${o.color_code or '-'}</td>
+				<td width="28%"></td>
+			</tr>
+		</table>
+		%endfor
+    </body>
+</html>]]></field>
+            <field eval="&quot;&quot;&quot;Portrait&quot;&quot;&quot;" name="orientation"/>
+            <field eval="&quot;&quot;&quot;A4&quot;&quot;&quot;" name="format"/>
+            <field name="html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <%
+    	import time
+    	pl=get_object(data)[0]
+    %>
+    %for o in get_dn(pl.note_id.id):
+    <body style="border:0; margin: 0;" onload="subst()">
+        <table class='header' width='100%' >
+			<tr class='kopsurat' height='80px' width='100%'>
+				<td></td>
+			</tr>
+			<tr width='100%'>
+				<td width='100%'>
+					<table width='100%'>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>TO</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.partner_id.name or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>ATTN</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.prepare_id.sale_id.attention.name or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>DATE</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.tanggal!=False and time.strftime('%d %B %Y', time.strptime(o.tanggal,'%Y-%m-%d')) or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>REF.</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.name or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='40px'>
+							<td colspan='3' align='center'>
+								<a>PACKING LIST</a>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		%endfor
+	${_debug or ''|n} </body>
+</html>]]>
+</field>
+            <field eval="70.0" name="margin_top"/>
+            <field eval="60.0" name="margin_bottom"/>
+            <field name="css" ><![CDATA[
+body {
+font-family:helvetica;
+font-size:12;
+}
+
+.footer td{
+font-size:12;
+}
+
+.header {
+margin-left:0;
+text-align:left;
+}
+
+.header td {
+font-size:12;
+}
+
+.listitem td{
+font-size:12;
+}
+
+.listitem th{
+font-size:12;
+}
+
+a{
+	font-size:12;
+	opacity:0;
+}
+
+]]> </field>
+            <field eval="&quot;&quot;&quot;Packing List Reguler Template&quot;&quot;&quot;" name="name"/>
+        </record>
+        
+        <record id="header_pl_newmont" model="ir.header_webkit">
+            <field name="footer_html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <body style="border:0; margin: 0;" onload="subst()">
+    	%for o in objects:
+    	<table class='footer' width='100%'>
+			<tr width="100%">
+				<td width="22%"></td>
+				<td width="50%">
+					<b>Purchase Order No : </b>${o.poc or '-'}, ${o.prepare_id.sale_id.date_order!='False' and time.strftime('%d %B %Y', time.strptime(o.prepare_id.sale_id.date_order,'%Y-%m-%d')) or '-'}<br>
+					<b>Stock Code :</b> ${o.color_code or '-'}</td>
+				<td width="28%"></td>
+			</tr>
+		</table>
+		%endfor
+    </body>
+</html>]]></field>
+            <field eval="&quot;&quot;&quot;Portrait&quot;&quot;&quot;" name="orientation"/>
+            <field eval="&quot;&quot;&quot;A4&quot;&quot;&quot;" name="format"/>
+            <field name="html"><![CDATA[<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+        <script>
+            function subst() {
+            var vars={};
+            var x=document.location.search.substring(1).split('&');
+            for(var i in x) {var z=x[i].split('=',2);vars[z[0]] = unescape(z[1]);}
+            var x=['frompage','topage','page','webpage','section','subsection','subsubsection'];
+            for(var i in x) {
+            var y = document.getElementsByClassName(x[i]);
+            for(var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];
+                }
+            }
+        </script>
+        <style type="text/css">
+            ${css}
+        </style>
+    </head>
+    <%
+    	import time
+    %>
+    %for o in objects:
+    <body style="border:0; margin: 0;" onload="subst()">
+        <table class='header' width='100%' >
+			<tr class='kopsurat' height='80px' width='100%'>
+				<td></td>
+			</tr>
+			<tr width='100%'>
+				<td width='100%'>
+					<table width='100%'>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>TO</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.partner_id.name or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>ATTN</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.prepare_id.sale_id.attention.name or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>DATE</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.tanggal!='False' and time.strftime('%d %B %Y', time.strptime(o.tanggal,'%Y-%m-%d')) or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='20px'>
+							<td width='15%'>
+								<a>REF.</a>
+							</td>
+							<td width='2%'>
+								<a>:</a>
+							</td>
+							<td width='83%'>
+								${o.name or '-'}
+							</td>
+						</tr>
+						<tr width='100%' height='40px'>
+							<td colspan='3' align='center'>
+								PACKING LIST
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		%endfor
+	${_debug or ''|n} </body>
+</html>]]>
+</field>
+            <field eval="70.0" name="margin_top"/>
+            <field eval="60.0" name="margin_bottom"/>
+            <field name="css" ><![CDATA[
+body {
+font-family:helvetica;
+font-size:12;
+}
+
+.footer td{
+font-size:12;
+}
+
+.header {
+margin-left:0;
+text-align:left;
+}
+
+.header td {
+font-size:12;
+}
+
+.listitem td{
+font-size:12;
+}
+
+.listitem th{
+font-size:12;
+}
+
+a{
+	font-size:12;
+	opacity:0;
+}
+
+]]> </field>
+            <field eval="&quot;&quot;&quot;Packing List Newmont Template&quot;&quot;&quot;" name="name"/>
+        </record>
+	</data>
+</openerp>

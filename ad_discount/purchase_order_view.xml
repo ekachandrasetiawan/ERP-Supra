@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="purchase_order_form_discount" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form" />
+            <field name="arch" type="xml">
+            	<field name="amount_untaxed" position="replace">
+            		<field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+            	</field>
+            	<field name="amount_tax" position="replace">
+            		<field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+            	</field>
+            	<field name="amount_total" position="replace">
+            		<field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+            	</field>
+            	<field name="price_subtotal" position="replace">
+            		<field name="discount_type" />
+            		<field name="discount1" attrs="{'invisible': [('discount_type','in',('disc2',''))]}"/>
+            		<field name="discount2" attrs="{'invisible': [('discount_type','in',('disc1',''))]}"/>
+            		<field name="price_subtotal" />
+            	</field>
+            </field>
+        </record>
+	</data>
+</openerp>

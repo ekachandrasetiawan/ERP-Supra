@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+			
+		<report id="report_summary_activity" string="Report Summary Activity" 
+			model="management.summary" name="management.summary.activity"
+			file="ad_report_management/report/report_summary_activity.mako" 
+			report_type="webkit" auto="False" menu="False"/>
+		
+		<report id="report_summary_product" string="Report Summary Product" 
+			model="management.summary" name="management.summary.product"
+			file="ad_report_management/report/report_summary_product.mako" 
+			report_type="webkit" auto="False" menu="False"/>
+		
+		<report id="report_summary_sales" string="Report Summary Sales" 
+			model="management.summary" name="management.summary.sales"
+			file="ad_report_management/report/report_summary_sales.mako" 
+			report_type="webkit" auto="False" menu="False"/>
+		
+	</data>
+</openerp>
+
+
+

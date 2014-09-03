@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+		<record model="ir.ui.view" id="view_wizard_mutasi_account">
+            <field name="name">Mutasi Account</field>
+            <field name="model">mutasi.account</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Report" version="7.0">
+                	<group>
+                	    <field name="account_from"/>
+						<field name="account_to"/>
+						<field name="date_from"/>
+						<field name="date_to"/>
+					</group>
+					<footer>
+	                    <button name="print_report" string="Print" type="object" default_focus="1" class="oe_highlight"/>
+	                    or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                </footer>
+                </form>
+            </field>
+        </record>
+              
+        <record model="ir.actions.act_window" id="action_mutasi_account">
+            <field name="name">Mutasi Account</field>
+            <field name="res_model">mutasi.account</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+       
+        <menuitem id="menu_mutasi_account" name="Mutasi Account" action="action_mutasi_account" parent="account.final_accounting_reports"/>
+
+
+
+		<record model="ir.ui.view" id="view_wizard_report_voucher">
+            <field name="name">Report Voucher</field>
+            <field name="model">many.voucher</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Voucher Report" version="7.0">
+                    <group>
+						<field name="statement_id"/>
+					</group>
+					<group>
+						<field name="line_ids" mode="tree,form" nolabel="1">
+							<tree string="Voucher">
+					            <field name="name"/>
+					            <field name="ref"/>
+					            <field name="type"/>	          	          
+					            <field name="date"/>
+					            <field name="amount"/>
+					            <field name="account_id"/>
+                            </tree>
+						</field>
+					</group>
+					<footer>
+	                    <button name="print_voucher" string="Print" type="object" default_focus="1" class="oe_highlight"/>
+	                    or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                </footer>
+                </form>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="action_voucher_report">
+            <field name="name">Report Voucher</field>
+            <field name="res_model">many.voucher</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+       
+        <menuitem id="menu_voucher_report" name="Voucher Report" action="action_voucher_report" parent="account.final_accounting_reports"/>
+
+
+
+		<record model="ir.ui.view" id="view_wizard_acccounting_legal">
+            <field name="name">Accounting Legal</field>
+            <field name="model">accounting.legal</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form col="4" string="Report" version="7.0">
+                	<group>
+                	    <field name="report"/>
+                	</group>
+					<group col="2">
+						<field name="fiscalyear_id" colspan="2"/>
+						<field name="period_from"/>
+						<field name="period_to"/>
+						<field name="name" invisible="True"/>
+					</group>
+					<footer>
+	                    <button name="eksport_excel" string="Print" type="object" default_focus="1" class="oe_highlight"/>
+	                    or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                </footer>
+                </form>
+            </field>
+        </record>
+              
+        <record model="ir.actions.act_window" id="action_accounting_legal">
+            <field name="name">Accounting Legal</field>
+            <field name="res_model">accounting.legal</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+       
+        <menuitem id="menu_accounting_legal" name="Legal Report" action="action_accounting_legal" parent="account.final_accounting_reports"/>
+
+	</data>
+</openerp>
+

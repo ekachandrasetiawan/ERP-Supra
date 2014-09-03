@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+
+		<record model="ir.ui.view" id="view_wizard">
+            <field name="name">Sale Order Summary</field>
+            <field name="model">sale.order.summary</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form col="4" string="Wizard Report" version="7.0">
+	                  <group col="4" colspan="4">
+	                  	<separator string="Summary Report Sales Order" colspan="4"/>
+	                  	<newline/>
+	                  	<field name="type" colspan="4"/>
+	                  	<field name="partner_id"/>
+	                  	<field name="name"/>
+	                  </group>
+	                  <group col="4" colspan="4" attrs="{'invisible':[('name', '!=', 'date')]}">
+	                      <separator string="Due Date" colspan="4"/>
+	                      <field name="from"/>
+	                      <field name="to"/>
+		              </group>
+	                  <group colspan="4" attrs="{'invisible':[('name','!=','order')]}">
+	                      <separator string="Sales Order" colspan="4"/>
+	                      <field name="sale_ids" mode="tree,form" nolabel="1" width="550" height="400"/>
+		              </group>
+		              <footer>
+	                    <button name="sales_summary" string="Print" type="object" class="oe_highlight" attrs="{'invisible':[('type','=','eks')]}"/>
+	                    or 
+	                    <button string="Cancel" class="oe_link" special="cancel" />
+	                  </footer>
+                </form>
+            </field>
+        </record>
+              
+        <record model="ir.actions.act_window" id="action_sale_order_summary">
+            <field name="name">Sale Order Summary</field>
+            <field name="res_model">sale.order.summary</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+       
+		<menuitem id="menu_sale_order_summary" name="Report Summary" action="action_sale_order_summary" parent="base.menu_sales"/>
+	</data>
+</openerp>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="ir.actions.act_window" id="rent_requisition_detail_list_action">
+			<field name="name">Rent Requisition Detail</field>
+			<field name="res_model">rent.requisition.detail</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<!-- <menuitem id="rent_requisition_detail_menu" name="Rent Requisition Detail" parent="purchase_rent_menu" action="rent_requisition_detail_list_action" /> -->
+		<record model="ir.ui.view" id="rent_requisition_detail_view">
+			<field name="name">rent_requisition_detail.tree</field>
+			<field name="model">rent.requisition.detail</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree  editable="top" string="Rent Requisition">
+					<!-- <field name="rent_requisition_id" /> -->
+					<field name="name" />
+					<field name="qty" />
+					<field name="uom" />
+					<field name="state" />
+					<field name="notes" />
+				</tree>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="rent_requisition_detail_form">
+			<field name="name">rent_requisition_detail.form</field>
+			<field name="model">rent.requisition.detail</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Rent Requisition Detail" version="7.0">>
+					<sheet>
+						<group>
+							<!-- <field name="rent_requisition_id" /> -->
+							<field name="name" />
+							<field name="qty" />
+							<field name="uom" />
+							<field name="notes" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+	</data>
+</openerp>

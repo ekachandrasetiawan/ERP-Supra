@@ -1,0 +1,54 @@
+<openerp>
+	<data>
+
+		<record id="view_order_form_discount" model="ir.ui.view">
+            <field name="name">sale.order.discount</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='th_weight']" position="after">
+                	<field name="discount_nominal"/>
+                </xpath>
+                
+                <xpath expr="//tree[@string='Sales Order Lines']/field[@name='discount']" position="after">
+                	<field name="discount_nominal"/>
+                </xpath>
+            </field>
+        </record>
+        
+	</data>
+</openerp>
+
+
+<!--
+
+
+		<record model="ir.ui.view" id="purchase_discount_order_line_form">
+			<field name="name">purchase_discount.order.line.form</field>
+			<field name="model">purchase.order.line</field>
+	        <field name="type">form</field>
+	        <field name="inherit_id" ref="eid_second_uom.purchase_order_line_tolerances_form"/>
+	        <field name="arch" type="xml">
+				<field name="purchase_uom" position="after">
+					<field name="discount"/>
+				</field>
+				<field name="price_unit" position="after">
+					<field name="discount_nominal" colspan="4"/>
+				</field>
+			</field>
+		</record>
+
+		<record id="view_invoice_line_form_nominal" model="ir.ui.view">
+			<field name="name">view.invoice.line.form.nominal</field>
+			<field name="type">form</field>
+			<field name="model">account.invoice.line</field>
+			<field name="inherit_id" ref="account.view_invoice_line_form" />
+			<field name="arch" type="xml">
+                <field name="price_unit" position="after">
+                	<field name="discount_nominal"/>
+                </field>		
+			</field>
+		</record>
+
+
+-->

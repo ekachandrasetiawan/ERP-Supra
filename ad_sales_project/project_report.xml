@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+ 
+		<report id="report_activity" string="Sales Activity" 
+				model="sales.activity" name="sales.status" 
+				rml="ad_sales_project/report/report_sales.rml"
+				auto="False" menu="False"/>
+
+		<report id="report_plan" string="Plan Activity" 
+				model="sales.activity" name="plan.status" 
+				rml="ad_sales_project/report/report_plan.rml"
+				auto="False" menu="False"/>
+		
+	</data>
+</openerp>
+

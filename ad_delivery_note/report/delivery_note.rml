@@ -1,0 +1,217 @@
+<?xml version="1.0"?>
+<!DOCTYPE document SYSTEM "rml.dtd" >
+<document filename="Internal Moves.pdf">
+  <template pageSize="(23cm,29.5cm)" title="Internal Moves" author="Eka Chandra Setiawan" allowSplitting="20">
+    <pageTemplate id="first">
+      <frame id="first" x1="1.0cm" y1="2.0cm" width="20cm" height="27cm"/>
+        <header>
+      <pageGraphics>
+        <setFont name="Arial-Bold" size="10"/>
+        <drawString x="19.0cm" y="1cm">Hal <pageNumber/></drawString>
+        <image x="1.5cm" y="26.4cm" height="60.0" ></image>
+      </pageGraphics>
+    </header>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Table_Partner_Address">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+
+    <blockTableStyle id="Table1">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    
+  <blockTableStyle id="Table001">
+    <!-- <lineStyle kind="GRID" colorName="black"/> -->
+    <blockValign value="TOP"/>
+  </blockTableStyle>
+
+    <blockTableStyle id="Tablebody">
+
+    <blockValign value="TOP"/>
+  </blockTableStyle>
+
+    <blockTableStyle id="Table00100">
+     <!-- <lineStyle kind="LINEABOVE" colorName="black" start="0,0" stop="-1,0"/> -->
+   <blockValign value="TOP"/>
+  </blockTableStyle>
+
+  <blockTableStyle id="TableFooter">
+   <blockValign value="TOP"/>
+  </blockTableStyle>
+
+    <blockTableStyle id="TableHeader">
+     <!-- <lineStyle kind="LINEABOVE" colorName="black" start="0,0" stop="1,0"/> -->
+   <blockValign value="TOP"/>
+  </blockTableStyle>
+
+
+  <blockTableStyle id="setTable">
+    <!-- <lineStyle kind="LINEBEFORE" colorName="black"/>
+    <lineStyle kind="LINEAFTER" colorName="black"/> -->
+    <!--<lineStyle kind="GRID" colorName="black"/>-->
+    <blockValign value="TOP"/>
+  </blockTableStyle>
+
+
+    <initialize>
+      <paraStyle name="all" alignment="justify"/>
+    </initialize>
+    <paraStyle name="Standard" fontName="Arial-Bold"/>
+    <paraStyle name="Text body" fontName="Arial-Bold" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="List" fontName="Arial-Bold" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Table Contents" fontName="Arial-Bold" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Table Heading" fontName="Arial-Bold" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Caption" fontName="Arial-Bold" fontSize="10.0" leading="13" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="Index" fontName="Arial-Bold"/>
+    <paraStyle name="Heading" fontName="Arial-Bold" fontSize="15.0" leading="19" spaceBefore="12.0" spaceAfter="6.0"/>
+  <paraStyle name="terp_default_Bold_88" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="13.0" leading="15" alignment="LEFT" blockValign="TOP" spaceBefore="5.0" spaceAfer="2.0"/>
+
+    <paraStyle name="terp_default_Bold_88_header" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="18.0" leading="20" alignment="center" blockValign="TOP" spaceBefore="5.0" spaceAfer="2.0"/>
+
+
+  <paraStyle name="terp_default_Bold_881" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="5.0" leading="10" alignment="LEFT" blockValign="TOP" spaceBefore="0.0" spaceAfter="0.0"/>
+  
+    <paraStyle name="terp_default_Bold_89" rightIndent="0.0" leftIndent="0.0" fontName="Impact" fontSize="9.0" leading="12" alignment="LEFT" blockValign="TOP" spaceBefore="0.0" spaceAfter="0.0"/>
+
+        <paraStyle name="terp_default_Bold_89_header" rightIndent="0.0" leftIndent="0.0" fontName="Impact" fontSize="7.0" leading="8" alignment="center" blockValign="TOP" spaceBefore="0.0" spaceAfter="0.0"/>
+
+<paraStyle name="terp_default_Bold_89C" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="7.0" leading="10" alignment="LEFT" blockValign="TOP" spaceBefore="0.0" spaceAfter="0.0"/>
+
+     <paraStyle name="terp_default_Bold_288" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="12.0" leading="15" alignment="LEFT" blockValign="TOP" spaceBefore="3.0" spaceAfter="3.0"/>
+    <paraStyle name="terp_default_Bold_289" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="10.0" leading="10" alignment="LEFT" blockValign="TOP" spaceBefore="0.0" spaceAfter="5.0"/>
+ <paraStyle name="terp_default_Bold_2891" rightIndent="0.0" leftIndent="15.0" fontName="Arial-Bold" fontSize="10.0" leading="10" alignment="LEFT" blockValign="TOP" spaceBefore="0.0" spaceAfter="5.0"/>
+
+    
+    <paraStyle name="terp_default_Bold_8" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="10.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_18" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="11.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+  <paraStyle name="terp_default_Bold_182" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="11.0" leading="12" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_Centre_889" rightIndent="0.0" leftIndent="0.0" fontName="Arial" fontSize="14.0" leading="15" alignment="LEFT" spaceBefore="1.0" spaceAfter="1.0"/>
+
+    <paraStyle name="terp_default_Bold_8_Italic" rightIndent="0.0" leftIndent="0.0" fontName="Times-BoldItalic" fontSize="9.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+     <paraStyle name="terp_default_Bold_Centre_1" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="8.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Right_8" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="11.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+
+
+ <paraStyle name="terp_default_Bold_Centre_8" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="11.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+   
+  </stylesheet>
+  <story>
+  <pto>
+
+    <para style="terp_default_8">[[ repeatIn(objects,'o') ]]</para>
+        <blockTable colWidths="600.0" style="Table_Partner_Address">
+      <tr>
+        <td>
+          <para style="terp_default_Bold_88_header"><font color="white">.........</font></para>
+          <para style="terp_default_Bold_89_header"><font color="white">.........</font>
+          </para>
+        </td>
+      </tr>     
+    </blockTable>
+    <blockTable colWidths="600.0" style="Table_Partner_Address">
+          <tr>
+            <td>
+              <para style="terp_default_Bold_89C"><font color="white">.........</font></para>
+              <para style="terp_default_Bold_89C"><font color="white">................</font></para>
+               <para style="terp_default_Bold_89C"><font color="white">................</font></para>
+            </td>
+          </tr>
+        </blockTable>
+
+    <blockTable colWidths="220.0,380.0" style="Table001">
+    <tr>
+        <td>
+           <blockTable colWidths="220.0" style="Table_Partner_Address"> 
+            <tr>
+              <td><para style="terp_default_Bold_182"> [[ o.partner_id.name ]] </para></td>
+            </tr>
+            <tr>
+              <td><para style="terp_default_Bold_182"> [[ o.partner_shipping_id.street ]] [[ o.partner_shipping_id.street2 ]] [[ o.partner_shipping_id.city ]] [[ o.partner_shipping_id.state_id.name ]] [[ o.partner_shipping_id.zip ]]</para>
+              <para style="terp_default_Bold_182">PHONE :  [[ o.partner_shipping_id.phone ]] </para>
+              </td>
+            </tr>
+            </blockTable> 
+        </td>
+        <td> 
+          <blockTable colWidths="130.0,250.0" style="Table_Partner_Address"> 
+            <tr>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+              <td><para style="terp_default_Bold_18">[[ o.name ]]</para></td>
+            </tr>
+            <tr>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+            </tr>
+             <tr>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+            </tr>
+            <tr>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+              <td><para style="terp_default_Bold_18">[[ get_lines(o)['prepare_no'] ]]</para></td>
+            </tr>
+             <tr>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+            </tr>
+             <tr>
+              <td> 
+                <para style="terp_default_8"><font color="white"> .</font></para>
+                <para style="terp_default_8"><font color="white"> ..........................</font>[[ o.poc ]]</para>
+              </td>
+              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+            </tr>
+          </blockTable>
+        </td>
+   </tr>
+    </blockTable>
+    <!-- 
+    <para style="terp_default_8"><font color="white">. </font></para>-->
+    <para style="terp_default_8"><font color="white">. </font></para>
+
+    <blockTable colWidths="30.0,115.0,345.0,110.0" style="Table001">
+    <tr>
+        <td> <para style="terp_default_Bold_Centre_8"><font color="white"> .</font> </para> </td>
+        <td> <para style="terp_default_Bold_Centre_8"><font color="white"> .</font></para> </td>
+        <td> <para style="terp_default_Bold_Centre_8"><font color="white"> .</font></para> </td>
+        <td> <para style="terp_default_Bold_Centre_8"><font color="white"> .</font></para> </td>
+    </tr>
+    </blockTable>
+            <blockTable rowHeights="273.0" colWidths="600" style="Table001">
+                <tr>
+                  <td>
+                      <section>
+                      <para style="terp_default_1">[[repeatIn(o.note_lines, 'x')]]</para>
+                              <blockTable colWidths="25.0,115.0,345.0,115.0" style="Tablebody">
+                                <tr>
+                                <td><para style="terp_default_8">[[ x.no ]]</para></td>
+                                <td><para style="terp_default_Right_8">[[ x.product_qty ]] [[ x.product_uom.name ]] </para></td>
+                                <td><para style="terp_default_8">[[ x.name ]]</para></td>
+                                <td><para style="terp_default_Right_8">[[ x.product_id.default_code ]]</para></td>
+                                </tr>
+                              </blockTable>
+                     </section>  
+
+                  </td>
+                </tr>
+            </blockTable>
+
+      <blockTable rowHeights="80.0" colWidths="150.0,450.0" style="Table001">
+       <tr>
+        <td>
+           <para style="terp_default_8"><font color="white"> .</font></para>
+
+        </td>
+        <td>
+          <xpre style="terp_default_8">[[ o.terms ]]</xpre>
+        </td>
+      </tr>
+      </blockTable>   
+      <para style="terp_default_8"><font color="white"> </font></para>
+  </pto>
+  </story>
+</document>

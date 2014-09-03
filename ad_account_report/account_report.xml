@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+			
+		<report id="report_mutasi_account"  string="Report Mutasi Account" 
+			model="account.move" name="mutasi.report" 
+			file="ad_account_report/report/report_mutasi.mako" 
+			report_type="webkit" auto="False" menu="False"/>
+		
+	</data>
+</openerp>
+
+
+

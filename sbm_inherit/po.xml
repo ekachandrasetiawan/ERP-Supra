@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		
+		<record id="purchase_order_form" model="ir.ui.view">
+			<field name="name">purchase.order.form</field>
+			<field name="model">purchase.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="purchase.purchase_order_form" />
+			
+			<field name="arch" type="xml">
+				<field name="amount_untaxed" position="before">
+            		<field name="amount_bruto" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+            		<field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+            	</field>
+			</field>
+		</record>
+		<!-- END OF INHERIT FIELD cust_ref_no -->
+	</data>
+</openerp>

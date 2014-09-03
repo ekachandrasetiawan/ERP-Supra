@@ -1,0 +1,35 @@
+from osv import osv, fields
+from tools.translate import _
+
+class partner(osv.osv):
+    ''' inherited res.partner '''
+    _inherit = 'res.partner'
+    _columns = {
+        'npwp' : fields.char('No. NPWP', size=20, required=False, help='Nomor NPWP, Misal 01.540.674.7.431-000'),
+              }
+
+    def onchange_format_npwp(self, cr, uid, ids, npwp):
+        x = len(npwp)
+        result = ''
+        warning = {
+            "title": _("NPWP Number Format Incorrect!"),
+            "message": _("Masukan 15 Digit Number NPWP Tanpa Tanda Baca ex : 015406747431000")
+        }
+    	try:
+	    int(npwp)
+	    if len(npwp) == 15:
+	        int(npwp[:15])
+	        int_1 = npwp[:2]
+	        int_2 = npwp[2:5]
+		int_3 = npwp[5:8]
+		int_4 = npwp[8:9]
+		int_5 = npwp[9:12]
+		int_6 = npwp[12:15]
+		npwp_partner = int_1 + '.' + int_2 + '.' + int_3 + '.' + int_4 + '.' + int_5 + '-' + int_6
+		return {'value': {'npwp': npwp_partner}}
+	    else:
+	    	return {'warning': warning, 'value': {'npwp': result}}
+        except:
+            return {'warning': warning, 'value': {'npwp': result}}
+
+partner()

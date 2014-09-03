@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+			
+		<report id="report_sale_outstanding" string="Report Sale Outstanding" 
+			model="sale.order.summary" name="sale.outstanding"
+			file="ad_report_summary/report/report_sale_outstanding.mako" 
+			report_type="webkit" auto="False" menu="False"/>
+		
+		<report id="report_sale_note" string="Report Sale Note" 
+			model="sale.order.summary" name="sale.note"
+			file="ad_report_summary/report/report_sale_note.mako" 
+			report_type="webkit" auto="False" menu="False"/>
+		
+	</data>
+</openerp>
+
+
+

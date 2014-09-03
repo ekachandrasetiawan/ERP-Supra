@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<record id="view_purchase_partial_invoice" model="ir.ui.view">
+            <field name="name">Invoice Order</field>
+            <field name="model">purchase.partial.invoice</field>
+            <field name="arch" type="xml">
+                <form string="Invoice Purchase Order" version="7.0">
+                    <p class="oe_grey">Create a draft invoice for advance payment</p>
+                    <group>
+                        <field name="amount" class="oe_inline"/>
+                    </group>
+                    <footer>
+                        <button name="create_invoices" string="Create Advance" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_purchase_partial_invoice" model="ir.actions.act_window">
+            <field name="name">Invoice Order</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.partial.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <record id="purchase_order_invoice" model="ir.ui.view">
+            <field name="name">purchase.order.invoice</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"></field>
+            <field name="arch" type="xml">
+                <button name="view_invoice" position="replace">
+                	<button name="%(action_purchase_partial_invoice)d" string="Partial Invoice" type="action" states="approved" class="oe_highlight" groups="base.group_user"/>
+                	<button name="action_invoice_create" string="Full Invoice" type="object" states="approved" class="oe_highlight" groups="base.group_user"/>
+                </button>
+            </field>
+        </record>
+        
+    </data>
+</openerp>

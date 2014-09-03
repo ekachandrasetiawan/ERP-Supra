@@ -1,0 +1,709 @@
+<?xml version="1.0"?>
+<document filename="purchase.pdf">
+  <template pageSize="(21cm,29.5cm)" title="Purchase Import" author="EKA CHANDRA SETIAWAN" allowSplitting="20">
+    <pageTemplate id="first">
+      <frame id="first" x1="0.5cm" y1="2.0cm" width="20cm" height="27cm"/>
+      	<header>
+			<pageGraphics>
+				<setFont name="Franklin Gothic Medium" size="7"/>
+				<drawString x="19.0cm" y="1cm">Hal <pageNumber/></drawString>
+			</pageGraphics>
+		</header>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Standard_Outline">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Tableau1">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table_Partner_Address">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <blockTableStyle id="total_amount">
+      <lineStyle kind="GRID" colorName="black"/>
+    </blockTableStyle>
+
+    <blockTableStyle id="Table_Invoice_General_judul">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0" kind="LINEBEFORE" colorName="#FFFFFF" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0" kind="LINEABOVE" colorName="#FFFFFF" start="0,0" stop="0,0"/>
+      <lineStyle thickness="0" kind="LINEBELOW" colorName="#FFFFFF" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0" kind="LINEBEFORE" colorName="#FFFFFF" start="1,0" stop="1,-1"/>
+      <lineStyle thickness="0" kind="LINEABOVE" colorName="#FFFFFF" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0" kind="LINEBELOW" colorName="#FFFFFF" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0" kind="LINEBEFORE" colorName="#FFFFFF" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0" kind="LINEAFTER" colorName="#FFFFFF" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0" kind="LINEABOVE" colorName="#FFFFFF" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0" kind="LINEBELOW" colorName="#FFFFFF" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0" kind="LINEBEFORE" colorName="#FFFFFF" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0" kind="LINEAFTER" colorName="#FFFFFF" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0" kind="LINEABOVE" colorName="#FFFFFF" start="3,0" stop="3,0"/>
+      <lineStyle thickness="0" kind="LINEBELOW" colorName="#FFFFFF" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0" kind="LINEBEFORE" colorName="#FFFFFF" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0" kind="LINEAFTER" colorName="#FFFFFF" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0" kind="LINEABOVE" colorName="#FFFFFF" start="4,0" stop="4,0"/>
+      <lineStyle thickness="0" kind="LINEBELOW" colorName="#FFFFFF" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0" kind="LINEBEFORE" colorName="#FFFFFF" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0" kind="LINEAFTER" colorName="#FFFFFF" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0" kind="LINEABOVE" colorName="#FFFFFF" start="5,0" stop="5,0"/>
+      <lineStyle thickness="0" kind="LINEBELOW" colorName="#FFFFFF" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table_Invoice_General_Header">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="5,0" stop="5,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table_Invoice_General_Header_12">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="3,0" stop="3,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="4,0" stop="4,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table_Invoice_General_Header_11">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="2,0" stop="2,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="3,0" stop="3,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="4,0" stop="4,-1"/>
+      
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
+      
+    </blockTableStyle>
+    <blockTableStyle id="Table_Invoice_General_Header2">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,0" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#ffffff" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="5,0" stop="5,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+
+
+	<blockTableStyle id="Table23456">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="5,0" stop="5,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="6,0" stop="6,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="6,0" stop="6,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="6,0" stop="6,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="6,-1" stop="6,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="7,0" stop="7,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#000000" start="7,0" stop="7,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" start="7,0" stop="7,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000" start="7,-1" stop="7,-1"/>
+    </blockTableStyle>
+	
+    <blockTableStyle id="Table21">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#000000" start="6,0" stop="6,-1"/>
+    </blockTableStyle>
+
+   <blockTableStyle id="Table212">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="0,0" stop="0,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="0,0" stop="0,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="0,-1" stop="0,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="1,0" stop="1,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="1,0" stop="1,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="1,-1" stop="1,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="2,0" stop="2,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="2,0" stop="2,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="2,-1" stop="2,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="3,0" stop="3,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="3,0" stop="3,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="3,-1" stop="3,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="4,0" stop="4,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#FFFFFF" start="4,0" stop="4,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="4,0" stop="4,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="4,-1" stop="4,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="5,0" stop="5,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#FFFFFF" start="5,0" stop="5,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="5,0" stop="5,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="5,-1" stop="5,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="6,0" stop="6,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#FFFFFF" start="6,0" stop="6,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="6,0" stop="6,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="6,-1" stop="6,-1"/>
+      <lineStyle kind="LINEBEFORE" colorName="#FFFFFF" start="7,0" stop="7,-1"/>
+      <lineStyle kind="LINEAFTER" colorName="#FFFFFF" start="7,0" stop="7,-1"/>
+      <lineStyle kind="LINEABOVE" colorName="#FFFFFF" start="7,0" stop="7,0"/>
+      <lineStyle kind="LINEBELOW" colorName="#FFFFFF" start="7,-1" stop="7,-1"/>
+    </blockTableStyle>
+
+
+    <blockTableStyle id="Table_All_Total_Detail4">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+          <!-- Kolom ke-1 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="0,0" stop="0,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,-1" stop="1,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="0,0" stop="0,0"/>
+        <!-- Kolom ke-2 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="1,0" stop="1,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="2,-1" stop="2,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="1,-1" stop="1,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,0" stop="1,0"/>
+        <!-- Kolom ke-3 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="3,-1" stop="3,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="2,-1" stop="2,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="2,0" stop="2,0"/>
+        <!-- Kolom ke-4 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="4,-1" stop="4,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="3,-1" stop="3,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="3,0" stop="3,0"/>
+        <!-- Kolom ke-5 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="5,-1" stop="5,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="4,-1" stop="4,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="4,0" stop="4,0"/>
+    </blockTableStyle>
+
+
+    <blockTableStyle id="Table_All_Total_Detail414">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+          <!-- Kolom ke-1 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,-1" stop="1,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="0,-1" stop="0,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="0,0" stop="0,0"/>
+        <!-- Kolom ke-2 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="1,0" stop="1,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="2,-1" stop="2,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="1,-1" stop="1,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,0" stop="1,0"/>
+        <!-- Kolom ke-3 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="2,0" stop="2,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="3,-1" stop="3,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="2,-1" stop="2,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="2,0" stop="2,0"/>
+        <!-- Kolom ke-4 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="3,0" stop="3,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="4,-1" stop="4,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="3,-1" stop="3,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="3,0" stop="3,0"/>
+        <!-- Kolom ke-5 -->
+        <!-- atas --><lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="4,0" stop="4,0"/>
+        <!-- kanan --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="5,-1" stop="5,-1"/>
+        <!-- bawah --><lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="4,-1" stop="4,-1"/>
+        <!-- kiri --><lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="4,0" stop="4,0"/>
+    </blockTableStyle>
+
+    <blockTableStyle id="Table_Invoice_General_Header3">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="0,0" stop="0,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,0" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#ffffff" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#ffffff" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="5,0" stop="5,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table_Invoice_General_Header4">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="0,0" stop="0,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,0" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#ffffff" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#ffffff" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="5,0" stop="5,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table_Invoice_General_Header5">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="0,0" stop="0,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#ffffff" start="1,0" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#ffffff" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#ffffff" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="3,0" stop="3,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#ffffff" start="4,0" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="4,0" stop="4,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#000000" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#ffffff" start="5,0" stop="5,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="5,0" stop="5,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table_General_Detail_Content">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#e6e6e6" start="0,0" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#e6e6e6" start="0,0" stop="0,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#e6e6e6" start="1,0" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#e6e6e6" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#e6e6e6" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#e6e6e6" start="2,0" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#e6e6e6" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBEFORE" colorName="#e6e6e6" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEAFTER" colorName="#e6e6e6" start="3,0" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#e6e6e6" start="3,0" stop="3,0"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table7">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table8">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="3,-1" stop="3,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="4,-1" stop="4,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="5,-1" stop="5,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table10">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="1,0" stop="1,0"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="2,0" stop="2,0"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="1,2" stop="1,2"/>
+      <lineStyle thickness="0.5" kind="LINEABOVE" colorName="#000000" start="2,2" stop="2,2"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table9">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#000000" start="2,-1" stop="2,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table2">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="0,-1" stop="0,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="1,-1" stop="1,-1"/>
+      <lineStyle thickness="0.5" kind="LINEBELOW" colorName="#e6e6e6" start="2,-1" stop="2,-1"/>
+    </blockTableStyle>
+    <blockTableStyle id="Table1">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+    </blockTableStyle>
+    <initialize>
+      <paraStyle name="all" alignment="justify"/>
+    </initialize>
+    <paraStyle name="Standard" fontName="Franklin Gothic Medium"/>
+    <paraStyle name="Text body" fontName="Franklin Gothic Medium" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="List" fontName="Franklin Gothic Medium" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Table Contents" fontName="Franklin Gothic Medium" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Table Heading" fontName="Franklin Gothic Medium" alignment="CENTER" spaceBefore="0.0" spaceAfter="6.0"/>
+    <paraStyle name="Caption" fontName="Franklin Gothic Medium" fontSize="12.0" leading="13" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="Index" fontName="Franklin Gothic Medium"/>
+    <paraStyle name="Heading" fontName="Franklin Gothic Medium" fontSize="18.0" leading="19" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_header" fontName="Franklin Gothic Medium-Bold" fontSize="14.0" leading="15" alignment="LEFT" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_8" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="10.0" leading="12" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_White_8" rightIndent="0.0" leftIndent="0.0" text-decoration="underline" fontName="Franklin Gothic Medium" fontSize="10.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0" textColor="#ffffff"/>
+    <paraStyle name="terp_default_7" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="12.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_5" fontName="Franklin Gothic Medium" fontSize="7.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_12" fontName="Franklin Gothic Medium" fontSize="9.0" leading="17" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="Footer" fontName="Franklin Gothic Medium"/>
+    <paraStyle name="Horizontal Line" fontName="Franklin Gothic Medium" fontSize="8.0" leading="8" spaceBefore="0.0" spaceAfter="14.0"/>
+    <paraStyle name="Heading 9" fontName="Franklin Gothic Medium-Bold" fontSize="85%" leading="NaN" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_General" fontName="Franklin Gothic Medium-Bold" fontSize="10.0" leading="10" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details" fontName="Franklin Gothic Medium-Bold" fontSize="11.0" leading="11" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_Bold_8" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium-Bold" fontSize="12.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_8_Italic" rightIndent="0.0" leftIndent="0.0" fontName="Times-BoldItalic" fontSize="11.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_Centre_8" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium-Bold" fontSize="9.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_tblheader_General_Centre" fontName="Franklin Gothic Medium-Bold" fontSize="10.0" leading="10" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_General_Right" fontName="Franklin Gothic Medium-Bold" fontSize="10.0" leading="10" alignment="RIGHT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details_right" fontName="Franklin Gothic Medium-Bold" fontSize="14.0" leading="11" alignment="RIGHT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details_Left" fontName="Franklin Gothic Medium-Bold" fontSize="14.0" leading="11" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details_Centre" fontName="Franklin Gothic Medium-Bold" fontSize="14.0" leading="11" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_tblheader_Details_Right" fontName="Franklin Gothic Medium-Bold" fontSize="11.0" leading="11" alignment="RIGHT" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_Right_8" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="10.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Right_7" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="10.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Right_Bold_8" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium-Bold" fontSize="10.0" leading="10" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_Bold_9" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium-Bold" fontSize="10.0" text-decoration="underline" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_8" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="10.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_7" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="12.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_header_Right" fontName="Franklin Gothic Medium-Bold" fontSize="17.0" leading="19" alignment="LEFT" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_header_Centre" fontName="Franklin Gothic Medium-Bold" fontSize="14.0" leading="15" alignment="CENTER" spaceBefore="12.0" spaceAfter="6.0"/>
+    <paraStyle name="terp_default_address" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="12.0" leading="13" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_9" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="11.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_9" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium-Bold" fontSize="10.0" leading="11" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_9_CENTER" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium-Bold" fontSize="10.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Centre_9" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="11.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="total_amount" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="10.0" leading="11" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+
+    <paraStyle name="terp_default_Right_9" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="11.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_Right_9" rightIndent="0.0" leftIndent="-3.0" fontName="Franklin Gothic Medium-Bold" fontSize="11.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Bold_Right_7" rightIndent="0.0" leftIndent="-3.0" fontName="Franklin Gothic Medium-Bold" fontSize="12.0" leading="11" alignment="RIGHT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_2" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_Center_7" fontName="Franklin Gothic Medium" fontSize="10.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_White_2" rightIndent="0.0" leftIndent="0.0" fontName="Franklin Gothic Medium" fontSize="2.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0" textColor="#ffffff"/>
+    <paraStyle name="terp_default_Note" rightIndent="0.0" leftIndent="9.0" fontName="Franklin Gothic Medium-Oblique" fontSize="10.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="Table" fontName="Franklin Gothic Medium" fontSize="12.0" leading="13" spaceBefore="6.0" spaceAfter="6.0"/>
+    <paraStyle name="User Index 10" rightIndent="0.0" leftIndent="127.0" fontName="Franklin Gothic Medium"/>
+    <paraStyle name="terp_default_1" fontName="Franklin Gothic Medium" fontSize="3.0" leading="3" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="Preformatted Text" fontName="Franklin Gothic Medium" fontSize="12.0" leading="13" spaceBefore="0.0" spaceAfter="0.0"/>
+    <images/>
+  </stylesheet>
+  <story>
+  <pto>
+    <para style="terp_default_8">[[ repeatIn(objects,'o') ]]</para>
+    <para style="terp_default_8">[[ setLang(o.partner_id.lang) ]]</para>
+    <pto_header>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+    </pto_header>
+
+    <blockTable colWidths="550.0" style="Table_Partner_Address">
+    <tr>
+    <td>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_tblheader_Details_Left"><u>PURCHASE ORDER</u></para>
+    </td>
+    </tr>
+    </blockTable>
+    
+    <para style="terp_default_Right_8"><font color="white"> </font></para>
+    <blockTable colWidths="40.0,310.0, 200.0" style="Table_Partner_Address">
+      <tr>
+          <td>
+            <para style="terp_default_Bold_9">No. :</para>
+          </td>
+          <td>
+            <para style="terp_default_Bold_9">[[ o.name ]]</para>
+          </td>
+          <td>
+            <para style="terp_default_8">Form : [[ 'No.SBM-F-adm-07a/00' ]]</para>
+          </td>
+      </tr>
+      
+      <tr>
+        <td><!-- 
+          <para style="terp_default_8"><font color="white">:</font></para> -->
+          <para style="terp_default_Bold_9">To :</para>
+        </td>
+        <td>
+          <!-- <para style="terp_default_8"><font color="white">:</font></para> -->
+          <para style="terp_default_Bold_9">[[ o.partner_id.name ]]</para>
+        </td>
+        <td>
+          <!-- <para style="terp_default_8"><font color="white">:</font></para> -->
+          <para style="terp_default_8">Fax : [[ o.partner_id.fax ]]</para>
+        </td> 
+      </tr>
+
+      <tr>
+        <td>
+          <para style="terp_default_8">Attn :</para>
+        </td>
+        <td>
+          <para style="terp_default_8">[[ o.attention.name ]]</para>
+        </td>
+        <td>
+          <para style="terp_default_8">Date : [[ time.strftime('%B %d, %Y', time.strptime(o.date_order,'%Y-%m-%d'))  ]]</para>
+          <!-- <para style="terp_default_8">Date : [[ time.strftime('%d %B %Y', time.strptime(o.date_order,'%Y-%m-%d'))  ]]</para> -->
+        </td>
+      </tr>
+    </blockTable>
+    
+    <para style="terp_default_Right_8"><font color="white"> </font></para>
+    <blockTable colWidths="550.0" style="Table_Invoice_General_judul">
+      <tr>
+        <td>
+          <para style="terp_default_8">Gentlemen, we are pleased to confirm the following order :</para>
+        </td>
+      </tr>
+    </blockTable>
+    
+    <blockTable colWidths="35.0,60.0,290.0,80.0,90.0" style="Table_Invoice_General_judul">
+    <tr>
+        <td> <para style="terp_default_Bold_Centre_8"><b>No.</b> </para> </td>
+        <td> <para style="terp_default_Bold_Centre_8"><b>Qty</b></para> </td>
+        <td> <para style="terp_default_Bold_Centre_8"><b>Description</b></para> </td>
+        <td> 
+          <para style="terp_default_Bold_Centre_8"><b>Unit Price</b></para> 
+          <para style="terp_default_Bold_Centre_8"><b>[[ o.pricelist_id.currency_id.name ]]</b></para> 
+        </td>
+        <td> 
+          <para style="terp_default_Bold_Centre_8"><b>Total Price</b></para>
+          <para style="terp_default_Bold_Centre_8"><b>[[ o.pricelist_id.currency_id.name ]]</b></para> 
+        </td>
+    </tr>
+    </blockTable>
+    
+    <section>
+    <para style="terp_default_1">[[repeatIn(get_lines(o),'lines')]]</para>
+    <blockTable colWidths="25.0,60.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
+    <tr>
+      <td><para style="terp_default_Bold_Centre_8">[[ lines['no'] ]]</para></td>
+      <td><para style="terp_default_Bold_Centre_8">[[ koma('%.0f', lines['qty']) ]] [[ lines['satuan'].name ]]</para></td>
+      <td><para style="terp_default_8">[[ lines['name'] ]]</para></td>
+      <td><para style="terp_default_Bold_Centre_8">[[ koma('%.2f', lines['harga']) ]]</para></td>
+      <td><para style="terp_default_Bold_Centre_8">[[ koma('%.2f', lines['harga'] * lines['qty']) ]]</para></td>
+    </tr>
+    </blockTable>
+    </section>
+
+    <!-- <para style="terp_default_8"><font color="white">:</font></para> -->
+    <para style="terp_default_Right_8"><font color="white"> </font></para>
+    <blockTable colWidths="85.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
+      <tr>
+        <td><para style="terp_default_Bold_9"><font color="white"> </font></para></td>
+      	<td><para style="total_amount"><b>[[ o.total_price ]]</b></para></td>
+        <td><para style="total_amount"><b>[[ o.pricelist_id.currency_id.name ]]</b></para></td>
+        <td>
+            <blockTable colWidths="90.0" style="total_amount">
+              <tr>
+                <td>
+                  <para style="total_amount"> <b>[[ o.amount_total ]]</b> </para>
+                </td>
+              </tr>
+            </blockTable>
+        </td>
+      </tr>
+    </blockTable>
+    
+	<blockTable colWidths="85.0,470.0" style="Table_Invoice_General_judul">
+    <tr>
+        <td><para style="terp_default_8">Your Ref : </para></td>
+        <td><para style="terp_default_8">: [[ o.yourref ]]</para></td>
+    </tr>
+    <tr>
+        <td><para style="terp_default_Bold_9">Note :</para></td>
+        <td>
+           <para style="terp_default_8">[[ o.note ]]</para>
+        </td>
+    </tr>
+
+    <tr>
+        <td><para style="terp_default_8">Delivery : </para></td>
+        <td><para style="terp_default_8">: [[ o.delivery ]]</para></td>
+    </tr>
+    <tr>
+        <td><para style="terp_default_8">Payment : </para></td>
+        <td><para style="terp_default_8">: [[ o.term_of_payment ]]</para></td>
+    </tr>
+
+	<tr>
+        <td><para style="terp_default_8">Shipment to : </para></td>
+        <td><para style="terp_default_Bold_9">: [[ o.shipment_to ]]</para></td>
+    </tr>
+	<tr>
+		<td><para style="terp_default_8"><font color="white">:</font></para></td>
+        <td>
+        	<para style="terp_default_8">Consignee name &amp; address : </para>
+        	<para style="terp_default_Bold_9">[[ o.company_id.name ]]</para>
+        	<para style="terp_default_Bold_9">[[ o.company_id.street ]]</para>
+        	<para style="terp_default_Bold_9">[[ o.company_id.street2 ]]</para>
+        	<!-- <para style="terp_default_Bold_9">[[ o.company_id.city ]] - [[ o.company_id.zip ]]</para> -->
+        	<para style="terp_default_Bold_9">Phone : [[ o.company_id.phone ]]</para>
+        </td>
+    </tr>
+
+    </blockTable>
+    
+    
+    <para style="terp_default_Right_8"><font color="white"> </font></para>
+    <blockTable colWidths="550.0" style="Table_Invoice_General_judul">
+        <tr>
+        	<td><para style="terp_default_Bold_9">[[ o.after_shipment ]]</para></td>
+    	</tr>
+    	<tr>
+        	<td><para style="terp_default_Bold_9">Kindly acknowledge the receipt of this order and send us your Proforma Invoice and estimation of Delivery</para></td>
+    	</tr>
+    </blockTable>
+    
+	  <para style="terp_default_Right_8"><font color="white">. </font></para>
+    <blockTable colWidths="275.0,275.0" style="Table_Invoice_General_judul">
+      <tr>
+        <td align="center">
+          <para style="terp_default_Centre_9">Yours faithfully,</para>
+          <para style="terp_default_Centre_9">PT. SUPRABAKTI MANDIRI</para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white">. </font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white">. </font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_Centre_Bold_9"><u>JIMMY HADINATA</u></para>
+          <para style="terp_default_Centre_9">General Manager</para>
+        </td>
+        <td align="center">
+          <para style="terp_default_Centre_9">Acknowledgment by :</para>
+          <para style="terp_default_Centre_9">[[ o.partner_id.name ]]</para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white">. </font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white">. </font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_5"><font color="white"> .</font></para>
+          <para style="terp_default_Centre_9">----------------------------------</para>
+          <para style="terp_default_Centre_9">[[ ' ' ]]</para>
+        </td>
+      </tr>
+    </blockTable>
+    
+  </pto>
+  </story>
+</document>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+		<record model="ir.ui.view" id="view_wizard_history_payment">
+            <field name="name">History Payment</field>
+            <field name="model">history.payment</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Report" version="7.0">
+                	<group>
+                	    <field name="report"/>
+                	</group>
+					<group>
+						<field name="date_from"/>
+						<field name="date_to"/>
+						<field name="name" invisible="True"/>
+						<field name="data_eksport" width="300" filename="name"/>
+					</group>
+					<footer>
+						<button icon="gtk-ok" type="object" name="eksport_excel" string="Eksport" default_focus="1" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+	                </footer>
+                </form>
+            </field>
+        </record>
+              
+        <record model="ir.actions.act_window" id="action_history_payment">
+            <field name="name">History Payment</field>
+            <field name="res_model">history.payment</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+       
+        <menuitem id="menu_history_payment" name="History Payment" action="action_history_payment" parent="account.final_accounting_reports"/>
+
+	</data>
+</openerp>
+

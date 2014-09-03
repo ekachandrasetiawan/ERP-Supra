@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+		<data>
+			<record model="ir.ui.view" id="hrd_detail_form_view">
+				<field name="name">hr.employee</field>
+				<field name="model">hr.employee</field>
+				<field name="type">form</field>
+				<field name="inherit_id" ref="hr.view_employee_form"/>
+				<field name="arch" type="xml">
+						<label for="name" position="replace"/>
+						<field name="user_id" position="replace"/>
+						<field name="name" position="before">
+							<h3>
+								<label for="nik"/>
+								<field name="nik" placeholder="Nomor Induk Karyawan"/>
+							</h3>
+						</field>
+						<field name="coach_id" position="replace"/>
+						<field name="name" position="replace">
+							<group>
+									<h3>
+										<label for="name" string="Nama Karyawan"/>
+										<field name="name" placeholder="Nama Karyawan"/>
+										<label for="user_id" string="Related User"/>
+										<field name="user_id" on_change="onchange_user(user_id)" string="Related User"/>
+									</h3>
+							</group>
+						</field>
+						<field name="job_id" position="replace"/>
+						<field name="category_ids" position="replace"/>
+						<field name="work_location" position="replace"/>
+						<field name="address_id" position="after">
+							<field name="alamat_tinggal"/>
+							<field name="alamat_ktp"/>
+						</field>
+						<field name="department_id" position="after">
+								<field name="golongan"/>
+								<field name="level"/>
+						</field>
+						<field name="parent_id" position="after">
+								<field name="siteawal_id"/>
+								<field name="siteaktual"/>
+						</field>
+						<field name="company_id" position="replace"/>
+						<field name="notes" position="before">
+							<group string="Data Surat Tugas">
+								<field name="surat_tunjangan_ids" nolabel="1" colspan="2">
+									<tree string="Surat Tugas" editable="top">
+										<field name="name"/>
+									</tree>
+									<form string="Surat Tugas">
+										<field name="name"/>
+									</form>
+								</field>
+							</group>
+						</field>
+						 <xpath expr="//page[@string='Public Information']" position="after">
+				            <page string="Detail Information">
+				            	<group>
+				            		<field name="ktp"/>
+					            	<notebook colspan="4">
+								    	<page string="Passport">
+						                    
+						                </page>
+							            <page string="Asuransi">
+
+								        </page>
+								        <page string="Jamsostek">
+
+								        </page>
+						            </notebook>
+				            	</group>
+				            </page>
+
+				            <page string="Medical Info">
+				            	<group>
+				            		<field name="golongan_darah"/>
+				            		<group string="Riwayat Penyakit" colspan="2">
+											<field name="riwayat_penyakit_ids" nolabel="1" colspan="4">
+												<tree string="Riwayat Penyakit" editable="top">
+						                          	<field name="name"/>
+						                        </tree>
+						                        <form string="Riwayat Penyakit">
+						                            <field name="name"/>
+						                        </form>	
+											</field>
+					            	</group>
+									<group string="Medical record" colspan="2">
+										
+				            			<tree string="Medical Record" editable="top" colspan="2">
+												<field name="medical_record_ids" nolabel="1" colspan="4" editable="top">
+													<tree string="Medical Record" editable="top">
+							                          	<field name="medical_check_up"/>
+														<field name="claims"/>
+							                        </tree>
+							                        <form string="Medical Record">
+							                            <field name="medical_check_up"/>
+														<field name="claims"/>
+							                        </form>	
+												</field>
+											</tree>
+									</group>
+				            	</group>
+
+				            </page>
+				            <page string="Education and Training">
+				            	<group>
+				            		<field name="nik"/>
+				            	</group>
+				            </page>
+				        </xpath>
+				        <xpath expr="//page[@string='Personal Information']" position="replace"/>
+				</field>
+			</record>
+		</data>
+</openerp>

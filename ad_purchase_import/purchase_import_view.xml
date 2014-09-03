@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<report id="purchase_importj" string="Import J" 
+				model="purchase.order" name="purchase.importj" 
+				rml="ad_purchase_import/report/importj.rml"
+				auto="False" menu="False"/>
+
+		<report id="purchase_imports" string="Import S" 
+				model="purchase.order" name="purchase.imports" 
+				rml="ad_purchase_import/report/imports.rml"
+				auto="False" menu="False"/>
+		
+        <record id="purchase_order_form_view_report" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form" />
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="jenis"/>
+                </field>
+                <field name="dest_address_id" position="after">
+                    <field name="port" />
+                </field>
+           		<xpath expr="/form/sheet/notebook/page[@string='Incoming Shipments &amp; Invoices']" position="after">
+                    <page string='Other Info' >
+                        <separator string="Your ref"/>
+                        <field name="yourref" colspan="4" nolabel="1"/>
+                        <separator string="Note"/>
+                        <field name="note" colspan="4" nolabel="1"/>
+                        <separator string="Delivery"/>
+                        <field name="delivery" colspan="4" nolabel="1"/>
+                        <separator string="Other"/>
+                        <field name="other" colspan="4" nolabel="1"/>
+                    </page>
+            	</xpath>
+            	<xpath expr="/form/sheet/notebook/page[@string='Other Info']" position="after">
+                    <page string='Setting' >
+                        <separator string="Total Price"/>
+                        <field name="total_price" colspan="4" nolabel="1"/>
+                        <separator string="Shipment To"/>
+                        <field name="shipment_to" colspan="4" nolabel="1"/>
+
+						<separator string="After Shipment"/>
+                        <field name="after_shipment" colspan="4" nolabel="1"/>
+                    </page>
+            	</xpath>
+
+            	<button string="Print" position="replace">
+					<button name="%(purchase_importj)d" type="action" states="draft,approved,done" string="Import J" icon="gtk-print"/>
+	                <button name="%(purchase_imports)d" type="action" states="draft,approved,done" string="Import S" icon="gtk-print"/>
+				</button>
+            </field>
+        </record>
+        
+
+        <record model="ir.actions.act_window" id="action_purchase_order_import">
+	        <field name="name">Purchase Order Import</field>
+	        <field name="type">ir.actions.act_window</field>
+	        <field name="res_model">purchase.order</field>
+	        <field name="domain">[('jenis','!=','loc')]</field>
+	        <field name="context">{'default_jenis': 'impj', 'default_type_permintaan': '1'}</field>
+            <field name="view_type">form</field>
+	        <field name="view_mode">tree,form</field>
+	    </record>
+	    
+	    <menuitem id="menu_purchase_order_import" parent="purchase.menu_procurement_management" action="action_purchase_order_import"/>
+
+        <record id="seq_type_importj" model="ir.sequence.type">
+			<field name="name">Sequence PO Import J</field>
+			<field name="code">purchase.order.importj</field>
+		</record>
+		
+		<record id="seq_importj" model="ir.sequence">
+			<field name="name">Sequence PO Import J</field>
+			<field name="code">purchase.order.importj</field>
+			<field name="prefix"></field>
+			<field name="suffix">J / INDENT /%(month)s/%(year)s</field>
+			<field name="padding">5</field>
+		</record>
+		
+        <record id="seq_type_import" model="ir.sequence.type">
+        	<field name="name">Sequence PO Import S</field>
+            <field name="code">purchase.order.imports</field>
+        </record>
+
+        <record id="seq_import" model="ir.sequence">
+        	<field name="name">Sequence PO Import S</field>
+            <field name="code">purchase.order.imports</field>
+			<field name="prefix"></field>
+            <field name="suffix">S / INDENT /%(month)s/%(year)s</field>
+            <field name="padding">5</field>
+        </record>		
+	</data>
+</openerp>
+
+
+<!--
+        <record id="seq_type_eksport" model="ir.sequence.type">
+			<field name="name">Sequence PO Local</field>
+			<field name="code">purchase.order.local</field>
+		</record>
+		
+		<record id="seq_eksport" model="ir.sequence">
+			<field name="name">Sequence PO Local</field>
+			<field name="code">purchase.order.local</field>
+                        <field name="prefix"></field>
+                        <field name="suffix"> / LOCAL /%(month)s/%(year)s</field>
+			<field name="padding">5</field>
+		</record>
+-->
+        

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    	<record id="view_pr_tree" model="ir.ui.view">
+            <field name="name">pr.tree</field>
+            <field name="model">pr</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Purchase Requisition">
+                	<field name="name"/>
+                	<field name="ref_pr"/>
+	                <field name="tanggal"/>
+	                <field name="duedate"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>
+		
+        <record id="view_pr_form" model="ir.ui.view">
+            <field name="name">pr.form</field>
+            <field name="model">pr</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Purchase Requisition New" version="7.0">
+            	<header>
+            		<button name="submit" states="draft" string="Submit" type="object" class="oe_highlight" icon="gtk-apply"/>
+            		<button name="setdraft" states="confirm" string="Set to Draft" type="object" class="oe_highlight" icon="gtk-jump-to"/>
+            		<button name="confirm" states="confirm" string="Validate" type="object" class="oe_highlight"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,done"/>
+                </header>
+            		<sheet>
+		            <separator string="Purchase Requisition"/>
+						<group col="4" colspan="4">
+		            	 	<field name="ref_pr"/>
+		            	 	<field name="name"/>
+			                <field name="salesman_id"/>
+			                <field name="customer_id"/>
+			              
+			                <field name="location"/>
+			                <field name="tanggal"/>
+			                <field name="duedate"/>
+			            </group>
+			            <div class="oe_clear"/>
+                            <field name="notes" placeholder="Terms and conditions..." colspan="4"/>
+		            </sheet>
+            	</form>
+            </field>
+         </record>
+
+        <record id="seq_pr_new" model="ir.sequence.type">
+			<field name="name">Purchase Requisition</field>
+			<field name="code">pr</field>
+		</record>
+		
+		<record id="seq_set_pr_new" model="ir.sequence">
+			<field name="name">Purchase Requisition</field>
+			<field name="code">pr</field>
+			<!--<field name="prefix">PB/%(y)s/%(month)s/</field>-->
+			<field name="suffix">/PR/SBM/%(y)s/%(month)s</field>
+			<field name="padding">5</field>
+		</record>
+
+
+    	<record model="ir.actions.act_window" id="master_pr">
+			<field name="name">Purchase Requisition</field>
+			<field name="res_model">pr</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+    	<menuitem name="Purchase Requisition" parent="base.menu_sales" id="data_pr" action="master_pr"/>
+    </data>
+</openerp>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="rent_requisition_seq" model="ir.sequence.type">
+			<field name="name">Purchase Rent Sequence</field>
+			<field name="code">rent.requisition</field>
+		</record>
+		<record id="rent_requisition_set_seq" model="ir.sequence">
+			<field name="name">Purchase Rent Sequence</field>
+			<field name="code">rent.requisition</field>
+			<field name="prefix">PB/REN/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+
+		<report auto="False" id="printRentRequisition" menu="True" model="rent.requisition" name="print.pbrent" rml="sbm_purchase_rent/report/report.rml" string="Report"/>
+		<record id="rent_requisition_list_action" model="ir.actions.act_window">
+			<field name="name">Rent Requisition</field>
+			<field name="res_model">rent.requisition</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<record id="rent_requisition_create_for_car" model="ir.actions.act_window">
+			<field name="name">Car Requisition</field>
+			<field name="res_model">rent.requisition</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+		</record>
+		
+
+		<!-- ACTION PO RENT TREE BARU UNTUK COLOR TREE-->
+		<!-- <record id="po_rent_tree" model="ir.ui.view">
+			<field name="name">po.rent.tree</field>
+			<field name="model">purchase.order</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Rent Requisition Order" colors="red:state == 'draft'">
+					<field name="name"/>
+					<field name="duedate"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="rent_requisition_order_action">
+			<field name="name">Purchase Order Requisition</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">purchase.order</field>
+			<field name="domain">[('type_permintaan','=','2')]</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="po_rent_tree" />
+	   </record> -->
+
+	   <!-- END OF -->
+
+
+		<!-- INHERIT TREE COLOR -->
+		<!-- <record id="po_rent_tree" model="ir.ui.view">
+			<field name="name">purchase.order.tree</field>
+			<field name="model">purchase.order</field>
+			<field name="type">tree</field>
+			<field name="inherit_id" ref="sbm_purchaseorder.view_po_tree_set" />
+			<field name="arch" type="xml">
+				<xpath expr="//tree[@string='Purchase Order']" position="attributes">
+					<attribute name="colors">red:state == 'draft' and duedate=='2014-03-01';</attribute>
+				</xpath>
+			</field>
+		</record> -->
+
+		<record model="ir.actions.act_window" id="rent_requisition_order_action">
+			<field name="name">Purchase Order Requisition</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">purchase.order</field>
+			<field name="domain">[('type_permintaan','=','2')]</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+	   </record>
+	   
+
+		<!-- <record model="ir.ui.view" id="purchase_order_rent_inherit_tree">
+			<field name="name">po.rent.inherit.tree</field>
+			<field name="model">purchase.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="tree" />
+			<field name="arch" type="xml">
+				<xpath expr="//page[@string='Extra Information']" position="after">
+					<page string="Cost Lines">
+                        <field colspan="4" name="biaya_lines" nolabel="1" widget="one2many_list">
+                            <tree string="Cost" editable="top">
+				                <field name="name"/>
+				                <field name="price_unit"/>
+                            </tree>
+                        </field>
+                    </page>
+				</xpath>
+			</field>
+		</record> -->
+
+
+		<!-- <menuitem id="purchase_rent_menu" name="Purchase Rent" parent="base.menu_purchase_root"/>
+		<menuitem action="rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisitions" parent="purchase_rent_menu"/> -->
+		<!-- <menuitem id="rent_requisition_car_menu" parent="rent_requisition_menu" name="Car" action="rent_requisition_create_for_car" />-->
+		<record id="rent_requisition_view" model="ir.ui.view">
+			<field name="name">rent_requisition.tree</field>
+			<field name="model">rent.requisition</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				
+				<tree string="Rent Requisition">
+					<field name="name"/>
+					<field name="ref_no"/>
+					<field name="spk_no"/>
+					<!-- <field name="date_create"/> -->
+					<field name="due_date"/>
+					<!-- <field name="date_start"/> -->
+					<field name="date_expire"/>
+					<field name="employee_id"/>
+					<field name="department_id"/>
+					<field name="customer_id"/>
+					<field name="type"/>
+					<field name="notes"/>
+					<field name="state"/>
+					<!-- <field name="test"/> -->
+				</tree>
+			</field>
+		</record>
+		<!-- SEARCH SUGGESTION WILL BE SHOW IN EVERY TYPE KEYWORD IN SEARCH FIELD	 -->
+		<record id="rent_requisition_search" model="ir.ui.view">
+			<field name="name">rent.requisition.search</field>
+			<field name="model">rent.requisition</field>
+			<field name="arch" type="xml">
+				<search string="Search Requisition">
+					<field name="name"/>
+					<field name="ref_no"/>
+					<field name="spk_no"/>
+					<field name="type" />
+					<field name="department_id" string="Dep."/>
+					<field name="customer_id" string="For"/>
+					<field name="state" string="State"/>
+					<field name="employee_id" string="Empl"/>
+					<field name="notes" string="Notes"/>
+				</search>
+			</field>
+		</record>
+		<!-- END OF SEARCH -->
+
+
+
+		<!-- START FORM RENT REQUISITION -->
+		<record id="rent_requisition_form" model="ir.ui.view">
+			<field name="name">rent_requisition.form</field>
+			<field name="model">rent.requisition</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Rent Requisition" version="7.0">
+					<header>
+						<!--BUTTON OK -->
+						<!--
+							states untuk visibility state nya pas apa
+						-->
+						<!-- untuk button report perlu tag report diatas -->
+						<button class="oe_highlight" icon="gtk-print" name="%(printRentRequisition)d" states="purchase" string="Print" type="action"/>
+						<button class="oe_highlight" icon="gtk-apply" name="setCheck" states="draft" string="Confirm This Requisition" type="object"/>
+						<button name="confirm2" states="confirm" string="Approve" type="object" class="oe_highlight"/>
+						<button class="oe_highlight" icon="gtk-apply" name="setConfirm" states="check" string="Approve" type="object"/>
+
+						<field name="state" statusbar_visible="draft, check, confirm, purchase, done" widget="statusbar"/>
+					</header>
+					<sheet>
+						<group col="2" colspan="2">
+							<field name="ref_no"/>
+						</group>
+						<group col="4" colspan="4">
+							<field name="name" />
+							<field name="spk_no"/>
+							<field name="employee_id" on_change="chooseEmployee(employee_id)"/>
+							<field name="department_id"/>
+							<field name="due_date"/>
+							<!-- <field name="date_start"/> -->
+							<field name="date_expire"/>
+							<field name="type"/>
+							<!-- attribute customer_id difilter cuma yang bertipe customer aja -->
+							<field domain="[('customer','=',1)]" name="customer_id"/>
+							<!-- <field name="type" on_change="onChangeType(type)" /> -->
+							<field name="notes"/>
+						</group>
+						<field name="details"/>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		<!-- END FORM RENT.REQUISITION -->
+
+		<!-- WIZARD -->
+		<record id="view_wizard_po_rent_tree" model="ir.ui.view">
+			<field name="name">wizard.po.rent.tree</field>
+			<field name="model">wizard.po.rent</field>
+			<field name="type">tree</field>
+			<field name="priority">2</field>
+			<field name="arch" type="xml">
+				<tree string="Data Rekap PB RENT">
+					<!-- <field name="name"/> -->
+					<field name="pricelist_id"/>
+				</tree>
+			</field>
+		</record>
+		<record id="view_wizard_po_rent_form" model="ir.ui.view">
+			<field name="name">wizard.po.rent.form</field>
+			<field name="model">wizard.po.rent</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Pembelian Barang" version="7.0">
+					<sheet>
+						<separator string="Rent Requisition Order"/>
+						<group col="2" colspan="2">
+							<field name="req_ref" on_change="setProduct(req_ref)"/>
+							<field name="due_date"/>
+							<field name="pricelist_id"/>
+						</group>
+						<notebook colspan="4">
+							<page string="Detail Barang">
+								<field colspan="4" name="detail_pb_ids" nolabel="1">
+									<tree editable="top" string="Detail Barang Sewa">
+										<!-- <field name="name" on_change="setProduct(name)"/> -->
+										<field name="product"/>
+										<field name="qty"/>
+										<field name="product_uom" readonly="True"/>
+										<field name="suplier"/>
+										<!-- <field name="price_unit" /> -->
+										<!-- <field name="contract_id" /> -->
+										<field name="po_will_be_print" />
+									</tree>
+								</field>
+							</page>
+						</notebook>
+					</sheet>
+					<footer>
+						<button class="oe_highlight" icon="gtk-apply" name="create_po" string="Create PO" type="object"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+		<record id="wizard_rent_list_action" model="ir.actions.act_window">
+			<field name="name">Rent Requisition Process</field>
+			<field name="res_model">wizard.po.rent</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>
+			<field name="view_id" ref="view_wizard_po_rent_form"/>
+		</record>
+		<!-- <menuitem action="wizard_rent_list_action" id="wizard_po_rent" name="Wizard Rent Order" parent="purchase_rent_menu"/> -->
+
+
+
+
+
+
+
+
+
+
+
+
+	</data>
+</openerp>

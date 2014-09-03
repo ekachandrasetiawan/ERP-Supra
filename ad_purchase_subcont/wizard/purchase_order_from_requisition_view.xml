@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_purchase_order_line_from_requisition_lines" model="ir.ui.view">
+            <field name="name">purchase.order.line.from.requisition.lines.form</field>
+            <field name="model">purchase.order.line.from.requisition.lines</field>
+            <field name="arch" type="xml">
+                <form string="Import Product" version="7.0">
+                    <separator string="Product Purchase Requisition Subcont" />
+                    <field height="300" width="700" name="line_ids" domain="[('state_line','=','ready')]"/>
+                    <footer>
+                        <button string="Ok" name="populate_order_lines" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_view_purchase_order_line_from_requisition_lines" model="ir.actions.act_window">
+            <field name="name">Import Product</field>
+            <field name="res_model">purchase.order.line.from.requisition.lines</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_purchase_order_line_from_requisition_lines"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</openerp>

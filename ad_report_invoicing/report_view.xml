@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="view_wizard_print_inv">
+	    	<field name="name">Print</field>
+	        <field name="model">wizard.print</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	        	<form string="Print" version="7.0">
+			    	<group>
+	              		<field name="report_type"/>
+	              		<field name="report_inv_type" attrs="{'invisible':[('report_type','=','fp')]}"/>
+	              		<field name="report_fp_type" attrs="{'invisible':[('report_type','=','inv')]}"/>
+	                </group>
+	                <footer>
+	                	<div>
+	                    	<button type="object" name="do_print" string="Print" class="oe_highlight" icon="terp-gtk-go-back-rtl"/>              
+				    		or
+				    		<button special="cancel" string="Cancel" class="oe_link"/>
+	                    </div>
+	                </footer>
+	            </form>
+	       	</field>
+		</record>
+		
+		<record model="ir.actions.act_window" id="action_view_wizard_print_inv">
+            <field name="name">Print</field>
+            <field name="res_model">wizard.print</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_wizard_print_inv"/>
+        </record>
+        
+		<report auto="False" id="report_inv" model="account.invoice" name="invoice2.form"
+            file="ad_report_invoicing/inv/inv_form.mako" string="Invoice"
+            usage="default" menu="False" webkit_header="header_inv_A4" header="True"
+			report_type="webkit"/>
+		
+		<!--<report auto="False" id="report_kwitansi" model="account.invoice" name="kwitansi.form"
+            file="ad_report_invoicing/kwi/kwitansi_form.mako" string="Kwitansi"
+            usage="default"
+			report_type="webkit"/>-->
+			
+		<report auto="False" id="report_faktur_pajak" model="account.invoice" name="faktur.pajak.form"
+            file="ad_report_invoicing/fp/faktur_pajak.mako" string="Faktur Pajak"
+            usage="default" report_type="webkit" menu="False" header="False"/>
+        <report auto="False" id="report_faktur_pajak_valas" model="account.invoice" name="faktur.pajak.valas.form"
+            file="ad_report_invoicing/fp/faktur_pajak_valas.mako" string="Faktur Pajak
+            USD" usage="default" report_type="webkit" header="False"/>
+		
+		<record id="invoice_form_1" model="ir.ui.view">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="before">
+	                <button name="%(action_view_wizard_print_inv)d"
+	                        string="Invoice" type="action" class="oe_highlight"
+	                        attrs="{'invisible':[('state', '!=', 'open')]}"
+	                        />
+	            </xpath>
+            </field>
+        </record>
+	</data>
+</openerp>

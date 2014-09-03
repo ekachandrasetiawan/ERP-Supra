@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+		
+		<menuitem id="menu_report_crm_supra" parent="ad_sales_project.activity_menu" name="Report Sales"/>
+		
+		<record model="ir.ui.view" id="view_salesorderrecord">
+	    	<field name="name">Monthly Sales Order Report</field>
+	        <field name="model">salesorderrecord.crm</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	        	<form string="Monthly Sales Order Report" version="7.0">
+			    	<group>
+	              		<field name="periode"/>
+						<field name="salesman_ids"/>
+	                    </group>
+	                    <footer>
+	                        <div>
+	                            <button type="object" name="print_report" string="Print" icon="terp-gtk-go-back-rtl"/>              
+				    			or
+				    			<button special="cancel" string="Cancel" class="oe_link"/>
+	                        </div>
+	                    </footer>
+	                </form>
+	            </field>
+		</record>
+        
+    	<record model="ir.actions.act_window" id="action_view_salesorderrecord">
+            <field name="name">Monthly Sales Order Report</field>
+            <field name="res_model">salesorderrecord.crm</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_salesorderrecord"/>
+        </record>
+		
+        <!--<menuitem id="menu_salesorderrecord" parent="menu_report_crm_supra" sequence="10" action="action_view_salesorderrecord"/>-->
+        
+        <report id="report_salesorderrecord"
+        name="salesorderrecord.crm.form"
+        string="Monthly Sales Order Record"
+        file="ad_supra_crm_report/report/salesorderrecord.mako"
+        report_type="webkit"
+        model="salesorderrecord.crm" 
+        auto="False"
+        menu="False"
+        />
+        
+		<record model="ir.ui.view" id="view_salesactivityrecord">
+	    	<field name="name">Weekly Sales Activity Report</field>
+	        <field name="model">salesactivityrecord.crm</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	        	<form string="Weekly Sales Activity Report" version="7.0">
+			    	<group>
+	              		<field name="date_begin" on_change="onchange_date(date_begin)"/>
+	              		<field name="date_end" on_change="onchange_date(date_begin)" />
+						<field name="user_ids"/>
+	                    </group>
+	                    <footer>
+	                        <div>
+	                            <button type="object" name="print_report1" string="Print" icon="terp-gtk-go-back-rtl"/>              
+				    			or
+				    			<button special="cancel" string="Cancel" class="oe_link"/>
+	                        </div>
+	                    </footer>
+	                </form>
+	            </field>
+		</record>
+        
+    	<record model="ir.actions.act_window" id="action_view_salesactivityrecord">
+            <field name="name">Weekly Sales Activity Report</field>
+            <field name="res_model">salesactivityrecord.crm</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_salesactivityrecord"/>
+        </record>
+		
+        <menuitem id="menu_salesactivityrecord" parent="menu_report_crm_supra" sequence="10" action="action_view_salesactivityrecord"/>
+        
+        <report id="report_salesactivityrecord"
+        name="salesactivityrecord.crm.form"
+        string="Weekly Sales Activity Record"
+        file="ad_supra_crm_report/report/salesactivityrecord.mako"
+        report_type="webkit" 
+        model="salesactivityrecord.crm" 
+        auto="False"
+        menu="False"
+        />
+        
+        <record model="ir.ui.view" id="view_salesprospectrecord">
+	    	<field name="name">Weekly Sales Prospect Report</field>
+	        <field name="model">salesprospectrecord.crm</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	        	<form string="Weekly Sales Prospect Report" version="7.0">
+			    	<group>
+	              		<!--<field name="date_begin"/>
+	              		<field name="date_end"/>-->
+						<field name="filter_selection"/>
+						<field name="user_ids" attrs="{'invisible':[('filter_selection','!=','4')]}"/>
+						<field name="customer_id" domain="[('customer','=',True)]" attrs="{'invisible':[('filter_selection','!=','1')]}"/>
+						<field name="product_group" attrs="{'invisible':[('filter_selection','!=','2')]}"/>
+						<field name="amount" attrs="{'invisible':[('filter_selection','!=','3')]}"/>
+	                    </group>
+	                    <footer>
+	                        <div>
+	                            <button type="object" name="print_report2" string="Print" icon="terp-gtk-go-back-rtl"/>              
+				    			or
+				    			<button special="cancel" string="Cancel" class="oe_link"/>
+	                        </div>
+	                    </footer>
+	                </form>
+	            </field>
+		</record>
+        
+    	<record model="ir.actions.act_window" id="action_view_salesprospectrecord">
+            <field name="name">Weekly Sales Prospect Report</field>
+            <field name="res_model">salesprospectrecord.crm</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="view_salesprospectrecord"/>
+        </record>
+		
+        <menuitem id="menu_salesprospectrecord" parent="menu_report_crm_supra" sequence="10" action="action_view_salesprospectrecord"/>
+        
+        <report id="report_salesprospectrecord"
+        name="salesprospectrecord.crm.form"
+        string="Weekly Sales Prospect Report"
+        file="ad_supra_crm_report/report/salesprospectrecord.mako"
+        report_type="webkit" 
+        model="salesprospectrecord.crm" 
+        auto="False"
+        menu="False"
+        />
+
+
+        </data>
+</openerp>

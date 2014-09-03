@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+
+<data noupdate="1">
+    <!-- Multi - Company Rules -->
+
+    	<record id="sale_activity_rule" model="ir.rule">
+	        <field name="name">All Sales Activity</field>
+	        <field ref="model_sales_activity" name="model_id"/>
+	        <field name="domain_force">['|',('user_id','=',[x.name.id for x in user.kelompok_id.users_line]),('user_id','=',False)]</field>
+	        <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+	    </record>
+	
+		<record id="week_status_rule" model="ir.rule">
+	        <field name="name">All Week Status</field>
+	        <field ref="model_week_status" name="model_id"/>
+	        <field name="domain_force">['|',('user_id','=',[x.name.id for x in user.kelompok_id.users_line]),('user_id','=',False)]</field>
+	        <field name="groups" eval="[(4, ref('base.group_sale_salesman'))]"/>
+	    </record>
+
+</data>
+</openerp>

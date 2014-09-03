@@ -1,0 +1,54 @@
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="hrd_form_cuti_view">
+				<field name="name">hr.holidays</field>
+				<field name="model">hr.holidays</field>
+				<field name="type">form</field>
+				<field name="inherit_id" ref="hr_holidays.edit_holiday_new"/>
+				<field name="arch" type="xml">
+						<button name="refuse" position="replace">
+							<button string="Refuse" name="refuse" states="confirm,validate,approve_manager,approve_hrd" type="workflow" />
+						</button>
+						<button name="validate" position="replace">
+						 	<button string="Approve HRD" name="holidays_validate" states="approve_hrd" type="object" groups="base.group_hr_user" class="oe_highlight"/>
+						</button>
+						<button name="second_validate" position="replace">
+						 	<button string="Approve Manager" name="approve_manager" states="confirm" type="object" groups="base.group_hr_user" class="oe_highlight"/>
+						</button>  
+
+
+						<field name="state" position="replace">
+							        <field name="state" widget="statusbar" statusbar_visible="draft,confirm,approve_hrd,done" statusbar_colors='{"confirm":"blue","refuse":"red"}'/>
+						</field>                 
+					    <field name="date_to" position="replace">
+							<field name="date_to" class="oe_inline" on_change="onchange_date_to(date_to, date_from, employee_id, holiday_status_id)"/><label string="-" class="oe_inline"/>
+						</field>
+						<field name="holiday_status_id" position="after">
+								<field name="alamat_cuti"/>
+								<field name="hp" placeholder="0000-0000-0000"/>
+						</field>
+						<field name="department_id" position="after">
+								<field name="sisa_cuti" on_change="onchange_date_to(date_to, date_from, employee_id, holiday_status_id)"/>
+								<field name="note_refuse"/>
+						</field>
+				</field>
+		</record>
+		<record model="ir.ui.view" id="hrd_form_holidays_allocation_view">
+				<field name="name">hr.holidays</field>
+				<field name="model">hr.holidays</field>
+				<field name="type">form</field>
+				<field name="inherit_id" ref="hr_holidays.allocation_leave_new"/>
+				<field name="arch" type="xml">
+						<field name="number_of_days_temp" position="replace">
+								<field name="number_of_days_temp" on_change="setremaining(number_of_days_temp)"/>
+						</field>
+						<field name="department_id" position="replace">
+								<field name="remaining"/> days
+						</field>
+						<field name="state" position="replace">
+							<field name="state" widget="statusbar" statusbar_visible="draft,confirm,done" statusbar_colors='{"confirm":"blue","done":"blue","refuse":"red"}'/>
+						</field>
+				</field>
+		</record>
+	</data>
+</openerp>

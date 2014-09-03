@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        
+
+		<record id="view_bank_statement_tree_voucher" model="ir.ui.view">
+            <field name="name">account.bank.statement.tree.voucher</field>
+            <field name="model">account.bank.statement</field>
+            <field name="inherit_id" ref="account.view_bank_statement_tree"/>
+            <field name="arch" type="xml">
+                <field name="balance_start" position="replace">
+                	<field name="balance_start" invisible="1"/>
+                </field>
+                <field name="balance_end_real" position="replace">
+                	<field name="balance_end_real" invisible="1"/>
+                </field>
+            </field>
+        </record>
+        
+		<record id="view_bank_statement_bank_voucher" model="ir.ui.view">
+            <field name="name">account.bank.statement.bank.voucher</field>
+            <field name="model">account.bank.statement</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.view_bank_statement_form"/>
+            <field name="arch" type="xml">
+                <field name="balance_start" position="replace"/>
+                <field name="balance_end_real" position="replace"/>
+                <xpath expr="//field[@name='ref']" position="after">
+		    		<field name="code_voucher"/>
+		    		<field name="method"/>
+		    		<field name="kurs"/>
+		    	</xpath>
+            </field>
+        </record>
+        
+        
+		<record id="view_bank_statement_bank_voucher_replace" model="ir.ui.view">
+            <field name="name">account.bank.statement.invoice.form.replace</field>
+            <field name="model">account.bank.statement</field>
+            <field name="inherit_id" ref="account_voucher.view_bank_statement_form_invoice"/>
+            <field name="arch" type="xml">
+                <button string="Import Invoices" position="replace"/>
+            </field>
+        </record>
+        
+        
+
+		<record id="view_bank_statement_voucher" model="ir.ui.view">
+            <field name="name">account.bank.statement2.voucher</field>
+            <field name="model">account.bank.statement</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.view_bank_statement_form2"/>
+            <field name="arch" type="xml">
+		    	<xpath expr="//field[@name='ref']" position="after">
+		    		<field name="code_voucher"/>
+		    	</xpath>
+            </field>
+        </record>
+        
+
+		<record id="customer_invoice_tree_supra" model="ir.ui.view">
+			<field name="name">customer.invoice.tree.supra</field>
+			<field name="type">form</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_tree" />
+			<field name="arch" type="xml">
+				<field name="number" position="after">
+					<field name="kmk"/>
+					<field name="kwitansi"/>
+                </field>	
+			</field>
+		</record>
+
+
+		<record id="customer_invoice_supra" model="ir.ui.view">
+			<field name="name">customer.invoice.supra</field>
+			<field name="type">form</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_form" />
+			<field name="arch" type="xml">
+				<field name="product_id" position="before">
+					<field name="sequence" string="No"/>
+				</field>
+				<field name="journal_id" position="after">
+					<field name="kwitansi"/>
+					<field name="faktur_pajak_no" on_change="onchange_format_faktur(faktur_pajak_no)"/>
+                </field>
+                <field name="user_id" position="after">
+					<field name="approver"/>
+				</field>
+                <field name="partner_id" position="after">
+					<field name="kmk"/>
+					<field name="pajak"/>
+                </field>
+                <button string="Print Invoice" position="replace">
+					<button name="print_customerinvoice" type="object" states="draft,open,paid" string="Invoice" icon="gtk-print"/>
+					<button name="print_fakturpajak" type="object" states="draft,open,paid" string="Faktur Pajak" icon="gtk-print"/>
+				</button>	
+			</field>
+		</record>
+		
+
+        <record model="ir.ui.view" id="faktur_pajak_supplier_form">
+            <field name="name">faktur.pajak.supplier.form</field>            
+            <field name="model">account.invoice</field>            
+            <field name="type">form</field>							
+			<field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <field name="supplier_invoice_number" position="replace"/>
+                <field name="origin" position="after">
+                    <field name="pajak"/>
+                </field>
+                <field name="date_invoice" position="after">
+                    <field name="kwitansi"/>
+                    <field name="faktur_pajak_no" on_change="onchange_format_faktur(faktur_pajak_no)"/>
+                </field>
+			</field>		
+		</record>
+		
+
+		<!-- SEQUENCE BANK --> 
+		
+        <record id="seq_type_bank_permata_new" model="ir.sequence.type">
+			<field name="name">Bank Permata</field>
+			<field name="code">bank.permata</field>
+		</record>
+		
+		<record id="seq_bank_permata_new" model="ir.sequence">
+			<field name="name">Bank Permata</field>
+			<field name="code">bank.permata</field>
+			<field name="prefix">B-PMT/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+		
+        <record id="seq_type_bank_central_asia_new" model="ir.sequence.type">
+			<field name="name">Bank Central Asia</field>
+			<field name="code">bank.central.asia</field>
+		</record>
+		
+		<record id="seq_bank_central_asia_new" model="ir.sequence">
+			<field name="name">Bank Central Asia</field>
+			<field name="code">bank.central.asia</field>
+			<field name="prefix">B-BCA/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+		
+        <record id="seq_type_bank_kesawan_usd_new" model="ir.sequence.type">
+			<field name="name">Bank Kesawan USD</field>
+			<field name="code">bank.kesawan.usd</field>
+		</record>
+		
+		<record id="seq_bank_kesawan_usd_new" model="ir.sequence">
+			<field name="name">Bank Kesawan USD</field>
+			<field name="code">bank.kesawan.usd</field>
+			<field name="prefix">B-KSD/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+		
+        <record id="seq_type_bank_kesawan_new" model="ir.sequence.type">
+			<field name="name">Bank Kesawan</field>
+			<field name="code">bank.kesawan</field>
+		</record>
+		
+		<record id="seq_bank_kesawan_new" model="ir.sequence">
+			<field name="name">Bank Kesawan</field>
+			<field name="code">bank.kesawan</field>
+			<field name="prefix">B-KSR/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+		
+        <record id="seq_type_bank_inter_indonesia_new" model="ir.sequence.type">
+			<field name="name">Bank Inter Indonesia</field>
+			<field name="code">bank.inter.indonesia</field>
+		</record>
+		
+		<record id="seq_bank_inter_indonesia_new" model="ir.sequence">
+			<field name="name">Bank Inter Indonesia</field>
+			<field name="code">bank.inter.indonesia</field>
+			<field name="prefix">B-BIE/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>		
+
+
+
+        <record id="seq_type_bank_lippo_new" model="ir.sequence.type">
+			<field name="name">Bank LIPPO</field>
+			<field name="code">bank.lippo</field>
+		</record>
+		
+		<record id="seq_bank_lippo_new" model="ir.sequence">
+			<field name="name">Bank LIPPO</field>
+			<field name="code">bank.lippo</field>
+			<field name="prefix">B-LPR/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+		
+        <record id="seq_type_bank_lippo_usd_new" model="ir.sequence.type">
+			<field name="name">Bank LIPPO USD</field>
+			<field name="code">bank.lippo.usd</field>
+		</record>
+		
+		<record id="seq_bank_lippo_usd_new" model="ir.sequence">
+			<field name="name">Bank LIPPO USD</field>
+			<field name="code">bank.lippo.usd</field>
+			<field name="prefix">B-LPD/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+		
+        <record id="seq_type_bank_permata_optima_new" model="ir.sequence.type">
+			<field name="name">Bank Permata Optima</field>
+			<field name="code">bank.permata.optima</field>
+		</record>
+		
+		<record id="seq_bank_permata_optima_new" model="ir.sequence">
+			<field name="name">Bank Permata Optima</field>
+			<field name="code">bank.permata.optima</field>
+			<field name="prefix">B-BPO/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>	
+
+
+		
+        <record id="seq_type_bank_mandiri_usd_new" model="ir.sequence.type">
+			<field name="name">Bank Mandiri USD</field>
+			<field name="code">bank.mandiri.usd</field>
+		</record>
+		
+		<record id="seq_bank_mandiri_usd_new" model="ir.sequence">
+			<field name="name">Bank Mandiri USD</field>
+			<field name="code">bank.mandiri.usd</field>
+			<field name="prefix">B-MDD/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+        <record id="seq_type_bank_mandiri_new" model="ir.sequence.type">
+			<field name="name">Bank Mandiri</field>
+			<field name="code">bank.mandiri</field>
+		</record>
+		
+		<record id="seq_bank_mandiri_new" model="ir.sequence">
+			<field name="name">Bank Mandiri</field>
+			<field name="code">bank.mandiri</field>
+			<field name="prefix">B-MDR/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+        <record id="seq_type_bank_mandiri_bisnis_new" model="ir.sequence.type">
+			<field name="name">Bank Mandiri Bisnis</field>
+			<field name="code">bank.mandiri.bisnis</field>
+		</record>
+		
+		<record id="seq_bank_mandiri_bisnis_new" model="ir.sequence">
+			<field name="name">Bank Mandiri Bisnis</field>
+			<field name="code">bank.mandiri.bisnis</field>
+			<field name="prefix">B-MDB/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+
+        <record id="seq_type_bank_lippo_aud_new" model="ir.sequence.type">
+			<field name="name">Bank LIPPO AUD</field>
+			<field name="code">bank.lippo.aud</field>
+		</record>
+		
+		<record id="seq_bank_lippo_aud_new" model="ir.sequence">
+			<field name="name">Bank LIPPO AUD</field>
+			<field name="code">bank.lippo.aud</field>
+			<field name="prefix">B-LPA/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+
+		<!-- SEQUENCE CASH -->
+		
+
+        <record id="seq_type_cash_cilacap_new" model="ir.sequence.type">
+			<field name="name">Cash Cilacap</field>
+			<field name="code">cash.cilacap</field>
+		</record>
+		
+		<record id="seq_cash_cilacap_new" model="ir.sequence">
+			<field name="name">Cash Cilacap</field>
+			<field name="code">cash.cilacap</field>
+			<field name="prefix">K-CLP/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+
+
+        <record id="seq_type_cash_suralaya_new" model="ir.sequence.type">
+			<field name="name">Cash Suralaya</field>
+			<field name="code">cash.suralaya</field>
+		</record>
+		
+		<record id="seq_cash_suralaya_new" model="ir.sequence">
+			<field name="name">Cash Suralaya</field>
+			<field name="code">cash.suralaya</field>
+			<field name="prefix">K-SLY/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_surabaya_new" model="ir.sequence.type">
+			<field name="name">Cash Surabaya</field>
+			<field name="code">cash.surabaya</field>
+		</record>
+		
+		<record id="seq_cash_surabaya_new" model="ir.sequence">
+			<field name="name">Cash Surabaya</field>
+			<field name="code">cash.surabaya</field>
+			<field name="prefix">K-SBY/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_sumatera_new" model="ir.sequence.type">
+			<field name="name">Cash Sumatera</field>
+			<field name="code">cash.sumatera</field>
+		</record>
+		
+		<record id="seq_cash_sumatera_new" model="ir.sequence">
+			<field name="name">Cash Sumatera</field>
+			<field name="code">cash.sumatera</field>
+			<field name="prefix">K-SMT/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_inco_soroako_new" model="ir.sequence.type">
+			<field name="name">Cash Inco Soroako</field>
+			<field name="code">cash.inco.soroako</field>
+		</record>
+		
+		<record id="seq_cash_inco_soroako_new" model="ir.sequence">
+			<field name="name">Cash Inco Soroako</field>
+			<field name="code">cash.inco.soroako</field>
+			<field name="prefix">K-ISO/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_timika_new" model="ir.sequence.type">
+			<field name="name">Cash Timika</field>
+			<field name="code">cash.timika</field>
+		</record>
+		
+		<record id="seq_cash_timika_new" model="ir.sequence">
+			<field name="name">Cash Timika</field>
+			<field name="code">cash.timika</field>
+			<field name="prefix">K-TMK/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_newmount_new" model="ir.sequence.type">
+			<field name="name">Cash Newmount</field>
+			<field name="code">cash.newmount</field>
+		</record>
+		
+		<record id="seq_cash_newmount_new" model="ir.sequence">
+			<field name="name">Cash Newmount</field>
+			<field name="code">cash.newmount</field>
+			<field name="prefix">K-NWM/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_paiton_emomy_new" model="ir.sequence.type">
+			<field name="name">Cash Paiton Emomy</field>
+			<field name="code">cash.paiton.emomy</field>
+		</record>
+		
+		<record id="seq_cash_paiton_emomy_new" model="ir.sequence">
+			<field name="name">Cash Paiton Emomy</field>
+			<field name="code">cash.paiton.emomy</field>
+			<field name="prefix">K-PEY/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_pekanbaru_new" model="ir.sequence.type">
+			<field name="name">Cash Pekanbaru</field>
+			<field name="code">cash.pekanbaru</field>
+		</record>
+		
+		<record id="seq_cash_pekanbaru_new" model="ir.sequence">
+			<field name="name">Cash Pekanbaru</field>
+			<field name="code">cash.pekanbaru</field>
+			<field name="prefix">K-PKB/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_kalsu_new" model="ir.sequence.type">
+			<field name="name">Cash Kalsu</field>
+			<field name="code">cash.kalsu</field>
+		</record>
+		
+		<record id="seq_cash_kalsu_new" model="ir.sequence">
+			<field name="name">Cash Kalsu</field>
+			<field name="code">cash.kalsu</field>
+			<field name="prefix">K-KLS/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_sunter_usd_new" model="ir.sequence.type">
+			<field name="name">Cash Sunter USD</field>
+			<field name="code">cash.sunter.usd</field>
+		</record>
+		
+		<record id="seq_cash_sunter_usd_new" model="ir.sequence">
+			<field name="name">Cash Sunter USD</field>
+			<field name="code">cash.sunter.usd</field>
+			<field name="prefix">K-SND/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+
+        <record id="seq_type_cash_sunter_new" model="ir.sequence.type">
+			<field name="name">Cash Sunter</field>
+			<field name="code">cash.sunter</field>
+		</record>
+		
+		<record id="seq_cash_sunter_new" model="ir.sequence">
+			<field name="name">Cash Sunter</field>
+			<field name="code">cash.sunter</field>
+			<field name="prefix">K-SNT/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_cirebon_new" model="ir.sequence.type">
+			<field name="name">Cash Cirebon</field>
+			<field name="code">cash.cirebon</field>
+		</record>
+		
+		<record id="seq_cash_cirebon_new" model="ir.sequence">
+			<field name="name">Cash Cirebon</field>
+			<field name="code">cash.cirebon</field>
+			<field name="prefix">K-CRB/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_power_trans_new" model="ir.sequence.type">
+			<field name="name">Cash Power Trans</field>
+			<field name="code">cash.power.trans</field>
+		</record>
+		
+		<record id="seq_cash_power_trans_new" model="ir.sequence">
+			<field name="name">Cash Power Trans</field>
+			<field name="code">cash.power.trans</field>
+			<field name="prefix">K-PWT/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_pasar_kemis_new" model="ir.sequence.type">
+			<field name="name">Cash Pasar Kemis</field>
+			<field name="code">cash.pasar.kemis</field>
+		</record>
+		
+		<record id="seq_cash_pasar_kemis_new" model="ir.sequence">
+			<field name="name">Cash Pasar Kemis</field>
+			<field name="code">cash.pasar.kemis</field>
+			<field name="prefix">K-PKM/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_padang_new" model="ir.sequence.type">
+			<field name="name">Cash Padang</field>
+			<field name="code">cash.padang</field>
+		</record>
+		
+		<record id="seq_cash_padang_new" model="ir.sequence">
+			<field name="name">Cash Padang</field>
+			<field name="code">cash.padang</field>
+			<field name="prefix">K-PDG/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+
+        <record id="seq_type_cash_sunter_eur_new" model="ir.sequence.type">
+			<field name="name">Cash Sunter EUR</field>
+			<field name="code">cash.sunter.eur</field>
+		</record>
+		
+		<record id="seq_cash_sunter_eur_new" model="ir.sequence">
+			<field name="name">Cash Sunter EUR</field>
+			<field name="code">cash.sunter.eur</field>
+			<field name="prefix">K-SNE/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+
+        <record id="seq_type_cash_porsea_new" model="ir.sequence.type">
+			<field name="name">Cash Porsea</field>
+			<field name="code">cash.porsea</field>
+		</record>
+		
+		<record id="seq_cash_porsea_new" model="ir.sequence">
+			<field name="name">Cash Porsea</field>
+			<field name="code">cash.porsea</field>
+			<field name="prefix">K-PRA/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_citereup_new" model="ir.sequence.type">
+			<field name="name">Cash Citereup</field>
+			<field name="code">cash.citereup</field>
+		</record>
+		
+		<record id="seq_cash_citereup_new" model="ir.sequence">
+			<field name="name">Cash Citereup</field>
+			<field name="code">cash.citereup</field>
+			<field name="prefix">K-CTP/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_nnt_new" model="ir.sequence.type">
+			<field name="name">Cash NNT</field>
+			<field name="code">cash.nnt</field>
+		</record>
+		
+		<record id="seq_cash_nnt_new" model="ir.sequence">
+			<field name="name">Cash NNT</field>
+			<field name="code">cash.nnt</field>
+			<field name="prefix">K-NNT/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_pomala_new" model="ir.sequence.type">
+			<field name="name">Cash Pomala</field>
+			<field name="code">cash.pomala</field>
+		</record>
+		
+		<record id="seq_cash_pomala_new" model="ir.sequence">
+			<field name="name">Cash Pomala</field>
+			<field name="code">cash.pomala</field>
+			<field name="prefix">K-PML/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_bontang_new" model="ir.sequence.type">
+			<field name="name">Cash Bontang</field>
+			<field name="code">cash.bontang</field>
+		</record>
+		
+		<record id="seq_cash_bontang_new" model="ir.sequence">
+			<field name="name">Cash Bontang</field>
+			<field name="code">cash.bontang</field>
+			<field name="prefix">K-BTG/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+        <record id="seq_type_cash_makassar_new" model="ir.sequence.type">
+			<field name="name">Cash Makassar</field>
+			<field name="code">cash.makassar</field>
+		</record>
+		
+		<record id="seq_cash_makassar_new" model="ir.sequence">
+			<field name="name">Cash Makassar</field>
+			<field name="code">cash.makassar</field>
+			<field name="prefix">K-MKS/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+		
+
+
+
+
+	</data>
+</openerp>
+
+
+
+<!--
+
+        <record id="view_account_statement_from_invoice_inherit" model="ir.ui.view">
+            <field name="name">account.statement.from.invoice.lines.form.inherit</field>
+            <field name="model">account.statement.from.invoice.lines</field>
+            <field name="inherit_id" ref="account_voucher.view_account_statement_from_invoice_lines"/>
+            <field name="arch" type="xml">
+                <field name="line_ids" position="replace">
+                	<field height="300" width="700" name="line_ids" domain="[('account_id.type','in',['receivable','payable']), ('journal_id.type','not in',['cash','bank']), ('reconcile_id','=',False), ('state', '=', 'valid')]"/>
+           		</field>
+            </field>
+        </record>
+
+
+-->
