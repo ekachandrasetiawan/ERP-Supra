@@ -133,6 +133,9 @@ class order_preparation(osv.osv):
         return True
 
     def preparation_done(self, cr, uid, ids, context=None):
+        setDueDateValue = time.strftime('%m/%d/%y')
+        dn_id=self.pool.get('delivery.note').search(cr,uid,[('prepare_id', '=' ,ids)])
+        self.pool.get("delivery.note").write(cr, uid, dn_id, {'tanggal': setDueDateValue})
         self.write(cr, uid, ids, {'state': 'done'})
         return True                                  
           
