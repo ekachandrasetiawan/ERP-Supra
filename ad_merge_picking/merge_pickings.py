@@ -89,7 +89,7 @@ class merge_pickings(osv.osv_memory):
         for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
             pool_picking.write(cr, uid, [picking.id], {'invoice_state': 'invoiced', 'invoice_id': invoice_id}) 
             for move_line in picking.move_lines:
-                discount_amount = 0
+                disc_amount = 0
                 if data.type == 'out':
                     price_unit = pool_picking._get_price_unit_invoice(cr, uid, move_line, 'out_invoice')
                     tax_ids = pool_picking._get_taxes_invoice(cr, uid, move_line, 'out_invoice')
