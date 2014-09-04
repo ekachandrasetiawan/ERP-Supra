@@ -590,7 +590,9 @@ class sales_activity(osv.osv):
      
     def create(self, cr, uid, vals, context=None):    
         vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'sales.activity')
+
         return super(sales_activity, self).create(cr, uid, vals, context=context)
+
 
     def activity_cancel(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state': 'draft'})
@@ -808,6 +810,7 @@ after_plan_senin()
 
 class before_actual_senin(osv.osv):
     _name = "before.actual.senin"
+    _idx = 1
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -819,9 +822,10 @@ class before_actual_senin(osv.osv):
     }
     
     def unlink(self, cr, uid, ids, context=None):
-        move = self.browse(cr, uid, ids, context=context)[0]
+        move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(before_actual_senin, self).unlink(cr, uid, ids, context=context)
 
     def onchange_rencana(self, cr, uid, ids):
@@ -868,6 +872,7 @@ before_actual_senin()
 
 class after_actual_senin(osv.osv):
     _name = "after.actual.senin"
+    _idx = 1
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -880,8 +885,9 @@ class after_actual_senin(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(after_actual_senin, self).unlink(cr, uid, ids, context=context)
 
 
@@ -957,6 +963,7 @@ after_plan_selasa()
 
 class before_actual_selasa(osv.osv):
     _name = "before.actual.selasa"
+    _idx = 2
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -969,8 +976,9 @@ class before_actual_selasa(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(before_actual_selasa, self).unlink(cr, uid, ids, context=context)
 
 
@@ -1020,6 +1028,7 @@ before_actual_selasa()
 
 class after_actual_selasa(osv.osv):
     _name = "after.actual.selasa"
+    _idx=2
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1032,8 +1041,9 @@ class after_actual_selasa(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(after_actual_selasa, self).unlink(cr, uid, ids, context=context)
 
 
@@ -1111,6 +1121,7 @@ after_plan_rabu()
 
 class before_actual_rabu(osv.osv):
     _name = "before.actual.rabu"
+    _idx=3
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1123,8 +1134,9 @@ class before_actual_rabu(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(before_actual_rabu, self).unlink(cr, uid, ids, context=context)
 
     def onchange_cancel(self, cr, uid, ids, batal):
@@ -1174,6 +1186,7 @@ before_actual_rabu()
 
 class after_actual_rabu(osv.osv):
     _name = "after.actual.rabu"
+    _idx=3
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1186,8 +1199,9 @@ class after_actual_rabu(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(after_actual_rabu, self).unlink(cr, uid, ids, context=context)
 
 
@@ -1265,6 +1279,7 @@ after_plan_kamis()
 
 class before_actual_kamis(osv.osv):
     _name = "before.actual.kamis"
+    _idx=4
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1277,11 +1292,9 @@ class before_actual_kamis(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
-        try:
-            if move.jenis == 'plan':
-                raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
-        except NotExist:
-            raise osv.except_osv(_('Perhatian'),_('Data Actual tidak bisa dihapus !'))
+        move = move[0]
+        if move.jenis == 'plan':
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(before_actual_kamis, self).unlink(cr, uid, ids, context=context)
 
 
@@ -1331,6 +1344,7 @@ before_actual_kamis()
 
 class after_actual_kamis(osv.osv):
     _name = "after.actual.kamis"
+    _idx=4
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1343,8 +1357,9 @@ class after_actual_kamis(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(after_actual_kamis, self).unlink(cr, uid, ids, context=context)
 
 
@@ -1420,6 +1435,7 @@ after_plan_jumat()
 
 class before_actual_jumat(osv.osv):
     _name = "before.actual.jumat"
+    _idx=5
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1432,8 +1448,9 @@ class before_actual_jumat(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(before_actual_jumat, self).unlink(cr, uid, ids, context=context)
 
     def onchange_cancel(self, cr, uid, ids, batal):
@@ -1483,6 +1500,7 @@ before_actual_jumat()
 
 class after_actual_jumat(osv.osv):
     _name = "after.actual.jumat"
+    _idx=5
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1495,8 +1513,9 @@ class after_actual_jumat(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
+        move = move[0]
         if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+            raise osv.except_osv(_('Perhatian'),_('Data Aktual tidak bisa dihapus !'))
         return super(after_actual_jumat, self).unlink(cr, uid, ids, context=context)
 
 
@@ -1573,6 +1592,7 @@ after_plan_sabtu()
 
 class before_actual_sabtu(osv.osv):
     _name = "before.actual.sabtu"
+    _idx=6
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1610,6 +1630,7 @@ before_actual_sabtu()
 
 class after_actual_sabtu(osv.osv):
     _name = "after.actual.sabtu"
+    _idx=6
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1650,6 +1671,7 @@ after_actual_sabtu()
 
 class before_plan_ahad(osv.osv):
     _name = "before.plan.ahad"
+
     _columns = {
         'name': fields.text('Objectives', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1675,6 +1697,7 @@ after_plan_ahad()
 
 class before_actual_ahad(osv.osv):
     _name = "before.actual.ahad"
+    _idx=0
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
@@ -1712,6 +1735,7 @@ before_actual_ahad()
 
 class after_actual_ahad(osv.osv):
     _name = "after.actual.ahad"
+    _idx=0
     _columns = {
         'name': fields.text('Results', required=True),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
