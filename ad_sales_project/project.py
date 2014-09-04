@@ -1277,8 +1277,11 @@ class before_actual_kamis(osv.osv):
 
     def unlink(self, cr, uid, ids, context=None):
         move = self.browse(cr, uid, ids, context=context)
-        if move.jenis == 'plan':
-            raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+        try:
+            if move.jenis == 'plan':
+                raise osv.except_osv(_('Perhatian'),_('Data planning tidak bisa dihapus !'))
+        except NotExist:
+            raise osv.except_osv(_('Perhatian'),_('Data Actual tidak bisa dihapus !'))
         return super(before_actual_kamis, self).unlink(cr, uid, ids, context=context)
 
 
