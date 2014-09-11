@@ -4,6 +4,7 @@ import decimal_precision as dp
 from tools.translate import _
 from osv import fields, osv
 from datetime import datetime, timedelta
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 
 
 class res_users(osv.osv):
@@ -179,7 +180,7 @@ class order_preparation(osv.osv):
     _defaults = {
         'name': '/',
         'state': 'draft',
-        'tanggal': time.strftime('%Y-%m-%d'), 
+        'tanggal': time.strftime(DEFAULT_SERVER_DATE_FORMAT), 
     }
      
         

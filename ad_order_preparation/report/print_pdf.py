@@ -95,4 +95,5 @@ class ReportStatus(report_sxw.rml_parse):
 
 
 report_sxw.report_sxw('report.preparation.continue', 'order.preparation', 'addons/ad_order_preparation/report/preparation_continue.rml', parser=ReportStatus, header=False)
+report_sxw.report_sxw('report.preparation.multipage', 'order.preparation', 'addons/ad_order_preparation/report/preparation_A4multi.rml', parser=ReportStatus, header=False)
 

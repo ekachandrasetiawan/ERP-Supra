@@ -463,7 +463,7 @@ class delivery_note(osv.osv):
                    
                 iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
                 id_done = iddo.items()
-                stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'min_date': val.tanggal, 'note_id': val.id})
+                stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'note_id': val.id})
                    
                 self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
                 return True
@@ -578,14 +578,15 @@ class stock_move(osv.osv):
     _inherit = "stock.move"
     _columns = {
         'no': fields.char('No', size=3),
-        # 'desc':fields.text('Description'),
+        'desc':fields.char('Description')
     }
     
+    def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
+        hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
+        uom=self.pool.get('product.template').browse(cr,uid,[prd])[0]
+        return {'value':{ 'desc':hasil.name, 'product_qty':1, 'product_uom':uom.uom_id.id} }
+        
     _defaults = {'no': 10}
-
-    # def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
-    #     hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
-    #     return {'value':{ 'desc':hasil.name} }
    
 stock_move()
 

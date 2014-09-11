@@ -11,6 +11,10 @@
 		<report auto="False" id="form_quotation" model="sale.order" 
 				name="quotation.report" file="ad_perintah_kerja/report/quotation.mako" 
 				string="Penawaran" usage="default" menu="False" report_type="webkit"/>
+
+		<report auto="False" id="form_salesorder" model="sale.order" 
+		name="salesorder.report" file="ad_perintah_kerja/report/salesorder.mako" 
+		string="Sales Order" usage="default" menu="False" report_type="webkit"/>
 			
 		<record id="view_order_form_quotation" model="ir.ui.view">
             <field name="name">sale.order.form</field>
@@ -19,6 +23,9 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='state']" position="before">
 	                <button name="%(form_quotation)d" string="Print Penawaran" type="action" states="draft,sent" class="oe_highlight" />
+	            </xpath>
+	              <xpath expr="//field[@name='state']" position="before">
+	                <button name="%(form_salesorder)d" string="Print Sales Order" type="action" states="progress,manual" class="oe_highlight" />
 	            </xpath>
             </field>
         </record>
