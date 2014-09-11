@@ -486,3 +486,10 @@ class account_invoice_tax(osv.osv):
 	_name='account.invoice.tax'
 	_inherit='account.invoice.tax'
 
+class SaleOrderLine(osv.osv):
+	_name = 'sale.order.line'
+	_inherit = 'sale.order.line'
+	_columns = {
+		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
+	}
+SaleOrderLine()
