@@ -15,6 +15,7 @@
 					</field> -->
 					<xpath expr="//field[@name='origin']" position="after">
 	                    <field name="cust_doc_ref"/>
+	                    <field name="lbm_no"/>
 	                </xpath>
 				
 			</field>

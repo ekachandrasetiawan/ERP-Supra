@@ -10,6 +10,7 @@ class stock_picking(osv.osv):
 	_inherit = 'stock.picking'
 	_columns = {
 		'cust_doc_ref' : fields.char('External Doc Ref',200,required=False,store=True),
+		'lbm_no' : fields.char('LBM No',200,required=False,store=True),
 	}
 
 	
@@ -20,6 +21,7 @@ class stock_picking_in(osv.osv):
 	_table="stock_picking"
 	_columns = {
 		'cust_doc_ref' : fields.char('External Doc Ref',200,required=False,store=True),
+		'lbm_no' : fields.char('LBM No',200,required=False,store=True),
 	}
 	# def __init__(self, pool, cr):
 	# 	super(StockPickingIn, self).__init__(pool, cr)
