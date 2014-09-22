@@ -495,3 +495,25 @@ class SaleOrderLine(osv.osv):
 		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
 	}
 SaleOrderLine()
+
+class AccountBankStatement(osv.osv):
+	def _getSubTotal(self, cr, uid, ids, name, arg, context=None):
+		res = {}
+
+		
+		
+		accounts= self.browse(cr, uid, ids, context=context)
+		for account in accounts:
+			# dis[order.id]=order.amount_bruto-order.amount_untaxed
+			res[account.id] = 0
+			print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>..'
+			for line in account.line_ids:
+				res[account.id] += line.amount
+				print "<<<<<<<<<<<<<",line.amount
+		return res
+
+	_name = 'account.bank.statement'
+	_inherit = 'account.bank.statement'
+	_columns = {
+		'subtotal':fields.function(_getSubTotal,string='Total',required=False,store=False),
+	}

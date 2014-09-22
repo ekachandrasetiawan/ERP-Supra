@@ -119,6 +119,8 @@ class order_preparation(osv.osv):
         val = self.pool.get('ir.sequence').get(cr, uid, 'pesan.antar').split('/')
         use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
         vals['name'] = val[-1]+'B/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",vals['name']
+        
         return super(order_preparation, self).create(cr, uid, vals, context=context)
  
     def preparation_draft(self, cr, uid, ids, context=None):
