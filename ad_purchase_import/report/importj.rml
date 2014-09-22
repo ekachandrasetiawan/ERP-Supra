@@ -599,6 +599,21 @@
     </blockTable>
     </section>
 
+    <blockTable colWidths="25.0,60.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
+    <tr>
+      <td><para style="terp_default_8"><font color="white">:</font></para></td>
+      <td>
+        <para style="terp_default_8"><font color="white">:</font></para>
+      </td>
+      <td>
+        <para style="terp_default_8">Discount</para></td>
+      <td>
+        <para style="terp_default_8"><font color="white">:</font></para>
+      </td>
+      <td><para style="terp_default_Bold_Centre_8">[[ koma('%.2f',get_amount(o)['discountamount']) ]]</para></td>
+    </tr>
+    </blockTable>
+
     <!-- <para style="terp_default_8"><font color="white">:</font></para> -->
     <para style="terp_default_Right_8"><font color="white"> </font></para>
     <blockTable colWidths="85.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
@@ -620,27 +635,27 @@
     
 	<blockTable colWidths="85.0,470.0" style="Table_Invoice_General_judul">
     <tr>
-        <td><para style="terp_default_8">Your Ref : </para></td>
+        <td><para style="terp_default_8">Your Ref  </para></td>
         <td><para style="terp_default_8">: [[ o.yourref ]]</para></td>
     </tr>
     <tr>
-        <td><para style="terp_default_Bold_9">Note :</para></td>
+        <td><para style="terp_default_Bold_9">Note </para></td>
         <td>
-           <para style="terp_default_8">[[ o.note ]]</para>
+           <para style="terp_default_8">: [[ o.note ]]</para>
         </td>
     </tr>
 
     <tr>
-        <td><para style="terp_default_8">Delivery : </para></td>
+        <td><para style="terp_default_8">Delivery  </para></td>
         <td><para style="terp_default_8">: [[ o.delivery ]]</para></td>
     </tr>
     <tr>
-        <td><para style="terp_default_8">Payment : </para></td>
+        <td><para style="terp_default_8">Payment </para></td>
         <td><para style="terp_default_8">: [[ o.term_of_payment ]]</para></td>
     </tr>
 
 	<tr>
-        <td><para style="terp_default_8">Shipment to : </para></td>
+        <td><para style="terp_default_8">Shipment to  </para></td>
         <td><para style="terp_default_Bold_9">: [[ o.shipment_to ]]</para></td>
     </tr>
 	<tr>
