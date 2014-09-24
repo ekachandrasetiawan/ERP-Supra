@@ -578,13 +578,13 @@ class stock_move(osv.osv):
     _inherit = "stock.move"
     _columns = {
         'no': fields.char('No', size=3),
-        'desc':fields.char('Description')
+        'desc':fields.char('Description',required=False)
     }
     
-    def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
-        hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
-        uom=self.pool.get('product.template').browse(cr,uid,[prd])[0]
-        return {'value':{ 'desc':hasil.name, 'product_qty':1, 'product_uom':uom.uom_id.id} }
+    # def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
+    #     hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
+    #     uom=self.pool.get('product.template').browse(cr,uid,[prd])[0]
+    #     return {'value':{ 'desc':hasil.name, 'product_qty':1, 'product_uom':uom.uom_id.id} }
         
     _defaults = {'no': 10}
    

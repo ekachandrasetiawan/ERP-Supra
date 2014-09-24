@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<!-- start inherit field cust_ref_no to stock picking form -->
+		<record id="view_order_preparation_form" model="ir.ui.view">
+			<field name="name">order.packaging.form</field>
+			<field name="model">order.preparation</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="ad_order_preparation.view_order_preparation_form" />
+
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='origin']" position="after">
+                    
+                </xpath>
+			</field>
+		</record>
+		<!-- END OF INHERIT FIELD cust_ref_no -->
+	</data>
+</openerp>

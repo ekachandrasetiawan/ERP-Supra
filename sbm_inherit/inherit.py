@@ -506,10 +506,10 @@ class AccountBankStatement(osv.osv):
 		for account in accounts:
 			# dis[order.id]=order.amount_bruto-order.amount_untaxed
 			res[account.id] = 0
-			print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>..'
+			# print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>..'
 			for line in account.line_ids:
 				res[account.id] += line.amount
-				print "<<<<<<<<<<<<<",line.amount
+				# print "<<<<<<<<<<<<<",line.amount
 		return res
 
 	_name = 'account.bank.statement'
@@ -517,3 +517,8 @@ class AccountBankStatement(osv.osv):
 	_columns = {
 		'subtotal':fields.function(_getSubTotal,string='Total',required=False,store=False),
 	}
+
+# class OrderPreparation(osv.osv):
+# 	_inherit = 'order.preparation'
+# 	_name = 'order.preparation'
+# 	
