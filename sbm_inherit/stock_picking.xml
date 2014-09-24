@@ -15,10 +15,23 @@
 					</field> -->
 					<xpath expr="//field[@name='origin']" position="after">
 	                    <field name="cust_doc_ref"/>
+	                    <field name="lbm_no"/>
 	                </xpath>
 				
 			</field>
 		</record>
 		<!-- END OF INHERIT FIELD cust_ref_no -->
+
+		<!-- <record id="view_picking_form_internal" model="ir.ui.view">
+			<field name="name">stock.picking.form.request</field>
+			<field name="model">stock.picking</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="ad_delivery_note.view_picking_form_internal" />
+			<field name="arch" type="xml">
+				<xpath expr="//form/header/button[@name='draft_validate']" position="replace">
+					<button states="assigned" name="draft_validate" string="Confirm &amp; Transfer" type="object" class="oe_highlight" groups="base.group_user"/>
+				</xpath>
+			</field>
+		</record> -->
 	</data>
 </openerp>

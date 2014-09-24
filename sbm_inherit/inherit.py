@@ -10,6 +10,7 @@ class stock_picking(osv.osv):
 	_inherit = 'stock.picking'
 	_columns = {
 		'cust_doc_ref' : fields.char('External Doc Ref',200,required=False,store=True),
+		'lbm_no' : fields.char('LBM No',200,required=False,store=True),
 	}
 
 	
@@ -20,6 +21,7 @@ class stock_picking_in(osv.osv):
 	_table="stock_picking"
 	_columns = {
 		'cust_doc_ref' : fields.char('External Doc Ref',200,required=False,store=True),
+		'lbm_no' : fields.char('LBM No',200,required=False,store=True),
 	}
 	# def __init__(self, pool, cr):
 	# 	super(StockPickingIn, self).__init__(pool, cr)
@@ -493,3 +495,30 @@ class SaleOrderLine(osv.osv):
 		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
 	}
 SaleOrderLine()
+
+class AccountBankStatement(osv.osv):
+	def _getSubTotal(self, cr, uid, ids, name, arg, context=None):
+		res = {}
+
+		
+		
+		accounts= self.browse(cr, uid, ids, context=context)
+		for account in accounts:
+			# dis[order.id]=order.amount_bruto-order.amount_untaxed
+			res[account.id] = 0
+			# print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>..'
+			for line in account.line_ids:
+				res[account.id] += line.amount
+				# print "<<<<<<<<<<<<<",line.amount
+		return res
+
+	_name = 'account.bank.statement'
+	_inherit = 'account.bank.statement'
+	_columns = {
+		'subtotal':fields.function(_getSubTotal,string='Total',required=False,store=False),
+	}
+
+# class OrderPreparation(osv.osv):
+# 	_inherit = 'order.preparation'
+# 	_name = 'order.preparation'
+# 	

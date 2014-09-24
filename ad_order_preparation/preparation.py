@@ -1,5 +1,6 @@
 import time
 import netsvc
+import openerp.exceptions
 import decimal_precision as dp
 from tools.translate import _
 from osv import fields, osv
@@ -18,14 +19,15 @@ res_users()
 
 class order_preparation(osv.osv):
     _name = "order.preparation"
+    _description = "Order Packaging"
     _columns = {
         'name': fields.char('Reference', required=True, size=64, select=True, readonly=False, states={'draft': [('readonly', False)]}),
-        'poc': fields.char('Customer Reference', size=64),
-        'tanggal' : fields.date('Date Preparation', readonly=True, states={'draft': [('readonly', False)]}),
-        'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]}),
+        'poc': fields.char('Customer Reference', size=64,track_visibility='onchange'),
+        'tanggal' : fields.date('Date Preparation', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
+        'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
         'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=[('state','in', ('progress','manual'))], states={'draft': [('readonly', False)]}),
-        'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=True, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]}),
-        'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True),
+        'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=True, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
+        
         'prepare_lines': fields.one2many('order.preparation.line', 'preparation_id', 'Packaging Lines', readonly=True, states={'draft': [('readonly', False)]}),
         'delivery_lines': fields.one2many('delivery.note', 'prepare_id', 'Delivery Lines', readonly=True),
         'write_date': fields.datetime('Date Modified', readonly=True),
@@ -36,6 +38,21 @@ class order_preparation(osv.osv):
         'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]}),
         'note': fields.text('Notes'),
         'terms':fields.text('Terms & Condition'),
+        'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True),
+    }
+    _inherit = ['mail.thread']
+    _track = {
+        'note':{},
+        'state':{
+            'ad_order_preparation.mt_pack_approved': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approve',
+            'ad_order_preparation.mt_pack_canceled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
+            'ad_order_preparation.mt_pack_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
+            'ad_order_preparation.mt_pack_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+
+        },
+        'prepare_lines':{
+
+        }
     }
     
 
@@ -113,12 +130,28 @@ class order_preparation(osv.osv):
             'datas': datas,
             }
             
-    def create(self, cr, uid, vals, context=None):    
+    def create(self, cr, uid, vals, context=None):
+        check = self.search(cr,uid,[('sale_id','=',vals['sale_id']),('picking_id','=',vals['picking_id'])])
+
+        OPs = self.browse(cr,uid,check,context=None)
+
+        if check:
+            allOp = []
+            for op in OPs:
+                allOp.append(op.name)
+                
+            mm = '\n==> '.join(allOp)
+            msg = 'You cannot create an Order Package which is has been exist.\n\n===> '+mm
+            
+            raise openerp.exceptions.Warning(msg)
+        
         rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
         usa = str(self.pool.get('sale.order').browse(cr, uid, vals['sale_id']).user_id.initial)
         val = self.pool.get('ir.sequence').get(cr, uid, 'pesan.antar').split('/')
         use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
         vals['name'] = val[-1]+'B/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+        
+        
         return super(order_preparation, self).create(cr, uid, vals, context=context)
  
     def preparation_draft(self, cr, uid, ids, context=None):
@@ -134,7 +167,7 @@ class order_preparation(osv.osv):
         return True
 
     def preparation_done(self, cr, uid, ids, context=None):
-        setDueDateValue = time.strftime('%m/%d/%y')
+        setDueDateValue = time.strftime('%Y-%m-%d')
         dn_id=self.pool.get('delivery.note').search(cr,uid,[('prepare_id', '=' ,ids)])
         self.pool.get("delivery.note").write(cr, uid, dn_id, {'tanggal': setDueDateValue})
         self.write(cr, uid, ids, {'state': 'done'})
@@ -188,11 +221,12 @@ order_preparation()
  
 class order_preparation_line(osv.osv):
     _name = "order.preparation.line"
+
     _columns = {
         'no': fields.char('No', size=3),
         'name': fields.text('Description'),
         'preparation_id': fields.many2one('order.preparation', 'Order Preparation', required=True, ondelete='cascade'),
-        'product_id': fields.many2one('product.product', 'Product'),
+        'product_id': fields.many2one('product.product', 'Product',track_visibility='always'),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product UoM')),
         'product_uom': fields.many2one('product.uom', 'UoM'),
         'product_packaging': fields.many2one('product.packaging', 'Packaging'),
@@ -200,52 +234,9 @@ class order_preparation_line(osv.osv):
          
 order_preparation_line()
 
-#         'spkdate' : fields.date('SPK Date', readonly=True, states={'draft': [('readonly', False)]}),
-#         'kontrak': fields.char('Contract No', size=64, readonly=True, states={'draft': [('readonly', False)]}),
-#         'kontrakdate' : fields.date('Contract Date', readonly=True, states={'draft': [('readonly', False)]}),
-#         'workshop': fields.char('Working Place', size=64, readonly=True, states={'draft': [('readonly', False)]}),
-#         'dodate' : fields.datetime('Delivery Date', readonly=True, states={'draft': [('readonly', False)]}),
-#         'gudang': fields.char('Warehouse', size=64, readonly=True, states={'draft': [('readonly', False)]}),
-#         'suratjalan': fields.char('DO No', required=True, size=64, readonly=True, states={'draft': [('readonly', False)]}),
-#         'suratkerja': fields.char('WO No', required=True, size=64, readonly=True, states={'draft': [('readonly', False)]}),
-#         'do': fields.boolean('DO ?', help="Check jika ada DO"),
-#         'spk': fields.boolean('WO ?', help="Check jika ada SPK"),
 
-    
-#     def spk_change(self, cr, uid, ids, spk, sale):
-#         # ex: 000001A/SBM-ADM/JH-NR/X/13
-#         if not sale:
-#             raise osv.except_osv(('Attention !'), ('Please select a sales order!'))    
-#         kerja = '/'
-#         rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-#         if spk:
-#             usa = str(self.pool.get('sale.order').browse(cr, uid, sale).user_id.initial)
-#             val = self.pool.get('ir.sequence').get(cr, uid, 'perintah.kerja').split('/')
-#             use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-#             kerja = val[-1]+'A/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-#         return  {'value': {'suratkerja': kerja}}
-#     
-#     def do_change(self, cr, uid, ids, do, sale):
-#         # ex: 000001B/SBM-ADM/JH-NR/X/13
-#         if not sale:
-#             raise osv.except_osv(('Attention !'), ('Please select a sales order!'))
-#         kirim = '/'
-#         rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-#         if do:
-#             usa = str(self.pool.get('sale.order').browse(cr, uid, sale).user_id.initial)
-#             val = self.pool.get('ir.sequence').get(cr, uid, 'pesan.antar').split('/')
-#             use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-#             kirim = val[-1]+'B/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-#         return  {'value': {'suratjalan': kirim}}
-    
-#     def sale_change(self, cr, uid, ids, sale):
-#         
-#         if sale:
-#             res = {}
-#             obj_sale = self.pool.get('sale.order').browse(cr, uid, sale)
-#             res['prepare_lines'] = [] 
-#             res['picking_id'] = False
-#             res['partner_id'] = obj_sale.partner_id.id
-#             res['kontrak'] = obj_sale.client_order_ref
-#              
-#             return  {'value': res}
+# class order_preparation(osv.osv):
+#     _name = "order.preparation"
+#     _description = "Order Preparation Packaging"
+#     # inherit from mail.thread allows the use of OpenChatter
+#     _inherit = ['mail.thread']
