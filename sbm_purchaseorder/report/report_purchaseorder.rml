@@ -568,7 +568,9 @@
           <pto_trailer>
           <blockTable colWidths="600.0" style="Table00100">
         <tr>
-        <td> <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
+        <td>
+	 <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
+       <!--  <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
         <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
         <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
         <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
@@ -577,12 +579,11 @@
         <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
         <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
         <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
-        <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
-        <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para>
+        <para style="terp_default_Bold_Centre_8"><font color="white">.</font> </para> -->
          </td>
         </tr>
        </blockTable>
-            <para style="terp_default_8"><font color="white"> </font></para>
+           <para style="terp_default_8"><font color="white"> </font></para>
             <para style="terp_default_8"><font color="white"> </font></para>
             <para style="terp_default_8"><font color="white"> </font></para>
             <para style="terp_default_8"><font color="white"> </font></para>
@@ -844,7 +845,7 @@
            <para style="terp_default_8"><font color="white"> </font></para>  
           <para style="terp_default_Bold_289">1). Copy PO dan Faktur Pajak ASLI Rangkap 2</para>
           <para style="terp_default_Bold_289">2). Kwitansi ASLI dan Surat Jalan (DO) ASLI</para>
-          <para style="terp_default_Bold_289">3). NPWP/NPPKP Suprabakti Mandiri : 01.327.742.1.038.000</para>
+          <para style="terp_default_Bold_289">3). NPWP/NPPKP Suprabakti Mandiri : 01.327.742.1-038.000</para>
           <para style="terp_default_Bold_289">4). Alamat NPWP : JL.Danau Sunter Utara Blok A No.9 Tanjung Priuk</para>
           <para style="terp_default_Bold_2891">Jakarta Utara 14350</para>
           <para style="terp_default_Bold_289">5). Pengiriman Barang harus melampirkan Surat Jalan Rangkap 2</para>
