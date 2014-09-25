@@ -104,6 +104,13 @@ class ReportStatus(report_sxw.rml_parse):
     def get_lines(self,obj):
       res={}
       res['prepare_no']=obj.prepare_id.name[:7]
+      
+      note_lines= obj.note_lines
+      for x in note_lines:
+        # product_set=self.pool.get('mrp.bom').search(cr,uid,[('product_id', '=' ,x.product_id)])
+        print '============================',x.product_id
+        # res.append({'no':x.no,'product_id':x.product_qty, 'product_uom':x.product_uom.name, name':x.name,'part_no':x.product_id.default_code})
+
       return res
             
     def get_basedon(self, form):
