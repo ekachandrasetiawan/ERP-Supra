@@ -277,15 +277,16 @@ procurement_order()
 
 class delivery_note(osv.osv):
     _name = "delivery.note"
+
     _columns = {
         'name': fields.char('Delivery Note', required=True, size=64, readonly=True, states={'draft': [('readonly', False)]}),
         'prepare_id': fields.many2one('order.preparation', 'Order Packaging', domain=[('state', 'in', ['approve','done'])], required=False, readonly=True, states={'draft': [('readonly', False)]}),
-        'tanggal' : fields.date('Delivery Date'),
-        'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel')], 'State', readonly=True),
+        'tanggal' : fields.date('Delivery Date',track_visibility='onchange'),
+        'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel')], 'State', readonly=True,track_visibility='onchange'),
         'note_lines': fields.one2many('delivery.note.line', 'note_id', 'Note Lines', readonly=True, states={'draft': [('readonly', False)]}),
-        'poc': fields.char('Customer Reference', size=64),
+        'poc': fields.char('Customer Reference', size=64,track_visibility='onchange'),
         'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]}),
-        'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]}),
+        'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
         'write_date': fields.datetime('Date Modified', readonly=True),
         'write_uid':  fields.many2one('res.users', 'Last Modification User', readonly=True),
         'create_date': fields.datetime('Date Created', readonly=True),
@@ -299,6 +300,9 @@ class delivery_note(osv.osv):
         'name': '/',
         'state': 'draft', 
     }
+
+    _inherit = ['mail.thread']
+    
      
     _order = "name desc"
 

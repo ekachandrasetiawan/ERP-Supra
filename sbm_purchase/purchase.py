@@ -253,11 +253,11 @@ class Set_PO(osv.osv):
 
 Set_PO()
 
-class Search_PB(osv.osv_memory):
-	_name = 'search.pb'
-	_columns={
-		'name':fields.many2many('detail.pb','search_pb_rel','search_detail_pb','id'),
-	}
+# class Search_PB(osv.osv_memory):
+# 	_name = 'search.pb'
+# 	_columns={
+# 		'name':fields.many2many('detail.pb','search_pb_rel','search_detail_pb','id'),
+# 	}
 
 class Wizard_Detail_PB(osv.osv):
 	_name = 'wizard.detail.pb'

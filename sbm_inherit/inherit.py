@@ -522,3 +522,17 @@ class AccountBankStatement(osv.osv):
 # 	_inherit = 'order.preparation'
 # 	_name = 'order.preparation'
 # 	
+
+class DeliveryNote(osv.osv):
+	
+	_description = 'Delivery Note'
+	_name = 'delivery.note'
+	_inherit = ['delivery.note','mail.thread']
+	_track = {
+		'partner_shipping_id':{
+
+		},
+		'delivery_date':{
+
+		}
+	}
