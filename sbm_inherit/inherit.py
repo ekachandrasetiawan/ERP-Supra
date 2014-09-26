@@ -541,6 +541,24 @@ class DeliveryNote(osv.osv):
 # ---------------------------------------------
 # OVERRIDE INTERMAL MOVE REDIRECT ON DO PARTIAL
 # ---------------------------------------------
+class stock_picking(osv.osv):
+	_inherit = "stock.picking"
+	_name = "stock.picking"
+	def do_partial(self, cr, uid, ids, partial_datas, context=None):
+		pick = self.browse(cr,uid,ids)
+		# print pick[0].name;
+		if pick[0].name==False:
+			# GENERATE NUMBER
+			self.generateSeq(cr,uid,ids,context)
+
+		return super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
+	def generateSeq(self,cr,uid,ids,context=None):
+
+		newPickName = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking')
+		return self.write(cr,uid,ids,{'name':newPickName})
+
+	# def submit(self,cr,uid,ids,context=None):
+
 # class stock_picking(osv.osv):
 # 	_inherit = "stock.picking"
 # 	_name = "stock.picking"

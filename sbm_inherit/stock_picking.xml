@@ -20,6 +20,28 @@
 				
 			</field>
 		</record>
+
+
+		<record id="view_picking_in_form" model="ir.ui.view">
+			<field name="name">stock.picking.form.request</field>
+			<field name="model">stock.picking</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="ad_delivery_note.view_picking_form_internal" />
+
+			<field name="arch" type="xml">
+				
+					<!-- <field name="cust_doc_ref" position="after" >
+						<field name="origin" />
+					</field> -->
+					<xpath expr="//button[@name='force_assign']" position="after">
+	                    <button states="warehouse,confirmed" name="generateSeq" string="Get Seq" type="object" class="oe_highlight" attrs="{'invisible':[('backorder_id','!=','')]}"/>
+	                </xpath>
+
+	                <xpath expr="//field[@name='origin']" position="after">
+	                	<field name="backorder_id" attrs="{'invisible':[('backorder_id','=','')]}" />
+	                </xpath>				
+			</field>
+		</record>
 		<!-- END OF INHERIT FIELD cust_ref_no -->
 
 		<!-- <record id="view_picking_form_internal" model="ir.ui.view">
