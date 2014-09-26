@@ -553,9 +553,16 @@ class stock_picking(osv.osv):
 
 		return super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
 	def generateSeq(self,cr,uid,ids,context=None):
+		pick = self.browse(cr,uid,ids)
 
-		newPickName = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking')
-		return self.write(cr,uid,ids,{'name':newPickName})
+		if pick[0].name == False:
+			newPickName = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking')
+			return self.write(cr,uid,ids,{'name':newPickName})
+		else:
+			raise osv.except_osv(('Error !!!'), ('Can\'t Update Squence'))
+			return False
+
+		
 
 	# def submit(self,cr,uid,ids,context=None):
 

@@ -21,7 +21,7 @@
 			</field>
 		</record>
 
-
+		<!-- INTERNAL MOVES PRODUCT MOVES -->
 		<record id="view_picking_in_form" model="ir.ui.view">
 			<field name="name">stock.picking.form.request</field>
 			<field name="model">stock.picking</field>
