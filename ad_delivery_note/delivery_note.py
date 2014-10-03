@@ -295,12 +295,11 @@ class delivery_note(osv.osv):
         'note': fields.text('Notes'),
         'terms':fields.text('Terms & Condition'),
     }
-     
     _defaults = {
         'name': '/',
         'state': 'draft', 
     }
-
+    # to add mail thread in footer
     _inherit = ['mail.thread']
     
      
@@ -421,6 +420,8 @@ class delivery_note(osv.osv):
                 stock_picking = self.pool.get("stock.picking")
 
                 move = [x.product_id.id for x in val.prepare_id.picking_id.move_lines]
+                print "PREPARE ======= ",val.prepare_id
+                # return False
                 line = [x.product_id.id for x in val.note_lines]
                 err = [x for x in line if x not in move]
                 if err:
@@ -446,7 +447,9 @@ class delivery_note(osv.osv):
                     if b.product_qty == mad.product_qty:
                         move_id = mid
                     else:
-                        stock_move.write(cr,uid, [mid], {'product_qty': mad.product_qty-b.product_qty})
+                        stock_move.write(cr,uid, [mid], {
+                            'product_qty': mad.product_qty-b.product_qty}
+                        )
                         move_id = stock_move.create(cr,uid, {
                                         'name' : val.name,
                                         'product_id': b.product_id.id,
@@ -456,6 +459,7 @@ class delivery_note(osv.osv):
                                         'location_id' : mad.location_id.id,
                                         'location_dest_id' : mad.location_dest_id.id,
                                         'picking_id': val.prepare_id.picking_id.id})
+                        print "MOVE_ID OBJ >>>>>>>>>>>>>>>>>>>>>.",move_id
                         stock_move.action_confirm(cr, uid, [move_id], context)
                            
                     partial_data['move%s' % (move_id)] = {
@@ -463,13 +467,36 @@ class delivery_note(osv.osv):
                         'product_qty': b.product_qty,
                         'product_uom': b.product_uom.id,
                         'prodlot_id': mad.prodlot_id.id}
+                    # self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
+
+                    
                    
                    
                 iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
                 id_done = iddo.items()
+                getMove = self.pool.get('stock.move').browse(cr,uid,move_id,context={})
+                prepare_obj = self.pool.get('order.preparation')
+                print "sacsacsacsacsac-----------------------",id_done[0]
+                prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':getMove.picking_id.id})
+
                 stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'note_id': val.id})
-                   
+
                 self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
+
+                # print "AAAAAAAAAAAAAAAAAAAAa=====",st
+                # print "BBBBBBBBBBBBBBBB",st.id
+                # print "BBBBBBBBBBBBBBBB",stock_picking.id
+                # print "ID DO ===========================",iddo
+                # print "ID DONEEEEEEE =+++=============",id_done
+
+                print "MOVE ID",move_id
+                print partial_data,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+                print val.prepare_id,">>>>>>>><<<>>>>>>>>>>>>>>>>>>>>>>>>..================"
+                
+                # print "GET MOVE === ",getMove.picking_id
+                # return False
+                # self.pool.get('order.preparation').write(cr,uid,val.prepare_id,{'picking_id':getMove.picking_id.id})
+
                 return True
         else:
             self.write(cr, uid, ids, {'state': 'done'})
