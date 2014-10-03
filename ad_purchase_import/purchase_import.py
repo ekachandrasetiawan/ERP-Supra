@@ -29,7 +29,7 @@ class purchase_order(osv.osv):
     _defaults ={
         'total_price':'TOTAL PRICE CIF JAKARTA',
         'shipment_to':'PT.SUPRABAKTI MANDIRI, Destination : JAKARTA PORT',
-        'after_shipment':'After shipment, please fax me the copy of invoice, Packing List, Insurance Certificate and Bill of Lading "Telex Release"',
+        'after_shipment':'After shipment, please email me the copy of Invoice, Packing List and Bill of Lading "Telex Release"',
     }
 
 purchase_order()

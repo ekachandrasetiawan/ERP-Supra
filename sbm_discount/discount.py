@@ -44,14 +44,13 @@ class PurchaseOrder(osv.osv):
             val = val1 = 0.0
             cur = order.pricelist_id.currency_id
             for line in order.order_line:
+                # print '====================',line.state
                 val1 += line.price_subtotal
                 pajak = self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, line.price_unit, line.product_qty, line.product_id, order.partner_id)['taxes']
                 if line.discount_nominal:
                     harga = (line.price_unit*line.product_qty-line.discount_nominal)
                     pajak = self.pool.get('account.tax').compute_all(cr, uid, line.taxes_id, harga, 1, line.product_id, order.partner_id)['taxes']
                 if line.discount:
-                    #price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-                    # harga = (line.price_unit*line.product_qty-price)
                     pricediscount = (line.price_unit *line.product_qty) * (1 - (line.discount or 0.0) / 100.0)      
                     subtotalPrice = (line.price_unit*line.product_qty)-pricediscount
                     harga=(line.price_unit*line.product_qty)-subtotalPrice
@@ -59,8 +58,10 @@ class PurchaseOrder(osv.osv):
                 if pajak:
                     val += pajak[0].get('amount', 0.0)
             res[order.id]['amount_tax']=cur_obj.round(cr, uid, cur, val)
-            res[order.id]['amount_untaxed']=cur_obj.round(cr, uid, cur, val1)
+            res[order.id]['amount_untaxed']=0
+            # res[order.id]['amount_untaxed']=cur_obj.round(cr, uid, cur, val1)
             res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax']
+            # print '==================EKA CHANDRA'
         return res
 
     def action_cancel_draft(self, cr, uid, ids, context=None):

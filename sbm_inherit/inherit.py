@@ -536,3 +536,111 @@ class DeliveryNote(osv.osv):
 
 		}
 	}
+
+class SerialNumber(osv.osv):
+	_description = 'Serial Number'
+	_name = 'stock.production.lot'
+	_inherit= 'stock.production.lot'
+	_columns = {
+		'desc':fields.text('Description'),
+	}
+
+class stock_move_split_lines_exist(osv.osv_memory):
+    _name = "stock.move.split.lines"
+    _inherit = "stock.move.split.lines"
+    _description = "Stock move Split lines"
+
+
+    def name_get(self, cr, uid, ids, context=None):
+        if not ids:
+            return []
+        reads = self.read(cr, uid, ids, ['name', 'prefix', 'ref'], context)
+        res = []
+        for record in reads:
+            name = record['name']
+            prefix = record['prefix']
+            if prefix:
+                name = prefix + '/' + name
+            if record['ref']:
+                name = '%s [%s]' % (name, record['ref'])
+            res.append((record['id'], name))
+        return res
+
+    def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
+        args = args or []
+        ids = []
+        if name:
+            ids = self.search(cr, uid, [('prefix', '=', name)] + args, limit=limit, context=context)
+            if not ids:
+                ids = self.search(cr, uid, [('name', operator, name)] + args, limit=limit, context=context)
+        else:
+            ids = self.search(cr, uid, args, limit=limit, context=context)
+        return self.name_get(cr, uid, ids, context)
+        
+    def _get_stock(self, cr, uid, ids, context=None):
+        """ Gets stock of products for locations
+        @return: Dictionary of values
+        """
+        if context is None:
+            context = {}
+        if 'location_id' not in context:
+            locations = self.pool.get('stock.location').search(cr, uid, [('usage', '=', 'internal')], context=context)
+        else:
+            locations = context['location_id'] and [context['location_id']] or []
+
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+
+        res = {}.fromkeys(ids, 0.0)
+        if locations:
+            cr.execute('''select
+                    prodlot_id,
+                    sum(qty)
+                from
+                    stock_report_prodlots
+                where
+                    location_id IN %s and prodlot_id IN %s group by prodlot_id''',(tuple(locations),tuple(ids),))
+            res.update(dict(cr.fetchall()))
+
+        return 100
+
+    def _stock_search(self, cr, uid, obj, name, args, context=None):
+        """ Searches Ids of products
+        @return: Ids of locations
+        """
+        locations = self.pool.get('stock.location').search(cr, uid, [('usage', '=', 'internal')])
+        cr.execute('''select
+                prodlot_id,
+                sum(qty)
+            from
+                stock_report_prodlots
+            where
+                location_id IN %s group by prodlot_id
+            having  sum(qty) '''+ str(args[0][1]) + str(args[0][2]),(tuple(locations),))
+        res = cr.fetchall()
+        ids = [('id', 'in', map(lambda x: x[0], res))]
+        return ids
+
+    _columns = {
+    	'name': fields.char('Serial Number', size=64),
+        'quantity': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+        'wizard_id': fields.many2one('stock.move.split', 'Parent Wizard'),
+        'wizard_exist_id': fields.many2one('stock.move.split', 'Parent Wizard (for existing lines)'),
+        'prodlot_id': fields.many2one('stock.production.lot', 'Serial Number'),
+		'desc':fields.text('Description'),
+		'stock_available': fields.function(_get_stock, fnct_search=_stock_search, type="float", string="Available", select=True, help="Current quantity of products with this Serial Number available in company warehouses", digits_compute=dp.get_precision('Product Unit of Measure')),
+    }
+    _defaults = {
+        'quantity': 1.0,
+    }
+    def _dumy_getStock(self,cr,uid,ids,context=None):
+    	return 1000
+    def onchange_lot_id(self, cr, uid, ids, prodlot_id=False, product_qty=False,
+                        loc_id=False, product_id=False, uom_id=False,context=None):
+    	if prodlot_id == False:
+    		return False
+    	else:
+	    	hasil=self.pool.get('stock.production.lot').browse(cr,uid,[prodlot_id])[0]
+	    	return {'value':{'desc':hasil.desc,'stock_available':self.pool.get('stock.move.split.lines')._dumy_getStock(cr,uid,ids,context)}}
+        return self.pool.get('stock.move').onchange_lot_id(cr, uid, [], prodlot_id, product_qty,
+                        loc_id, product_id, uom_id, context)

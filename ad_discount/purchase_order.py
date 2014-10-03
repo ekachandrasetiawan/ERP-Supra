@@ -21,6 +21,7 @@ class purchase_order(osv.osv):
             val = val1 = 0.0
             cur = order.pricelist_id.currency_id
             for line in order.order_line:
+                print '=====================',line.state
                 disc = 0.0
                 price = 0.0
                 if line.discount_type == "disc1":
