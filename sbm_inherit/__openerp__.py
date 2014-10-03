@@ -21,7 +21,7 @@
         "account_invoice_line.xml",
         "account_bank_statement.xml",
         "product_batch.xml",
-        "split_batch.xml"
+        "split_batch.xml",
     ],
     'demo_xml': [],
     'installable': True,

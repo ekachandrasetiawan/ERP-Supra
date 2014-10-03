@@ -53,8 +53,15 @@ class stock_picking_in(osv.osv):
 	
 stock_picking_in()
 
+
+# INHERIT FOR
+# 1. TOTAL DISCOUNT
+# 2. DESCRIPTION LINE MANY2ONE RELATED
 class PurchaseOrder(osv.osv):
 	_inherit='purchase.order'
+	_name='purchase.order'
+	
+
 
 
 	def _get_total_discount(self, cr, uid, ids, name, arg, context=None):
@@ -95,7 +102,8 @@ class PurchaseOrder(osv.osv):
 			string="SubTotal",
 			type="float",
 			store=False
-		)
+		),
+		'description': fields.related('order_line','name', type='text', string='Description',store=False),
 	}
 	_defaults = {
 		'total_discount': _default_total_discount
@@ -103,6 +111,9 @@ class PurchaseOrder(osv.osv):
 
 
 PurchaseOrder()
+class PurchaseOrderLine(osv.osv):
+	_inherit='purchase.order.line'
+	# _name='purchase.order.line'
 
 class SpecialWorkOrder(osv.osv):
 	_inherit = 'perintah.kerja'
