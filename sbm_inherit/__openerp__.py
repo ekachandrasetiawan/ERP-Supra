@@ -22,6 +22,7 @@
         "account_bank_statement.xml",
         "product_batch.xml",
         "split_batch.xml",
+        # "purchase_order.xml",
     ],
     'demo_xml': [],
     'installable': True,
