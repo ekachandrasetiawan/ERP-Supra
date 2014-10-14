@@ -682,6 +682,10 @@ class stock_picking(osv.osv):
 			raise osv.except_osv(('Error !!!'), ('Can\'t Update Squence'))
 			return False
 
+
+class stock_move(osv.osv):
+	_inherit = 'stock.move'
+	_order = 'no ASC'
 		
 
 	# def submit(self,cr,uid,ids,context=None):
