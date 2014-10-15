@@ -3,6 +3,7 @@ from stock import stock
 import math
 import time
 import netsvc
+import openerp.exceptions
 from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
@@ -555,7 +556,98 @@ class SerialNumber(osv.osv):
 	_inherit= 'stock.production.lot'
 	_columns = {
 		'desc':fields.text('Description'),
+		'exp_date':fields.date('Exp Date'),
 	}
+
+class split_in_production_lot(osv.osv_memory):
+    _name = "stock.move.split"
+    _inherit = "stock.move.split"
+    _description = "Stock move Split"
+
+    def split_lot(self, cr, uid, ids, context=None):
+        """ To split a lot"""
+        if context is None:
+            context = {}
+        res = self.split(cr, uid, ids, context.get('active_ids'), context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
+    def split(self, cr, uid, ids, move_ids, context=None):
+        """ To split stock moves into serial numbers
+
+        :param move_ids: the ID or list of IDs of stock move we want to split
+        """
+        if context is None:
+            context = {}
+        assert context.get('active_model') == 'stock.move',\
+             'Incorrect use of the stock move split wizard'
+        inventory_id = context.get('inventory_id', False)
+        prodlot_obj = self.pool.get('stock.production.lot')
+        inventory_obj = self.pool.get('stock.inventory')
+        move_obj = self.pool.get('stock.move')
+        new_move = []
+        for data in self.browse(cr, uid, ids, context=context):
+            for move in move_obj.browse(cr, uid, move_ids, context=context):
+                move_qty = move.product_qty
+                quantity_rest = move.product_qty
+                uos_qty_rest = move.product_uos_qty
+                new_move = []
+                if data.use_exist:
+                    lines = [l for l in data.line_exist_ids if l]
+                else:
+                    lines = [l for l in data.line_ids if l]
+                total_move_qty = 0.0
+                for line in lines:
+                    quantity = line.quantity
+                    total_move_qty += quantity
+                    if total_move_qty > move_qty:
+                        raise osv.except_osv(_('Processing Error!'), _('Serial number quantity %d of %s is larger than available quantity (%d)!') \
+                                % (total_move_qty, move.product_id.name, move_qty))
+                    if quantity <= 0 or move_qty == 0:
+                        continue
+                    quantity_rest -= quantity
+                    uos_qty = quantity / move_qty * move.product_uos_qty
+                    uos_qty_rest = quantity_rest / move_qty * move.product_uos_qty
+                    if quantity_rest < 0:
+                        quantity_rest = quantity
+                        self.pool.get('stock.move').log(cr, uid, move.id, _('Unable to assign all lots to this move!'))
+                        return False
+                    default_val = {
+                        'product_qty': quantity,
+                        'product_uos_qty': uos_qty,
+                        'state': move.state
+                    }
+                    if quantity_rest > 0:
+                        current_move = move_obj.copy(cr, uid, move.id, default_val, context=context)
+                        if inventory_id and current_move:
+                            inventory_obj.write(cr, uid, inventory_id, {'move_ids': [(4, current_move)]}, context=context)
+                        new_move.append(current_move)
+
+                    if quantity_rest == 0:
+                        current_move = move.id
+                    prodlot_id = False
+                    if data.use_exist:
+                        prodlot_id = line.prodlot_id.id
+                    if not prodlot_id:
+                        prodlot_id = prodlot_obj.create(cr, uid, {
+                            'name': line.name,
+                            'desc':line.desc,
+                            'exp_date':line.exp_date,
+                            'product_id': move.product_id.id},
+                        context=context)
+
+                    move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'state':move.state})
+
+                    update_val = {}
+                    if quantity_rest > 0:
+                        update_val['product_qty'] = quantity_rest
+                        update_val['product_uos_qty'] = uos_qty_rest
+                        update_val['state'] = move.state
+                        move_obj.write(cr, uid, [move.id], update_val)
+
+        return new_move
+
+split_in_production_lot()
+
 
 class stock_move_split_lines_exist(osv.osv_memory):
     _name = "stock.move.split.lines"
@@ -640,20 +732,28 @@ class stock_move_split_lines_exist(osv.osv_memory):
         'wizard_exist_id': fields.many2one('stock.move.split', 'Parent Wizard (for existing lines)'),
         'prodlot_id': fields.many2one('stock.production.lot', 'Serial Number'),
 		'desc':fields.text('Description'),
-		'stock_available': fields.function(_get_stock, fnct_search=_stock_search, type="float", string="Available", select=True, help="Current quantity of products with this Serial Number available in company warehouses", digits_compute=dp.get_precision('Product Unit of Measure')),
+		'exp_date':fields.date('Exp Date'),
+		'stock_available': fields.float('Stock Available'),
     }
     _defaults = {
         'quantity': 1.0,
     }
-    def _dumy_getStock(self,cr,uid,ids,context=None):
-    	return 1000
+    def _dumy_getStock(self,cr,uid,ids,prodlot_id,context=None):
+    	stock = 10
+    	return stock
     def onchange_lot_id(self, cr, uid, ids, prodlot_id=False, product_qty=False,
                         loc_id=False, product_id=False, uom_id=False,context=None):
     	if prodlot_id == False:
     		return False
     	else:
+    		# print '=======================PROUDCT QTY=============',product_qty
 	    	hasil=self.pool.get('stock.production.lot').browse(cr,uid,[prodlot_id])[0]
-	    	return {'value':{'desc':hasil.desc,'stock_available':self.pool.get('stock.move.split.lines')._dumy_getStock(cr,uid,ids,context)}}
+
+	    	if product_qty > hasil.stock_available:
+	    		raise openerp.exceptions.Warning('Stock Available Tidak Mencukupi')
+	    		return {'value':{'quantity':0}}
+
+	    	return {'value':{'desc':hasil.desc,'exp_date':hasil.exp_date,'stock_available':hasil.stock_available}}
         return self.pool.get('stock.move').onchange_lot_id(cr, uid, [], prodlot_id, product_qty,
                         loc_id, product_id, uom_id, context)
 

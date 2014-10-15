@@ -43,6 +43,8 @@
 				<label for="purchase_ok" position="after">
 					<field name="is_rent_item" />
 					<label for="is_rent_item"/>
+					<field name="not_stock" />
+					<label for="not_stock"/>
 				</label>
 			</field>
 		</record>

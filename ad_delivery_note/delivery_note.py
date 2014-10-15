@@ -123,7 +123,6 @@ class sale_order_line(osv.osv):
         if partner_id:
             lang = partner_obj.browse(cr, uid, partner_id).lang
         context_partner = {'lang': lang, 'partner_id': partner_id}
-
         if not product:
             return {'value': {'th_weight': 0,
                 'product_uos_qty': qty}, 'domain': {'product_uom': [],
@@ -134,7 +133,6 @@ class sale_order_line(osv.osv):
         result = {}
         warning_msgs = ''
         product_obj = product_obj.browse(cr, uid, product, context=context_partner)
-
         result['product_uom'] = product_obj.uom_id.id
 
         uom2 = False
@@ -217,7 +215,10 @@ class sale_order_line(osv.osv):
         #                'title': _('Configuration Error!'),
         #                'message' : warning_msgs
         #             }
-
+        if product_obj.not_stock == False:
+            if qty >= product_obj.virtual_available:
+                raise osv.except_osv(('Error !!!'), ('Stock Available Tidak Mencukupi'))
+                return False
         result['product_onhand'] = product_obj.qty_available
         result['product_future'] = product_obj.virtual_available
         

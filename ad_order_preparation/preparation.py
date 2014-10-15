@@ -132,9 +132,7 @@ class order_preparation(osv.osv):
             
     def create(self, cr, uid, vals, context=None):
         check = self.search(cr,uid,[('sale_id','=',vals['sale_id']),('picking_id','=',vals['picking_id'])])
-
         OPs = self.browse(cr,uid,check,context=None)
-
         if check:
             allOp = []
             for op in OPs:
@@ -163,6 +161,18 @@ class order_preparation(osv.osv):
         return True                                  
          
     def preparation_confirm(self, cr, uid, ids, context=None):
+        val = self.browse(cr, uid, ids)[0]
+        for x in val.prepare_lines:
+            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+
+            mm = ' ' + product.default_code + ' '
+            stock = ' ' + str(product.qty_available) + ' '
+            msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+
+            if x.product_qty > product.qty_available:
+                raise openerp.exceptions.Warning(msg)
+                return False
+
         self.write(cr, uid, ids, {'state': 'approve'})
         return True
 
