@@ -33,7 +33,11 @@
 				<xpath expr="//button[@name='force_assign']" position="after">
                     <button states="warehouse,confirmed,assigned" name="generateSeq" string="Get Seq" type="object" class="oe_highlight" attrs="{'invisible':[('backorder_id','!=','')]}"/>
                 </xpath>
-                
+
+                <xpath expr="//button[@name='force_assign']" position="after">
+                	<button type="object" string="OpenBackOrder" name="open_full_record" icon="gtk-next" attrs="{'invisible': [('backorder_id','=',False)]}"/>
+                </xpath>
+
                 <xpath expr="//field[@name='origin']" position="after">
                 	<field name="backorder_id" attrs="{'invisible':[('backorder_id','=','')]}" />
                 </xpath>

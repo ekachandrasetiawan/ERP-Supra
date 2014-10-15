@@ -8,11 +8,26 @@ from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from openerp.addons.account import account_invoice
 class stock_picking(osv.osv):
+	def open_full_record(self, cr, uid, ids, context=None):
+		data= self.browse(cr, uid, ids, context=context)
+		# print "======================================",data[0].backorder_id
+		return {
+			'type': 'ir.actions.act_window',
+			'view_type': 'form',
+			'view_mode': 'form',
+			'action_id':588,
+			'view_id':960,
+			'res_model': self._name,
+			'res_id': data[0].backorder_id.id,
+			'target': 'current',
+		    'context': context,  # May want to modify depending on the source/destination
+		}
 	_inherit = 'stock.picking'
 	_columns = {
 		'cust_doc_ref' : fields.char('External Doc Ref',200,required=False,store=True),
 		'lbm_no' : fields.char('LBM No',200,required=False,store=True),
 	}
+
 
 	
 stock_picking()
