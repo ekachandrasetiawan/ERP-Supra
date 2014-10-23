@@ -608,7 +608,7 @@ product_list_line()
 class stock_move(osv.osv):
     _inherit = "stock.move"
     _columns = {
-        'no': fields.char('No', size=3),
+        'no': fields.integer('No', size=3),
         'desc':fields.char('Description',required=False)
     }
     

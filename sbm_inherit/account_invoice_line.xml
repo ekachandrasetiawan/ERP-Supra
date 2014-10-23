@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
+		<record id="invoice_customer_form" model="ir.ui.view">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form" />
+            <field name="arch" type="xml">
+            	<xpath expr="//button[@string='Cancel Invoice']" position="after">
+            		<button name="actionFakturPrint" string="Print Faktur Pajak" type="object" />
+            	</xpath>
+            </field>
+        </record>
         <record id="invoice_supplier_form" model="ir.ui.view">
             <field name="name">account.invoice.form</field>
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_supplier_form" />
             <field name="arch" type="xml">
+            	<xpath expr="//button[@string='Cancel Invoice']" position="after">
+            		<button name="actionTest" string="Test Outside" type="object" />
+            	</xpath>
             	<xpath expr="//field[@name='invoice_line']" position="replace">
                     <field context="{'partner_id': partner_id, 'price_type': context.get('price_type') or False, 'type': type}" name="invoice_line">
 	                    <tree string="Invoice lines" editable="bottom">
