@@ -7,6 +7,7 @@
         "ad_delivery_note",
         "account","ad_discount",
         "ad_order_preparation",
+        "web"
     ],
     "author": "Suprabakti Mandiri",
     "category": "Purchase Suprabakti",
@@ -28,4 +29,8 @@
     'demo_xml': [],
     'installable': True,
     'active': False,
+    'js':['static/src/js/reportLink.js'],
+    # "qweb": [
+    #     'static/src/xml/reportbutton.xml',
+    # ],
 }

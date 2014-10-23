@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+ <div t-name="test_button" t-attf-class="base #{cls}" class="oe_web_example">  
+   <p>
+    <button name="dosomething" type="object" id="bstart">start</button>
+   </p>
+ </div>
+</templates>

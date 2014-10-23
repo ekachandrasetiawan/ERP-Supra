@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		
+		<record model="ir.ui.view" id="test_form_view">
+		        <field name="name">test.form</field>
+		        <field name="model">test</field>
+		        <field name="type">form</field>
+		        <field name="arch" type="xml">
+		            <form string="test">
+		                <field name="numero"  widget="test"/>    
+		            </form>
+		        </field>
+		 </record>
+	</data>
+</openerp>
