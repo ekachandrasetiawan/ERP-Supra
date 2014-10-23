@@ -17,6 +17,19 @@ class res_users(osv.osv):
 res_users()
 
 
+class product_batch(osv.osv):
+    _description = 'Product Batch Delivery Order'
+    _name = 'product.batch.line'
+    _columns = {
+        'nama':fields.char('Serial Number',size=64),
+        'preparation_id': fields.many2one('order.preparation', 'Order Preparation', required=True, ondelete='cascade'),
+        'product_id': fields.many2one('product.product', 'Product',track_visibility='always'),
+        'desc':fields.char('Description', size=64),
+        'product_qty':fields.integer('Product Qty'),
+    }
+
+product_batch()
+
 class order_preparation(osv.osv):
     _name = "order.preparation"
     _description = "Order Packaging"
@@ -36,6 +49,7 @@ class order_preparation(osv.osv):
         'create_uid':  fields.many2one('res.users', 'Creator', select=True, readonly=True),
         'partner_id': fields.many2one('res.partner', 'Customer', select=True, domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]}),
         'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]}),
+        'batch_lines ': fields.one2many('product.batch.line','preparation_id','Product Batch', readonly=True, states={'draft': [('readonly', False)]}),
         'note': fields.text('Notes'),
         'terms':fields.text('Terms & Condition'),
         'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True),
@@ -164,16 +178,18 @@ class order_preparation(osv.osv):
         val = self.browse(cr, uid, ids)[0]
         for x in val.prepare_lines:
             product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+            if product.not_stock == False:
+                # print '=========================',product.qty_available
+                mm = ' ' + product.default_code + ' '
+                stock = ' ' + str(product.qty_available) + ' '
+                msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
-            mm = ' ' + product.default_code + ' '
-            stock = ' ' + str(product.qty_available) + ' '
-            msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
-
-            if x.product_qty > product.qty_available:
-                raise openerp.exceptions.Warning(msg)
-                return False
+                if x.product_qty > product.qty_available:
+                    raise openerp.exceptions.Warning(msg)
+                    return False
 
         self.write(cr, uid, ids, {'state': 'approve'})
+        # self.write(cr, uid, ids, {'state': 'draft'})
         return True
 
     def preparation_done(self, cr, uid, ids, context=None):

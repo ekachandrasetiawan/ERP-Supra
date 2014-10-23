@@ -642,6 +642,7 @@ class split_in_production_lot(osv.osv_memory):
                     prodlot_id = False
                     if data.use_exist:
                         prodlot_id = line.prodlot_id.id
+                        desc = line.prodlot_id.desc
                     if not prodlot_id:
                         prodlot_id = prodlot_obj.create(cr, uid, {
                             'name': line.name,
@@ -650,7 +651,7 @@ class split_in_production_lot(osv.osv_memory):
                             'product_id': move.product_id.id},
                         context=context)
 
-                    move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'state':move.state})
+                    move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'name' : desc, 'state':move.state})
 
                     update_val = {}
                     if quantity_rest > 0:
