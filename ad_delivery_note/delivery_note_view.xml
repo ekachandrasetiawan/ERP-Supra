@@ -237,6 +237,17 @@
         </record>
 
 
+        <record model="ir.ui.view" id="view_stock_move_form">
+            <field name="name">stock.move.form</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_form" />
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="desc" />
+                </field>
+            </field>
+        </record>
+
 
         <record id="view_move_picking_form_request" model="ir.ui.view">
             <field name="name">stock.move.form</field>
@@ -254,7 +265,6 @@
                     <field name="product_qty" on_change="onchange_quantity(product_id, product_qty, product_uom, 1)"/>
                     <field name="product_uom" string="Unit Of Measure" groups="product.group_uom"/>   
                 	<field name="no"/>
-                    <field name="name" invisible="1"/>
                     <field name="type" invisible="1"/>
                     <field name="scrapped" invisible="1"/>
 				</group>
@@ -263,7 +273,8 @@
                 </group>
                 <group string="Locations" groups="stock.group_locations">
                     <field name="location_id" domain="[('usage','&lt;&gt;','view')]"/>
-                    <field name="location_dest_id" domain="[('usage','=','internal')]" groups="stock.group_locations"/>
+                  <!--   <field name="location_dest_id" domain="[('usage','=','internal'),('usage','=','inventory')]" groups="stock.group_locations"/> -->
+                    <field name="location_dest_id" groups="stock.group_locations"/>
                 </group>
                 </form>
             </field>

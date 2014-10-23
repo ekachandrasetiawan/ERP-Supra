@@ -88,6 +88,7 @@
                         <field name="picking_id" on_change="picking_change(picking_id)"/>
                         <field name="duedate"/>
                     </group>
+                    <button name="$(refresh)d" type="object" string="View Batch"/>
                     <notebook colspan="5">
                         <page string="Order Lines">
                             <field colspan="4" name="prepare_lines" nolabel="1" widget="one2many_list">
@@ -115,6 +116,22 @@
                         <page string="Notes">
                             <field name="note" colspan="4" nolabel="1"/>
                         </page>
+           <!--              <page string="Product Batch">
+                            <field colspan="4" name="batch_lines">
+                                <form>
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="desc"/>
+                                    <field name="product_qty"/>
+                                </form>
+                                <tree string="">
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="desc"/>
+                                    <field name="product_qty"/>
+                                </tree>
+                            </field>
+                        </page> -->
                     </notebook>
                     <div class="oe_clear">
                         <field name="terms" class="oe_inline" placeholder="Terms and conditions..."/>
@@ -132,7 +149,32 @@
             </form>
         </field>
     </record>
-    
+    <!-- 
+    <record id="product_batch" model="ir.ui.view">
+            <field name="name">stock.production.lot.form</field>
+            <field name="model">stock.production.lot</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Product Batch">
+                    <separator string="" colspan="4" />
+                    <group colspan="4" col="6">
+                        <button  icon="gtk-cancel" special="cancel" string="Cancel"/>
+                        <button  icon="gtk-ok" name="add_terminal" string="Assign Terminal" type="object"/>
+                    </group>
+               </form>
+            </field>
+        </record>
+
+    <record id="refresh" model="ir.actions.act_window">
+        <field name="name">Batch Product</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner.terminal</field>
+        <field name="view_type">form</field>
+        <field name="view_id" ref="product_batch"/>
+        <field name="target">new</field>
+    </record>
+ -->
+
     <record id="mt_pack_approved" model="mail.message.subtype">
         <field name="name">Packing Approved</field>
         <field name="default" eval="False"/>

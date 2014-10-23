@@ -77,22 +77,22 @@ class Reportrachseorder(report_sxw.rml_parse):
         totaldiscount=0
         amount_untaxed=0
         for x in order_line:
-            if x.note_line == '-':
-               # amount_untaxed=amount_untaxed+(x.product_qty * x.price_unit)
-               # diskon=diskon+x.discount_nominal
-               # if x.discount == 0:
-               #     pricediscount=0
-               # else:
-               #     pricediscount = (x.price_unit *x.product_qty) * ( x.discount / 100 ) 
-                
-               # totaldiscount = totaldiscount+pricediscount
+            # print '=======================================',x.product_id.id
+            # if x.product_id.id == 9727:
+            #     print '<<<<<<<<<<<<<<aaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+            #     res.append({'no':False,'product_id':False, 'name':False,'part_no':False,'qty':False,'satuan':False,'harga':False,'total':False})
+            
 
+            if x.note_line == '-':
                 res.append({'no':i,'product_id':x.product_id, 'name':x.name,'part_no':x.part_number,'qty':x.product_qty,'satuan':x.product_uom,'harga':x.price_unit,'total':x.price_unit*x.product_qty})
                 i+=1
             else:
-                res.append({'no':False,'product_id':False, 'name':x.note_line,'part_no':False,'qty':False,'satuan':False,'harga':False,'total':False})
-                res.append({'no':i,'product_id':x.product_id, 'name':x.name,'part_no':x.part_number,'qty':x.product_qty,'satuan':x.product_uom,'harga':x.price_unit,'total':x.price_unit*x.product_qty})
-                i+=1
+                if x.product_id.id == 9727:
+                    res.append({'no':False,'product_id':False, 'name':False,'part_no':False,'qty':False,'satuan':False,'harga':False,'total':False})
+                else:
+                    res.append({'no':False,'product_id':False, 'name':x.note_line,'part_no':False,'qty':False,'satuan':False,'harga':False,'total':False})
+                    res.append({'no':i,'product_id':x.product_id, 'name':x.name,'part_no':x.part_number,'qty':x.product_qty,'satuan':x.product_uom,'harga':x.price_unit,'total':x.price_unit*x.product_qty})
+                    i+=1
 
         res.append({'no':False,'product_id':False, 'name':False,'part_no':False,'qty':False,'satuan':False,'harga':False,'total':False})
         res.append({'no':False,'product_id':False, 'name':obj.notes,'part_no':False,'qty':False,'satuan':False,'harga':False,'total':False})

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import time
+import openerp.exceptions
 from openerp import pooler
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -58,6 +59,7 @@ class stock_picking(osv.osv):
     _inherit = "stock.picking"
     _columns = {
         'note_id': fields.many2one('delivery.note','Delivery Note', select=True),
+        'note': fields.text('Notes', states={'done':[('readonly', False)]}),
         'state': fields.selection([
             ('draft', 'Draft'),
             ('warehouse','Check Warehouse'),
@@ -77,7 +79,55 @@ class stock_picking(osv.osv):
         ),
     }
     
+# def quantity_by_loc(self, cr, uid, product_id, location_id, context):
+#     #if you can't access context from method as argument than you can define here.
+#     product_obj = self.pool.get('product.product')
+#     qty = 0.0
+#     if context is None:
+#         context={}
+#     context.update({
+#         'states': ['done'],
+#         'what': ('in', 'out'),
+#         'location':location_id,
+#     })
+
+#     avail_product_details = product_obj.get_product_available(cr, uid, product_id, context=context)
+#     if avail_product_defails.values():
+#         qty = avail_product_defails.values()[0]
+#     return qty
+
+    # def _product_get_multi_location(self, cr, uid, ids, product_ids=False, context=None,
+    #                                 states=['done'], what=('in', 'out')):
+    #     """
+    #     @param product_ids: Ids of product
+    #     @param states: List of states
+    #     @param what: Tuple of
+    #     @return:
+    #     """
+    #     product_obj = self.pool.get('product.product')
+    #     if context is None:
+    #         context = {}
+    #     context.update({
+    #         'states': states,
+    #         'what': what,
+    #         'location': ids
+    #     })
+    #     return product_obj.get_product_available(cr, uid, product_ids, context=context)
+
     def draft_force_warehouse(self,cr,uid,ids,context=None):
+        val = self.browse(cr, uid, ids)[0]
+        for x in val.move_lines:
+            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+            print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.qty_available
+            if product.not_stock == False:
+                mm = ' ' + product.default_code + ' '
+                stock = ' ' + str(product.qty_available) + ' '
+                msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+
+                if x.product_qty > product.qty_available:
+                    raise openerp.exceptions.Warning(msg)
+                    return False
+        # return self.write(cr,uid,ids,{'state':'warehouse'})
         return self.write(cr,uid,ids,{'state':'warehouse'})
 
     def draft_force_assign(self,cr,uid,ids,context=None):
@@ -123,7 +173,6 @@ class sale_order_line(osv.osv):
         if partner_id:
             lang = partner_obj.browse(cr, uid, partner_id).lang
         context_partner = {'lang': lang, 'partner_id': partner_id}
-
         if not product:
             return {'value': {'th_weight': 0,
                 'product_uos_qty': qty}, 'domain': {'product_uom': [],
@@ -134,7 +183,6 @@ class sale_order_line(osv.osv):
         result = {}
         warning_msgs = ''
         product_obj = product_obj.browse(cr, uid, product, context=context_partner)
-
         result['product_uom'] = product_obj.uom_id.id
 
         uom2 = False
@@ -217,7 +265,14 @@ class sale_order_line(osv.osv):
         #                'title': _('Configuration Error!'),
         #                'message' : warning_msgs
         #             }
-
+        if product_obj.not_stock == False:
+            if qty > product_obj.virtual_available:
+                warning_msgs += _("Not enough stock Available")
+                protect = {
+                        'title':_('Protect Stock Product !'),
+                        'message': warning_msgs
+                    }
+                return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
         result['product_onhand'] = product_obj.qty_available
         result['product_future'] = product_obj.virtual_available
         
@@ -445,8 +500,10 @@ class delivery_note(osv.osv):
                     mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
                     mad = stock_move.browse(cr, uid, mid)
                     if b.product_qty == mad.product_qty:
+                        print '===================EKA CHANDRA SETIAWAN==========================='
                         move_id = mid
                     else:
+                        print '===================EKA CHANDRA SETIAWAN==========================='
                         stock_move.write(cr,uid, [mid], {
                             'product_qty': mad.product_qty-b.product_qty}
                         )
@@ -608,8 +665,9 @@ product_list_line()
 class stock_move(osv.osv):
     _inherit = "stock.move"
     _columns = {
-        'no': fields.integer('No', size=3),
-        'desc':fields.char('Description',required=False)
+        'no': fields.char('No', size=3),
+        'desc':fields.text('Description',required=False),
+        'name':fields.text('Product Name',required=False)
     }
     
     # def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):

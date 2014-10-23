@@ -8,6 +8,7 @@ class RentItems (osv.osv):
 	# _name = 'rent.items'
 	_inherit = 'product.product'
 	_columns = {
-		'is_rent_item': fields.boolean('Is Rent Item')
+		'is_rent_item': fields.boolean('Is Rent Item'),
+		'not_stock': fields.boolean('Not Stock')
 	}
 RentItems()

@@ -594,7 +594,11 @@
             <td> <para style="terp_default_Bold_Centre_8">Nama Barang</para></td>
         </tr>
         </blockTable>  
-                      <section rowHeights="400.0">
+                    <blockTable rowHeights="200">
+                        <tr>
+                            <td>
+
+                                <section rowHeights="400.0">
                       <para style="terp_default_1">[[repeatIn(o.prepare_lines, 'x')]]</para>
                       <blockTable colWidths="30.0,80.0,450.0" style="Table21">
                       <tr>
@@ -632,6 +636,9 @@
                       </tr>
                       </blockTable> 
                 </section>
+                            </td>
+                        </tr>
+                    </blockTable>
 
     <blockTable colWidths="560.0" style="TableFoter">
       <tr>
