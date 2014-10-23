@@ -432,7 +432,7 @@ class account_invoice(osv.osv):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"account-invoice/print&id="+str(ids[0])
-		print "<<<<<<<<<<<<<<<<<<<<<<<<<<<",urlTo
+		# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<",urlTo
 		return {
 			'type': 'ir.actions.act_url',
 			'target': 'new',
