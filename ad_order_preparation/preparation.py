@@ -249,7 +249,7 @@ class order_preparation_line(osv.osv):
     _name = "order.preparation.line"
 
     _columns = {
-        'no': fields.char('No', size=3),
+        'no': fields.integer('No', size=3),
         'name': fields.text('Description'),
         'preparation_id': fields.many2one('order.preparation', 'Order Preparation', required=True, ondelete='cascade'),
         'product_id': fields.many2one('product.product', 'Product',track_visibility='always'),

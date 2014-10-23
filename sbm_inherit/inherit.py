@@ -5,6 +5,7 @@ import time
 import netsvc
 import openerp.exceptions
 from osv import osv, fields
+from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from openerp.addons.account import account_invoice
@@ -297,11 +298,11 @@ class PurchaseOrderFullInvoice(osv.osv):
 				print ">>>>>>>>>>",inv_line_id,">>>>>>>>>>>>>>>>>>>>>>>>>",po_line.taxes_id
 
 			
-			print listInvPPN
+			# print listInvPPN
 			# START AUTOMATIC CONVERT DISCOUNT TO NOMINAL
 			acc_discount_id=271 #DISCOUNT PEMBELIAN
 			# IF ALL LINE WITH PPN THEN WE JUST ONLY CREATE 1 INVOICE LINE
-			print order.total_discount,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+			# print order.total_discount,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 			if order.total_discount != 0.0:
 
 				if allWithPPN:
@@ -417,6 +418,29 @@ class account_bank_statement_line(osv.osv):
 	}
 
 class account_invoice(osv.osv):
+	def actionTest(self,cr,uid,ids,context=None):
+		# pick = self.browse(cr,uid,ids)
+		# print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>CALLLLEDDD"
+		return {
+			'type': 'ir.actions.act_url',
+			'target': 'new',
+			'url': 'http://www.google.com',
+		    
+		}
+	def actionFakturPrint(self,cr,uid,ids,context=None):
+		# pick = self.browse(cr,uid,ids)
+		# print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>CALLLLEDDD"
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"account-invoice/print&id="+str(ids[0])
+		print "<<<<<<<<<<<<<<<<<<<<<<<<<<<",urlTo
+		return {
+			'type': 'ir.actions.act_url',
+			'target': 'new',
+			'url': urlTo,
+		}
+
+
 	def _get_total_discount(self,cr,uid,ids,name,arg,context=None):
 		# get total discount from line
 		acc_discount_id=271
