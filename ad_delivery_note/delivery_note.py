@@ -116,19 +116,19 @@ class stock_picking(osv.osv):
 
     def draft_force_warehouse(self,cr,uid,ids,context=None):
         val = self.browse(cr, uid, ids)[0]
-        for x in val.move_lines:
-            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
-            print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.qty_available
-            if product.not_stock == False:
-                mm = ' ' + product.default_code + ' '
-                stock = ' ' + str(product.qty_available) + ' '
-                msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+        # for x in val.move_lines:
+        #     product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+        #     print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.qty_available
+        #     if product.not_stock == False:
+        #         mm = ' ' + product.default_code + ' '
+        #         stock = ' ' + str(product.qty_available) + ' '
+        #         msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
-                if x.product_qty > product.qty_available:
-                    raise openerp.exceptions.Warning(msg)
-                    return False
+        #         if x.product_qty > product.qty_available:
+        #             raise openerp.exceptions.Warning(msg)
+        #             return False
         # return self.write(cr,uid,ids,{'state':'warehouse'})
-        return self.write(cr,uid,ids,{'state':'warehouse'})
+        return self.write(cr,uid,ids,{'state':'assigned'})
 
     def draft_force_assign(self,cr,uid,ids,context=None):
         return self.write(cr,uid,ids,{'state':'confirmed'})
@@ -265,14 +265,16 @@ class sale_order_line(osv.osv):
         #                'title': _('Configuration Error!'),
         #                'message' : warning_msgs
         #             }
-        if product_obj.not_stock == False:
-            if qty > product_obj.virtual_available:
-                warning_msgs += _("Not enough stock Available")
-                protect = {
-                        'title':_('Protect Stock Product !'),
-                        'message': warning_msgs
-                    }
-                return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
+
+        # SCRIPT PROTECT STOCK AVAILABEL SALES ORDER LINE
+        # if product_obj.not_stock == False:
+        #     if qty > product_obj.virtual_available:
+        #         warning_msgs += _("Not enough stock Available")
+        #         protect = {
+        #                 'title':_('Protect Stock Product !'),
+        #                 'message': warning_msgs
+        #             }
+        #         return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
         result['product_onhand'] = product_obj.qty_available
         result['product_future'] = product_obj.virtual_available
         
