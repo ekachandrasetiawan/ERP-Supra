@@ -29,7 +29,7 @@
     'demo_xml': [],
     'installable': True,
     'active': False,
-    'js':['static/src/js/reportLink.js'],
+    'js':['static/src/js/account_invoice.js'],
     # "qweb": [
     #     'static/src/xml/reportbutton.xml',
     # ],
