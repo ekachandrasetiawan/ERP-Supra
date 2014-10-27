@@ -99,6 +99,7 @@ class ReportStatus(report_sxw.rml_parse):
             'get_basedon': self.get_basedon,
             'get_location': self.get_location,
             'get_lines':self.get_lines,
+            'get_user':str(self.pool.get('res.users').browse(cr, uid, uid).initial)
         })
 
     def get_lines(self,obj):
@@ -109,7 +110,7 @@ class ReportStatus(report_sxw.rml_parse):
     def get_basedon(self, form):
         data = self.pool.get(form['model']).browse(self.cr, self.uid, [form['form']['id']])
         return data
-    
+
     def get_location(self, o):
         loc = []; data = []
         for x in o.move_lines :
@@ -121,7 +122,35 @@ class ReportStatus(report_sxw.rml_parse):
         data = (o.move_lines[0].location_dest_id.name, o.move_lines[0].location_dest_id.comment)
         return data
 
+class InternalMove(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context=None):
+        super(InternalMove, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+            'get_location': self.get_location,
+            'get_lines_move':self.get_lines_move,
+            'user_name':str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+})
+
+    def get_lines_move(self,o):
+        res={}
+        move_lines= obj.move_lines
+        for x in move_lines:
+          print '============================',x.product_id
+
+        return res
+
+    def get_location(self, o):
+        loc = []; data = []
+        for x in o.move_lines :
+          loc.append(x.location_dest_id.id)
+
+        if len(set(loc)) > 1 :
+          raise osv.except_osv(('Perhatian !'), ('Lokasi tujuan harus satu tempat'))
+        
+        data = (o.move_lines[0].location_dest_id.name, o.move_lines[0].location_dest_id.comment)
+        return data
+
 report_sxw.report_sxw('report.delivery.note', 'delivery.note', 'addons/ad_delivery_note/report/delivery_note.rml', parser=ReportStatus, header=False)
 report_sxw.report_sxw('report.note.continue', 'delivery.note', 'addons/ad_delivery_note/report/note_continue.rml', parser=ReportStatus, header=False)
-report_sxw.report_sxw('report.internal.move', 'stock.picking', 'addons/ad_delivery_note/report/internal_move.rml', parser=ReportStatus, header=False)
-
+report_sxw.report_sxw('report.internal.move', 'stock.picking', 'addons/ad_delivery_note/report/internal_move.rml', parser=InternalMove, header=False)

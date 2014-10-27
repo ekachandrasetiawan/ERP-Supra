@@ -79,6 +79,7 @@
         <paraStyle name="terp_default_Bold_89_header" rightIndent="0.0" leftIndent="0.0" fontName="Impact" fontSize="7.0" leading="8" alignment="center" blockValign="TOP" spaceBefore="0.0" spaceAfter="0.0"/>
 
 <paraStyle name="terp_default_Bold_89C" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="7.0" leading="10" alignment="LEFT" blockValign="TOP" spaceBefore="0.0" spaceAfter="0.0"/>
+<paraStyle name="initial" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="20.0" leading="10" alignment="RIGHT" blockValign="TOP" spaceBefore="0.0" spaceAfter="0.0"/>
 
      <paraStyle name="terp_default_Bold_288" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="12.0" leading="15" alignment="LEFT" blockValign="TOP" spaceBefore="3.0" spaceAfter="3.0"/>
     <paraStyle name="terp_default_Bold_289" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="10.0" leading="10" alignment="LEFT" blockValign="TOP" spaceBefore="0.0" spaceAfter="5.0"/>
@@ -114,11 +115,14 @@
         </td>
       </tr>     
     </blockTable>
-    <blockTable colWidths="600.0" style="Table_Partner_Address">
+    <blockTable colWidths="500.0,100.0" style="Table_Partner_Address">
           <tr>
             <td>
               <para style="terp_default_Bold_89C"><font color="white">.........</font>SBM-F-PCH-02/01</para>
               <para style="terp_default_Bold_89C"><font color="white">................</font>12/01/30</para>
+            </td>
+            <td>
+              <para style="initial"> <b>[[ user_name ]]</b></para>
             </td>
           </tr>
         </blockTable>
@@ -133,7 +137,7 @@
             </tr>
             <tr>
               <td><para style="terp_default_Bold_182"><font color="white"> .</font></para></td>
-              <td><para style="terp_default_Bold_182">[[ get_location(o)[1] ]] [[ get_user(user) ]]</para></td>
+              <td><para style="terp_default_Bold_182">[[ get_location(o)[1] ]] </para></td>
             </tr>
             </blockTable> 
         </td>

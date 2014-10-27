@@ -116,17 +116,17 @@ class stock_picking(osv.osv):
 
     def draft_force_warehouse(self,cr,uid,ids,context=None):
         val = self.browse(cr, uid, ids)[0]
-        # for x in val.move_lines:
-        #     product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
-        #     print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.qty_available
-        #     if product.not_stock == False:
-        #         mm = ' ' + product.default_code + ' '
-        #         stock = ' ' + str(product.qty_available) + ' '
-        #         msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+        for x in val.move_lines:
+            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+            print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.qty_available
+            if product.not_stock == False:
+                mm = ' ' + product.default_code + ' '
+                stock = ' ' + str(product.qty_available) + ' '
+                msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
-        #         if x.product_qty > product.qty_available:
-        #             raise openerp.exceptions.Warning(msg)
-        #             return False
+                if x.product_qty > product.qty_available:
+                    raise openerp.exceptions.Warning(msg)
+                    return False
         # return self.write(cr,uid,ids,{'state':'warehouse'})
         return self.write(cr,uid,ids,{'state':'assigned'})
 
@@ -267,14 +267,14 @@ class sale_order_line(osv.osv):
         #             }
 
         # SCRIPT PROTECT STOCK AVAILABEL SALES ORDER LINE
-        # if product_obj.not_stock == False:
-        #     if qty > product_obj.virtual_available:
-        #         warning_msgs += _("Not enough stock Available")
-        #         protect = {
-        #                 'title':_('Protect Stock Product !'),
-        #                 'message': warning_msgs
-        #             }
-        #         return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
+        if product_obj.not_stock == False:
+            if qty > product_obj.virtual_available:
+                warning_msgs += _("Not enough stock Available")
+                protect = {
+                        'title':_('Protect Stock Product !'),
+                        'message': warning_msgs
+                    }
+                return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
         result['product_onhand'] = product_obj.qty_available
         result['product_future'] = product_obj.virtual_available
         
@@ -469,93 +469,92 @@ class delivery_note(osv.osv):
 
         val = self.browse(cr, uid, ids, context={})[0]
         print val.special
+
+        print '==================================',val.prepare_id.picking_id.state
         if val.special==False:
-            if val.prepare_id is None:
-                raise osv.except_osv(('Perhatian !'), ('Input Order Packaging Untuk Validate'))
-            else:
-                stock_move = self.pool.get('stock.move')
-                stock_picking = self.pool.get("stock.picking")
+            if val.prepare_id.picking_id.state == 'confirmed' or val.prepare_id.picking_id.state == 'assigned':
+                if val.prepare_id is None:
+                    raise osv.except_osv(('Perhatian !'), ('Input Order Packaging Untuk Validate'))
+                else:
+                    stock_move = self.pool.get('stock.move')
+                    stock_picking = self.pool.get("stock.picking")
 
-                move = [x.product_id.id for x in val.prepare_id.picking_id.move_lines]
-                print "PREPARE ======= ",val.prepare_id
-                # return False
-                line = [x.product_id.id for x in val.note_lines]
-                err = [x for x in line if x not in move]
-                if err:
-                    v = self.pool.get('product.product').browse(cr, uid, err)[0].default_code
-                    raise osv.except_osv(('Invalid action !'), ('Product \'%s\' tidak ada didalam daftar order !') % (v,))
-                   
-                for x in val.note_lines:
-                    if x.product_qty <= 0:
-                        raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
-                    
-                    for z in val.prepare_id.picking_id.move_lines:
-                        #print '============================',z.sale_line_id.product_uom_qty
-                        if x.product_id.id == z.product_id.id:
-                            if x.product_qty > z.sale_line_id.product_uom_qty:
-                                y = self.pool.get('product.product').browse(cr, uid, x.product_id.id).default_code
+                    move = [x.product_id.id for x in val.prepare_id.picking_id.move_lines]
+                    print "PREPARE ======= ",val.prepare_id
+                    # return False
+                    line = [x.product_id.id for x in val.note_lines]
+                    err = [x for x in line if x not in move]
+                    if err:
+                        v = self.pool.get('product.product').browse(cr, uid, err)[0].default_code
+                        raise osv.except_osv(('Invalid action !'), ('Product \'%s\' tidak ada didalam daftar order !') % (v,))
+                       
+                    for x in val.note_lines:
+                        if x.product_qty <= 0:
+                            raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
+                        
+                        for z in val.prepare_id.picking_id.move_lines:
+                            #print '============================',z.sale_line_id.product_uom_qty
+                            if x.product_id.id == z.product_id.id:
+                                if x.product_qty > z.sale_line_id.product_uom_qty:
+                                    y = self.pool.get('product.product').browse(cr, uid, x.product_id.id).default_code
                                # raise osv.except_osv(('Perhatian !'), ('Quantity product \'%s\' lebih besar dari quantity order !') % (y,))
+                        
+                    partial_data = {'min_date' : val.tanggal}
+                    for b in val.note_lines:
+                        move_id = False
+                        mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
+                        mad = stock_move.browse(cr, uid, mid)
+                        if b.product_qty == mad.product_qty:
+                            move_id = mid
+                        else:
+                            stock_move.write(cr,uid, [mid], {
+                                'product_qty': mad.product_qty-b.product_qty}
+                            )
+                            move_id = stock_move.create(cr,uid, {
+                                            'name' : val.name,
+                                            'product_id': b.product_id.id,
+                                            'product_qty': b.product_qty,
+                                            'product_uom': b.product_uom.id,
+                                            'prodlot_id': mad.prodlot_id.id,
+                                            'location_id' : mad.location_id.id,
+                                            'location_dest_id' : mad.location_dest_id.id,
+                                            'picking_id': val.prepare_id.picking_id.id})
+                            stock_move.action_confirm(cr, uid, [move_id], context)
+                               
+                        partial_data['move%s' % (move_id)] = {
+                            'product_id': b.product_id.id,
+                            'product_qty': b.product_qty,
+                            'product_uom': b.product_uom.id,
+                            'prodlot_id': mad.prodlot_id.id}
+                        # self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
+                    iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
+                    id_done = iddo.items()
+                    getMove = self.pool.get('stock.move').browse(cr,uid,move_id,context={})
+                    prepare_obj = self.pool.get('order.preparation')
+                    print "sacsacsacsacsac-----------------------",id_done[0]
+                    prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':getMove.picking_id.id})
+
+                    stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'note_id': val.id})
+
+                    self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
+
+                    # print "AAAAAAAAAAAAAAAAAAAAa=====",st
+                    # print "BBBBBBBBBBBBBBBB",st.id
+                    # print "BBBBBBBBBBBBBBBB",stock_picking.id
+                    # print "ID DO ===========================",iddo
+                    # print "ID DONEEEEEEE =+++=============",id_done
+
+                    print "MOVE ID",move_id
+                    print partial_data,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+                    print val.prepare_id,">>>>>>>><<<>>>>>>>>>>>>>>>>>>>>>>>>..================"
                     
-                partial_data = {'min_date' : val.tanggal}
-                for b in val.note_lines:
-                    move_id = False
-                    mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
-                    mad = stock_move.browse(cr, uid, mid)
-                    if b.product_qty == mad.product_qty:
-                        print '===================EKA CHANDRA SETIAWAN==========================='
-                        move_id = mid
-                    else:
-                        print '===================EKA CHANDRA SETIAWAN==========================='
-                        stock_move.write(cr,uid, [mid], {
-                            'product_qty': mad.product_qty-b.product_qty}
-                        )
-                        move_id = stock_move.create(cr,uid, {
-                                        'name' : val.name,
-                                        'product_id': b.product_id.id,
-                                        'product_qty': b.product_qty,
-                                        'product_uom': b.product_uom.id,
-                                        'prodlot_id': mad.prodlot_id.id,
-                                        'location_id' : mad.location_id.id,
-                                        'location_dest_id' : mad.location_dest_id.id,
-                                        'picking_id': val.prepare_id.picking_id.id})
-                        print "MOVE_ID OBJ >>>>>>>>>>>>>>>>>>>>>.",move_id
-                        stock_move.action_confirm(cr, uid, [move_id], context)
-                           
-                    partial_data['move%s' % (move_id)] = {
-                        'product_id': b.product_id.id,
-                        'product_qty': b.product_qty,
-                        'product_uom': b.product_uom.id,
-                        'prodlot_id': mad.prodlot_id.id}
-                    # self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
+                    # print "GET MOVE === ",getMove.picking_id
+                    # return False
+                    # self.pool.get('order.preparation').write(cr,uid,val.prepare_id,{'picking_id':getMove.picking_id.id})
 
-                    
-                   
-                   
-                iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
-                id_done = iddo.items()
-                getMove = self.pool.get('stock.move').browse(cr,uid,move_id,context={})
-                prepare_obj = self.pool.get('order.preparation')
-                print "sacsacsacsacsac-----------------------",id_done[0]
-                prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':getMove.picking_id.id})
-
-                stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'note_id': val.id})
-
-                self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
-
-                # print "AAAAAAAAAAAAAAAAAAAAa=====",st
-                # print "BBBBBBBBBBBBBBBB",st.id
-                # print "BBBBBBBBBBBBBBBB",stock_picking.id
-                # print "ID DO ===========================",iddo
-                # print "ID DONEEEEEEE =+++=============",id_done
-
-                print "MOVE ID",move_id
-                print partial_data,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-                print val.prepare_id,">>>>>>>><<<>>>>>>>>>>>>>>>>>>>>>>>>..================"
-                
-                # print "GET MOVE === ",getMove.picking_id
-                # return False
-                # self.pool.get('order.preparation').write(cr,uid,val.prepare_id,{'picking_id':getMove.picking_id.id})
-
+                    return True
+            else:
+                self.write(cr, uid, ids, {'state': 'done'})
                 return True
         else:
             self.write(cr, uid, ids, {'state': 'done'})
@@ -703,7 +702,7 @@ class stock_move(osv.osv):
             'product_qty': 1.00,
             'product_uos_qty' : self.pool.get('stock.move').onchange_quantity(cr, uid, ids, prod_id, 1.00, product.uom_id.id, uos_id)['value']['product_uos_qty'],
             'prodlot_id' : False,
-            'desc':product.name,
+            'desc':product.name + '\n\n' + product.description,
         }
         if not ids:
             result['name'] = product.partner_ref
