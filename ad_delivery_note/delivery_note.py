@@ -55,6 +55,7 @@ sale_order()
 
 
 class stock_picking(osv.osv):
+    
 
     _inherit = "stock.picking"
     _columns = {
@@ -116,20 +117,44 @@ class stock_picking(osv.osv):
 
     def draft_force_warehouse(self,cr,uid,ids,context=None):
         val = self.browse(cr, uid, ids)[0]
-        # for x in val.move_lines:
-        #     product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
-        #     print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.qty_available
-        #     if product.not_stock == False:
-        #         mm = ' ' + product.default_code + ' '
-        #         stock = ' ' + str(product.qty_available) + ' '
-        #         msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+        
+        for x in val.move_lines:
+            # product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+            product = x.product_id
+            pQty = x.product_qty
 
-        #         if x.product_qty > product.qty_available:
-        #             raise openerp.exceptions.Warning(msg)
-        #             return False
+            isHasBOM = False
+            # if product is SET / HAS A BOM MATERIALS
+            if product.bom_ids:
+                # print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADA BOM ",product.id
+                isHasBOM = True
+                line_bom = x.id
+                # bom = product.bom_ids[0].bom_lines
+                # LOOP EACH BOM
+                for component in product.bom_ids[0].bom_lines :
+                    print ".....",component.product_id.name," ",component.product_qty," ",component.product_uom.name
+
+
+
+
+
+
+
+
+            # CHECK PRODUCT AVAILABILITY
+            # print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.default_code
+            if product.not_stock == False:
+                mm = ' ' + product.default_code + ' '
+                stock = ' ' + str(product.qty_available) + ' '
+                msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+
+                # UNCOMMENT THIS FOR LIVE
+                # if x.product_qty > product.qty_available:
+                    # raise openerp.exceptions.Warning(msg)
+                    # return False
+                # END UNCOMMENT FOR LIVE
         # return self.write(cr,uid,ids,{'state':'warehouse'})
-        return self.write(cr,uid,ids,{'state':'assigned'})
-
+        return False
     def draft_force_assign(self,cr,uid,ids,context=None):
         return self.write(cr,uid,ids,{'state':'confirmed'})
 
@@ -138,6 +163,16 @@ class stock_picking(osv.osv):
 
 
 stock_picking()
+
+
+class move_set_data(osv.osv):
+    _name "move.set.data"
+    _description = "Move Set Data"
+    _columns = {
+        'origin_move_id'    :   fields.integer('Origin Move ID',string="Move",required=True), 
+        'product_id'        :   fields.many2one('product.product',required=True,string="Product"),
+        'product_qty'       :   fields
+    }
 
 class stock_picking_out(osv.osv):
 
@@ -667,7 +702,7 @@ product_list_line()
 class stock_move(osv.osv):
     _inherit = "stock.move"
     _columns = {
-        'no': fields.char('No', size=3),
+        'no': fields.integer('No', size=3),
         'desc':fields.text('Description',required=False),
         'name':fields.text('Product Name',required=False)
     }
@@ -714,28 +749,3 @@ class stock_move(osv.osv):
         return {'value': result}
    
 stock_move()
-
-
-# class catatan_line(osv.osv):
-#     _name = "catatan.line"
-#     _columns = {
-#         'name': fields.text('Description'),
-#         'packing_id': fields.many2one('packing.list.line', 'Packing List', required=True, ondelete='cascade'),
-#         'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)]),
-#         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product UoM')),
-#         'product_uom': fields.many2one('product.uom', 'UoM'),
-#         'product_packaging': fields.many2one('product.packaging', 'Packaging'),
-#     }
-#              
-# catatan_line()
-
-
-#                             <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True), ('is_company', '=', True)]" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
-#                             <field name="partner_invoice_id" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice'}"/>
-#                             <field name="partner_shipping_id" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery'}"/>
-
-
- 
-
-
-
