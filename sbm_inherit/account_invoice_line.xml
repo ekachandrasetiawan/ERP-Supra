@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
+		<record model="ir.actions.act_url" id="actionFakturPrint">
+	        <field name="name">Google URL</field>
+	        <field name="url">http://www.google.com</field>
+	    </record>
 		<record id="invoice_customer_form" model="ir.ui.view">
             <field name="name">account.invoice.form</field>
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_form" />
             <field name="arch" type="xml">
             	<xpath expr="//button[@string='Cancel Invoice']" position="after">
-            		<button name="actionFakturPrint" string="Print Faktur Pajak" type="object" />
+            		
+            		<!-- <button name="%(actionFakturPrint)d" string="Print Faktur Pajaks" type="action" class="oe_highlight"/> -->
+            		<button name="actionFakturPrint" string="Print Faktur Pajak" type="object"  class="oe_highlight" />
             	</xpath>
             </field>
         </record>
@@ -16,9 +22,7 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_supplier_form" />
             <field name="arch" type="xml">
-            	<xpath expr="//button[@string='Cancel Invoice']" position="after">
-            		<button name="actionTest" string="Test Outside" type="object" />
-            	</xpath>
+            	
             	<xpath expr="//field[@name='invoice_line']" position="replace">
                     <field context="{'partner_id': partner_id, 'price_type': context.get('price_type') or False, 'type': type}" name="invoice_line">
 	                    <tree string="Invoice lines" editable="bottom">
