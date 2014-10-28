@@ -55,8 +55,6 @@ sale_order()
 
 
 class stock_picking(osv.osv):
-<<<<<<< HEAD
-	
 	def _checkSetProduct(self, cr, uid, ids, field_name, arg, context):
 		res = {}
 		for id in ids:
@@ -329,109 +327,6 @@ class stock_picking(osv.osv):
 
 	def setdraft(self,cr,uid,ids,context=None):
 		return self.write(cr,uid,ids,{'state':'draft'})
-=======
-    
-
-    _inherit = "stock.picking"
-    _columns = {
-        'note_id': fields.many2one('delivery.note','Delivery Note', select=True),
-        'note': fields.text('Notes', states={'done':[('readonly', False)]}),
-        'state': fields.selection([
-            ('draft', 'Draft'),
-            ('warehouse','Check Warehouse'),
-            ('settodraft','Set To Draft'),
-            ('cancel', 'Cancelled'),
-            ('auto', 'Waiting Another Operation'),
-            ('confirmed', 'Waiting Availability'),
-            ('assigned', 'Ready to Transfer'),
-            ('done', 'Transferred'),
-            ], 'Status', readonly=True, select=True, track_visibility='onchange', help="""
-            * Draft: not confirmed yet and will not be scheduled until confirmed\n
-            * Waiting Another Operation: waiting for another move to proceed before it becomes automatically available (e.g. in Make-To-Order flows)\n
-            * Waiting Availability: still waiting for the availability of products\n
-            * Ready to Transfer: products reserved, simply waiting for confirmation.\n
-            * Transferred: has been processed, can't be modified or cancelled anymore\n
-            * Cancelled: has been cancelled, can't be confirmed anymore"""
-        ),
-    }
-    
-# def quantity_by_loc(self, cr, uid, product_id, location_id, context):
-#     #if you can't access context from method as argument than you can define here.
-#     product_obj = self.pool.get('product.product')
-#     qty = 0.0
-#     if context is None:
-#         context={}
-#     context.update({
-#         'states': ['done'],
-#         'what': ('in', 'out'),
-#         'location':location_id,
-#     })
-
-#     avail_product_details = product_obj.get_product_available(cr, uid, product_id, context=context)
-#     if avail_product_defails.values():
-#         qty = avail_product_defails.values()[0]
-#     return qty
-
-    # def _product_get_multi_location(self, cr, uid, ids, product_ids=False, context=None,
-    #                                 states=['done'], what=('in', 'out')):
-    #     """
-    #     @param product_ids: Ids of product
-    #     @param states: List of states
-    #     @param what: Tuple of
-    #     @return:
-    #     """
-    #     product_obj = self.pool.get('product.product')
-    #     if context is None:
-    #         context = {}
-    #     context.update({
-    #         'states': states,
-    #         'what': what,
-    #         'location': ids
-    #     })
-    #     return product_obj.get_product_available(cr, uid, product_ids, context=context)
-
-    def draft_force_warehouse(self,cr,uid,ids,context=None):
-        val = self.browse(cr, uid, ids)[0]
-        
-        for x in val.move_lines:
-            # product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
-            product = x.product_id
-            pQty = x.product_qty
-
-            isHasBOM = False
-            # if product is SET / HAS A BOM MATERIALS
-            if product.bom_ids:
-                # print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADA BOM ",product.id
-                isHasBOM = True
-                line_bom = x.id
-                # bom = product.bom_ids[0].bom_lines
-                # LOOP EACH BOM
-                for component in product.bom_ids[0].bom_lines :
-                    print ".....",component.product_id.name," ",component.product_qty," ",component.product_uom.name
-
-
-
-
-            # CHECK PRODUCT AVAILABILITY
-            # print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.default_code
-            if product.not_stock == False:
-                mm = ' ' + product.default_code + ' '
-                stock = ' ' + str(product.qty_available) + ' '
-                msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
-
-                # UNCOMMENT THIS FOR LIVE
-                # if x.product_qty > product.qty_available:
-                    # raise openerp.exceptions.Warning(msg)
-                    # return False
-                # END UNCOMMENT FOR LIVE
-        # return self.write(cr,uid,ids,{'state':'warehouse'})
-        return self.write(cr,uid,ids,{'state':'warehouse'})
-    def draft_force_assign(self,cr,uid,ids,context=None):
-        return self.write(cr,uid,ids,{'state':'confirmed'})
-
-    def setdraft(self,cr,uid,ids,context=None):
-        return self.write(cr,uid,ids,{'state':'draft'})
->>>>>>> 250e22d5ce2774f545c91c1df56bd05f406335cc
 
 
 stock_picking()
@@ -472,133 +367,8 @@ class sale_order_line(osv.osv):
 	_columns = {
 		'product_onhand': fields.float('On Hand', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
 		'product_future': fields.float('Available', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
-  }
+	}
 
-
-<<<<<<< HEAD
-	def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
-			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
-			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
-		context = context or {}
-		lang = lang or context.get('lang',False)
-		if not  partner_id:
-			raise osv.except_osv(_('No Customer Defined!'), _('Before choosing a product,\n select a customer in the sales form.'))
-		warning = {}
-		product_uom_obj = self.pool.get('product.uom')
-		partner_obj = self.pool.get('res.partner')
-		product_obj = self.pool.get('product.product')
-		context = {'lang': lang, 'partner_id': partner_id}
-		if partner_id:
-			lang = partner_obj.browse(cr, uid, partner_id).lang
-		context_partner = {'lang': lang, 'partner_id': partner_id}
-		if not product:
-			return {'value': {'th_weight': 0,
-				'product_uos_qty': qty}, 'domain': {'product_uom': [],
-				   'product_uos': []}}
-		if not date_order:
-			date_order = time.strftime(DEFAULT_SERVER_DATE_FORMAT)
-
-		result = {}
-		warning_msgs = ''
-		product_obj = product_obj.browse(cr, uid, product, context=context_partner)
-		result['product_uom'] = product_obj.uom_id.id
-
-		uom2 = False
-		if uom:
-			uom2 = product_uom_obj.browse(cr, uid, uom)
-			if product_obj.uom_id.category_id.id != uom2.category_id.id:
-				uom = False
-		if uos:
-			if product_obj.uos_id:
-				uos2 = product_uom_obj.browse(cr, uid, uos)
-				if product_obj.uos_id.category_id.id != uos2.category_id.id:
-					uos = False
-			else:
-				uos = False
-		fpos = fiscal_position and self.pool.get('account.fiscal.position').browse(cr, uid, fiscal_position) or False
-		if update_tax: #The quantity only have changed
-			result['tax_id'] = self.pool.get('account.fiscal.position').map_tax(cr, uid, fpos, product_obj.taxes_id)
-
-		tambah = ''
-		if product_obj.description:
-			tambah = '\n'+product_obj.description
-		if not flag:
-			result['name'] = '[' + product_obj.default_code + '] ' + product_obj.name_template+tambah #self.pool.get('product.product').name_get(cr, uid, [product_obj.id], context=context_partner)[0][1]+tambah
-			if product_obj.description_sale:
-				result['name'] += '\n'+product_obj.description_sale+tambah
-		domain = {}
-		if (not uom) and (not uos):
-			result['product_uom'] = product_obj.uom_id.id
-			if product_obj.uos_id:
-				result['product_uos'] = product_obj.uos_id.id
-				result['product_uos_qty'] = qty * product_obj.uos_coeff
-				uos_category_id = product_obj.uos_id.category_id.id
-			else:
-				result['product_uos'] = False
-				result['product_uos_qty'] = qty
-				uos_category_id = False
-			result['th_weight'] = qty * product_obj.weight
-			domain = {'product_uom':
-						[('category_id', '=', product_obj.uom_id.category_id.id)],
-						'product_uos':
-						[('category_id', '=', uos_category_id)]}
-		elif uos and not uom: # only happens if uom is False
-			result['product_uom'] = product_obj.uom_id and product_obj.uom_id.id
-			result['product_uom_qty'] = qty_uos / product_obj.uos_coeff
-			result['th_weight'] = result['product_uom_qty'] * product_obj.weight
-		elif uom: # whether uos is set or not
-			default_uom = product_obj.uom_id and product_obj.uom_id.id
-			q = product_uom_obj._compute_qty(cr, uid, uom, qty, default_uom)
-			if product_obj.uos_id:
-				result['product_uos'] = product_obj.uos_id.id
-				result['product_uos_qty'] = qty * product_obj.uos_coeff
-			else:
-				result['product_uos'] = False
-				result['product_uos_qty'] = qty
-			result['th_weight'] = q * product_obj.weight        # Round the quantity up
-
-		if not uom2:
-			uom2 = product_obj.uom_id
-		# get unit price
-		
-		# if not pricelist:
-		#     warn_msg = _('You have to select a pricelist or a customer in the sales form !\n'
-		#             'Please set one before choosing a product.')
-		#     warning_msgs += _("No Pricelist ! : ") + warn_msg +"\n\n"
-		# else:
-		#     price = self.pool.get('product.pricelist').price_get(cr, uid, [pricelist],
-		#             product, qty or 1.0, partner_id, {
-		#                 'uom': uom or result.get('product_uom'),
-		#                 'date': date_order,
-		#                 })[pricelist]
-		#     if price is False:
-		#         warn_msg = _("Cannot find a pricelist line matching this product and quantity.\n"
-		#                 "You have to change either the product, the quantity or the pricelist.")
-
-		#         warning_msgs += _("No valid pricelist line found ! :") + warn_msg +"\n\n"
-		#     else:
-		#         result.update({'price_unit': price})
-		# if warning_msgs:
-		#     warning = {
-		#                'title': _('Configuration Error!'),
-		#                'message' : warning_msgs
-		#             }
-
-		# SCRIPT PROTECT STOCK AVAILABEL SALES ORDER LINE
-		# if product_obj.not_stock == False:
-		#     if qty > product_obj.virtual_available:
-		#         warning_msgs += _("Not enough stock Available")
-		#         protect = {
-		#                 'title':_('Protect Stock Product !'),
-		#                 'message': warning_msgs
-		#             }
-		#         return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
-		result['product_onhand'] = product_obj.qty_available
-		result['product_future'] = product_obj.virtual_available
-		
-		
-		return {'value': result, 'domain': domain, 'warning': warning}
-=======
     def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
             uom=False, qty_uos=0, uos=False, name='', partner_id=False,
             lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
@@ -721,7 +491,6 @@ class sale_order_line(osv.osv):
         
         
         return {'value': result, 'domain': domain, 'warning': warning}
->>>>>>> 250e22d5ce2774f545c91c1df56bd05f406335cc
 
 
 class product_product(osv.osv):
@@ -1104,61 +873,6 @@ product_list_line()
 
 
 class stock_move(osv.osv):
-<<<<<<< HEAD
-	# def write(self, cr, uid, ids, vals, context=None):
-	# 	print vals,"======================================================"
-	# 	# return  super(stock_move, self).write(cr, uid, ids, vals, context=context)
-	# 	return False
-
-	_inherit = "stock.move"
-	_columns = {
-		'no': fields.integer('No', size=3),
-		'desc':fields.text('Description',required=False),
-		'name':fields.text('Product Name',required=False),
-		'set_id':fields.many2one('move.set.data',string='Set Data',ondelete='cascade'),
-	}
-	
-	# def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
-	#     hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
-	#     uom=self.pool.get('product.template').browse(cr,uid,[prd])[0]
-	#     return {'value':{ 'desc':hasil.name, 'product_qty':1, 'product_uom':uom.uom_id.id} }
-	def onchange_product_id(self, cr, uid, ids, prod_id=False, loc_id=False,
-							loc_dest_id=False, partner_id=False):
-		""" On change of product id, if finds UoM, UoS, quantity and UoS quantity.
-		@param prod_id: Changed Product id
-		@param loc_id: Source location id
-		@param loc_dest_id: Destination location id
-		@param partner_id: Address id of partner
-		@return: Dictionary of values
-		"""
-		if not prod_id:
-			return {}
-		user = self.pool.get('res.users').browse(cr, uid, uid)
-		lang = user and user.lang or False
-		if partner_id:
-			addr_rec = self.pool.get('res.partner').browse(cr, uid, partner_id)
-			if addr_rec:
-				lang = addr_rec and addr_rec.lang or False
-		ctx = {'lang': lang}
-
-		product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=ctx)[0]
-		uos_id  = product.uos_id and product.uos_id.id or False
-		result = {
-			'product_uom': product.uom_id.id,
-			'product_uos': uos_id,
-			'product_qty': 1.00,
-			'product_uos_qty' : self.pool.get('stock.move').onchange_quantity(cr, uid, ids, prod_id, 1.00, product.uom_id.id, uos_id)['value']['product_uos_qty'],
-			'prodlot_id' : False,
-			'desc':product.name,
-		}
-		if not ids:
-			result['name'] = product.partner_ref
-		if loc_id:
-			result['location_id'] = loc_id
-		if loc_dest_id:
-			result['location_dest_id'] = loc_dest_id
-		return {'value': result}
-=======
     _inherit = "stock.move"
     _columns = {
         'no': fields.integer('No', size=3),
@@ -1206,6 +920,5 @@ class stock_move(osv.osv):
         if loc_dest_id:
             result['location_dest_id'] = loc_dest_id
         return {'value': result}
->>>>>>> 250e22d5ce2774f545c91c1df56bd05f406335cc
    
 stock_move()
