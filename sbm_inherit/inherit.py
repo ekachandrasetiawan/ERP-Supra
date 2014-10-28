@@ -792,7 +792,7 @@ class stock_move_split_lines_exist(osv.osv_memory):
 		'stock_available': fields.float('Stock Available'),
     }
     _defaults = {
-        'quantity': 1.0,
+        'quantity': 0.0,
     }
     def _dumy_getStock(self,cr,uid,ids,prodlot_id,context=None):
     	stock = 10
