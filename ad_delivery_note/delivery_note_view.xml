@@ -236,6 +236,21 @@
             </field>
         </record>
 
+        <record id="tree_move_set_data" model="ir.ui.view">
+            <field name="name">move.set.data.form</field>
+            <field name="model">move.set.data</field>
+            <field name="arch" type="xml">
+                <tree string="Move Set Data" version="7.0">
+                    <field name="no" />
+                    <field name="product_id" />
+                    <field name="desc" />
+                    <field name="product_qty" />
+                    <field name="product_uom" />
+                    <field name="location_id" />
+                    <field name="location_dest_id" />
+                </tree>
+            </field>
+        </record>
 
         <record model="ir.ui.view" id="view_stock_move_form">
             <field name="name">stock.move.form</field>
@@ -338,9 +353,14 @@
                     </group>
                     <notebook>
                         <page string="Products">
-                            <field name="move_lines" context="{'address_in_id': partner_id, 'form_view_ref':'ad_delivery_note.view_move_picking_form_request', 'tree_view_ref':'ad_delivery_note.view_move_picking_tree_request', 'picking_type': 'internal'}" options='{"reload_on_button": true}'/>      
+                            <field name="move_lines" context="{'address_in_id': partner_id, 'form_view_ref':'ad_delivery_note.view_move_picking_form_request', 'tree_view_ref':'ad_delivery_note.view_move_picking_tree_request', 'picking_type': 'internal'}" options='{"reload_on_button": true}'/>     
+                            <!-- <field name="move_set_datas"/> -->
                         	<field name="note" placeholder="Add an internal note..." class="oe_inline"/>
 						</page>
+                        <!-- <page string="Set Products" attrs="{'invisible':True}"> -->
+                        <page string="Set Products" attrs="{'invisible':False}">
+                            <field name="move_set_datas"/>
+                        </page>
                     </notebook>
                 </sheet>
                 </form>
