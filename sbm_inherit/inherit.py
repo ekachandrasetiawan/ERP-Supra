@@ -847,3 +847,17 @@ class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	_order = 'no ASC'
 
+class bom(osv.osv):
+	def checkUniqueByProduct(self,cr,uid,prod_id):
+		objs = self.search(cr,uid,[('product_id', '=', prod_id)])
+		return objs
+
+	def create(self,cr,uid,vals,context=None):
+		
+		if self.checkUniqueByProduct(cr,uid,vals.get('product_id')):
+			res = False
+			raise osv.except_osv(('Error !!!'), ('Can\'t Create new BOM, BOM has been Exist!!!'))
+		else:
+			res = super(bom,self).create(cr,uid,vals,context)
+		return res
+	_inherit='mrp.bom'
