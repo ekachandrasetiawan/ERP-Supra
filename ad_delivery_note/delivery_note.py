@@ -368,129 +368,126 @@ class sale_order_line(osv.osv):
 		'product_onhand': fields.float('On Hand', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
 		'product_future': fields.float('Available', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
 	}
+	def product_id_change(self, cr, uid, ids, pricelist, product, qty=0, uom=False, qty_uos=0, uos=False, name='', partner_id=False, lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
+		context = context or {}
+		lang = lang or context.get('lang',False)
+		if not  partner_id:
+			raise osv.except_osv(_('No Customer Defined!'), _('Before choosing a product,\n select a customer in the sales form.'))
+		warning = {}
+		product_uom_obj = self.pool.get('product.uom')
+		partner_obj = self.pool.get('res.partner')
+		product_obj = self.pool.get('product.product')
+		context = {'lang': lang, 'partner_id': partner_id}
+		if partner_id:
+			lang = partner_obj.browse(cr, uid, partner_id).lang
+		context_partner = {'lang': lang, 'partner_id': partner_id}
+		if not product:
+			return {'value': {'th_weight': 0,
+				'product_uos_qty': qty}, 'domain': {'product_uom': [],
+				   'product_uos': []}}
+		if not date_order:
+			date_order = time.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
-    def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
-            uom=False, qty_uos=0, uos=False, name='', partner_id=False,
-            lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
-        context = context or {}
-        lang = lang or context.get('lang',False)
-        if not  partner_id:
-            raise osv.except_osv(_('No Customer Defined!'), _('Before choosing a product,\n select a customer in the sales form.'))
-        warning = {}
-        product_uom_obj = self.pool.get('product.uom')
-        partner_obj = self.pool.get('res.partner')
-        product_obj = self.pool.get('product.product')
-        context = {'lang': lang, 'partner_id': partner_id}
-        if partner_id:
-            lang = partner_obj.browse(cr, uid, partner_id).lang
-        context_partner = {'lang': lang, 'partner_id': partner_id}
-        if not product:
-            return {'value': {'th_weight': 0,
-                'product_uos_qty': qty}, 'domain': {'product_uom': [],
-                   'product_uos': []}}
-        if not date_order:
-            date_order = time.strftime(DEFAULT_SERVER_DATE_FORMAT)
+		result = {}
+		warning_msgs = ''
+		product_obj = product_obj.browse(cr, uid, product, context=context_partner)
+		result['product_uom'] = product_obj.uom_id.id
 
-        result = {}
-        warning_msgs = ''
-        product_obj = product_obj.browse(cr, uid, product, context=context_partner)
-        result['product_uom'] = product_obj.uom_id.id
+		uom2 = False
+		if uom:
+			uom2 = product_uom_obj.browse(cr, uid, uom)
+			if product_obj.uom_id.category_id.id != uom2.category_id.id:
+				uom = False
+		if uos:
+			if product_obj.uos_id:
+				uos2 = product_uom_obj.browse(cr, uid, uos)
+				if product_obj.uos_id.category_id.id != uos2.category_id.id:
+					uos = False
+			else:
+				uos = False
+		fpos = fiscal_position and self.pool.get('account.fiscal.position').browse(cr, uid, fiscal_position) or False
+		if update_tax: #The quantity only have changed
+			result['tax_id'] = self.pool.get('account.fiscal.position').map_tax(cr, uid, fpos, product_obj.taxes_id)
 
-        uom2 = False
-        if uom:
-            uom2 = product_uom_obj.browse(cr, uid, uom)
-            if product_obj.uom_id.category_id.id != uom2.category_id.id:
-                uom = False
-        if uos:
-            if product_obj.uos_id:
-                uos2 = product_uom_obj.browse(cr, uid, uos)
-                if product_obj.uos_id.category_id.id != uos2.category_id.id:
-                    uos = False
-            else:
-                uos = False
-        fpos = fiscal_position and self.pool.get('account.fiscal.position').browse(cr, uid, fiscal_position) or False
-        if update_tax: #The quantity only have changed
-            result['tax_id'] = self.pool.get('account.fiscal.position').map_tax(cr, uid, fpos, product_obj.taxes_id)
+		tambah = ''
+		if product_obj.description:
+			tambah = '\n'+product_obj.description
+		if not flag:
+			result['name'] = '[' + product_obj.default_code + '] ' + product_obj.name_template+tambah #self.pool.get('product.product').name_get(cr, uid, [product_obj.id], context=context_partner)[0][1]+tambah
+			if product_obj.description_sale:
+				result['name'] += '\n'+product_obj.description_sale+tambah
+		domain = {}
+		if (not uom) and (not uos):
+			result['product_uom'] = product_obj.uom_id.id
+			if product_obj.uos_id:
+				result['product_uos'] = product_obj.uos_id.id
+				result['product_uos_qty'] = qty * product_obj.uos_coeff
+				uos_category_id = product_obj.uos_id.category_id.id
+			else:
+				result['product_uos'] = False
+				result['product_uos_qty'] = qty
+				uos_category_id = False
+			result['th_weight'] = qty * product_obj.weight
+			domain = {'product_uom':
+						[('category_id', '=', product_obj.uom_id.category_id.id)],
+						'product_uos':
+						[('category_id', '=', uos_category_id)]}
+		elif uos and not uom: # only happens if uom is False
+			result['product_uom'] = product_obj.uom_id and product_obj.uom_id.id
+			result['product_uom_qty'] = qty_uos / product_obj.uos_coeff
+			result['th_weight'] = result['product_uom_qty'] * product_obj.weight
+		elif uom: # whether uos is set or not
+			default_uom = product_obj.uom_id and product_obj.uom_id.id
+			q = product_uom_obj._compute_qty(cr, uid, uom, qty, default_uom)
+			if product_obj.uos_id:
+				result['product_uos'] = product_obj.uos_id.id
+				result['product_uos_qty'] = qty * product_obj.uos_coeff
+			else:
+				result['product_uos'] = False
+				result['product_uos_qty'] = qty
+			result['th_weight'] = q * product_obj.weight        # Round the quantity up
 
-        tambah = ''
-        if product_obj.description:
-            tambah = '\n'+product_obj.description
-        if not flag:
-            result['name'] = '[' + product_obj.default_code + '] ' + product_obj.name_template+tambah #self.pool.get('product.product').name_get(cr, uid, [product_obj.id], context=context_partner)[0][1]+tambah
-            if product_obj.description_sale:
-                result['name'] += '\n'+product_obj.description_sale+tambah
-        domain = {}
-        if (not uom) and (not uos):
-            result['product_uom'] = product_obj.uom_id.id
-            if product_obj.uos_id:
-                result['product_uos'] = product_obj.uos_id.id
-                result['product_uos_qty'] = qty * product_obj.uos_coeff
-                uos_category_id = product_obj.uos_id.category_id.id
-            else:
-                result['product_uos'] = False
-                result['product_uos_qty'] = qty
-                uos_category_id = False
-            result['th_weight'] = qty * product_obj.weight
-            domain = {'product_uom':
-                        [('category_id', '=', product_obj.uom_id.category_id.id)],
-                        'product_uos':
-                        [('category_id', '=', uos_category_id)]}
-        elif uos and not uom: # only happens if uom is False
-            result['product_uom'] = product_obj.uom_id and product_obj.uom_id.id
-            result['product_uom_qty'] = qty_uos / product_obj.uos_coeff
-            result['th_weight'] = result['product_uom_qty'] * product_obj.weight
-        elif uom: # whether uos is set or not
-            default_uom = product_obj.uom_id and product_obj.uom_id.id
-            q = product_uom_obj._compute_qty(cr, uid, uom, qty, default_uom)
-            if product_obj.uos_id:
-                result['product_uos'] = product_obj.uos_id.id
-                result['product_uos_qty'] = qty * product_obj.uos_coeff
-            else:
-                result['product_uos'] = False
-                result['product_uos_qty'] = qty
-            result['th_weight'] = q * product_obj.weight        # Round the quantity up
+		if not uom2:
+			uom2 = product_obj.uom_id
+		# get unit price
+		
+		# if not pricelist:
+		#     warn_msg = _('You have to select a pricelist or a customer in the sales form !\n'
+		#             'Please set one before choosing a product.')
+		#     warning_msgs += _("No Pricelist ! : ") + warn_msg +"\n\n"
+		# else:
+		#     price = self.pool.get('product.pricelist').price_get(cr, uid, [pricelist],
+		#             product, qty or 1.0, partner_id, {
+		#                 'uom': uom or result.get('product_uom'),
+		#                 'date': date_order,
+		#                 })[pricelist]
+		#     if price is False:
+		#         warn_msg = _("Cannot find a pricelist line matching this product and quantity.\n"
+		#                 "You have to change either the product, the quantity or the pricelist.")
 
-        if not uom2:
-            uom2 = product_obj.uom_id
-        # get unit price
-        
-        # if not pricelist:
-        #     warn_msg = _('You have to select a pricelist or a customer in the sales form !\n'
-        #             'Please set one before choosing a product.')
-        #     warning_msgs += _("No Pricelist ! : ") + warn_msg +"\n\n"
-        # else:
-        #     price = self.pool.get('product.pricelist').price_get(cr, uid, [pricelist],
-        #             product, qty or 1.0, partner_id, {
-        #                 'uom': uom or result.get('product_uom'),
-        #                 'date': date_order,
-        #                 })[pricelist]
-        #     if price is False:
-        #         warn_msg = _("Cannot find a pricelist line matching this product and quantity.\n"
-        #                 "You have to change either the product, the quantity or the pricelist.")
+		#         warning_msgs += _("No valid pricelist line found ! :") + warn_msg +"\n\n"
+		#     else:
+		#         result.update({'price_unit': price})
+		# if warning_msgs:
+		#     warning = {
+		#                'title': _('Configuration Error!'),
+		#                'message' : warning_msgs
+		#             }
 
-        #         warning_msgs += _("No valid pricelist line found ! :") + warn_msg +"\n\n"
-        #     else:
-        #         result.update({'price_unit': price})
-        # if warning_msgs:
-        #     warning = {
-        #                'title': _('Configuration Error!'),
-        #                'message' : warning_msgs
-        #             }
-
-        # SCRIPT PROTECT STOCK AVAILABEL SALES ORDER LINE
-        if product_obj.not_stock == False:
-            if qty > product_obj.virtual_available:
-                warning_msgs += _("Not enough stock Available")
-                protect = {
-                        'title':_('Protect Stock Product !'),
-                        'message': warning_msgs
-                    }
-                return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
-        result['product_onhand'] = product_obj.qty_available
-        result['product_future'] = product_obj.virtual_available
-        
-        
-        return {'value': result, 'domain': domain, 'warning': warning}
+		# SCRIPT PROTECT STOCK AVAILABEL SALES ORDER LINE
+		if product_obj.not_stock == False:
+			if qty > product_obj.virtual_available:
+				warning_msgs += _("Not enough stock Available")
+				protect = {
+						'title':_('Protect Stock Product !'),
+						'message': warning_msgs
+					}
+				return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
+		result['product_onhand'] = product_obj.qty_available
+		result['product_future'] = product_obj.virtual_available
+		
+		
+		return {'value': result, 'domain': domain, 'warning': warning}
 
 
 class product_product(osv.osv):
@@ -623,153 +620,153 @@ class delivery_note(osv.osv):
 			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
 			vals['name'] ='14'+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
 			return super(delivery_note, self).create(cr, uid, vals, context=context)
-    def package_draft(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state': 'draft'})
-        return True                               
-    
-    def package_cancel(self, cr, uid, ids, context=None):
-        self.write(cr, uid, ids, {'state': 'cancel'})
-        return True                                  
-         
-    def package_confirm(self, cr, uid, ids, context=None):
-        val = self.browse(cr, uid, ids, context={})[0]
-        for x in val.note_lines:
-            if x.product_qty <= 0:
-                raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
-        self.write(cr, uid, ids, {'state': 'approve'})
-        return True
-         
-    def unlink(self, cr, uid, ids, context=None):
-        val = self.browse(cr, uid, ids, context={})[0]
-        if val.state != 'draft':
-            raise osv.except_osv(('Invalid action !'), ('Cannot delete a delivery note which is in state \'%s\'!') % (val.state,))
-        return super(delivery_note, self).unlink(cr, uid, ids, context=context)
-          
-    def prepare_change(self, cr, uid, ids, pre):
-        if pre :
-            res = {}; line = []
-            data = self.pool.get('order.preparation').browse(cr, uid, pre)
-            dnid = self.pool.get('delivery.note').search(cr, uid, [('prepare_id', '=', pre), ('state', '=', 'done')])
-            for x in data.prepare_lines:
-                qty = x.product_qty 
-                if dnid:
-                    dnlid = self.pool.get('delivery.note.line').search(cr, uid, [('note_id', 'in', tuple(dnid)), ('product_id', '=', x.product_id.id)])
-                    if dnlid:
-                        dnldt = self.pool.get('delivery.note.line').browse(cr, uid, dnlid)
-                        qty -= sum([i.product_qty for i in dnldt])
-                line.append({
-                             'no': x.no,
-                             'product_id' : x.product_id.id,
-                             'product_qty': qty,
-                             'product_uom': x.product_uom.id,
-                             'name': x.name
-                             })
-             
-            res['note_lines'] = line
-            res['poc'] = data.sale_id.client_order_ref
-            res['tanggal'] = data.duedate
-            res['partner_id'] = data.sale_id.partner_id.id
-            res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
-            
-            return  {'value': res}
-                     
+	def package_draft(self, cr, uid, ids, context=None):
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True                               
+	
+	def package_cancel(self, cr, uid, ids, context=None):
+		self.write(cr, uid, ids, {'state': 'cancel'})
+		return True                                  
+		 
+	def package_confirm(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		for x in val.note_lines:
+			if x.product_qty <= 0:
+				raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
+		self.write(cr, uid, ids, {'state': 'approve'})
+		return True
+		 
+	def unlink(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		if val.state != 'draft':
+			raise osv.except_osv(('Invalid action !'), ('Cannot delete a delivery note which is in state \'%s\'!') % (val.state,))
+		return super(delivery_note, self).unlink(cr, uid, ids, context=context)
+		  
+	def prepare_change(self, cr, uid, ids, pre):
+		if pre :
+			res = {}; line = []
+			data = self.pool.get('order.preparation').browse(cr, uid, pre)
+			dnid = self.pool.get('delivery.note').search(cr, uid, [('prepare_id', '=', pre), ('state', '=', 'done')])
+			for x in data.prepare_lines:
+				qty = x.product_qty 
+				if dnid:
+					dnlid = self.pool.get('delivery.note.line').search(cr, uid, [('note_id', 'in', tuple(dnid)), ('product_id', '=', x.product_id.id)])
+					if dnlid:
+						dnldt = self.pool.get('delivery.note.line').browse(cr, uid, dnlid)
+						qty -= sum([i.product_qty for i in dnldt])
+				line.append({
+							 'no': x.no,
+							 'product_id' : x.product_id.id,
+							 'product_qty': qty,
+							 'product_uom': x.product_uom.id,
+							 'name': x.name
+							 })
+			 
+			res['note_lines'] = line
+			res['poc'] = data.sale_id.client_order_ref
+			res['tanggal'] = data.duedate
+			res['partner_id'] = data.sale_id.partner_id.id
+			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
+			
+			return  {'value': res}
+					 
 
-    def package_validate(self, cr, uid, ids, context=None):
+	def package_validate(self, cr, uid, ids, context=None):
 
-        val = self.browse(cr, uid, ids, context={})[0]
-        print val.special
+		val = self.browse(cr, uid, ids, context={})[0]
+		print val.special
 
-        print '==================================',val.prepare_id.picking_id.state
-        if val.special==False:
-            if val.prepare_id.picking_id.state == 'confirmed' or val.prepare_id.picking_id.state == 'assigned':
-                if val.prepare_id is None:
-                    raise osv.except_osv(('Perhatian !'), ('Input Order Packaging Untuk Validate'))
-                else:
-                    stock_move = self.pool.get('stock.move')
-                    stock_picking = self.pool.get("stock.picking")
+		print '==================================',val.prepare_id.picking_id.state
+		if val.special==False:
+			if val.prepare_id.picking_id.state == 'confirmed' or val.prepare_id.picking_id.state == 'assigned':
+				if val.prepare_id is None:
+					raise osv.except_osv(('Perhatian !'), ('Input Order Packaging Untuk Validate'))
+				else:
+					stock_move = self.pool.get('stock.move')
+					stock_picking = self.pool.get("stock.picking")
 
-                    move = [x.product_id.id for x in val.prepare_id.picking_id.move_lines]
-                    print "PREPARE ======= ",val.prepare_id
-                    # return False
-                    line = [x.product_id.id for x in val.note_lines]
-                    err = [x for x in line if x not in move]
-                    if err:
-                        v = self.pool.get('product.product').browse(cr, uid, err)[0].default_code
-                        raise osv.except_osv(('Invalid action !'), ('Product \'%s\' tidak ada didalam daftar order !') % (v,))
-                       
-                    for x in val.note_lines:
-                        if x.product_qty <= 0:
-                            raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
-                        
-                        for z in val.prepare_id.picking_id.move_lines:
-                            #print '============================',z.sale_line_id.product_uom_qty
-                            if x.product_id.id == z.product_id.id:
-                                if x.product_qty > z.sale_line_id.product_uom_qty:
-                                    y = self.pool.get('product.product').browse(cr, uid, x.product_id.id).default_code
-                               # raise osv.except_osv(('Perhatian !'), ('Quantity product \'%s\' lebih besar dari quantity order !') % (y,))
-                        
-                    partial_data = {'min_date' : val.tanggal}
-                    for b in val.note_lines:
-                        move_id = False
-                        mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
-                        mad = stock_move.browse(cr, uid, mid)
-                        if b.product_qty == mad.product_qty:
-                            move_id = mid
-                        else:
-                            stock_move.write(cr,uid, [mid], {
-                                'product_qty': mad.product_qty-b.product_qty}
-                            )
-                            move_id = stock_move.create(cr,uid, {
-                                            'name' : val.name,
-                                            'product_id': b.product_id.id,
-                                            'product_qty': b.product_qty,
-                                            'product_uom': b.product_uom.id,
-                                            'prodlot_id': mad.prodlot_id.id,
-                                            'location_id' : mad.location_id.id,
-                                            'location_dest_id' : mad.location_dest_id.id,
-                                            'picking_id': val.prepare_id.picking_id.id})
-                            stock_move.action_confirm(cr, uid, [move_id], context)
-                               
-                        partial_data['move%s' % (move_id)] = {
-                            'product_id': b.product_id.id,
-                            'product_qty': b.product_qty,
-                            'product_uom': b.product_uom.id,
-                            'prodlot_id': mad.prodlot_id.id}
-                        # self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
-                    iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
-                    id_done = iddo.items()
-                    getMove = self.pool.get('stock.move').browse(cr,uid,move_id,context={})
-                    prepare_obj = self.pool.get('order.preparation')
-                    print "sacsacsacsacsac-----------------------",id_done[0]
-                    prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':getMove.picking_id.id})
+					move = [x.product_id.id for x in val.prepare_id.picking_id.move_lines]
+					print "PREPARE ======= ",val.prepare_id
+					# return False
+					line = [x.product_id.id for x in val.note_lines]
+					err = [x for x in line if x not in move]
+					if err:
+						v = self.pool.get('product.product').browse(cr, uid, err)[0].default_code
+						raise osv.except_osv(('Invalid action !'), ('Product \'%s\' tidak ada didalam daftar order !') % (v,))
+					   
+					for x in val.note_lines:
+						if x.product_qty <= 0:
+							raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
+						
+						for z in val.prepare_id.picking_id.move_lines:
+							#print '============================',z.sale_line_id.product_uom_qty
+							if x.product_id.id == z.product_id.id:
+								if x.product_qty > z.sale_line_id.product_uom_qty:
+									y = self.pool.get('product.product').browse(cr, uid, x.product_id.id).default_code
+							   # raise osv.except_osv(('Perhatian !'), ('Quantity product \'%s\' lebih besar dari quantity order !') % (y,))
+						
+					partial_data = {'min_date' : val.tanggal}
+					for b in val.note_lines:
+						move_id = False
+						mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
+						mad = stock_move.browse(cr, uid, mid)
+						if b.product_qty == mad.product_qty:
+							move_id = mid
+						else:
+							stock_move.write(cr,uid, [mid], {
+								'product_qty': mad.product_qty-b.product_qty}
+							)
+							move_id = stock_move.create(cr,uid, {
+											'name' : val.name,
+											'product_id': b.product_id.id,
+											'product_qty': b.product_qty,
+											'product_uom': b.product_uom.id,
+											'prodlot_id': mad.prodlot_id.id,
+											'location_id' : mad.location_id.id,
+											'location_dest_id' : mad.location_dest_id.id,
+											'picking_id': val.prepare_id.picking_id.id})
+							stock_move.action_confirm(cr, uid, [move_id], context)
+							   
+						partial_data['move%s' % (move_id)] = {
+							'product_id': b.product_id.id,
+							'product_qty': b.product_qty,
+							'product_uom': b.product_uom.id,
+							'prodlot_id': mad.prodlot_id.id}
+						# self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
+					iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
+					id_done = iddo.items()
+					getMove = self.pool.get('stock.move').browse(cr,uid,move_id,context={})
+					prepare_obj = self.pool.get('order.preparation')
+					print "sacsacsacsacsac-----------------------",id_done[0]
+					prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':getMove.picking_id.id})
 
-                    stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'note_id': val.id})
+					stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'note_id': val.id})
 
-                    self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
+					self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
 
-                    # print "AAAAAAAAAAAAAAAAAAAAa=====",st
-                    # print "BBBBBBBBBBBBBBBB",st.id
-                    # print "BBBBBBBBBBBBBBBB",stock_picking.id
-                    # print "ID DO ===========================",iddo
-                    # print "ID DONEEEEEEE =+++=============",id_done
+					# print "AAAAAAAAAAAAAAAAAAAAa=====",st
+					# print "BBBBBBBBBBBBBBBB",st.id
+					# print "BBBBBBBBBBBBBBBB",stock_picking.id
+					# print "ID DO ===========================",iddo
+					# print "ID DONEEEEEEE =+++=============",id_done
 
-                    print "MOVE ID",move_id
-                    print partial_data,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-                    print val.prepare_id,">>>>>>>><<<>>>>>>>>>>>>>>>>>>>>>>>>..================"
-                    
-                    # print "GET MOVE === ",getMove.picking_id
-                    # return False
-                    # self.pool.get('order.preparation').write(cr,uid,val.prepare_id,{'picking_id':getMove.picking_id.id})
+					print "MOVE ID",move_id
+					print partial_data,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+					print val.prepare_id,">>>>>>>><<<>>>>>>>>>>>>>>>>>>>>>>>>..================"
+					
+					# print "GET MOVE === ",getMove.picking_id
+					# return False
+					# self.pool.get('order.preparation').write(cr,uid,val.prepare_id,{'picking_id':getMove.picking_id.id})
 
-                    return True
-            else:
-                self.write(cr, uid, ids, {'state': 'done'})
-                return True
-        else:
-            self.write(cr, uid, ids, {'state': 'done'})
-            return True
-            
-        return False
+					return True
+			else:
+				self.write(cr, uid, ids, {'state': 'done'})
+				return True
+		else:
+			self.write(cr, uid, ids, {'state': 'done'})
+			return True
+			
+		return False
 delivery_note()
  
 
@@ -873,52 +870,52 @@ product_list_line()
 
 
 class stock_move(osv.osv):
-    _inherit = "stock.move"
-    _columns = {
-        'no': fields.integer('No', size=3),
-        'desc':fields.text('Description',required=False),
-        'name':fields.text('Product Name',required=False)
-    }
-    
-    # def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
-    #     hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
-    #     uom=self.pool.get('product.template').browse(cr,uid,[prd])[0]
-    #     return {'value':{ 'desc':hasil.name, 'product_qty':1, 'product_uom':uom.uom_id.id} }
-    def onchange_product_id(self, cr, uid, ids, prod_id=False, loc_id=False,
-                            loc_dest_id=False, partner_id=False):
-        """ On change of product id, if finds UoM, UoS, quantity and UoS quantity.
-        @param prod_id: Changed Product id
-        @param loc_id: Source location id
-        @param loc_dest_id: Destination location id
-        @param partner_id: Address id of partner
-        @return: Dictionary of values
-        """
-        if not prod_id:
-            return {}
-        user = self.pool.get('res.users').browse(cr, uid, uid)
-        lang = user and user.lang or False
-        if partner_id:
-            addr_rec = self.pool.get('res.partner').browse(cr, uid, partner_id)
-            if addr_rec:
-                lang = addr_rec and addr_rec.lang or False
-        ctx = {'lang': lang}
+	_inherit = "stock.move"
+	_columns = {
+		'no': fields.integer('No', size=3),
+		'desc':fields.text('Description',required=False),
+		'name':fields.text('Product Name',required=False)
+	}
+	
+	# def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
+	#     hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
+	#     uom=self.pool.get('product.template').browse(cr,uid,[prd])[0]
+	#     return {'value':{ 'desc':hasil.name, 'product_qty':1, 'product_uom':uom.uom_id.id} }
+	def onchange_product_id(self, cr, uid, ids, prod_id=False, loc_id=False,
+							loc_dest_id=False, partner_id=False):
+		""" On change of product id, if finds UoM, UoS, quantity and UoS quantity.
+		@param prod_id: Changed Product id
+		@param loc_id: Source location id
+		@param loc_dest_id: Destination location id
+		@param partner_id: Address id of partner
+		@return: Dictionary of values
+		"""
+		if not prod_id:
+			return {}
+		user = self.pool.get('res.users').browse(cr, uid, uid)
+		lang = user and user.lang or False
+		if partner_id:
+			addr_rec = self.pool.get('res.partner').browse(cr, uid, partner_id)
+			if addr_rec:
+				lang = addr_rec and addr_rec.lang or False
+		ctx = {'lang': lang}
 
-        product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=ctx)[0]
-        uos_id  = product.uos_id and product.uos_id.id or False
-        result = {
-            'product_uom': product.uom_id.id,
-            'product_uos': uos_id,
-            'product_qty': 1.00,
-            'product_uos_qty' : self.pool.get('stock.move').onchange_quantity(cr, uid, ids, prod_id, 1.00, product.uom_id.id, uos_id)['value']['product_uos_qty'],
-            'prodlot_id' : False,
-            'desc':product.name + '\n\n' + product.description,
-        }
-        if not ids:
-            result['name'] = product.partner_ref
-        if loc_id:
-            result['location_id'] = loc_id
-        if loc_dest_id:
-            result['location_dest_id'] = loc_dest_id
-        return {'value': result}
+		product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=ctx)[0]
+		uos_id  = product.uos_id and product.uos_id.id or False
+		result = {
+			'product_uom': product.uom_id.id,
+			'product_uos': uos_id,
+			'product_qty': 1.00,
+			'product_uos_qty' : self.pool.get('stock.move').onchange_quantity(cr, uid, ids, prod_id, 1.00, product.uom_id.id, uos_id)['value']['product_uos_qty'],
+			'prodlot_id' : False,
+			'desc':product.name + '\n\n' + product.description,
+		}
+		if not ids:
+			result['name'] = product.partner_ref
+		if loc_id:
+			result['location_id'] = loc_id
+		if loc_dest_id:
+			result['location_dest_id'] = loc_dest_id
+		return {'value': result}
    
 stock_move()
