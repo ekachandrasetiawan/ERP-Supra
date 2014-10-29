@@ -501,7 +501,7 @@ class sale_order_line(osv.osv):
 						'title':_('Protect Stock Product !'),
 						'message': warning_msgs
 					}
-				return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
+				# return {'value':{'product_uom_qty':0,'product_uos_qty':0} , 'warning':protect}
 		result['product_onhand'] = product_obj.qty_available
 		result['product_future'] = product_obj.virtual_available
 		
@@ -893,7 +893,8 @@ class stock_move(osv.osv):
 	_columns = {
 		'no': fields.integer('No', size=3),
 		'desc':fields.text('Description',required=False),
-		'name':fields.text('Product Name',required=False)
+		'name':fields.text('Product Name',required=False),
+		'set_id':fields.many2one('move.set.data',string="Set Product",ondelete="cascade")
 	}
 	
 	# def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
