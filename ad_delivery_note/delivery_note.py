@@ -237,70 +237,75 @@ class stock_picking(osv.osv):
 		# print vals
 		
 		getMoves  = vals.get('move_lines')
-		getMoves2 = []
-		moveSet = []
-		move_set_data_obj = self.pool.get('move.set.data')
-		# print "<BEFOREEEE",getMoves
-		for move in getMoves :
-			# print move,"<<<<<<<<<<<<<<<<<<<<<<<<<\\n"
-			moveData = move[2]
-			pQty = moveData['product_qty']
-			
-			# print moveData['product_id']
-			product = self.pool.get('product.product').browse(cr,uid,moveData['product_id'])
-			# print product
-			isHasBOM = False
-			if product.bom_ids:
-				isHasBOM = True
-				
-				move_set_id = move_set_data_obj.create(cr,uid,{
-					'product_id':int(moveData['product_id']),
-					'product_qty':float(moveData['product_qty']),
-					'product_uom':int(moveData['product_uom']),
-					'location_id':int(moveData['location_id']),
-					'location_dest_id':int(moveData['location_dest_id']),
-					'type':moveData['type'],
-					'no':float(moveData['no']),
-					'desc':moveData['desc']
-				})
-				print move_set_id,'-------------------'
-				moveSet.append(move_set_id)
-				for component in product.bom_ids[0].bom_lines:
-					res = [0,False]
-					bla = {}
-					# print component.product_id.name
-					bla['product_id']       = component.product_id.id
-					bla['product_qty']      = component.product_qty * pQty
-					bla['product_uom']      = component.product_uom.id
-					bla['location_id']      = moveData['location_id']
-					bla['location_dest_id'] = moveData['location_dest_id']
-					bla['type']             = moveData['type']
-					bla['no']               = moveData['no']
-					bla['desc']             = component.product_id.name
-					bla['set_id']           = move_set_id
-					# print bla
-					# print '=========================='
-					res.append(bla)
-					# print '==========================',res
-					getMoves2.append(res)
-				# getMoves.remove(move)
-				# getMoves.remove()
-				
-			else:
-				getMoves2.append(move)
-		# print getMoves
 
-		vals['move_lines'] = getMoves2
+		if getMoves:
+			getMoves2 = []
+			moveSet = []
+			move_set_data_obj = self.pool.get('move.set.data')
+			# print "<BEFOREEEE",getMoves
+			for move in getMoves :
+				# print move,"<<<<<<<<<<<<<<<<<<<<<<<<<\\n"
+				moveData = move[2]
+				pQty = moveData['product_qty']
+				
+				# print moveData['product_id']
+				product = self.pool.get('product.product').browse(cr,uid,moveData['product_id'])
+				# print product
+				isHasBOM = False
+				if product.bom_ids:
+					isHasBOM = True
+					
+					move_set_id = move_set_data_obj.create(cr,uid,{
+						'product_id':int(moveData['product_id']),
+						'product_qty':float(moveData['product_qty']),
+						'product_uom':int(moveData['product_uom']),
+						'location_id':int(moveData['location_id']),
+						'location_dest_id':int(moveData['location_dest_id']),
+						'type':moveData['type'],
+						'no':float(moveData['no']),
+						'desc':moveData['desc']
+					})
+					print move_set_id,'-------------------'
+					moveSet.append(move_set_id)
+					for component in product.bom_ids[0].bom_lines:
+						res = [0,False]
+						bla = {}
+						# print component.product_id.name
+						bla['product_id']       = component.product_id.id
+						bla['product_qty']      = component.product_qty * pQty
+						bla['product_uom']      = component.product_uom.id
+						bla['location_id']      = moveData['location_id']
+						bla['location_dest_id'] = moveData['location_dest_id']
+						bla['type']             = moveData['type']
+						bla['no']               = moveData['no']
+						bla['desc']             = component.product_id.name
+						bla['set_id']           = move_set_id
+						# print bla
+						# print '=========================='
+						res.append(bla)
+						# print '==========================',res
+						getMoves2.append(res)
+					# getMoves.remove(move)
+					# getMoves.remove()
+					
+				else:
+					getMoves2.append(move)
+			# print getMoves
 
-		# return False
-		stock_p_id = super(stock_picking, self).create(cr, uid, vals, context)
-		# print moveSet
-		if stock_p_id:
-			for move_set_line in moveSet:
-				self.pool.get('move.set.data').write(cr,uid,move_set_line,{'picking_id':stock_p_id})
-				print stock_p_id,'=============='
-		return stock_p_id
-		# return False
+			vals['move_lines'] = getMoves2
+
+			# return False
+			stock_p_id = super(stock_picking, self).create(cr, uid, vals, context)
+			# print moveSet
+			if stock_p_id:
+				for move_set_line in moveSet:
+					self.pool.get('move.set.data').write(cr,uid,move_set_line,{'picking_id':stock_p_id})
+					print stock_p_id,'=============='
+			return stock_p_id
+			# return False
+		else:
+			# IF NOT FROM MOVES
+			return super(stock_picking,self).create(cr,uid,vals,context)
 
 
 	def draft_force_warehouse(self,cr,uid,ids,context=None):
