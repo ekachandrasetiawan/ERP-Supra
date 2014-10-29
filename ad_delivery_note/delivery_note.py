@@ -55,10 +55,24 @@ sale_order()
 
 
 class stock_picking(osv.osv):
+	def print_im_out(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"internal-moves/print&id="+str(ids[0])
+		
+		return {
+			'type'	: 'ir.actions.client',
+			# 'target': 'new',
+			'tag'	: 'print.int.move',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo
+			},
+		}
 	def _checkSetProduct(self, cr, uid, ids, field_name, arg, context):
 		res = {}
 		for id in ids:
-			res[id]=  0
+			res[id]= 0;
 		return res
 	_inherit = "stock.picking"
 	_columns = {
@@ -907,9 +921,13 @@ class stock_move(osv.osv):
 			'product_uos': uos_id,
 			'product_qty': 1.00,
 			'product_uos_qty' : self.pool.get('stock.move').onchange_quantity(cr, uid, ids, prod_id, 1.00, product.uom_id.id, uos_id)['value']['product_uos_qty'],
-			'prodlot_id' : False,
-			'desc':product.name + '\n\n' + product.description,
+			'prodlot_id' : False
 		}
+		if product.description:
+			result['desc'] = product.name + '\n\n' + product.description
+		else:
+			result['desc'] = product.name
+
 		if not ids:
 			result['name'] = product.partner_ref
 		if loc_id:
