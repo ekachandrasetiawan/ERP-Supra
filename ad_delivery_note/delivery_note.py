@@ -58,7 +58,7 @@ class stock_picking(osv.osv):
 	def print_im_out(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"internal-moves/print&id="+str(ids[0])
+		urlTo = str(browseConf.value)+"moves/print&id="+str(ids[0])
 		
 		return {
 			'type'	: 'ir.actions.client',
@@ -170,7 +170,7 @@ class stock_picking(osv.osv):
 
 	def write(self,cr,uid,ids,vals,context=None):
 		# print "CALLEDD"
-
+		print "CALLED WRITE",ids
 		res = super(stock_picking,self).write(cr,uid,ids,vals,context)
 		self.cleanSetProductMove(cr,uid,ids,context)
 
@@ -220,6 +220,7 @@ class stock_picking(osv.osv):
 							bla['desc']             = component.product_id.name
 							bla['set_id']           = move_set_id
 							bla['picking_id']		= picking.id
+							bla['sale_line_id']		= move.sale_line_id.id
 
 							moveNew = self.pool.get('stock.move').create(cr,uid,bla,context)
 							# print moveNew,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,"
@@ -234,7 +235,8 @@ class stock_picking(osv.osv):
 	
 
 	def create(self, cr, uid, vals, context=None):
-		# print vals
+		print "VALSSSSS",vals
+		print "CONTEXT",context
 		
 		getMoves  = vals.get('move_lines')
 
@@ -242,9 +244,9 @@ class stock_picking(osv.osv):
 			getMoves2 = []
 			moveSet = []
 			move_set_data_obj = self.pool.get('move.set.data')
-			# print "<BEFOREEEE",getMoves
+			print "<BEFOREEEE",getMoves,"MOVEEEE:"
 			for move in getMoves :
-				# print move,"<<<<<<<<<<<<<<<<<<<<<<<<<\\n"
+				print move,"<<<<<<<<<<<<<<<<<<<<<<<<<\\n"
 				moveData = move[2]
 				pQty = moveData['product_qty']
 				
@@ -303,9 +305,14 @@ class stock_picking(osv.osv):
 					print stock_p_id,'=============='
 			return stock_p_id
 			# return False
+			# raise osv.except_osv(_('No Customer Defined!'), _('Tes'))
 		else:
 			# IF NOT FROM MOVES
-			return super(stock_picking,self).create(cr,uid,vals,context)
+			print "THISSSSSSS"
+			stock_p_id =  super(stock_picking,self).create(cr,uid,vals,context)
+			print "STOCK P ID",stock_p_id
+			return stock_p_id
+			# return False
 
 
 	def draft_force_warehouse(self,cr,uid,ids,context=None):
