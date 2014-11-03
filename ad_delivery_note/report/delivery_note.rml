@@ -158,12 +158,19 @@
               <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
               <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
             </tr>
-             <tr>
-              <td> 
-                <para style="terp_default_8"><font color="white"> .</font></para>
-                <para style="terp_default_8"><font color="white"> ..........................</font>[[ o.poc ]]</para>
+
+          </blockTable>
+
+          <blockTable colWidths="80.0,300.0" style="Table_Partner_Address">
+            <tr>
+              <td>
+                   <para style="terp_default_8"><font color="white"> .</font></para>
               </td>
-              <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
+              <td> 
+                
+                <para style="terp_default_8">[[ o.poc ]]</para>
+              </td>
+              
             </tr>
           </blockTable>
         </td>

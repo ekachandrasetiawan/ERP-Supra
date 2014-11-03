@@ -512,7 +512,7 @@
     <td>
       <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
       <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
-      <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
+      <para style="terp_default_Bold_8"><font color="white">ORDER</font></para>
       <para style="terp_tblheader_Details_Left"><u>PURCHASE ORDER</u></para>
     </td>
     </tr>
@@ -561,7 +561,6 @@
       </tr>
     </blockTable>
     
-    <para style="terp_default_Right_8"><font color="white"> </font></para>
     <blockTable colWidths="550.0" style="Table_Invoice_General_judul">
       <tr>
         <td>
@@ -695,9 +694,6 @@
           <para style="terp_default_5"><font color="white"> .</font></para>
           <para style="terp_default_5"><font color="white"> .</font></para>
           <para style="terp_default_5"><font color="white"> .</font></para>
-          <para style="terp_default_5"><font color="white"> .</font></para>
-          <para style="terp_default_5"><font color="white">. </font></para>
-          <para style="terp_default_5"><font color="white"> .</font></para>
           <para style="terp_default_Centre_Bold_9"><u>JIMMY HADINATA</u></para>
           <para style="terp_default_Centre_9">General Manager</para>
         </td>
@@ -709,9 +705,6 @@
           <para style="terp_default_5"><font color="white"> .</font></para>
           <para style="terp_default_5"><font color="white"> .</font></para>
           <para style="terp_default_5"><font color="white">. </font></para>
-          <para style="terp_default_5"><font color="white"> .</font></para>
-          <para style="terp_default_5"><font color="white"> .</font></para>
-          <para style="terp_default_5"><font color="white"> .</font></para>
           <para style="terp_default_5"><font color="white"> .</font></para>
           <para style="terp_default_Centre_9">----------------------------------</para>
           <para style="terp_default_Centre_9">[[ ' ' ]]</para>

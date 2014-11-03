@@ -324,15 +324,15 @@ class stock_picking(osv.osv):
 			# pQty = x.product_qty
 
 			isHasBOM = False
-			# if product is SET / HAS A BOM MATERIALS
-			# if product.bom_ids:
-			# 	# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADA BOM ",product.id
-			# 	isHasBOM = True
-			# 	line_bom = x.id
-			# 	# bom = product.bom_ids[0].bom_lines
-			# 	# LOOP EACH BOM
-			# 	for component in product.bom_ids[0].bom_lines :
-			# 		print ".....",component.product_id.name," ",component.product_qty," ",component.product_uom.name
+			if product is SET / HAS A BOM MATERIALS
+			if product.bom_ids:
+				# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADA BOM ",product.id
+				isHasBOM = True
+				line_bom = x.id
+				# bom = product.bom_ids[0].bom_lines
+				# LOOP EACH BOM
+				for component in product.bom_ids[0].bom_lines :
+					print ".....",component.product_id.name," ",component.product_qty," ",component.product_uom.name
 
 			# CHECK PRODUCT AVAILABILITY
 			# print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.default_code
