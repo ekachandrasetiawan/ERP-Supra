@@ -132,7 +132,7 @@ class stock_picking(osv.osv):
 					'picking_id':moveData['picking_id'] or False,
 
 				})
-				print move_set_id,'-------------------'
+				print move_set_id,'-------------------rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr'
 				moveSet.append(move_set_id)
 				for component in product.bom_ids[0].bom_lines:
 					res = [0,False]
@@ -148,6 +148,9 @@ class stock_picking(osv.osv):
 					bla['name']             = "["+component.product.default_code+"] "+component.product_id.name
 					bla['desc']             = "["+component.product.default_code+"] "+component.product_id.name
 					bla['set_id']           = move_set_id
+					bla['partner_id']		= moveData['partner_id']
+					bla['product_uos']		= component.product_uom.id
+					bla['product_uos_qty']	= component.product_qty * pQty
 					# print bla
 					# print '=========================='
 					res.append(bla)
@@ -181,10 +184,10 @@ class stock_picking(osv.osv):
 		# print "CALLEDD"
 		# print "CALLED WRITE",ids
 		res = super(stock_picking,self).write(cr,uid,ids,vals,context)
-		
-
-		return res
 		self.cleanSetProductMove(cr,uid,ids,context)
+		# print vals,"---INI",context
+		return res
+		
 
 	def cleanSetProductMove(self,cr,uid,ids,context=None):
 		pickings = self.browse(cr,uid,ids,context)
@@ -199,7 +202,7 @@ class stock_picking(osv.osv):
 				# print move,"======================>"
 				pSet = False
 				pQty = move.product_qty
-				print "move aaaaa ",move
+				# print "move aaaaa ",move
 				if move.product_id.bom_ids:
 					pSet = True
 					# add move to move_set_data
@@ -238,7 +241,10 @@ class stock_picking(osv.osv):
 							bla['set_id']           = move_set_id
 							bla['picking_id']		= picking.id
 							bla['sale_line_id']		= move.sale_line_id.id
-							bla['purchase_line_id']		= move.purchase_line_id.id or False
+							bla['purchase_line_id']	= move.purchase_line_id.id or False
+							bla['partner_id']		= move.partner_id.id
+							bla['product_uos_qty']	= component.product_qty * pQty
+							bla['product_uos']		= move.product_uos.id
 
 							moveNew = self.pool.get('stock.move').create(cr,uid,bla,context)
 							# print moveNew,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,"
@@ -253,18 +259,18 @@ class stock_picking(osv.osv):
 	
 
 	def create(self, cr, uid, vals, context=None):
-		print "VALSSSSS",vals
+		# print "VALSSSSS",vals
 		# print "CONTEXT",context
 		
 		getMoves  = vals.get('move_lines')
-		print "GET MOVESSSSSS======================",getMoves
+		# print "GET MOVESSSSSS======================",getMoves
 		if getMoves:
 			getMoves2 = []
 			moveSet = []
 			move_set_data_obj = self.pool.get('move.set.data')
-			print "<BEFOREEEE",getMoves,"MOVEEEE:"
+			# print "<BEFOREEEE",getMoves,"MOVEEEE:"
 			for move in getMoves :
-				print move,"<<<<<<<<<<<<<<<<<<<<<<<<<\\n"
+				# print move,"<<<<<<<<<<<<<<<<<<<<<<<<<\\n"
 				moveData = move[2]
 				pQty = moveData['product_qty']
 				
@@ -274,8 +280,8 @@ class stock_picking(osv.osv):
 				isHasBOM = False
 				if product.bom_ids:
 					isHasBOM = True
-					
-					move_set_id = move_set_data_obj.create(cr,uid,{
+					newMoveSet = {}
+					newMoveSet = {
 						'product_id':int(moveData['product_id']),
 						'product_qty':float(moveData['product_qty']),
 						'product_uom':int(moveData['product_uom']),
@@ -284,8 +290,11 @@ class stock_picking(osv.osv):
 						'type':moveData['type'],
 						'no':float(moveData['no']),
 						'desc':moveData['desc'] or moveData['name'] or False,
-						'picking_id':moveData['picking_id'] or False,
-					})
+					}
+					if 'picking_id' in moveData:
+						newMoveSet['picking_id'] = moveData['picking_id'] or False
+
+					move_set_id = move_set_data_obj.create(cr,uid,newMoveSet)
 					print move_set_id,'-------------------'
 					moveSet.append(move_set_id)
 					for component in product.bom_ids[0].bom_lines:
@@ -299,10 +308,13 @@ class stock_picking(osv.osv):
 						bla['location_dest_id'] = moveData['location_dest_id']
 						bla['type']             = moveData['type']
 						bla['no']               = moveData['no']
-						bla['name']             = "["+component.product.default_code+"] "+component.product_id.name
+						bla['name']             = "["+component.product_id.default_code+"] "+component.product_id.name
 						bla['desc']             = component.product_id.name
 						bla['set_id']           = move_set_id
-						bla['purchase_line_id']	= moveData['purchase_line_id']
+						if 'purchase_line_id' in moveData:
+							bla['purchase_line_id']	= moveData['purchase_line_id']
+						bla['product_uos']		= component.product_uom.id
+						bla['product_uos_qty']	= component.product_qty * pQty
 						# print bla
 						# print '=========================='
 						res.append(bla)
@@ -323,15 +335,15 @@ class stock_picking(osv.osv):
 			if stock_p_id:
 				for move_set_line in moveSet:
 					self.pool.get('move.set.data').write(cr,uid,move_set_line,{'picking_id':stock_p_id})
-					print stock_p_id,'=============='
+					# print stock_p_id,'=============='
 			return stock_p_id
 			# return False
 			# raise osv.except_osv(_('No Customer Defined!'), _('Tes'))
 		else:
 			# IF NOT FROM MOVES
-			print "THISSSSSSS"
+			# print "THISSSSSSS"
 			stock_p_id =  super(stock_picking,self).create(cr,uid,vals,context)
-			print "STOCK P ID",stock_p_id
+			# print "STOCK P ID",stock_p_id
 			return stock_p_id
 			# return False
 		# return super(stock_picking,self).create(cr,uid,vals,context)
