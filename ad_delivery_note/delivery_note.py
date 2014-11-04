@@ -128,7 +128,9 @@ class stock_picking(osv.osv):
 					'location_dest_id':int(moveData['location_dest_id']),
 					'type':moveData['type'],
 					'no':float(moveData['no']),
-					'desc':moveData['desc']
+					'desc':moveData['desc'],
+					'picking_id':moveData['picking_id'] or False,
+
 				})
 				print move_set_id,'-------------------'
 				moveSet.append(move_set_id)
@@ -143,7 +145,8 @@ class stock_picking(osv.osv):
 					bla['location_dest_id'] = moveData['location_dest_id']
 					bla['type']             = moveData['type']
 					bla['no']               = moveData['no']
-					bla['desc']             = component.product_id.name
+					bla['name']             = "["+component.product.default_code+"] "+component.product_id.name
+					bla['desc']             = "["+component.product.default_code+"] "+component.product_id.name
 					bla['set_id']           = move_set_id
 					# print bla
 					# print '=========================='
@@ -180,6 +183,8 @@ class stock_picking(osv.osv):
 		pickings = self.browse(cr,uid,ids,context)
 		setsIds = []
 		moveObj = self.pool.get('stock.move')
+		print "CALLING CLENA SET PRODUCT MOVE"
+		print ids
 		for picking in pickings:
 			# print pickings,"=============<"
 
@@ -187,6 +192,7 @@ class stock_picking(osv.osv):
 				# print move,"======================>"
 				pSet = False
 				pQty = move.product_qty
+				print "move aaaaa ",move
 				if move.product_id.bom_ids:
 					pSet = True
 					# add move to move_set_data
@@ -197,9 +203,11 @@ class stock_picking(osv.osv):
 						'product_uom':move.product_uom.id,
 						'type':move.type,
 						'no':move.no,
-						'desc':move.desc,
+						'desc':move.desc or move.name or False,
 						'location_id':move.location_id.id,
 						'location_dest_id':move.location_dest_id.id,
+						'picking_id':move.picking_id.id,
+						
 					}
 					# print moveSetData
 					move_set_id = self.pool.get('move.set.data').create(cr,uid,moveSetData)
@@ -208,6 +216,7 @@ class stock_picking(osv.osv):
 
 					# create new move objects from bom component
 					if move.product_id.bom_ids[0].bom_lines :
+						# print "HAS BOMMMMMM"
 						for component in move.product_id.bom_ids[0].bom_lines :
 							bla = {}
 							bla['product_id']       = component.product_id.id
@@ -217,10 +226,12 @@ class stock_picking(osv.osv):
 							bla['location_dest_id'] = move.location_dest_id.id
 							bla['type']             = move.type
 							bla['no']               = move.no
-							bla['desc']             = component.product_id.name
+							bla['name']				= "["+component.product_id.default_code+"] "+component.product_id.name
+							bla['desc']             = "["+component.product_id.default_code+"] "+component.product_id.name
 							bla['set_id']           = move_set_id
 							bla['picking_id']		= picking.id
 							bla['sale_line_id']		= move.sale_line_id.id
+							bla['purchase_line_id']		= move.purchase_line_id.id or False
 
 							moveNew = self.pool.get('stock.move').create(cr,uid,bla,context)
 							# print moveNew,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,"
@@ -236,10 +247,10 @@ class stock_picking(osv.osv):
 
 	def create(self, cr, uid, vals, context=None):
 		print "VALSSSSS",vals
-		print "CONTEXT",context
+		# print "CONTEXT",context
 		
 		getMoves  = vals.get('move_lines')
-
+		print "GET MOVESSSSSS======================",getMoves
 		if getMoves:
 			getMoves2 = []
 			moveSet = []
@@ -265,7 +276,8 @@ class stock_picking(osv.osv):
 						'location_dest_id':int(moveData['location_dest_id']),
 						'type':moveData['type'],
 						'no':float(moveData['no']),
-						'desc':moveData['desc']
+						'desc':moveData['desc'] or moveData['name'] or False,
+						'picking_id':moveData['picking_id'] or False,
 					})
 					print move_set_id,'-------------------'
 					moveSet.append(move_set_id)
@@ -280,8 +292,10 @@ class stock_picking(osv.osv):
 						bla['location_dest_id'] = moveData['location_dest_id']
 						bla['type']             = moveData['type']
 						bla['no']               = moveData['no']
+						bla['name']             = "["+component.product.default_code+"] "+component.product_id.name
 						bla['desc']             = component.product_id.name
 						bla['set_id']           = move_set_id
+						bla['purchase_line_id']	= moveData['purchase_line_id']
 						# print bla
 						# print '=========================='
 						res.append(bla)
@@ -324,7 +338,7 @@ class stock_picking(osv.osv):
 			# pQty = x.product_qty
 
 			isHasBOM = False
-			if product is SET / HAS A BOM MATERIALS
+			# if product is SET / HAS A BOM MATERIALS
 			if product.bom_ids:
 				# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADA BOM ",product.id
 				isHasBOM = True
@@ -776,7 +790,7 @@ class delivery_note(osv.osv):
 					# print "ID DO ===========================",iddo
 					# print "ID DONEEEEEEE =+++=============",id_done
 
-					print "MOVE ID",move_id
+					print "MOVE ID SSSS",move_id
 					print partial_data,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 					print val.prepare_id,">>>>>>>><<<>>>>>>>>>>>>>>>>>>>>>>>>..================"
 					
