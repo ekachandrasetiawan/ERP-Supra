@@ -58,7 +58,8 @@ class stock_picking(osv.osv):
 	def print_im_out(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"moves/print&id="+str(ids[0])
+		urlTo = str(browseConf.value)+"moves/print&id="+str(ids[0])+"&uid="+str(uid)
+		
 		
 		return {
 			'type'	: 'ir.actions.client',
@@ -66,7 +67,8 @@ class stock_picking(osv.osv):
 			'tag'	: 'print.int.move',
 			'params': {
 				# 'id'	: ids[0],
-				'redir'	: urlTo
+				'redir'	: urlTo,
+				'uid':uid
 			},
 		}
 	def _checkSetProduct(self, cr, uid, ids, field_name, arg, context):
