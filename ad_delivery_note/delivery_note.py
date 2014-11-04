@@ -244,7 +244,7 @@ class stock_picking(osv.osv):
 							bla['purchase_line_id']	= move.purchase_line_id.id or False
 							bla['partner_id']		= move.partner_id.id
 							bla['product_uos_qty']	= component.product_qty * pQty
-							bla['product_uos']		= move.product_uos.id
+							bla['product_uos']		= component.product_uom.id
 
 							moveNew = self.pool.get('stock.move').create(cr,uid,bla,context)
 							# print moveNew,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,"
