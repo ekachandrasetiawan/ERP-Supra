@@ -170,20 +170,27 @@ class stock_picking(osv.osv):
 				self.pool.get('move.set.data').write(cr,uid,move_set_line,{'picking_id':stock_p_id})
 				# print stock_p_id,'=============='
 		return stock_p_id
+		self.cleanSetProductMove(cr,uid,stock_p_id,context)
+
+
+
+
+
 
 	def write(self,cr,uid,ids,vals,context=None):
 		# print "CALLEDD"
-		print "CALLED WRITE",ids
+		# print "CALLED WRITE",ids
 		res = super(stock_picking,self).write(cr,uid,ids,vals,context)
-		self.cleanSetProductMove(cr,uid,ids,context)
+		
 
 		return res
+		self.cleanSetProductMove(cr,uid,ids,context)
 
 	def cleanSetProductMove(self,cr,uid,ids,context=None):
 		pickings = self.browse(cr,uid,ids,context)
 		setsIds = []
 		moveObj = self.pool.get('stock.move')
-		print "CALLING CLENA SET PRODUCT MOVE"
+		# print "CALLING CLENA SET PRODUCT MOVE"
 		print ids
 		for picking in pickings:
 			# print pickings,"=============<"
@@ -238,7 +245,7 @@ class stock_picking(osv.osv):
 					else:
 						raise osv.except_osv(_('Error!'), _('Please Define Bill Of Material Data First For ',move.product_id.name))
 			# delete move where product is has BOM
-			print setsIds
+			# print setsIds
 			self.pool.get('stock.move').unlink(cr,uid,setsIds,context)
 
 
@@ -327,6 +334,7 @@ class stock_picking(osv.osv):
 			print "STOCK P ID",stock_p_id
 			return stock_p_id
 			# return False
+		# return super(stock_picking,self).create(cr,uid,vals,context)
 
 
 	def draft_force_warehouse(self,cr,uid,ids,context=None):
