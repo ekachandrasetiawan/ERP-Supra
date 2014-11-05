@@ -447,7 +447,7 @@ class PurchaseOrder(osv.osv):
 					if order_line.product_id.bom_ids[0].bom_lines:
 						for bom in order_line.product_id.bom_ids[0].bom_lines:
 							moveBom = {
-								'name': order_line.name or '',
+								'name': bom.product_id.name_template or order_line.name or '',
 					            'product_id': bom.product_id.id,
 					            'product_qty': order_line.product_qty,
 					            'product_uos_qty': order_line.product_qty*bom.product_qty,

@@ -4,7 +4,8 @@ openerp.ad_delivery_note = function (instance) {
         className: 'oe_web_example',
         init:function(parent,action){
             this._super(parent,action)
-            window.location = action.params.redir;
+            // window.location = action.params.redir;
+            window.open(action.params.redir, "_blank");
         },
         start: function () {
             return this._super();
