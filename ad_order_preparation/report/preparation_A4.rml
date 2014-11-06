@@ -10,7 +10,7 @@
         
         
         
-        <image x="1.0cm" y="1.1cm" height="800.0" file="ad_order_preparation/image/line.png" />
+        <image x="1.1cm" y="0.7cm" height="800.0" file="ad_order_preparation/image/line.png" />
         <image x="13.5cm" y="23.5cm" height="80.0" file="ad_order_preparation/image/square.png" />
         <image x="1.0cm" y="27.2cm" height="50.0" >[[ company.logo or removeParentNode('image') ]]</image>
         <image x="16.1cm" y="26.2cm" height="80.0" file="ad_order_preparation/image/iso.jpg" />
@@ -360,7 +360,7 @@
             <td> <para style="terp_default_Bold_Centre_8">Nama Barang</para></td>
         </tr>
         </blockTable>  
-          <blockTable rowHeights="350.0,50.0" colWidths="560" style="Table21">
+          <blockTable rowHeights="340.0,40.0" colWidths="560" style="Table21">
                 <tr>
                   <td>
                           <section>
@@ -386,7 +386,7 @@
                             </blockTable>
                                 </td>
                             <td>
-                             <blockTable colWidths="380.0,70.0" style="TableTOP"> 
+                             <blockTable colWidths="350.0,90.0" style="TableTOP"> 
                                 <tr>
                                   <td>
                                        <para style="content">[[ x.name ]]</para>

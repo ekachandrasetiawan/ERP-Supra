@@ -294,19 +294,19 @@ class stock_picking(osv.osv):
 		
 		for x in val.move_lines:
 			# product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
-			product = x.product_id
-			# pQty = x.product_qty
+			# product = x.product_id
+			# # pQty = x.product_qty
 
-			isHasBOM = False
-			if product is SET / HAS A BOM MATERIALS
-			if product.bom_ids:
-				# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADA BOM ",product.id
-				isHasBOM = True
-				line_bom = x.id
+			# isHasBOM = False
+			# # if product is SET / HAS A BOM MATERIALS
+			# if product.bom_ids:
+			# 	# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADA BOM ",product.id
+			# 	isHasBOM = True
+			# 	line_bom = x.id
 				# bom = product.bom_ids[0].bom_lines
 				# LOOP EACH BOM
-				for component in product.bom_ids[0].bom_lines :
-					print ".....",component.product_id.name," ",component.product_qty," ",component.product_uom.name
+				# for component in product.bom_ids[0].bom_lines :
+					# print ".....",component.product_id.name," ",component.product_qty," ",component.product_uom.name
 
 			# CHECK PRODUCT AVAILABILITY
 			# print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.default_code

@@ -176,17 +176,17 @@ class order_preparation(osv.osv):
          
     def preparation_confirm(self, cr, uid, ids, context=None):
         val = self.browse(cr, uid, ids)[0]
-        # for x in val.prepare_lines:
-        #     product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
-        #     if product.not_stock == False:
-        #         # print '=========================',product.qty_available
-        #         mm = ' ' + product.default_code + ' '
-        #         stock = ' ' + str(product.qty_available) + ' '
-        #         msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+        for x in val.prepare_lines:
+            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+            if product.not_stock == False:
+                 # print '=========================',product.qty_available
+                mm = ' ' + product.default_code + ' '
+                stock = ' ' + str(product.qty_available) + ' '
+                msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
-        #         if x.product_qty > product.qty_available:
-        #             raise openerp.exceptions.Warning(msg)
-        #             return False
+                if x.product_qty > product.qty_available:
+                    raise openerp.exceptions.Warning(msg)
+                    return False
 
         self.write(cr, uid, ids, {'state': 'approve'})
         # self.write(cr, uid, ids, {'state': 'draft'})
