@@ -840,10 +840,7 @@ class stock_picking(osv.osv):
 
 
 class stock_move(osv.osv):
-	# def create(self,cr,uid,vals,context=None):
-	# 	print "Falseeeeee>>>>>>"
-	# 	return False;
-	# def
+	
 	_inherit = 'stock.move'
 	_order = 'no ASC'
 

@@ -330,6 +330,9 @@
                     <button name="action_assign" states="confirmed" string="Check Availability" type="object" class="oe_highlight"/>
                     <button name="force_assign" states="confirmed" string="Force Availability" type="object" class="oe_highlight" groups="base.group_user"/>
                     <button name="%(print_internal_move)d" type="action" states="warehouse,assigned,confirmed,done" string="Print Internal Moves" icon="gtk-print"/>
+                    
+                    <button name="print_im_out" type="object" states="warehouse,assigned,confirmed,done" string="Print Internal Moves 2" icon="gtk-print"/>
+
 	                <button name="action_process" states="assigned" string="Confirm &amp; Transfer" groups="stock.group_stock_user" type="object" class="oe_highlight"/>
                     <button name="%(stock.action_stock_invoice_onshipping)d" string="Create Invoice/Refund"  attrs="{'invisible': ['|','|',('state','&lt;&gt;','done'),('invoice_state','=','invoiced'),('invoice_state','=','none')]}"  type="action" class="oe_highlight" groups="base.group_user"/>
                     <button name="%(stock.act_stock_return_picking)d" string="Reverse Transfer" states="done" type="action" groups="base.group_user"/>
