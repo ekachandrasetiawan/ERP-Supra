@@ -256,6 +256,7 @@ class order_preparation_line(osv.osv):
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product UoM')),
         'product_uom': fields.many2one('product.uom', 'UoM'),
         'product_packaging': fields.many2one('product.packaging', 'Packaging'),
+        'prodlot_id':fields.many2one('stock.production.lot','Serial Number', ondelete='cascade'),
     }
          
 order_preparation_line()
