@@ -17,6 +17,11 @@
 				rml="ad_delivery_note/report/internal_move.rml"
 				auto="False" menu="False"/>
 
+        <report id="print_internal_blank" string="Print Blank" 
+        model="stock.picking" name="internal.blank" 
+        rml="ad_delivery_note/report/internal_blank.rml"
+        auto="False" menu="False"/>
+
 		<record model="ir.ui.view" id="view_inherit_sale_order">
 			<field name="name">sale.order.inherit</field>
 			<field name="model">sale.order</field>
@@ -329,8 +334,9 @@
                     <button name="draft_validate" states="confirmed" string="Confirm &amp; Transfer" type="object" class="oe_highlight" groups="base.group_user"/>
                     <button name="action_assign" states="confirmed" string="Check Availability" type="object" class="oe_highlight"/>
                     <button name="force_assign" states="confirmed" string="Force Availability" type="object" class="oe_highlight" groups="base.group_user"/>
-                    <button name="%(print_internal_move)d" type="action" states="warehouse,assigned,confirmed,done" string="Print Internal Moves" icon="gtk-print"/>
-                    
+                   <!--  <button name="%(print_internal_move)d" type="action" states="warehouse,assigned,confirmed,done" string="Print Internal Moves" icon="gtk-print"/> -->
+                    <!-- <button name="%(print_internal_blank)d" type="action" states="warehouse,assigned,confirmed,done" string="Print Internal Blank" icon="gtk-print"/> -->
+
                     <button name="print_im_out" type="object" states="warehouse,assigned,confirmed,done" string="Print Internal Moves 2" icon="gtk-print"/>
 
 	                <button name="action_process" states="assigned" string="Confirm &amp; Transfer" groups="stock.group_stock_user" type="object" class="oe_highlight"/>
