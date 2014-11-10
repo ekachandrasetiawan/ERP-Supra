@@ -14,6 +14,16 @@
                 rml="ad_order_preparation/report/preparation_A4.rml"
                 auto="False" menu="False"/>
 
+        <act_window
+            context="{'search_default_done': 1}"
+            domain="[('stock_available','>', '0')]"
+            id="print_A4"
+            res_model="stock.production.lot"
+            src_model="order.preparation"
+            name="Stock Product Batch"/>
+
+
+
         <report id="print_A4multi" string="Preparation A4" 
                 model="order.preparation" name="preparation.multipage" 
                 rml="ad_order_preparation/report/preparation_A4multi.rml"
@@ -88,7 +98,7 @@
                         <field name="picking_id" on_change="picking_change(picking_id)"/>
                         <field name="duedate"/>
                     </group>
-                    <button name="$(refresh)d" type="object" string="View Batch"/>
+                    <!-- <button name="$(refresh)d" type="object" string="View Batch"/> -->
                     <notebook colspan="5">
                         <page string="Order Lines">
                             <field colspan="4" name="prepare_lines" nolabel="1" widget="one2many_list">
@@ -97,8 +107,9 @@
                                     <field name="product_id"/>
                                     <field name="product_qty"/>
                                     <field name="product_uom"/>
-                                    <field name="product_packaging"/>
                                     <field name="name" colspan="4"/>
+                                    <field name="prodlot_id" colspan="4" domain="[('stock_available','>', '0'),('product_id','=',product_id)]"/>
+                                    <field name="product_packaging"/>
                                 </form>
                                 <tree string="">
                                     <field name="no"/>
@@ -107,6 +118,7 @@
                                     <field name="product_qty"/>
                                     <field name="product_uom"/>
                                     <field name="product_packaging"/>
+                                    <field name="prodlot_id"/>
                                 </tree>
                             </field>
                         </page>
