@@ -69,6 +69,22 @@ class order_preparation(osv.osv):
         }
     }
     
+    def print_op_out(self,cr,uid,ids,context=None):
+        searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+        browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+        urlTo = str(browseConf.value)+"order-preparation/print&id="+str(ids[0])+"&uid="+str(uid)
+        
+        
+        return {
+            'type'  : 'ir.actions.client',
+            # 'target': 'new',
+            'tag'   : 'print.out.op',
+            'params': {
+                # 'id'  : ids[0],
+                'redir' : urlTo,
+                'uid':uid
+            },
+        }
 
     def print_preparationA5(self, cr, uid, ids, context=None):
         data = {}
@@ -255,13 +271,35 @@ class order_preparation_line(osv.osv):
         'product_id': fields.many2one('product.product', 'Product',track_visibility='always'),
         'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product UoM')),
         'product_uom': fields.many2one('product.uom', 'UoM'),
+        'detail':fields.text('Detail Product'),
         'product_packaging': fields.many2one('product.packaging', 'Packaging'),
-        'prodlot_id':fields.many2one('stock.production.lot','Serial Number', ondelete='cascade'),
+        'prodlot_id':fields.one2many('order.preparation.batch','batch_id','Serial Number', ondelete='cascade'),
     }
          
 order_preparation_line()
 
+class order_preparation_batch(osv.osv):
+    _name = "order.preparation.batch"
+    _columns = {
+        'name':fields.many2one('stock.production.lot','Serial Number', ondelete='cascade'),
+        'desc':fields.char('Description'),
+        'exp_date':fields.date('Exp Date'),
+        'stock_available': fields.float('Stock Available'),
+        'qty': fields.float('Qty'),
+        'batch_id': fields.many2one('order.preparation.line', 'Batch Product', ondelete='cascade'),
+    }
 
+    _defaults = {
+        'qty': 0.0,
+    }
+
+    def product_batch(self,cr,uid,ids,prodlot_id,qty,context=None):
+        hasil=self.pool.get('stock.production.lot').browse(cr,uid,[prodlot_id])[0]
+        if qty > hasil.stock_available:
+            raise openerp.exceptions.Warning('Stock Available Tidak Mencukupi')
+            return {'value':{'qty':0}}
+
+        return {'value':{'desc':hasil.desc,'exp_date':hasil.exp_date,'stock_available':hasil.stock_available}}
 # class order_preparation(osv.osv):
 #     _name = "order.preparation"
 #     _description = "Order Preparation Packaging"
