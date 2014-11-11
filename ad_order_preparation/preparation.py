@@ -161,7 +161,7 @@ class order_preparation(osv.osv):
             }
             
     def create(self, cr, uid, vals, context=None):
-        check = self.search(cr,uid,[('sale_id','=',vals['sale_id']),('picking_id','=',vals['picking_id'])])
+        check = self.search(cr,uid,[('sale_id','=',vals['sale_id']),('picking_id','=',vals['picking_id']),('state','!=','cancel')])
         OPs = self.browse(cr,uid,check,context=None)
         if check:
             allOp = []
