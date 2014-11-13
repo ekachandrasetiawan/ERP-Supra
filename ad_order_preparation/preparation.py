@@ -257,6 +257,7 @@ class order_preparation(osv.osv):
         'state': 'draft',
         'tanggal': time.strftime(DEFAULT_SERVER_DATE_FORMAT), 
     }
+
      
         
 order_preparation()
@@ -275,6 +276,7 @@ class order_preparation_line(osv.osv):
         'product_packaging': fields.many2one('product.packaging', 'Packaging'),
         'prodlot_id':fields.one2many('order.preparation.batch','batch_id','Serial Number', ondelete='cascade'),
     }
+    _order='no ASC'
          
 order_preparation_line()
 
