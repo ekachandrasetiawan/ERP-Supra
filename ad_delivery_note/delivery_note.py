@@ -691,6 +691,22 @@ class procurement_order(osv.osv):
 procurement_order()
 
 class delivery_note(osv.osv):
+	def print_dn_out(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"delivery-note/print&id="+str(ids[0])+"&uid="+str(uid)
+		
+		
+		return {
+			'type'	: 'ir.actions.client',
+			# 'target': 'new',
+			'tag'	: 'print.int.move',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo,
+				'uid':uid
+			},
+		}
 	_name = "delivery.note"
 
 	_columns = {
