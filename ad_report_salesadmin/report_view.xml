@@ -198,13 +198,13 @@
 	                <button name="%(report_kwitansi)d"
 	                        string="Kwitansi" type="action"
 	                        attrs="{'invisible':[('state', '!=', 'open')]}"/>
-	                <button name="%(report_inv)d"
+	                <!-- <button name="%(report_inv)d"
 	                        string="Invoice" type="action" class="oe_highlight"
 	                        attrs="{'invisible':[('state', '!=', 'open')]}"
 	                        />
 	                <button name="%(report_faktur_pajak)d"
 	                        string="Faktur Pajak" type="action" class="oe_highlight"
-	                        attrs="{'invisible':[('state', '!=', 'open')]}"/>
+	                        attrs="{'invisible':[('state', '!=', 'open')]}"/> -->
 	            </xpath>
             </field>
         </record>
