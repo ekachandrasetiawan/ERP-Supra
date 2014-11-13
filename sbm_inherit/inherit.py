@@ -858,3 +858,10 @@ class bom(osv.osv):
 			res = super(bom,self).create(cr,uid,vals,context)
 		return res
 	_inherit='mrp.bom'
+
+class account_move_line(osv.osv):
+	_inherit = "account.move.line"
+	_columns={
+		'ref': fields.related('move_id', 'ref', string='Reference', type='text', store=True),
+		'name': fields.char('Name', required=True),
+	}
