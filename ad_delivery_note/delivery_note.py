@@ -825,7 +825,8 @@ class delivery_note(osv.osv):
 							 'product_id' : x.product_id.id,
 							 'product_qty': qty,
 							 'product_uom': x.product_uom.id,
-							 'name': x.name
+							 'name': x.name,
+							 'op_line_id':x.id
 							 })
 			 
 			res['note_lines'] = line
@@ -946,6 +947,8 @@ class delivery_note_line(osv.osv):
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product UoM')),
 		'product_uom': fields.many2one('product.uom', 'UoM'),
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
+		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
+
 	}
 		 
 delivery_note_line()
