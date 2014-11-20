@@ -77,7 +77,7 @@ class order_preparation(osv.osv):
         
         return {
             'type'  : 'ir.actions.client',
-            # 'target': 'new',
+            'target': 'new',
             'tag'   : 'print.out.op',
             'params': {
                 # 'id'  : ids[0],
