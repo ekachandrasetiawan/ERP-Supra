@@ -92,10 +92,10 @@
 					<field name="kmk"/>
 					<field name="pajak"/>
                 </field>
-                <button string="Print Invoice" position="replace">
+                <!-- <button string="Print Invoice" position="replace">
 					<button name="print_customerinvoice" type="object" states="draft,open,paid" string="Invoice" icon="gtk-print"/>
 					<button name="print_fakturpajak" type="object" states="draft,open,paid" string="Faktur Pajak" icon="gtk-print"/>
-				</button>	
+				</button>	 -->
 			</field>
 		</record>
 		

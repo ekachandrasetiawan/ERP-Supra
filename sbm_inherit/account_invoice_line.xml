@@ -13,7 +13,8 @@
             	<xpath expr="//button[@string='Cancel Invoice']" position="after">
             		
             		<!-- <button name="%(actionFakturPrint)d" string="Print Faktur Pajaks" type="action" class="oe_highlight"/> -->
-            		<button name="actionFakturPrint" string="Print Faktur Pajak" type="object"  class="oe_highlight" />
+            		<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" />
+            		<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" />
             	</xpath>
             </field>
         </record>

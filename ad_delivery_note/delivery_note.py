@@ -699,7 +699,7 @@ class delivery_note(osv.osv):
 		
 		return {
 			'type'	: 'ir.actions.client',
-			# 'target': 'new',
+			'target': 'new',
 			'tag'	: 'print.int.move',
 			'params': {
 				# 'id'	: ids[0],

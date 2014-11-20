@@ -429,23 +429,26 @@ class account_invoice(osv.osv):
 			'url': 'http://www.google.com',
 		    
 		}
-	def actionFakturPrint(self,cr,uid,ids,context=None):
-		# pick = self.browse(cr,uid,ids)
-		# print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>CALLLLEDDD"
+	def actionPrintCustInv(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"account-invoice/print-invoice&id="+str(ids[0])
+		
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'account.invoice.print.faktur',
+			'params': {
+				'redir'	: urlTo
+			},
+		}
+	def actionPrintFaktur(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"account-invoice/print&id="+str(ids[0])
-		# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<",urlTo
-		# return {
-
-		# 	'type': 'ir.actions.act_url',
-		# 	'target': 'new',
-		# 	'url': 'http://www.google.com',
-		    
-		# }
 		return {
 			'type'	: 'ir.actions.client',
-			# 'target': 'new',
+			'target': 'new',
 			'tag'	: 'account.invoice.print.faktur',
 			'params': {
 				# 'id'	: ids[0],
