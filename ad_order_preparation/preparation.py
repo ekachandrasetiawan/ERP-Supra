@@ -245,7 +245,8 @@ class order_preparation(osv.osv):
                              'product_id' : x.product_id.id,
                              'product_qty': x.product_qty,
                              'product_uom': x.product_uom.id,
-                             'name': x.name
+                             'name': x.name,
+                             'move_id':x.id
                              })
              
             res['prepare_lines'] = line
@@ -257,6 +258,7 @@ class order_preparation(osv.osv):
         'state': 'draft',
         'tanggal': time.strftime(DEFAULT_SERVER_DATE_FORMAT), 
     }
+
      
         
 order_preparation()
@@ -274,7 +276,9 @@ class order_preparation_line(osv.osv):
         'detail':fields.text('Detail Product'),
         'product_packaging': fields.many2one('product.packaging', 'Packaging'),
         'prodlot_id':fields.one2many('order.preparation.batch','batch_id','Serial Number', ondelete='cascade'),
+        'move_id':fields.many2one('stock.move','Move'),
     }
+    _order='no ASC'
          
 order_preparation_line()
 

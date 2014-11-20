@@ -559,6 +559,7 @@ class SaleOrderLine(osv.osv):
 	_columns = {
 		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
 	}
+	_order = 'sequence ASC'
 SaleOrderLine()
 
 class AccountBankStatement(osv.osv):
@@ -858,3 +859,10 @@ class bom(osv.osv):
 			res = super(bom,self).create(cr,uid,vals,context)
 		return res
 	_inherit='mrp.bom'
+
+class account_move_line(osv.osv):
+	_inherit = "account.move.line"
+	_columns={
+		'ref': fields.related('move_id', 'ref', string='Reference', type='text', store=True),
+		'name': fields.char('Name', required=True),
+	}

@@ -91,16 +91,17 @@
             <field name="arch" type="xml">
                 <form string="Delivery Note" version="7.0">
 				<header>
-                        <button name="%(print_deliveryA4_rev)d" type="action" states="approve,done" string="Print A4" icon="gtk-print"/>
-			<!--
-                        <button name="print_deliveryA4" type="object" states="approve,done" string="Print A4" icon="gtk-print"/>-->
-	                    <button name="%(print_continue_note)d" type="action" states="approve,done" string="Print Continuous" icon="gtk-print"/>
-	                    <button name="package_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize"/>
-	           			<button name="package_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
-	           			<button name="package_confirm" type="object" states="draft" string="Approve" icon="gtk-apply"/>
-                        <button name="package_validate" type="object" states="approve" string="Validate" icon="gtk-apply"/>
-	           			<field name="state" widget="statusbar" statusbar_visible="draft,approve,done" statusbar_colors='{"draft":"red","approve":"blue"}'/>
-                </header>                                
+                    <button name="%(print_deliveryA4_rev)d" type="action" states="approve,done" string="Print A4" icon="gtk-print"/>
+                    <button name="print_dn_out" type="object" states="approve,done" string="Print DN" icon="gtk-dnd-multiple"/>
+		              <!--
+                    <button name="print_deliveryA4" type="object" states="approve,done" string="Print A4" icon="gtk-print"/>-->
+                    <button name="%(print_continue_note)d" type="action" states="approve,done" string="Print Continuous" icon="gtk-print"/>
+                    <button name="package_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize"/>
+           			<button name="package_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
+           			<button name="package_confirm" type="object" states="draft" string="Approve" icon="gtk-apply"/>
+                    <button name="package_validate" type="object" states="approve" string="Validate" icon="gtk-apply"/>
+           			<field name="state" widget="statusbar" statusbar_visible="draft,approve,done" statusbar_colors='{"draft":"red","approve":"blue"}'/>
+                </header>
 				<sheet>
                     <group col="4" colspan="4">
 		                <field name="name"/>

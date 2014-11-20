@@ -691,6 +691,22 @@ class procurement_order(osv.osv):
 procurement_order()
 
 class delivery_note(osv.osv):
+	def print_dn_out(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"delivery-note/print&id="+str(ids[0])+"&uid="+str(uid)
+		
+		
+		return {
+			'type'	: 'ir.actions.client',
+			# 'target': 'new',
+			'tag'	: 'print.int.move',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo,
+				'uid':uid
+			},
+		}
 	_name = "delivery.note"
 
 	_columns = {
@@ -809,7 +825,8 @@ class delivery_note(osv.osv):
 							 'product_id' : x.product_id.id,
 							 'product_qty': qty,
 							 'product_uom': x.product_uom.id,
-							 'name': x.name
+							 'name': x.name,
+							 'op_line_id':x.id
 							 })
 			 
 			res['note_lines'] = line
@@ -930,6 +947,8 @@ class delivery_note_line(osv.osv):
 		'product_qty': fields.float('Quantity', digits_compute=dp.get_precision('Product UoM')),
 		'product_uom': fields.many2one('product.uom', 'UoM'),
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
+		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
+
 	}
 		 
 delivery_note_line()
