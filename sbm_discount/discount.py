@@ -58,8 +58,8 @@ class PurchaseOrder(osv.osv):
                 if pajak:
                     val += pajak[0].get('amount', 0.0)
             res[order.id]['amount_tax']=cur_obj.round(cr, uid, cur, val)
-            res[order.id]['amount_untaxed']=0
-            # res[order.id]['amount_untaxed']=cur_obj.round(cr, uid, cur, val1)
+            # res[order.id]['amount_untaxed']=0
+            res[order.id]['amount_untaxed']=cur_obj.round(cr, uid, cur, val1)
             res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax']
             # print '==================EKA CHANDRA'
         return res
