@@ -39,6 +39,7 @@ class purchase_order(osv.osv):
             res[order.id]['amount_tax']=cur_obj.round(cr, uid, cur, val)
             res[order.id]['amount_untaxed']=cur_obj.round(cr, uid, cur, val1)
             res[order.id]['amount_total']=res[order.id]['amount_untaxed'] + res[order.id]['amount_tax']
+            print "RES == ",res
         return res
      
     def _get_order(self, cr, uid, ids, context=None):

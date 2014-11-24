@@ -66,6 +66,7 @@ class Reportrachseorder(report_sxw.rml_parse):
         res2['amount_untaxed']=amount_untaxed
         res2['total_discount']=totaldiscount
         res2['discountamount']=discountamount
+        # print "THISSSSSSSSSSSSS---------------",res2
         return res2
     
     def get_lines(self,obj):

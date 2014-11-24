@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="wizard_supplier_first_payment_form" model="ir.ui.view">
+			<field name="name">wizard.supplier.first.payment.form</field>
+			<field name="model">wizard.supplier.first.payment</field>
+			<field name="type">form</field>
+
+			<field name="arch" type="xml">
+				<form string="Supplier DP" version="7.0">
+					<sheet>
+						<group>
+							<field name="name"/>
+							<field name="po_id" on_change='on_change_po_id(po_id)'/>
+							<field name="journal_id"/>
+							<field name="payment_date"/>
+							<field name="period_id"/>
+
+							<field name="obi"/>
+							<field name="ref"/>
+
+							<field name="voucher_code"/>
+							<field name="method"/>
+							<field name="rate"/>
+							<field name="partner_id"/>
+							<field name="account_id"/>
+							<field name="amount"/>
+						</group>
+					</sheet>
+					<footer>
+						<button class="oe_highlight" icon="gtk-apply" name="create" string="Save Payment" type="object"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+		<record id="wizard_supplier_payment_action" model="ir.actions.act_window">
+			<field name="name">Supplier Payment Process</field>
+			<field name="res_model">wizard.supplier.first.payment</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>
+			<field name="view_id" ref="wizard_supplier_first_payment_form"/>
+		</record>
+
+		<menuitem id="supplier_first_payment_wizard_menu" parent="account.menu_finance_payables" name="Suplier DP" action="wizard_supplier_payment_action" />
+	</data>
+</openerp>
