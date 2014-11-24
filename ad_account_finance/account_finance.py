@@ -266,7 +266,40 @@ class account_invoice(osv.osv):
                 'report_name': 'print.customerinvoice',
                 'datas': data,
                 'nodestroy':True
-        }     
+        }
+
+    def compute_invoice_totals(self, cr, uid, inv, company_currency, ref, invoice_move_lines, context=None):
+        if context is None:
+            context={}
+        total = 0
+        total_currency = 0
+        cur_obj = self.pool.get('res.currency')
+        for i in invoice_move_lines:
+            if inv.currency_id.id != company_currency:
+                context.update({'date': inv.date_invoice or time.strftime('%Y-%m-%d')})
+                i['currency_id'] = inv.currency_id.id
+                i['amount_currency'] = i['price']
+                # base compute price
+                # i['price'] = cur_obj.compute(cr, uid, inv.currency_id.id,
+                #         company_currency, i['price'],
+                #         context=context)
+                # this changes based on compute real price in company currency using tax rate that inputed on invoice
+                # if pajak field inputed, then compute the price using pajak as multiplier, else using currency rate on master data
+                i['price'] = inv.pajak and  cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,i['price']*inv.pajak) or cur_obj.compute(cr, uid, inv.currency_id.id,
+                        company_currency, i['price'],
+                        context=context)            
+            else:
+                i['amount_currency'] = False
+                i['currency_id'] = False
+            i['ref'] = ref
+            if inv.type in ('out_invoice','in_refund'):
+                total += i['price']
+                total_currency += i['amount_currency'] or i['price']
+                i['price'] = - i['price']
+            else:
+                total -= i['price']
+                total_currency -= i['amount_currency'] or i['price']
+        return total, total_currency, invoice_move_lines     
        
     def action_move_create(self, cr, uid, ids, context=None):
         """Creates invoice related analytics and financial move lines"""
@@ -340,13 +373,14 @@ class account_invoice(osv.osv):
             total, total_currency, iml = self.compute_invoice_totals(cr, uid, inv, company_currency, ref, iml, context=ctx)
             acc_id = inv.account_id.id
 
-            if diff_currency_p:
-                for i in iml:
-                    if inv.pajak:
-                        if i['price'] < 0:
-                            i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,-(i['amount_currency'] * inv.pajak))
-                        else:
-                            i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,i['amount_currency'] * inv.pajak)
+            # udah pak, silahkan dicoba dulu
+            # if diff_currency_p:
+            #     for i in iml:
+            #         if inv.pajak:
+            #             if i['price'] < 0:
+            #                 i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,(i['amount_currency'] * inv.pajak))
+            #             else:a
+            #                 i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,i['amount_currency'] * inv.pajak)
 
             ending = 0
             if diff_currency_p:
