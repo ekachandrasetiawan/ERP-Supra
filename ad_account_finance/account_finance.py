@@ -71,6 +71,7 @@ class account_bank_statement_line(osv.osv):
 
     _inherit = 'account.bank.statement.line'
     _columns = {
+        'ref':fields.text('Reference',required=False),
         'kurs': fields.float('BI Rate', digits=(12,2), select=True),
         'code_voucher': fields.char('No Cek/Giro', size=32),
         'method': fields.selection([('cash', 'Cash'), ('cek', 'Cheques'), ('giro', 'Giro'), ('transfer', 'Transfer')], 'Method', select=True),
