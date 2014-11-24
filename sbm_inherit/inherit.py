@@ -10,6 +10,7 @@ from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 from openerp.addons.account import account_invoice
+from ad_account_finance import account_finance
 class stock_picking(osv.osv):
 	def open_full_record(self, cr, uid, ids, context=None):
 		data= self.browse(cr, uid, ids, context=context)
@@ -87,12 +88,12 @@ class PurchaseOrder(osv.osv):
 		
 
 		discount=0
-		totaldiscount=0 
-		amount_untaxed=0
+		totaldiscount=0
 		
 		orders= self.browse(cr, uid, ids, context=context)
 		for order in orders:
 			dis[order.id]=order.amount_bruto-order.amount_untaxed
+		print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",dis
 		return dis
 
 
@@ -408,14 +409,93 @@ class account_invoice_line(osv.osv):
 		'price_subtotal': fields.function(_amount_line, string='Amount', type="float",digits_compute= dp.get_precision('Account'), store=True),
 	}
 
-
-#For Bank Statment Size
-
+# INHERIT CLASS FOR ACCOUNT BANK STATEMENT LINE
+# For Bank Statment Size
 class account_bank_statement_line(osv.osv):
 	_name = "account.bank.statement.line"
 	_inherit = "account.bank.statement.line"
 	_columns={
 		'ref': fields.text('Reference'),
+		'po_id':fields.many2one('purchase.order',string="PO"),
+	}
+
+class wizard_suplier_first_payment(osv.osv_memory):
+	def create(self,cr,uid,values,context=None):
+		res = False
+		print values
+		acc_bs = self.pool.get('account.bank.statement')
+		acc_bs_line = self.pool.get('account.bank.statement.line')
+
+		po = self.pool.get('purchase.order')
+		
+		vals = {
+			'name':values['name'],
+			'date':values['payment_date'],
+			'journal_id':values['journal_id'],
+			
+			'period_id':values['period_id'],
+			'line_ids':[
+				[
+					0,
+					False,
+					{
+						'date':values['payment_date'],
+						'name':values['obi'],
+						'ref':values['ref'],
+						'code_voucher':values['voucher_code'],
+						'method':values['method'],
+						'kurs':values['rate'],
+						'partner_id':values['partner_id'],
+						'type':'supplier',
+						'sequence':0,
+						'account_id':values['account_id'],
+						'amount':values['amount'],
+						'po_id':values['po_id'],
+					}
+				]
+			]
+		}
+		poData = po.browse(cr,uid,values['po_id'])
+		if poData:
+			if values['amount'] >= poData.amount_total:
+				raise openerp.exceptions.Warning('Total Amount is Must on Under Of Purchase Order Total!')
+				res = False
+			else:
+				print vals
+				res = acc_bs.create(cr,uid,vals)
+				# return super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
+				
+		return res
+	def on_change_po_id(self,cr,uid,ids,po_id):
+		res = {}
+		po_obj = self.pool.get('purchase.order')
+		browse = po_obj.browse(cr,uid,po_id)
+		
+
+		return {
+			'value':{
+				'partner_id':browse.partner_id.id
+			}
+		}
+	_name = 'wizard.supplier.first.payment'
+	_description = 'Supplier DP with Bank Statement'
+	_columns = {
+		'name':fields.char('Reference',required=True),
+		'po_id':fields.many2one('purchase.order','PO No',required=True),
+		'journal_id': fields.many2one('account.journal', 'Journal', required=True),
+		'payment_date':fields.date('Date',required=True),
+		'period_id': fields.many2one('account.period', 'Period', required=True),
+		'obi':fields.char('OBI',required=True),
+		'ref':fields.text('Reference'),
+		'voucher_code':fields.char('No Cek/Giro'),
+		'method':fields.selection([('cash','Cash'),('cek','Cheques'),('giro','Giro'),('transfer','Transfer')],string="Payment Method",required=True),
+		'rate':fields.float('BI Rate'),
+		'partner_id': fields.many2one('res.partner',required=True,string="Supplier",domain=[('supplier','=',True)]),
+		'account_id':fields.many2one('account.account',string="Account",required=True),
+		'amount':fields.float(string="Amount",required=True),
+	}
+	_defaults={
+		'account_id':69
 	}
 
 class account_invoice(osv.osv):
@@ -475,13 +555,6 @@ class account_invoice(osv.osv):
 		for inv in invoices:
 			res[inv.id]=0
 			for line in inv.invoice_line:
-				# if not res[inv.id]:
-				# 	res[inv.id]=0
-
-				# if line.account_id.id == acc_discount_id:
-				# 	res[inv.id]+=line.price_subtotal
-				# else:
-				# 	res[inv.id]+=0
 				if line.account_id.id==acc_discount_id:
 					res[inv.id]+=line.price_subtotal
 

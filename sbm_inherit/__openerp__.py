@@ -23,6 +23,7 @@
         "account_bank_statement.xml",
         "product_batch.xml",
         "split_batch.xml",
+        "supplier_first_payment.xml",
         # "report/faktur.xml"
         # "purchase_order.xml",
     ],
