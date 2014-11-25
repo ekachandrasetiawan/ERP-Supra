@@ -6,11 +6,8 @@ import webbrowser
 import netsvc
 import openerp.exceptions
 from osv import osv, fields
-from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
-from openerp.addons.account import account_invoice
-from ad_account_finance import account_finance
 class stock_picking(osv.osv):
 	def open_full_record(self, cr, uid, ids, context=None):
 		data= self.browse(cr, uid, ids, context=context)
@@ -420,63 +417,6 @@ class account_bank_statement_line(osv.osv):
 	}
 
 class wizard_suplier_first_payment(osv.osv_memory):
-	def create(self,cr,uid,values,context=None):
-		res = False
-		print values
-		acc_bs = self.pool.get('account.bank.statement')
-		acc_bs_line = self.pool.get('account.bank.statement.line')
-
-		po = self.pool.get('purchase.order')
-		
-		vals = {
-			'name':values['name'],
-			'date':values['payment_date'],
-			'journal_id':values['journal_id'],
-			
-			'period_id':values['period_id'],
-			'line_ids':[
-				[
-					0,
-					False,
-					{
-						'date':values['payment_date'],
-						'name':values['obi'],
-						'ref':values['ref'],
-						'code_voucher':values['voucher_code'],
-						'method':values['method'],
-						'kurs':values['rate'],
-						'partner_id':values['partner_id'],
-						'type':'supplier',
-						'sequence':0,
-						'account_id':values['account_id'],
-						'amount':values['amount'],
-						'po_id':values['po_id'],
-					}
-				]
-			]
-		}
-		poData = po.browse(cr,uid,values['po_id'])
-		if poData:
-			if values['amount'] >= poData.amount_total:
-				raise openerp.exceptions.Warning('Total Amount is Must on Under Of Purchase Order Total!')
-				res = False
-			else:
-				print vals
-				res = acc_bs.create(cr,uid,vals)
-				# return super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
-				
-		return res
-	def on_change_po_id(self,cr,uid,ids,po_id):
-		res = {}
-		po_obj = self.pool.get('purchase.order')
-		browse = po_obj.browse(cr,uid,po_id)
-		
-
-		return {
-			'value':{
-				'partner_id':browse.partner_id.id
-			}
-		}
 	_name = 'wizard.supplier.first.payment'
 	_description = 'Supplier DP with Bank Statement'
 	_columns = {
@@ -497,6 +437,72 @@ class wizard_suplier_first_payment(osv.osv_memory):
 	_defaults={
 		'account_id':69
 	}
+
+	def check(self,cr,uid,values,context=None):
+		val = self.browse(cr, uid, values)[0]
+		print val,"<<<<<<<<<<<<<<<<<<<<<<<<<VAL"
+		# print wVal
+		# print ids
+
+		# print 111111
+		acc_bs = self.pool.get('account.bank.statement')
+		acc_bs_line = self.pool.get('account.bank.statement.line')
+
+		po = self.pool.get('purchase.order')
+
+		acc1 = acc_bs.create(cr,uid,{
+			'name' : val.name,
+			'date' : val.payment_date,
+			'journal_id' : val.journal_id.id,
+			
+			'period_id' : val.period_id.id
+		},context)
+		amount = val.amount
+		if amount > 0:
+			amount = -(val.amount)
+
+		acc11 = acc_bs_line.create(cr,uid,{
+			'date' : val.payment_date,
+			'name' : val.obi,
+			'ref' : val.ref,
+			'code_voucher' : val.voucher_code,
+			'method' : val.method,
+			'kurs' : val.rate,
+			'partner_id' : val.partner_id.id,
+			'type':'supplier',
+			'sequence':0,
+			'account_id' : val.account_id.id,
+			'amount' : amount,
+			'po_id' : val.po_id.id,
+			'statement_id':acc1
+		})
+		print acc1,"*********************"
+		print acc11,"********************"
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'view_bank_statement_form')
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'account.bank.statement.form',
+			'res_model': 'account.bank.statement',
+			'type': 'ir.actions.act_window',
+			'target': 'current',
+			'res_id':acc1,
+			'domain': "[('id','=',"+str(acc1)+")]",
+		}
+		
+	def on_change_po_id(self,cr,uid,ids,po_id):
+		res = {}
+		po_obj = self.pool.get('purchase.order')
+		browse = po_obj.browse(cr,uid,po_id)
+		
+
+		return {
+			'value':{
+				'partner_id':browse.partner_id.id
+			}
+		}
+	
 
 class account_invoice(osv.osv):
 	def actionTest(self,cr,uid,ids,context=None):

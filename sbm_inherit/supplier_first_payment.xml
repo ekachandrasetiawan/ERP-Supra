@@ -28,7 +28,7 @@
 						</group>
 					</sheet>
 					<footer>
-						<button class="oe_highlight" icon="gtk-apply" name="create" string="Save Payment" type="object"/>
+						<button class="oe_highlight" icon="gtk-apply" name="check" string="Save Payment" type="object"/>
 					</footer>
 				</form>
 			</field>
@@ -39,7 +39,7 @@
 			<field name="type">ir.actions.act_window</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">form</field>
-			<field name="target">new</field>
+			<!-- <field name="target">new</field> -->
 			<field name="view_id" ref="wizard_supplier_first_payment_form"/>
 		</record>
 
