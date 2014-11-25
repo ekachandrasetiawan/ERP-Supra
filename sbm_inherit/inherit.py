@@ -75,9 +75,9 @@ stock_picking_in()
 # 2. DESCRIPTION LINE MANY2ONE RELATED
 class PurchaseOrder(osv.osv):
 	_inherit='purchase.order'
-	_name='purchase.order'
-	
-
+	# _columns={
+	# 	'bank_statement_lines':fields.one2many('account.bank.statement.line','po_id',string="First Payments"),
+	# }
 
 
 	def _get_total_discount(self, cr, uid, ids, name, arg, context=None):
@@ -124,9 +124,8 @@ class PurchaseOrder(osv.osv):
 	_defaults = {
 		'total_discount': _default_total_discount
 	}
-
-
 PurchaseOrder()
+
 class PurchaseOrderLine(osv.osv):
 	_inherit='purchase.order.line'
 	# _name='purchase.order.line'
@@ -440,7 +439,7 @@ class wizard_suplier_first_payment(osv.osv_memory):
 
 	def check(self,cr,uid,values,context=None):
 		val = self.browse(cr, uid, values)[0]
-		print val,"<<<<<<<<<<<<<<<<<<<<<<<<<VAL"
+		# print val,"<<<<<<<<<<<<<<<<<<<<<<<<<VAL"
 		# print wVal
 		# print ids
 
@@ -476,8 +475,8 @@ class wizard_suplier_first_payment(osv.osv_memory):
 			'po_id' : val.po_id.id,
 			'statement_id':acc1
 		})
-		print acc1,"*********************"
-		print acc11,"********************"
+		# print acc1,"*********************"
+		# print acc11,"********************"
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'view_bank_statement_form')
 		return {
 			'view_mode': 'form',
@@ -947,4 +946,10 @@ class account_move_line(osv.osv):
 	_columns={
 		'ref': fields.related('move_id', 'ref', string='Reference', type='text', store=True),
 		'name': fields.char('Name', required=True),
+	}
+
+class PurchaseOrderWithDP(osv.osv):
+	_inherit = 'purchase.order'
+	_columns = {
+		'bank_statement_lines':fields.one2many('account.bank.statement.line','po_id',string="First Payments"),
 	}
