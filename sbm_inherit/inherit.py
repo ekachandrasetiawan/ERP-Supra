@@ -422,7 +422,7 @@ class wizard_suplier_first_payment(osv.osv_memory):
 	_columns = {
 		'name':fields.char('Reference',required=True),
 		'po_id':fields.many2one('purchase.order','PO No',required=True),
-		'journal_id': fields.many2one('account.journal', 'Journal', required=True),
+		'journal_id': fields.many2one('account.journal', 'Journal', required=True,domain=[('type','=','bank')]),
 		'payment_date':fields.date('Date',required=True),
 		'period_id': fields.many2one('account.period', 'Period', required=True),
 		'obi':fields.char('OBI',required=True),
