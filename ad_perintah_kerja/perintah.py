@@ -262,7 +262,7 @@ class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _name = 'sale.order'
     def copy_pure_quotation(self,cr,uid,ids,context=None):
-        print "CALLEDDD",ids;
+        # print "CALLEDDD",ids;
         rec = self.browse(cr,uid,ids,context)[0]
         
         prepareNewSO = {
@@ -291,6 +291,20 @@ class SaleOrder(osv.osv):
             'partner_invoice_id':rec.partner_invoice_id.id,
 
         }
+        ListScope1 = []
+        ListScope2 = []
+        ListTerms = []
+
+        for sSupra in rec.scope_work_supra:
+            ListScope1.append(sSupra.id)
+        for sCust in rec.scope_work_customer:
+            ListScope2.append(sCust.id)
+        for sTerm in rec.term_condition:
+            ListTerms.append(sTerm.id)
+
+        prepareNewSO['scope_work_supra'] = [(6,0,ListScope1)]
+        prepareNewSO['scope_work_customer'] = [(6,0,ListScope2)]
+        prepareNewSO['term_condition'] = [(6,0,ListTerms)]
 
         newOrderId = self.create(cr,uid,prepareNewSO,context)
         print prepareNewSO
@@ -320,12 +334,20 @@ class SaleOrder(osv.osv):
                 'product_onhand':line.product_onhand,
                 'product_future':line.product_future,
                 'discount_nominal':line.discount_nominal,
-
-
             }
             newLineObj.create(cr,uid,newLine,context)
 
         print "NEW ID    ",newOrderId
+        
+        
+        self.write(cr,uid,ids,{
+            'scope_work_supra':[(6,0,ListScope1)]
+        })
+        
+
+
+
+
 
 
 #             for x in val.perintah_lines:
