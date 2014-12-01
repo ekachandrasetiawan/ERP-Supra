@@ -340,11 +340,18 @@ class SaleOrder(osv.osv):
         print "NEW ID    ",newOrderId
         
         
-        self.write(cr,uid,ids,{
-            'scope_work_supra':[(6,0,ListScope1)]
-        })
-        
-
+        dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')
+        return {
+            'view_mode': 'form',
+            'view_id': view_id,
+            'view_type': 'form',
+            'view_name':'sale.order.form',
+            'res_model': 'sale.order',
+            'type': 'ir.actions.act_window',
+            'target': 'current',
+            'res_id':newOrderId,
+            'domain': "[('id','=',"+str(newOrderId)+")]",
+        }
 
 
 
