@@ -28,7 +28,7 @@
 	                <button name="%(form_salesorder)d" string="Print Sales Order" type="action" states="progress,manual" class="oe_highlight" />
 	            </xpath>
 	            <xpath expr="//button[@name='copy_quotation']" position="replace">
-	            	<button name="copy_pure_quotation" string="New Copy of Quotation" type="object"/>
+	            	<button confirm="Are You Sure to Copy This Document Into a New Document?" name="copy_pure_quotation" string="New Copy of Quotation" type="object"/>
 	            </xpath>
 
             </field>
