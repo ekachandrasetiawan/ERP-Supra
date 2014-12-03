@@ -258,6 +258,101 @@ class raw_material_line(osv.osv):
         return True
         
 raw_material_line()
+class SaleOrder(osv.osv):
+    _inherit = 'sale.order'
+    _name = 'sale.order'
+    def copy_pure_quotation(self,cr,uid,ids,context=None):
+        # print "CALLEDDD",ids;
+        rec = self.browse(cr,uid,ids,context)[0]
+        
+        prepareNewSO = {
+            'origin':rec.origin,
+            'order_policy':rec.order_policy,
+            'client_order_ref':rec.client_order_ref,
+            'partner_id':rec.partner_id.id,
+            'date_order':rec.date_order,
+            'note':rec.note,
+            'user_id':rec.user_id.id,
+            'payment_term':rec.payment_term.id,
+            'company_id':rec.company_id.id,
+            'amount_tax':rec.amount_tax,
+            'state':'draft',
+            'amount_untaxed':rec.amount_untaxed,
+            'partner_shipping_id':rec.partner_shipping_id.id,
+            'picking_policy':rec.picking_policy,
+            'incoterm':rec.incoterm.id,
+            'carrier_id':rec.carrier_id.id,
+            'worktype':rec.worktype,
+            'week':rec.week,
+            'attention':rec.attention.id,
+            'internal_notes':rec.internal_notes,
+            'project_id':rec.project_id.id,
+            'pricelist_id':rec.pricelist_id.id,
+            'partner_invoice_id':rec.partner_invoice_id.id,
+
+        }
+        ListScope1 = []
+        ListScope2 = []
+        ListTerms = []
+
+        for sSupra in rec.scope_work_supra:
+            ListScope1.append(sSupra.id)
+        for sCust in rec.scope_work_customer:
+            ListScope2.append(sCust.id)
+        for sTerm in rec.term_condition:
+            ListTerms.append(sTerm.id)
+
+        prepareNewSO['scope_work_supra'] = [(6,0,ListScope1)]
+        prepareNewSO['scope_work_customer'] = [(6,0,ListScope2)]
+        prepareNewSO['term_condition'] = [(6,0,ListTerms)]
+
+        newOrderId = self.create(cr,uid,prepareNewSO,context)
+        print prepareNewSO
+
+        for line in rec.order_line:
+            newLineObj = self.pool.get('sale.order.line')
+            newLine = {
+                'product_uos_qty':line.product_uos,
+                'product_uom':line.product_uom.id,
+                'product_uom_qty':line.product_uom_qty,
+                'discount':line.discount,
+                'product_uos':line.product_uos.id,
+                'sequence':line.sequence,
+                'order_id':newOrderId,
+                'price_unit':line.price_unit,
+                'name':line.name,
+                'company_id':line.company_id.id,
+                'salesman_id':line.salesman_id.id,
+                'state':'draft',
+                'product_id':line.product_id.id,
+                'order_partner_id':line.order_partner_id.id,
+                'th_weight':line.th_weight,
+                'type':line.type,
+                'address_allotment_id':line.address_allotment_id.id,
+                'procurement_id':line.procurement_id.id,
+                'delay':line.delay,
+                'product_onhand':line.product_onhand,
+                'product_future':line.product_future,
+                'discount_nominal':line.discount_nominal,
+            }
+            newLineObj.create(cr,uid,newLine,context)
+
+        print "NEW ID    ",newOrderId
+        
+        
+        dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')
+        return {
+            'view_mode': 'form',
+            'view_id': view_id,
+            'view_type': 'form',
+            'view_name':'sale.order.form',
+            'res_model': 'sale.order',
+            'type': 'ir.actions.act_window',
+            'target': 'current',
+            'res_id':newOrderId,
+            'domain': "[('id','=',"+str(newOrderId)+")]",
+        }
+
 
 
 

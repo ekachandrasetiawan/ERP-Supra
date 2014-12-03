@@ -76,7 +76,8 @@ class stock_picking(osv.osv):
 		for id in ids:
 			res[id]= 0;
 		return res
-	_inherit = "stock.picking"
+	_name = 'stock.picking'
+	_inherit = ["stock.picking","mail.thread"]
 	_columns = {
 		'note_id': fields.many2one('delivery.note','Delivery Note', select=True),
 		'note': fields.text('Notes', states={'done':[('readonly', False)]}),
