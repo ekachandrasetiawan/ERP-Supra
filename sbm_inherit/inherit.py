@@ -953,3 +953,7 @@ class PurchaseOrderWithDP(osv.osv):
 	_columns = {
 		'bank_statement_lines':fields.one2many('account.bank.statement.line','po_id',string="First Payments"),
 	}
+
+class AccountVoucher(osv.osv):
+	_inherit = 'account.voucher'
+	

@@ -113,7 +113,9 @@
                         <field name="partner_id"/>
 		                <field name="poc"/>
 		                <field name="partner_shipping_id"/>
+
 		                <field name="tanggal"/>
+                        <field name="attn"/>
 		            </group>
                     <notebook colspan="5">
                         <page string="Note Lines">

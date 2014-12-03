@@ -741,6 +741,7 @@ class delivery_note(osv.osv):
 		'packing_lines': fields.one2many('packing.list.line', 'note_id', 'Packing List'),
 		'note': fields.text('Notes'),
 		'terms':fields.text('Terms & Condition'),
+		'attn':fields.many2one('res.partner',string="Attention"),
 	}
 	_defaults = {
 		'name': '/',
@@ -850,6 +851,7 @@ class delivery_note(osv.osv):
 			res['tanggal'] = data.duedate
 			res['partner_id'] = data.sale_id.partner_id.id
 			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
+			res['attn'] = data.sale_id.attention.id
 			
 			return  {'value': res}
 					 
