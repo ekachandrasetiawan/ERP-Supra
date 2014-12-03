@@ -164,6 +164,17 @@ table.main tr td { padding: 5px;}
 						${o.name or ""}
 					</td>
 				</tr>
+					<tr width="100%" class="alignTop">
+					<td width="20%" class="alignTop">
+						<b>Customer Ref.<b/>
+					</td>
+					<td width="2%">
+						<b>:</b>
+					</td>
+					<td width="80%">
+						${o.client_order_ref or ""}
+					</td>
+				</tr>
 				<tr width="100%" class="alignTop">
 					<td width="20%" class="alignTop">
 						<b>Date<b/>

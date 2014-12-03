@@ -341,6 +341,7 @@ class account_invoice(osv.osv):
                 if (inv.type in ('in_invoice', 'in_refund') and abs(inv.check_total - inv.amount_total) >= (inv.currency_id.rounding/2.0)):
                     raise osv.except_osv(_('Bad Total!'), _('Please verify the price of the invoice!\nThe encoded total does not match the computed total.'))
 
+
             if inv.payment_term:
                 total_fixed = total_percent = 0
                 for line in inv.payment_term.line_ids:
@@ -349,6 +350,8 @@ class account_invoice(osv.osv):
                     if line.value == 'procent':
                         total_percent += line.value_amount
                 total_fixed = (total_fixed * 100) / (inv.amount_total or 1.0)
+
+
                 if (total_fixed + total_percent) > 100:
                     raise osv.except_osv(_('Error!'), _("Cannot create the invoice.\nThe related payment term is probably misconfigured as it gives a computed amount greater than the total invoiced amount. In order to avoid rounding issues, the latest line of your payment term must be of type 'balance'."))
 
@@ -368,19 +371,20 @@ class account_invoice(osv.osv):
                     entry_type = 'cont_voucher'
 
             diff_currency_p = inv.currency_id.id <> company_currency
+
+
             # create one move line for the total and possibly adjust the other lines amount
             total = 0
             total_currency = 0
             total, total_currency, iml = self.compute_invoice_totals(cr, uid, inv, company_currency, ref, iml, context=ctx)
             acc_id = inv.account_id.id
-
             # udah pak, silahkan dicoba dulu
             # if diff_currency_p:
             #     for i in iml:
             #         if inv.pajak:
             #             if i['price'] < 0:
             #                 i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,(i['amount_currency'] * inv.pajak))
-            #             else:a
+            #             else:
             #                 i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,i['amount_currency'] * inv.pajak)
 
             ending = 0
@@ -391,8 +395,9 @@ class account_invoice(osv.osv):
                     total = -(ending)
                 else:
                     total = abs(ending)
-
-            name = inv['name'] or inv['supplier_invoice_number'] or '/'
+            
+            name = inv['name'] or inv['supplier_invoice_number']
+            # name = inv['name'] or inv['supplier_invoice_number'] or '/'
             totlines = False
             if inv.payment_term:
                 totlines = payment_term_obj.compute(cr,
@@ -404,9 +409,9 @@ class account_invoice(osv.osv):
                 for t in totlines:
                     if inv.currency_id.id != company_currency:
                         amount_currency = cur_obj.compute(cr, uid, company_currency, inv.currency_id.id, t[1], context=ctx)
+
                     else:
                         amount_currency = False
-                    
                     # last line add the diff
                     res_amount_currency -= amount_currency or 0
                     i += 1
@@ -426,7 +431,6 @@ class account_invoice(osv.osv):
                         'ref': ref,
                     })
             else:
-                    
                 iml.append({
                     'type': 'dest',
                     'name': name,
@@ -477,12 +481,13 @@ class account_invoice(osv.osv):
 
             ctx.update(invoice=inv)
             move_id = move_obj.create(cr, uid, move, context=ctx)
+            # print '================',move
             new_move_name = move_obj.browse(cr, uid, move_id, context=ctx).name
-            
             # make the invoice point to that move
             self.write(cr, uid, [inv.id], {'move_id': move_id,'period_id':period_id, 'move_name':new_move_name}, context=ctx)
             # Pass invoice in context in method post: used if you want to get the same
             # account move reference when creating the same invoice after a cancelled one:
+            
             move_obj.post(cr, uid, [move_id], context=ctx)
         self._log_event(cr, uid, ids)
         return True
