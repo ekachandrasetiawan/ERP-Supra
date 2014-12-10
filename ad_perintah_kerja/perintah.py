@@ -312,7 +312,7 @@ class SaleOrder(osv.osv):
         for line in rec.order_line:
             newLineObj = self.pool.get('sale.order.line')
             newLine = {
-                'product_uos_qty':line.product_uos,
+                'product_uos_qty':line.product_uos_qty,
                 'product_uom':line.product_uom.id,
                 'product_uom_qty':line.product_uom_qty,
                 'discount':line.discount,
@@ -335,6 +335,7 @@ class SaleOrder(osv.osv):
                 'product_future':line.product_future,
                 'discount_nominal':line.discount_nominal,
             }
+            print "NEW LINE ",newLine
             newLineObj.create(cr,uid,newLine,context)
 
         print "NEW ID    ",newOrderId
