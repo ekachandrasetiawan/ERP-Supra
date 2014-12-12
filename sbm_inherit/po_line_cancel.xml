@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="view_po_line_cancel_tree" model="ir.ui.view">
+			<field name="name">purchase.order.line.cancel.tree</field>
+			<field name="model">purchase.order.line.cancel</field>
+			<field name="type">tree</field>
+
+			<field name="arch" type="xml">
+				<tree string="PO Line Cancel Tree" version="7.0">
+					<!-- <button name="confirm" string="Confirm" class="oe_highlight"/> -->
+					<field name="po_id"/>
+					<!-- <field name="po_line_id" /> -->
+					<field name="product_id" />
+					<field name="description" />
+					<field name="qty" />
+					<field name="uom" />
+					<field name="unit_price" />
+					<field name="subtotal" />
+					<field name="note" />
+					<field name="state" />
+
+				</tree>
+			</field>
+		</record>
+		
+		<record id="view_po_line_cancel_form" model="ir.ui.view">
+			<field name="name">purchase.order.line.cancel.form</field>
+			<field name="model">purchase.order.line.cancel</field>
+			<field name="type">form</field>
+
+			<field name="arch" type="xml">
+				<form  string="PO Line Cancel Form"  version="7.0">
+					<group>
+						<field name="po_id"/>
+						<field name="po_line_id"/>
+						<field name="product_id" />
+						<field name="description" />
+						<field name="qty" />
+						<field name="uom" />
+						<field name="unit_price" />
+						<field name="discount_amount" />
+						<field name="discount_percent" />
+						<field name="subtotal" />
+						<field name="approved_by" />
+						<field name="state"/>
+
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record id="view_po_line_cancel_search" model="ir.ui.view">
+			<field name="name">purchase.order.line.cancel.search</field>
+			<field name="model">purchase.order.line.cancel</field>
+			<field name="type">search</field>
+
+			<field name="arch" type="xml">
+				<search string="Canceled Item">
+					<group expand="!" string="Filter By">
+						<filter string="Waiting Approval" name="waiting_approval" icon="terp-check" domain="[('state','=','draft')]" help="Show Only Canceled Items"/>
+						<filter string="Canceled" name="canceled" icon="terp-check" domain="[('state','=','approved')]" help="Show Only Canceled Items"/>
+					</group>
+					<group expand="1" string="Group By...">
+                        <filter icon="terp-personal" name="group_po" string="PO No." domain="[]" context="{'group_by':'po_id'}"/>
+                    </group>
+                    
+                    <newline/>
+				</search>
+			</field>
+		</record>
+		
+		<record model="ir.actions.act_window" id="action_po_line_cancel">
+	        <field name="name">Purchase Order Item Cancel</field>
+	        <field name="type">ir.actions.act_window</field>
+	        <field name="res_model">purchase.order.line.cancel</field>
+	        <field name="view_type">form</field>
+	        <field name="view_mode">form,tree</field>
+			<field name="search_view_id" ref="view_po_line_cancel_search" />
+			<field name="context">{'search_default_group_po':1,'search_default_canceled':1}</field>
+	    </record>
+
+	    <record model="ir.actions.act_window" id="action_po_line_waiting_approval">
+	        <field name="name">Purchase Order Item Cancel</field>
+	        <field name="type">ir.actions.act_window</field>
+	        <field name="res_model">purchase.order.line.cancel</field>
+	        <field name="view_type">form</field>
+	        <field name="view_mode">tree,form</field>
+			<field name="search_view_id" ref="view_po_line_cancel_search" />
+
+			<field name="tree_view_id" ref="view_po_line_cancel_tree" />
+			<field name="context">{'search_default_group_po':1,'search_default_waiting_approval':1}</field>
+	    </record>
+	    <!-- <record model="ir.actions.act_window" id="action_order_preparation_form">
+	                <field name="name">Order Packaging</field>
+	                <field name="res_model">order.preparation</field>
+	                
+	            </record> -->
+		<menuitem name="Item To Cancel" parent="purchase.menu_procurement_management" id="po_line_cancel_waiting_to_approve" action="action_po_line_waiting_approval"/>
+		<menuitem name="Canceled Order" parent="sbm_purchase_rent.purchase_order_menu" id="po_line_cancel_menu" action="action_po_line_cancel"/>
+
+
+
+
+		<record id="purchase_order_form_with_cancel_button" model="ir.ui.view">
+			<field name="name">purchase.order.form.with.cancel.button</field>
+			<field name="type">form</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.purchase_order_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//button[@name='action_cancel']" position="after">
+					<button name="action_cancel_item" states="sent,confirmed,approved" string="Cancel Item" type="object"/>
+				</xpath>
+			</field>
+
+		</record>
+
+
+		<record id="wizard_po_cancel_item_form" model="ir.ui.view">
+			<field name="name">Wizard Cancel PO Item</field>
+			<field name="model">wizard.po.cancel.item</field>
+			<field name="arch" type="xml">
+				<form string="Cancel Item" version="7.0">
+					<group>
+						<field name="po_id" readonly="True" />
+					</group>
+					<field name="lines">
+						<tree editable="bottom" string="Product Moves">
+							<field name="line_id" invisible="1" />
+							<field name="product_id" readonly="True" />
+							<field name="description" readonly="True" />
+							<field name="qty" readonly="True" />
+							<field name="uom" readonly="True" />
+							<field name="unit_price" readonly="True" />
+							<field name="discount_amount" readonly="True" />
+							<field name="discount_percent" readonly="True" />
+							<field name="subtotal" readonly="True" />
+						</tree>
+					</field>
+					<group>
+						<field name="note" />
+					</group>
+					<footer>
+                        <button name="request_cancel_item" string="Submit" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+				</form>
+			</field>
+		</record>
+
+		<record id="wizard_po_cancel_item_action" model="ir.actions.act_window">
+			<field name="name">Action Cancel Item PO</field>
+			<field name="res_model">wizard.po.cancel.item</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="wizard_po_cancel_item_form"/>
+		</record>
+
+		<record id="stock_move_cancel_notes" model="ir.ui.view">
+			<field name="name">stock.move.cancel.notes</field>
+			<field name="model">stock.move</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="stock.view_move_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="after">
+					<field name="cancel_notes" />
+				</xpath>
+			</field>
+		</record>
+	</data>
+</openerp>
