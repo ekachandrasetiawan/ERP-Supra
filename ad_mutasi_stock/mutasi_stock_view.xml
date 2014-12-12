@@ -33,8 +33,20 @@
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
-       
+
+
         <menuitem id="menu_mutasi_stock" name="Mutasi Stock" action="action_mutasi_stock" parent="account.final_accounting_reports"/>
+<!-- 
+        <record model="ir.actions.act_window" id="action_transaksi_account">
+            <field name="name">Report Transaksi Per Account</field>
+            <field name="res_model">mutasi.stock</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+
+        <menuitem id="menu_transaksi_account" name="Transaksi Account" action="action_transaksi_account" parent="account.final_accounting_reports"/> -->
 
 	</data>
 </openerp>
