@@ -21,7 +21,7 @@ class stock_picking(osv.osv):
 			'res_model': self._name,
 			'res_id': data[0].backorder_id.id,
 			'target': 'current',
-		    'context': context,  # May want to modify depending on the source/destination
+			'context': context,  # May want to modify depending on the source/destination
 		}
 	_inherit = 'stock.picking'
 	_columns = {
@@ -512,7 +512,7 @@ class account_invoice(osv.osv):
 			'type': 'ir.actions.act_url',
 			'target': 'new',
 			'url': 'http://www.google.com',
-		    
+			
 		}
 	def actionPrintCustInv(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
@@ -694,206 +694,206 @@ class SerialNumber(osv.osv):
 	}
 
 class split_in_production_lot(osv.osv_memory):
-    _name = "stock.move.split"
-    _inherit = "stock.move.split"
-    _description = "Stock move Split"
+	_name = "stock.move.split"
+	_inherit = "stock.move.split"
+	_description = "Stock move Split"
 
-    def split_lot(self, cr, uid, ids, context=None):
-        """ To split a lot"""
-        if context is None:
-            context = {}
-        res = self.split(cr, uid, ids, context.get('active_ids'), context=context)
-        return {'type': 'ir.actions.act_window_close'}
+	def split_lot(self, cr, uid, ids, context=None):
+		""" To split a lot"""
+		if context is None:
+			context = {}
+		res = self.split(cr, uid, ids, context.get('active_ids'), context=context)
+		return {'type': 'ir.actions.act_window_close'}
 
-    def split(self, cr, uid, ids, move_ids, context=None):
-        """ To split stock moves into serial numbers
+	def split(self, cr, uid, ids, move_ids, context=None):
+		""" To split stock moves into serial numbers
 
-        :param move_ids: the ID or list of IDs of stock move we want to split
-        """
-        if context is None:
-            context = {}
-        assert context.get('active_model') == 'stock.move',\
-             'Incorrect use of the stock move split wizard'
-        inventory_id = context.get('inventory_id', False)
-        prodlot_obj = self.pool.get('stock.production.lot')
-        inventory_obj = self.pool.get('stock.inventory')
-        move_obj = self.pool.get('stock.move')
-        new_move = []
-        for data in self.browse(cr, uid, ids, context=context):
-            for move in move_obj.browse(cr, uid, move_ids, context=context):
-                move_qty = move.product_qty
-                quantity_rest = move.product_qty
-                uos_qty_rest = move.product_uos_qty
-                new_move = []
-                if data.use_exist:
-                    lines = [l for l in data.line_exist_ids if l]
-                else:
-                    lines = [l for l in data.line_ids if l]
-                total_move_qty = 0.0
-                for line in lines:
-                    quantity = line.quantity
-                    total_move_qty += quantity
-                    if total_move_qty > move_qty:
-                        raise osv.except_osv(_('Processing Error!'), _('Serial number quantity %d of %s is larger than available quantity (%d)!') \
-                                % (total_move_qty, move.product_id.name, move_qty))
-                    if quantity <= 0 or move_qty == 0:
-                        continue
-                    quantity_rest -= quantity
-                    uos_qty = quantity / move_qty * move.product_uos_qty
-                    uos_qty_rest = quantity_rest / move_qty * move.product_uos_qty
-                    if quantity_rest < 0:
-                        quantity_rest = quantity
-                        self.pool.get('stock.move').log(cr, uid, move.id, _('Unable to assign all lots to this move!'))
-                        return False
-                    default_val = {
-                        'product_qty': quantity,
-                        'product_uos_qty': uos_qty,
-                        'state': move.state
-                    }
-                    if quantity_rest > 0:
-                        current_move = move_obj.copy(cr, uid, move.id, default_val, context=context)
-                        if inventory_id and current_move:
-                            inventory_obj.write(cr, uid, inventory_id, {'move_ids': [(4, current_move)]}, context=context)
-                        new_move.append(current_move)
+		:param move_ids: the ID or list of IDs of stock move we want to split
+		"""
+		if context is None:
+			context = {}
+		assert context.get('active_model') == 'stock.move',\
+			 'Incorrect use of the stock move split wizard'
+		inventory_id = context.get('inventory_id', False)
+		prodlot_obj = self.pool.get('stock.production.lot')
+		inventory_obj = self.pool.get('stock.inventory')
+		move_obj = self.pool.get('stock.move')
+		new_move = []
+		for data in self.browse(cr, uid, ids, context=context):
+			for move in move_obj.browse(cr, uid, move_ids, context=context):
+				move_qty = move.product_qty
+				quantity_rest = move.product_qty
+				uos_qty_rest = move.product_uos_qty
+				new_move = []
+				if data.use_exist:
+					lines = [l for l in data.line_exist_ids if l]
+				else:
+					lines = [l for l in data.line_ids if l]
+				total_move_qty = 0.0
+				for line in lines:
+					quantity = line.quantity
+					total_move_qty += quantity
+					if total_move_qty > move_qty:
+						raise osv.except_osv(_('Processing Error!'), _('Serial number quantity %d of %s is larger than available quantity (%d)!') \
+								% (total_move_qty, move.product_id.name, move_qty))
+					if quantity <= 0 or move_qty == 0:
+						continue
+					quantity_rest -= quantity
+					uos_qty = quantity / move_qty * move.product_uos_qty
+					uos_qty_rest = quantity_rest / move_qty * move.product_uos_qty
+					if quantity_rest < 0:
+						quantity_rest = quantity
+						self.pool.get('stock.move').log(cr, uid, move.id, _('Unable to assign all lots to this move!'))
+						return False
+					default_val = {
+						'product_qty': quantity,
+						'product_uos_qty': uos_qty,
+						'state': move.state
+					}
+					if quantity_rest > 0:
+						current_move = move_obj.copy(cr, uid, move.id, default_val, context=context)
+						if inventory_id and current_move:
+							inventory_obj.write(cr, uid, inventory_id, {'move_ids': [(4, current_move)]}, context=context)
+						new_move.append(current_move)
 
-                    if quantity_rest == 0:
-                        current_move = move.id
-                    prodlot_id = False
-                    if data.use_exist:
-                        prodlot_id = line.prodlot_id.id
-                        desc = line.prodlot_id.desc
-                        move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'name' : desc, 'state':move.state})
-                    if not prodlot_id:
-                        prodlot_id = prodlot_obj.create(cr, uid, {
-                            'name': line.name,
-                            'desc':line.desc,
-                            'exp_date':line.exp_date,
-                            'product_id': move.product_id.id},
-                        context=context)
+					if quantity_rest == 0:
+						current_move = move.id
+					prodlot_id = False
+					if data.use_exist:
+						prodlot_id = line.prodlot_id.id
+						desc = line.prodlot_id.desc
+						move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'name' : desc, 'state':move.state})
+					if not prodlot_id:
+						prodlot_id = prodlot_obj.create(cr, uid, {
+							'name': line.name,
+							'desc':line.desc,
+							'exp_date':line.exp_date,
+							'product_id': move.product_id.id},
+						context=context)
 
-                        move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'state':move.state})
+						move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'state':move.state})
 
-                    move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'state':move.state})
+					move_obj.write(cr, uid, [current_move], {'prodlot_id': prodlot_id, 'state':move.state})
 
-                    update_val = {}
-                    if quantity_rest > 0:
-                        update_val['product_qty'] = quantity_rest
-                        update_val['product_uos_qty'] = uos_qty_rest
-                        update_val['state'] = move.state
-                        move_obj.write(cr, uid, [move.id], update_val)
+					update_val = {}
+					if quantity_rest > 0:
+						update_val['product_qty'] = quantity_rest
+						update_val['product_uos_qty'] = uos_qty_rest
+						update_val['state'] = move.state
+						move_obj.write(cr, uid, [move.id], update_val)
 
-        return new_move
+		return new_move
 
 split_in_production_lot()
 
 
 class stock_move_split_lines_exist(osv.osv_memory):
-    _name = "stock.move.split.lines"
-    _inherit = "stock.move.split.lines"
-    _description = "Stock move Split lines"
+	_name = "stock.move.split.lines"
+	_inherit = "stock.move.split.lines"
+	_description = "Stock move Split lines"
 
 
-    def name_get(self, cr, uid, ids, context=None):
-        if not ids:
-            return []
-        reads = self.read(cr, uid, ids, ['name', 'prefix', 'ref'], context)
-        res = []
-        for record in reads:
-            name = record['name']
-            prefix = record['prefix']
-            if prefix:
-                name = prefix + '/' + name
-            if record['ref']:
-                name = '%s [%s]' % (name, record['ref'])
-            res.append((record['id'], name))
-        return res
+	def name_get(self, cr, uid, ids, context=None):
+		if not ids:
+			return []
+		reads = self.read(cr, uid, ids, ['name', 'prefix', 'ref'], context)
+		res = []
+		for record in reads:
+			name = record['name']
+			prefix = record['prefix']
+			if prefix:
+				name = prefix + '/' + name
+			if record['ref']:
+				name = '%s [%s]' % (name, record['ref'])
+			res.append((record['id'], name))
+		return res
 
-    def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
-        args = args or []
-        ids = []
-        if name:
-            ids = self.search(cr, uid, [('prefix', '=', name)] + args, limit=limit, context=context)
-            if not ids:
-                ids = self.search(cr, uid, [('name', operator, name)] + args, limit=limit, context=context)
-        else:
-            ids = self.search(cr, uid, args, limit=limit, context=context)
-        return self.name_get(cr, uid, ids, context)
-        
-    def _get_stock(self, cr, uid, ids, context=None):
-        """ Gets stock of products for locations
-        @return: Dictionary of values
-        """
-        if context is None:
-            context = {}
-        if 'location_id' not in context:
-            locations = self.pool.get('stock.location').search(cr, uid, [('usage', '=', 'internal')], context=context)
-        else:
-            locations = context['location_id'] and [context['location_id']] or []
+	def name_search(self, cr, uid, name, args=None, operator='ilike', context=None, limit=100):
+		args = args or []
+		ids = []
+		if name:
+			ids = self.search(cr, uid, [('prefix', '=', name)] + args, limit=limit, context=context)
+			if not ids:
+				ids = self.search(cr, uid, [('name', operator, name)] + args, limit=limit, context=context)
+		else:
+			ids = self.search(cr, uid, args, limit=limit, context=context)
+		return self.name_get(cr, uid, ids, context)
+		
+	def _get_stock(self, cr, uid, ids, context=None):
+		""" Gets stock of products for locations
+		@return: Dictionary of values
+		"""
+		if context is None:
+			context = {}
+		if 'location_id' not in context:
+			locations = self.pool.get('stock.location').search(cr, uid, [('usage', '=', 'internal')], context=context)
+		else:
+			locations = context['location_id'] and [context['location_id']] or []
 
-        if isinstance(ids, (int, long)):
-            ids = [ids]
+		if isinstance(ids, (int, long)):
+			ids = [ids]
 
-        res = {}.fromkeys(ids, 0.0)
-        if locations:
-            cr.execute('''select
-                    prodlot_id,
-                    sum(qty)
-                from
-                    stock_report_prodlots
-                where
-                    location_id IN %s and prodlot_id IN %s group by prodlot_id''',(tuple(locations),tuple(ids),))
-            res.update(dict(cr.fetchall()))
+		res = {}.fromkeys(ids, 0.0)
+		if locations:
+			cr.execute('''select
+					prodlot_id,
+					sum(qty)
+				from
+					stock_report_prodlots
+				where
+					location_id IN %s and prodlot_id IN %s group by prodlot_id''',(tuple(locations),tuple(ids),))
+			res.update(dict(cr.fetchall()))
 
-        return 100
+		return 100
 
-    def _stock_search(self, cr, uid, obj, name, args, context=None):
-        """ Searches Ids of products
-        @return: Ids of locations
-        """
-        locations = self.pool.get('stock.location').search(cr, uid, [('usage', '=', 'internal')])
-        cr.execute('''select
-                prodlot_id,
-                sum(qty)
-            from
-                stock_report_prodlots
-            where
-                location_id IN %s group by prodlot_id
-            having  sum(qty) '''+ str(args[0][1]) + str(args[0][2]),(tuple(locations),))
-        res = cr.fetchall()
-        ids = [('id', 'in', map(lambda x: x[0], res))]
-        return ids
+	def _stock_search(self, cr, uid, obj, name, args, context=None):
+		""" Searches Ids of products
+		@return: Ids of locations
+		"""
+		locations = self.pool.get('stock.location').search(cr, uid, [('usage', '=', 'internal')])
+		cr.execute('''select
+				prodlot_id,
+				sum(qty)
+			from
+				stock_report_prodlots
+			where
+				location_id IN %s group by prodlot_id
+			having  sum(qty) '''+ str(args[0][1]) + str(args[0][2]),(tuple(locations),))
+		res = cr.fetchall()
+		ids = [('id', 'in', map(lambda x: x[0], res))]
+		return ids
 
-    _columns = {
-    	'name': fields.char('Serial Number', size=64),
-        'quantity': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
-        'wizard_id': fields.many2one('stock.move.split', 'Parent Wizard'),
-        'wizard_exist_id': fields.many2one('stock.move.split', 'Parent Wizard (for existing lines)'),
-        'prodlot_id': fields.many2one('stock.production.lot', 'Serial Number'),
+	_columns = {
+		'name': fields.char('Serial Number', size=64),
+		'quantity': fields.float('Quantity', digits_compute=dp.get_precision('Product Unit of Measure')),
+		'wizard_id': fields.many2one('stock.move.split', 'Parent Wizard'),
+		'wizard_exist_id': fields.many2one('stock.move.split', 'Parent Wizard (for existing lines)'),
+		'prodlot_id': fields.many2one('stock.production.lot', 'Serial Number'),
 		'desc':fields.text('Description'),
 		'exp_date':fields.date('Exp Date'),
 		'stock_available': fields.float('Stock Available'),
-    }
-    _defaults = {
-        'quantity': 0.0,
-    }
-    def _dumy_getStock(self,cr,uid,ids,prodlot_id,context=None):
-    	stock = 10
-    	return stock
-    def onchange_lot_id(self, cr, uid, ids, prodlot_id=False, product_qty=False,
-                        loc_id=False, product_id=False, uom_id=False,context=None):
-    	if prodlot_id == False:
-    		return False
-    	else:
-    		# print '=======================PROUDCT QTY=============',product_qty
-	    	hasil=self.pool.get('stock.production.lot').browse(cr,uid,[prodlot_id])[0]
+	}
+	_defaults = {
+		'quantity': 0.0,
+	}
+	def _dumy_getStock(self,cr,uid,ids,prodlot_id,context=None):
+		stock = 10
+		return stock
+	def onchange_lot_id(self, cr, uid, ids, prodlot_id=False, product_qty=False,
+						loc_id=False, product_id=False, uom_id=False,context=None):
+		if prodlot_id == False:
+			return False
+		else:
+			# print '=======================PROUDCT QTY=============',product_qty
+			hasil=self.pool.get('stock.production.lot').browse(cr,uid,[prodlot_id])[0]
 
-	    	if product_qty > hasil.stock_available:
-	    		raise openerp.exceptions.Warning('Stock Available Tidak Mencukupi')
-	    		return {'value':{'quantity':0}}
+			if product_qty > hasil.stock_available:
+				raise openerp.exceptions.Warning('Stock Available Tidak Mencukupi')
+				return {'value':{'quantity':0}}
 
-	    	return {'value':{'desc':hasil.desc,'exp_date':hasil.exp_date,'stock_available':hasil.stock_available}}
-        return self.pool.get('stock.move').onchange_lot_id(cr, uid, [], prodlot_id, product_qty,
-                        loc_id, product_id, uom_id, context)
+			return {'value':{'desc':hasil.desc,'exp_date':hasil.exp_date,'stock_available':hasil.stock_available}}
+		return self.pool.get('stock.move').onchange_lot_id(cr, uid, [], prodlot_id, product_qty,
+						loc_id, product_id, uom_id, context)
 
 
 # ---------------------------------------------
@@ -926,6 +926,7 @@ class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	_order = 'no ASC'
 
+
 class bom(osv.osv):
 	def checkUniqueByProduct(self,cr,uid,prod_id):
 		objs = self.search(cr,uid,[('product_id', '=', prod_id)])
@@ -956,4 +957,217 @@ class PurchaseOrderWithDP(osv.osv):
 
 class AccountVoucher(osv.osv):
 	_inherit = 'account.voucher'
+
+
+#Module Cancel Item in Purchase Order
+
+class ClassName(osv.osv):
+	
+	def action_cancel_item(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_inherit', 'wizard_po_cancel_item_form')
+
+		print "<<<<<<<<<<<<<<<<<<<<",view_id
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_po_cancel_item_form',
+			'res_model': 'wizard.po.cancel.item',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+	_inherit = 'purchase.order'
+
+class WizardPOCancelItem(osv.osv_memory):
+
+	def default_get(self, cr, uid, fields, context=None):
+		print "CALLLLEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+		if context is None: context = {}
+		po_ids = context.get('active_ids', [])
+		active_model = context.get('active_model')
+		res = super(WizardPOCancelItem, self).default_get(cr, uid, fields, context=context)
+		if not po_ids or len(po_ids) != 1:
+			# Partial Picking Processing may only be done for one picking at a time
+			return res
+		po_id, = po_ids
+		if po_id:
+			res.update(po_id=po_id)
+			po = self.pool.get('purchase.order').browse(cr, uid, po_id, context=context)
+			linesData = []
+			linesData += [self._load_po_line(cr, uid, l) for l in po.order_line if l.state not in ('done','cancel')]
+			res.update(lines=linesData)
+		print res,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
+		return res
+
+	def _load_po_line(self, cr, uid, line):
+		po_item = {
+			'line_id'			: line.id,
+			'product_id'		: line.product_id.id,
+			'description'		: line.name,
+			'uom'				: line.product_uom.id,
+			'qty'				: line.product_qty,
+			'unit_price'		: line.price_unit,
+			'discount_amount'	: line.discount_nominal,
+			'discount_percent'	: line.discount,
+			'subtotal'			: line.price_subtotal,
+		}
+		
+		return po_item
+
+	def request_cancel_item(self,cr,uid,ids,context=None):
+		print "CALLING request_cancel_item method"
+		data = self.browse(cr,uid,ids,context)[0]
+
+		polc = self.pool.get('purchase.order.line.cancel')
+		# we need to check INVOICES
+		# call po
+		po = data.po_id
+		inv_ids=[] #INVOICE WHERE STATE NOT DRAFT OR CANCEL
+		inv_ids+= [self.pool.get('account.invoice').browse(cr,uid,invoice.id,context) for invoice in po.invoice_ids if invoice.state not in ('draft','cancel')]
+		# print "INVOICESSS",inv_ids
+		if len(po.order_line) == len(data.lines):
+			raise osv.except_osv(('Error !!!'),('Tidak diperbolehkan mencancel semua item..!!Silahkan mengcancel PO!'))
+		newIds = []
+		for line in data.lines:
+			cancelItems = {
+				'po_id':po.id,
+				'po_line_id':line.line_id.id,
+				'product_id':line.product_id.id,
+				'description':line.description,
+				'qty':line.qty,
+				'uom':line.uom.id,
+				'unit_price':line.unit_price,
+				'discount_amount':line.discount_amount,
+				'discount_percent':line.discount_percent,
+				'subtotal':line.subtotal,
+				'state':'draft',
+				'note':data.note,
+			}
+			# make sure po line id is unique
+			check = self.pool.get('purchase.order.line.cancel').search(cr,uid,[('po_line_id','=',line.line_id.id)])
+			if check:
+				raise osv.except_osv(('Error !!!'),('TIdak bisa mencancel item "',str(line.product_id.name),'"..!!'))
+			newIds+=[polc.create(cr,uid,cancelItems,context)]
+			print newIds,"------------------------------------------"
+		# print "NEW IDS ",newIds
+
+		# redir
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_inherit', 'view_po_line_cancel_tree')
+
+		return {
+			'view_mode': 'tree',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'view_po_line_cancel_tree',
+			'res_model': 'purchase.order.line.cancel',
+			'type': 'ir.actions.act_window',
+			'target': 'current',
+			# 'domain': "[('id','in',"+newIds+")]",
+			'domain': [('id','in',newIds)]
+		}
+
+
+
+	_name="wizard.po.cancel.item"
+	_description="Wizard Cancel Item On P.O"
+	_columns = {
+		'po_id':fields.many2one('purchase.order',string="Purchase Order",required=True),
+		'lines':fields.one2many('wizard.po.cancel.item.line','w_id',string="Lines"),
+		'note':fields.text('Note',required=True,help="Reason why item(s) want to be cancel"),
+	}
+	_rec_name="po_id"
+
+
+class WizardPOCancelItemLine(osv.osv_memory):
+	_name="wizard.po.cancel.item.line"
+	_description="Line Wizard Cancel Item On P.O"
+	_columns={
+		'w_id':fields.many2one('wizard.po.cancel.item',string="Wizard",required=True,ondelete='CASCADE',onupdate='CASCADE'),
+		'line_id':fields.many2one('purchase.order.line','Item Line',required=True),
+		'product_id':fields.many2one('product.product',string="Product",required=True),
+		'description':fields.text('Desc'),
+		'qty':fields.float('Qty',required=True),
+		'uom':fields.many2one('product.uom',string="Unit of Measure",required=True),
+		'unit_price':fields.float('Unit Price'),
+		'discount_amount':fields.float('Discount (Amount)'),
+		'discount_percent':fields.float('Discount (Percentage)'),
+		'subtotal':fields.float('Subtotal'),
+	}
+	_rec_name = 'w_id'
+
+class PurchaseOrderLineCancel(osv.osv):
+	def confirm_cancel(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		idsToConfirm = context['active_ids']
+
+		# set state to approved
+		self.write(cr,uid,idsToConfirm,{'state':'approved','approved_by':uid});
+		lineToCancel = []
+		poToUpdate = []
+		cancel_notes = ""
+		for cancelItem in self.browse(cr,uid,idsToConfirm,context):
+			line = self.pool.get('purchase.order.line').browse(cr,uid,cancelItem.po_line_id,context)
+			# print line.name
+			lineToCancel+=[line.id]
+			poToUpdate+=[line.order_id]
+			cancelNotes = cancelItem.note
+		print lineToCancel
+
+		# search stock move
+		moveObj = self.pool.get('stock.move')
+		movesIdToUnlink = moveObj.search(cr,uid,[('purchase_line_id','in',lineToCancel)])
+
+		self.pool.get('purchase.order.line').unlink(cr,uid,lineToCancel)
+		self.pool.get('purchase.order').button_dummy(cr,uid,poToUpdate,context)
+		# moveObj.unlink(cr,uid,movesIdToUnlink)
+		moveObj.write(cr,uid,movesIdToUnlink,{'state':'cancel','cancel_notes':cancelNotes})
+
+
+
+	
+	_name = 'purchase.order.line.cancel'
+	_description = "Purchase Order Line Cancel"
+	
+	_columns={
+		'po_id':fields.many2one('purchase.order',string="PO No.",required=True,ondelete='CASCADE',onupdate='CASCADE'),
+		'po_line_id':fields.integer("Line ID",required=True),
+		'product_id':fields.many2one('product.product',string="Product",required=True),
+		'description':fields.text('Desc'),
+		'qty':fields.float('Qty',required=True),
+		'uom':fields.many2one('product.uom',string="Unit of Measure",required=True),
+		'unit_price':fields.float('Unit Price'),
+		'discount_amount':fields.float('Discount (Amount)'),
+		'discount_percent':fields.float('Discount (Percentage)'),
+		'subtotal':fields.float('Subtotal'),
+		'note':fields.text('Notes',required=True),
+		'state':fields.selection([('draft','draft'),('rfa','Waiting Approval'),('approved','Approved')],string="State"),
+		'approved_by':fields.many2one('res.users',string="Approved By",ondelete="CASCADE",onupdate='CASCADE'),
+
+	}
+	_rec_name = 'po_line_id'
+	_default={
+		'state':'draft',
+	}
+	_sql_constraints = [
+		('unique_line_id', 'unique(po_line_id)', "Tidak bisa mencancel item yang sama lebih dari 1X!!!"),
+	]
+
+class stock_move(osv.osv):
+	
+	_inherit = 'stock.move'
+	_columns = {
+		'cancel_notes':fields.text('Cancel Notes',required=False)
+	}
 	

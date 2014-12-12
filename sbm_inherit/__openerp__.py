@@ -24,6 +24,7 @@
         "product_batch.xml",
         "split_batch.xml",
         "supplier_first_payment.xml",
+        "po_line_cancel.xml",
         # "report/faktur.xml"
         # "purchase_order.xml",
     ],
