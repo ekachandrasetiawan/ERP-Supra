@@ -9,6 +9,41 @@ import decimal_precision as dp
 
 
 
+class ReportTransaksiAccount(osv.osv_memory):
+    _name = "report.transaksi.account"
+    _columns = {
+                'date_from' : fields.date('From'),
+                'date_to' : fields.date('To'),
+                'name': fields.many2one('account.account', 'Account')
+    }
+    _defaults = {
+                'date_from': time.strftime('%Y-%m-%d'),
+                'date_to': time.strftime('%Y-%m-%d'),
+    }
+
+    def eksport_report_transaksi_account(self,cr,uid,ids,context=None):
+        searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+        browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+        
+        val = self.browse(cr, uid, ids)[0]
+        account=str(val.name.id)
+        # print '=====================================',account
+        urlTo = str(browseConf.value)+"report-accounting/transaksi-account&account="+account+"&from="+val.date_from+"&to="+val.date_to
+        
+        
+        return {
+            'type'  : 'ir.actions.client',
+            'target': 'new',
+            'tag'   : 'print.out.stockmove',
+            'params': {
+                # 'id'  : ids[0],
+                'redir' : urlTo,
+                'uid':uid
+            },
+        }
+
+ReportTransaksiAccount()
+
 class MutasiStock(osv.osv_memory):
     _name = "mutasi.stock"
     _columns = {
