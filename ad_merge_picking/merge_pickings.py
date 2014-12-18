@@ -108,7 +108,7 @@ class merge_pickings(osv.osv_memory):
                 pool_invoice_line.create(
                     cr, uid, 
                     {
-                        'name': picking.origin +':'+ (picking.name).strip(), #move_line.name,
+                        'name': move_line.name,
                         'picking_id': picking.id,
                         'origin': origin,
                         'uos_id': move_line.product_uos.id or move_line.product_uom.id,
