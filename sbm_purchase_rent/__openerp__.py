@@ -20,4 +20,5 @@
     'demo_xml': [],
     'installable': True,
     'active': False,
+    'js':['static/src/js/rent_items.js']
 }

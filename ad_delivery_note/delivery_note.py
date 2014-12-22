@@ -356,7 +356,7 @@ class stock_picking(osv.osv):
 		val = self.browse(cr, uid, ids)[0]
 		
 		for x in val.move_lines:
-			# product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
 			product = x.product_id
 			# pQty = x.product_qty
 
@@ -372,16 +372,16 @@ class stock_picking(osv.osv):
 					# print ".....",component.product_id.name," ",component.product_qty," ",component.product_uom.name
 
 			# CHECK PRODUCT AVAILABILITY
-			# print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.default_code
+			print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',product.default_code
 			if product.not_stock == False:
 				mm = ' ' + product.default_code + ' '
 				stock = ' ' + str(product.qty_available) + ' '
 				msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
 				# UNCOMMENT THIS FOR LIVE
-				# if x.product_qty > product.qty_available:
-				# 	raise openerp.exceptions.Warning(msg)
-				# 	return False
+				if x.product_qty > product.qty_available:
+					raise openerp.exceptions.Warning(msg)
+					return False
 				# END UNCOMMENT FOR LIVE
 		return self.write(cr,uid,ids,{'state':'warehouse'})
 		# return False

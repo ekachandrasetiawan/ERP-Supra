@@ -46,6 +46,9 @@
 					<field name="not_stock" />
 					<label for="not_stock"/>
 				</label>
+				 <xpath expr="//div[@name='buttons']" position="inside">
+                   <button icon="gtk-ok" type="object" name="turnover" string="TurnOver" default_focus="1" class="oe_highlight"/>
+                </xpath>
 			</field>
 		</record>
 	</data>
