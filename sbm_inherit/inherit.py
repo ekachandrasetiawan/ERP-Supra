@@ -517,7 +517,7 @@ class account_invoice(osv.osv):
 	def actionPrintCustInv(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"account-invoice/print-invoice&id="+str(ids[0])
+		urlTo = str(browseConf.value)+"account-invoice/print-invoice&id="+str(ids[0])+"&uid="+str(uid)
 		
 		return {
 			'type'	: 'ir.actions.client',
@@ -530,7 +530,7 @@ class account_invoice(osv.osv):
 	def actionPrintFaktur(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"account-invoice/print&id="+str(ids[0])
+		urlTo = str(browseConf.value)+"account-invoice/print&id="+str(ids[0])+"&uid="+str(uid)
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',

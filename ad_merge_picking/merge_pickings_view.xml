@@ -50,10 +50,10 @@
        </record>
        
 
-       <menuitem name="Consolidate Pickings"
+       <!-- <menuitem name="Consolidate Pickings"
                   parent="base.menu_invoiced"
                   id="menu_merge_picking_sales"
-                  action="action_view_merge_do_form"/>
+                  action="action_view_merge_do_form"/> -->
        
        <menuitem name="Consolidate Pickings"
                   parent="account.menu_finance_payables"
