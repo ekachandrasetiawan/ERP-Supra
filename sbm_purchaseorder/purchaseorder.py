@@ -55,6 +55,22 @@ class Purchase_Order_Sbm(osv.osv):
 		order =  super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
 		return order
 
+	def print_po_out(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"purchase-order/printpo&id="+str(ids[0])+"&uid="+str(uid)
+
+		return {
+			'type'  : 'ir.actions.client',
+			'target': 'new',
+			'tag'   : 'print.out.po',
+			'params': {
+				# 'id'  : ids[0],
+				'redir' : urlTo,
+				'uid':uid
+			},
+		}
+
 	def on_change_partner_id(self,cr,uid,ids, pid):
 		partner_id = self.pool.get('res.partner').browse(cr,uid, pid)
 		cek=self.pool.get('res.partner').search(cr,uid,[('parent_id', '=' ,partner_id.id)])
@@ -76,6 +92,7 @@ class Purchase_Order_Sbm(osv.osv):
 			print no;
 
 			if po.type_permintaan == '1':
+
 				# cek = self.pool.get('detail.order.line').search(cr,uid,[('order_line_id', '=' ,ids)])
 				# order_line =self.pool.get('detail.order.line').browse(cr,uid,cek)
 				# for x in order_line:
@@ -91,12 +108,12 @@ class Purchase_Order_Sbm(osv.osv):
 				obj_purchase_line = self.pool.get('purchase.order.line').browse(cr,uid, cek)
 				
 				for z in obj_purchase_line:
-					if z.line_pb_general_id.id is None:
+					if z.line_pb_general_id:
 						detail_pb_cek=self.pool.get('detail.pb').search(cr,uid,[('id', '=' ,z.line_pb_general_id.id)])
 						
 						valdetailpb = self.pool.get('detail.pb').browse(cr,uid,detail_pb_cek[0])
-						
 						self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'qty_available': valdetailpb.jumlah_diminta-z.product_qty})
+
 						if valdetailpb.jumlah_diminta-z.product_qty == 0:
 							self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'state':'proses'})
  			elif po.type_permintaan == '2':
@@ -109,7 +126,8 @@ class Purchase_Order_Sbm(osv.osv):
 				for line in po.order_line:
 					if line.line_pb_subcont_id:
 						self.pool.get('purchase.requisition.subcont.line').write(cr,uid,[line.line_pb_subcont_id.id],{'state_line':'po'})
-		self.write(cr, uid, ids, {'name': no,'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
+		
+		self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
 		return super(Purchase_Order_Sbm,self).wkf_approve_order(cr,uid,ids,context=context)
 	
 	def action_cancel(self, cr, uid, ids, context=None):
@@ -170,11 +188,17 @@ Purchase_Order_Sbm()
 class purchase_order_line_detail(osv.osv):
 	_inherit = 'purchase.order.line'
 	_columns = {
+		'no':fields.integer('No'),
 		'line_pb_general_id':fields.many2one('detail.pb', 'Detail PB Umum'),
 		'note_line':fields.text('Notes line'),
 		'part_number':fields.char('Part Number'),
+		'variants':fields.many2one('product.variants','variants'),
 		'date_planned':fields.date('Scheduled Date', select=True),
 	    }
-	
+
+	_defaults ={
+		'no':1,
+	}
+	_order = 'no ASC'
 	
 purchase_order_line_detail()
