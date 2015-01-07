@@ -1043,7 +1043,7 @@ packing_list_line()
 class product_list_line(osv.osv):
 	_name = "product.list.line"
 	_columns = {
-		'no': fields.char('No', size=3),
+		'no': fields.integer('No', size=3),
 		'weight': fields.char('weight', size=128),
 		'measurement': fields.char('measurement', size=128),
 		'name': fields.text('Description'),
