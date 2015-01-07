@@ -958,7 +958,7 @@ delivery_note()
 class delivery_note_line(osv.osv):
 	_name = "delivery.note.line"
 	_columns = {
-		'no': fields.char('No', size=3),
+		'no': fields.integer('No'),
 		'name': fields.text('Description'),
 		'note_id': fields.many2one('delivery.note', 'Delivery Note', required=True, ondelete='cascade'),
 		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)]),
