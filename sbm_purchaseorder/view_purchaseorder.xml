@@ -9,16 +9,19 @@
                <field name="type">form</field>
                <field name="inherit_id" ref="purchase.purchase_order_form"/>
                <field name="arch" type="xml">
-                     <button name="print_quotation" position="replace">
+                    <button name="print_quotation" position="replace">
                          <button class="oe_highlight" name="%(printpo)d" states="approved,draft" string="Print Purchase Order" type="action"/>
-                     
                     </button>
+
+                    <xpath expr="//button[@name='print_quotation']" position="after">
+                         <button name="print_po_out" type="object" states="approved,draft" string="Print" icon="gtk-print"/>
+                    </xpath>
                        
                     <field name="name" position="replace">
                          <field name="name"/>
                     </field>
                     <field name="partner_id" position="replace">
-                         <field name="partner_id" on_change="on_change_partner_id(partner_id)"/>
+                    <field name="partner_id" on_change="on_change_partner_id(partner_id)"/>
                     </field>
                     <field name="date_order" position="replace"/>
                     <field name="company_id" position="replace"/>
@@ -43,6 +46,12 @@
 
                     <field name="date_planned" position="before">
                          <field name="part_number"/>
+                    </field>
+                    <field name="product_id" position="after">
+                         <field name="variants"/>
+                    </field>
+                    <field name="product_id" position="before">
+                         <field name="no"/>
                     </field>
 
                     <xpath expr="//page[@string='Purchase Order']" position="after">

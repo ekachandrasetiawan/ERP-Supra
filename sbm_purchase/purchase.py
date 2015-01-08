@@ -108,6 +108,7 @@ class Detail_PB(osv.osv):
     _name = 'detail.pb'
     _columns = {
         'name':fields.many2one('product.product','Product'),
+        'variants':fields.many2one('product.variants','variants'),
         'part_no':fields.char('Part No'),
         'jumlah_diminta':fields.float('Qty'),
         'qty_available':fields.float('Qty Available'),
@@ -118,6 +119,7 @@ class Detail_PB(osv.osv):
         'subtotal':fields.float('Sub Total'),
         'keterangan':fields.text('Keterangan'),
         'detail_pb_id':fields.many2one('pembelian.barang', 'Referensi PB', required=True, ondelete='cascade'),
+        'item': fields.many2many('set.po', 'pre_item_rel', 'permintaan_id', 'item_id', 'item'),
     	'state': fields.selection([
             ('draft', 'Draft'),
             ('onproses', 'Confirm'),
@@ -129,9 +131,20 @@ class Detail_PB(osv.osv):
 
     _defaults = {'state': 'draft'}
 
-    def cariproduct(self,cr,uid,ids, idp):
-    	hasil=self.pool.get('product.product').browse(cr,uid,[idp])[0]
-    	return {'value':{ 
+    def setvariants(self,cr,uid,ids, pid):
+    	if pid:
+	    	cek=self.pool.get('product.variants').search(cr,uid,[('product_id', '=' ,pid)])
+	    	hasil=self.pool.get('product.variants').browse(cr,uid,cek)
+	    	products=self.pool.get('product.product').browse(cr,uid,pid)
+	    	pn = products.default_code
+	    	product =[x.id for x in hasil]
+	    	return {'domain': {'variants': [('id','in',tuple(product))]},'value':{'part_no':pn,'stok':products.qty_available,'satuan':products.uom_id.id}}
+
+	def productvar(self,cr,uid,ids,idp):
+		# cek=self.pool.get('product.variants').search(cr,uid,[('product_id', '=' ,idp)])
+		print '========================',idp
+		hasil=self.pool.get('product.variants').browse(cr,uid,idp)
+		return {'value':{ 
 						'part_no':hasil.default_code,
 						'stok':hasil.qty_available,
 						'satuan':hasil.uom_id.id,
@@ -156,15 +169,19 @@ class Set_PO(osv.osv):
 	_columns ={
 		'name':fields.many2one('res.partner','Supplier',required=True, domain=[('supplier','=',True),('is_company', '=', True)]),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True),
-		'detail_pb_ids': fields.one2many('wizard.detail.pb', 'detail_pb_id', 'Detail PB'),
+		'permintaan': fields.many2many('detail.pb', 'pre_item_rel', 'item_id', 'permintaan_id', 'Detail Permintaan',domain=[('state','=','onproses')]),
 	}
 	
-	def create_po(self,cr,uid,ids,context=None):
+	def create_po(self,cr,uid,ids,fiscal_position_id=False,context=None):
 		val = self.browse(cr, uid, ids)[0]
+		# Perhitangan Pajak
+		account_fiscal_position = self.pool.get('account.fiscal.position')
+		account_tax = self.pool.get('account.tax')
+
 		obj_purchase = self.pool.get("purchase.order")
 		obj_purchase_line = self.pool.get('purchase.order.line')
 		obj_detail_order_line=self.pool.get('detail.order.line')
-		pb = [line.name.name for line in val.detail_pb_ids]
+		pb = [line.detail_pb_id.name for line in val.permintaan]
 		detailpb = ''
 		for x in set(pb):
 			detailpb += x[:5] + ', '
@@ -181,58 +198,29 @@ class Set_PO(osv.osv):
                                         'type_permintaan':'1',
                                         'term_of_payment':val.name.term_payment
                                        })
-		# products= {}
-		# for detail in val.detail_pb_ids:
-		# 	if detail.product.id not in products:
-		# 		products[detail.product.id]={
-		# 			'name':detail.name.name,
-		# 			'product':detail.product,
-		# 			'qty':detail.qty,
-		# 			'id_product_detail':detail.id_product_detail,
-		# 			'price_unit':detail.price_unit
-		# 		}
-		# 	else:
-		# 		products[detail.product.id]['qty'] = products[detail.product.id]['qty']+detail.qty
-
-		#print '==============DETAIL PRODUCT=================',products	
-		# for line in products:
-		# 	obj_purchase_line.create(cr, uid, {
-		# 								 'date_planned': time.strftime("%Y-%m-%d"),
-		# 								 'order_id': sid,
-  #                                        #'pb_id': products[line]['name'],
-  #                                        'name': products[line]['product'].name,
-  #                                        'product_id': products[line]['product'].id,
-  #                                        'part_number':products[line]['product'].partner_code,
-  #                                        'line_pb_general_id': products[line]['id_product_detail'],
-  #                                        'product_qty': products[line]['qty'],
-  #                                        'product_uom': products[line]['product'].uom_id.id,
-  #                                        'price_unit': products[line]['price_unit'],
-  #                                        'note_line':'-',
-  #                                        })
-		for line in val.detail_pb_ids:
+		noline=1
+		for line in val.permintaan:
+			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.name.supplier_taxes_id))
+			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
+			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
 			obj_purchase_line.create(cr, uid, {
+										 'no':noline,
 										 'date_planned': time.strftime("%Y-%m-%d"),
 										 'order_id': sid,
                                          #'pb_id': products[line]['name'],
-                                         'name': line.product.name,
-                                         'product_id': line.product.id,
-                                         'part_number':line.product.partner_code,
-                                         'line_pb_general_id': line.id_product_detail,
-                                         'product_qty': line.qty,
-                                         'product_uom': line.product.uom_id.id,
-                                         'price_unit': line.price_unit,
+                                         # 'pb_id': line.detail_pb_id.id,
+                                         'product_id': line.name.id,
+                                         'variants':line.variants.id,
+                                         'name':line.name.name,
+                                         'part_number':line.name.default_code,
+                                         'line_pb_general_id': line.id,
+                                         'product_qty': line.qty_available,
+                                         'product_uom': line.satuan.id,
+                                         'price_unit': line.harga,
                                          'note_line':'-',
+                                         'taxes_id': [(6,0,taxes_ids)],
                                          })
-
-		# for cek in val.detail_pb_ids:
-		# 	#print '==============CEK DETAIL================',cek.id_product_detail
-		# 	obj_detail_order_line.create(cr, uid, {
-		# 								'order_line_id':sid,
-		# 								'detail_pb_id':cek.id_product_detail,
-		# 								'qty':cek.qty,
-		# 								})
-
-
+			noline=noline+1
 
 		# purchase ==> Nama Module nya purchase_order_form ==> Nama Id Form nya
 		pool_data=self.pool.get("ir.model.data")
@@ -249,7 +237,6 @@ class Set_PO(osv.osv):
 		action['target'] = 'current'
 		action['res_id'] = sid
 		return action
-		#return True
 
 Set_PO()
 
@@ -264,17 +251,18 @@ class Wizard_Detail_PB(osv.osv):
 	_columns ={
 		'name':fields.many2one('pembelian.barang','No PB', domain=[('state','=','purchase')]),
 		'product':fields.many2one('product.product','Product'),
+		'variants':fields.many2one('product.variants','variants'),
 		'qty':fields.integer('Qty'),
 		'price_unit':fields.integer('Price Unit', required=True),
 		'id_product_detail':fields.integer('id'),
 		'detail_pb_id':fields.many2one('set.po', 'Detail PO', required=True, ondelete='cascade'),
+		# 'detail_pb_ids': fields.many2many('detail.pb', 'detail_set_pb', 'Detail Permintaan Barang'),
 	}
 	
 	def setProduct(self,cr,uid,ids, pid):
 		pb_id = self.pool.get('pembelian.barang').browse(cr,uid, pid)
 		cek=self.pool.get('detail.pb').search(cr,uid,[('detail_pb_id', '=' ,pb_id.id),('state', '=' ,'onproses')])
 		#product =[x.name.id for x in pb_id.detail_pb_ids]
-
 		hasil=self.pool.get('detail.pb').browse(cr,uid,cek)
 		product =[x.name.id for x in hasil]
 		return {'domain': {'product': [('id','in',tuple(product))]}}
@@ -299,3 +287,15 @@ class Detail_Order_Line(osv.osv):
 	}
 
 Detail_Order_Line()
+
+
+class Product_Variants(osv.osv):
+	_name = 'product.variants'
+	_columns = {
+		# 'name':fields.integer('variants_id'),
+		'product_id':fields.many2one('product.product','Product'),
+		'name':fields.char('Variants'),
+		'satuan':fields.many2one('product.uom','Product UOM'),
+	}
+
+Product_Variants()

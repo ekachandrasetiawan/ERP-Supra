@@ -51,7 +51,8 @@
 					    	<page string="Product Detail">
 			                    <field name="detail_pb_ids" nolabel="1" colspan="4">
 			                        <tree string="Product Detail" editable="buttom">
-			                          	<field name="name" on_change="cariproduct(name)"/>
+			                          	<field name="name" on_change="setvariants(name)"/>
+			                          	<field name="variants"/>
 			                            <field name="part_no"/>
 			                            <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
 			                            <field name="qty_available" on_change="jmlQty(jumlah_diminta)"/>
@@ -134,13 +135,14 @@
 		            	<notebook colspan="4">
 					    	<page string="Product Detail ">
 					    		<!--<button name="search_pb" string="Search Product" type="object"/>-->
-			                    <field name="detail_pb_ids" nolabel="1" colspan="4">
-			                    	<tree string="Detal Barang" editable="bottom">
-			                          	<field name="name" on_change="setProduct(name)"/>
-			                            <field name="product" on_change="setQty(product,name)"/>
-			                            <field name="qty"/>
-			                            <field name="price_unit"/>
-			                            <field name="id_product_detail" invisible="1"/>
+			                    <field name="permintaan" nolabel="1" colspan="4" string="Detail Permintaan Barang">
+			                    	<tree string="Detail Barang" editable="bottom">
+			                          	<field name="detail_pb_id"/>
+			                          	<field name="name" string="Product Name"/>
+			                          	<field name="variants" string="Variants"/>
+			                          	<field name="qty_available" string="Qty"/>
+			                          	<field name="satuan" string="UOM"/>
+			                          	<field name="harga" string="Price"/>
 			                        </tree>
 			                    </field>
 			                </page>
@@ -195,6 +197,7 @@
                 <tree string="Regular Requisition">
                 	<field name="detail_pb_id"/>
                 	<field name="name"/>
+                	<field name="variants"/>
 	                <field name="part_no"/>
 	                <field name="jumlah_diminta"/>
 	                <field name="satuan"/>
@@ -237,5 +240,52 @@
 		</record>
 
 		<menuitem name="Product List Regular Requisition" parent="purchase.menu_procurement_management" id="list_barang" action="master_list_barang_action"/>
+
+
+
+
+		<record id="view_product_variants_tree" model="ir.ui.view">
+            <field name="name">product.variants.tree</field>
+            <field name="model">product.variants</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Product Variants">
+                	<field name="product_id"/>
+                	<field name="name"/>
+	                <field name="satuan"/>
+                </tree>
+            </field>
+        </record>
+		
+		<record id="view_list_barang_form" model="ir.ui.view">
+            <field name="name">product.variants.form</field>
+            <field name="model">product.variants</field>
+            <field name="type">form</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <form string="Product Variants" version="7.0">
+					<sheet>
+		            <separator string="Product Variants"/>
+						<group col="4" colspan="4">
+		                	<field name="product_id" colspan="4"/>
+		                	<field name="name"/>
+			                <field name="satuan"/>
+			            </group>
+		            </sheet>
+                </form>
+            </field>
+        </record>
+
+
+		<record model="ir.actions.act_window" id="master_product_variants_action">
+			<field name="name">Product Variants</field>
+			<field name="res_model">product.variants</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+
+
+		<menuitem name="Product Variants" parent="purchase.menu_procurement_management" id="product_variants" action="master_product_variants_action"/>
     </data>
 </openerp>

@@ -2,6 +2,8 @@
 <openerp>
 	<data>
 		
+        <!-- Report Accounting Stock Move -->
+
 		<record model="ir.ui.view" id="view_wizard_mutasi_stock">
             <field name="name">Mutasi Stock</field>
             <field name="model">mutasi.stock</field>
@@ -37,7 +39,7 @@
 
         <menuitem id="menu_mutasi_stock" name="Mutasi Stock" action="action_mutasi_stock" parent="account.final_accounting_reports"/>
 
-
+        <!-- Report Accounting Transaksi Per Account  -->
 
         <record model="ir.ui.view" id="view_wizard_transaksi_account">
             <field name="name">Report Transaksi Per Account</field>
@@ -69,6 +71,39 @@
 
 
         <menuitem id="menu_transaksi_account" name="Transaksi Account" action="action_transaksi_account" parent="account.final_accounting_reports"/>
+
+
+        <!-- Report Saldo Akhir Product  -->
+
+        <record model="ir.ui.view" id="view_wizard_saldo_akhir">
+            <field name="name">Report Product Saldo Akhir</field>
+            <field name="model">report.saldo.akhir</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Report" version="7.0">
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <footer>
+                        <button icon="gtk-ok" type="object" name="eksport_report_saldo_akhir" string="Eksport" default_focus="1" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+        <record model="ir.actions.act_window" id="action_saldo_akhir">
+            <field name="name">Report Saldo Akhir Product</field>
+            <field name="res_model">report.saldo.akhir</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem id="menu_saldo_akhir" name="Saldo Akhir Product" action="action_saldo_akhir" parent="account.final_accounting_reports"/>
 
 	</data>
 </openerp>
