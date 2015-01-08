@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="ir.module.category" id="module_category_internal_move">
+            <field name="name">Internal Move</field>
+        </record>
+		
+		<!-- GROUP FOR ADMINISTRATOR / SUPER ADMIN USER -->
+		<record model="res.groups" id="group_im_manager">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Manager</field>
+		</record>
+
+		<record model="res.groups" id="group_im_set">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Setter</field>
+			<field name="description">Goup User yang dapat membuat/menarik internal move dari internal move request</field>
+		</record>
+
+		<record model="res.groups" id="group_im_confirmer">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Confirmer</field>
+			<field name="description">Untuk User yang dapat mengkonfirm Internal Move yang telah di tarik /draft dari Request serta dapat membuat surat jalan internal move tersebut</field>
+		</record>
+
+		<record model="res.groups" id="group_im_ws_checker">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Warehouse Checker</field>
+			<field name="description">Untuk Warehouse user yang mengirim signal Ready To Transfer State pada Internal Move, selain itu dapat receive internal move</field>
+		</record>
+
+
+
+
+		<record id="im_draft" model="mail.message.subtype">
+			<field name="name">Document as Draft</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">internal.move</field>
+		</record>
+
+		<record id="im_confirmed" model="mail.message.subtype">
+			<field name="name">Moves Confirmed</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">internal.move</field>
+		</record>
+
+		<record id="im_ready" model="mail.message.subtype">
+			<field name="name">Ready to Transfer</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">internal.move</field>
+		</record>
+
+		<record id="im_transfered" model="mail.message.subtype">
+			<field name="name">Moves Transfered</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">internal.move</field>
+		</record>
+
+		<record id="im_received" model="mail.message.subtype">
+			<field name="name">Moves Received</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">internal.move</field>
+		</record>
+
+		<record id="im_canceled" model="mail.message.subtype">
+			<field name="name">Moves Canceled</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">internal.move</field>
+		</record>
+		
+		<record id="internal_move_line_seq" model="ir.sequence.type">
+			<field name="name">Internal Move Line Sequence</field>
+			<field name="code">internal.move.line</field>
+		</record>
+
+		<record id="internal_move_line_set_seq" model="ir.sequence">
+			<field name="name">Internal Move Line Sequence</field>
+			<field name="code">internal.move.line</field>
+			<field name="padding">9</field>
+		</record>
+
+
+		<record id="internal_move_line_detail_seq" model="ir.sequence.type">
+			<field name="name">Internal Move Line Detail Sequence</field>
+			<field name="code">internal.move.line.detail</field>
+		</record>
+
+		<record id="internal_move_line_detail_set_seq" model="ir.sequence">
+			<field name="name">Internal Move Line Detail Sequence</field>
+			<field name="code">internal.move.line.detail</field>
+			<field name="padding">9</field>
+		</record>
+
+
+
+		<record id="view_stock_location_form_inherit" model="ir.ui.view">
+			<field name="name">view.stock.location.form.inherit</field>
+			<field name="model">stock.location</field>
+			<field name="inherit_id" ref="stock.view_location_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='partner_id']" position="after">
+					<field name="code"/>
+				</xpath>
+			</field>
+		</record>
+
+
+
+
+		<record id="internal_move_req_seq" model="ir.sequence.type">
+			<field name="name">Internal Move Request Sequence</field>
+			<field name="code">internal.move.request</field>
+		</record>
+
+		<record id="internal_move_req_set_seq" model="ir.sequence">
+			<field name="name">Internal Move Request Sequence</field>
+			<field name="code">internal.move.request</field>
+			<field name="padding">4</field>
+		</record>
+
+
+		<record id="internal_move_request_tree" model="ir.ui.view">
+			<field name="name">internal.move.request.tree</field>
+			<field name="model">internal.move.request</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Internal Move Request">
+					<field name="name" />
+					<field name="source" />
+					<field name="destination" />
+					<field name="due_date" />
+					<field name="manual_pb_no" />
+					<field name="state" widget="statusbar" />
+				</tree>
+			</field>
+		</record>
+
+
+		<record id="internal_move_request_form" model="ir.ui.view">
+			<field name="name">internal.move.request.form</field>
+			<field name="model">internal.move.request</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Internal Move Request Form" version="7.0">
+					<header>
+						<field name="state" widget="statusbar" />
+						<button name="confirmRequest" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Confirm Request ?" />
+					</header>
+					<sheet>
+						<group col="4" colspan="4">
+							<field name="name" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="manual_pb_no" required="True" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="request_by" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="due_date" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="source" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="ref_no" attrs="{'readonly':[('state','!=','draft')]}" />
+						</group>
+						<notebook>
+							<page string="Lines">
+								<!-- <field name="lines" context="{'state':state}" >
+									<tree>
+										<field name="no" />
+										<field name="product_id" on_change="on_change_product(product_id)"/>
+										<field name="qty"/>
+										<field name="uom_id"/>
+										<field name="desc" />
+										<field name="state" />
+									</tree>
+								
+									<form>
+										<field name="no" />
+										<field name="product_id" on_change="on_change_product(product_id)"/>
+										<field name="qty"/>
+										<field name="uom_id"/>
+										<field name="desc" />
+										<field name="state" />
+									</form>
+								</field> -->
+								<field name="lines" />
+								<field name="notes" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}"/>
+							</page>
+						</notebook>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+
+		<record id="internal_move_request_line_form" model="ir.ui.view">
+			<field name="name">internal.move.request.line.form</field>
+			<field name="model">internal.move.request.line</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Internal Move Request Form" version="7.0">
+					<sheet>
+						<header>
+							<field name="state" widget="statusbar" />
+						</header>
+						<group>
+
+							<field name="no" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
+							<field name="product_id" on_change="on_change_product(product_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
+							<field name="qty" attrs="{'readonly':[('state','!=','draft')]}"/>
+							<field name="uom_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+							<field name="desc" attrs="{'readonly':[('state','!=','draft')]}" />
+
+							
+						</group>
+						
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="internal_move_request_line_tree" model="ir.ui.view">
+			<field name="name">internal.move.request.line.tree</field>
+			<field name="model">internal.move.request.line</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Internal Move Request Tree">
+					<field name="no" />
+					<field name="product_id"/>
+					<field name="qty"/>
+					<field name="uom_id"/>
+					<field name="desc" />
+					<field name="processed_item_qty" readonly="1" />
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_internal_move_request">
+			<field name="name">Request for Internal Moves</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">internal.move.request</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		
+
+
+
+		<record id="internal_move_seq" model="ir.sequence.type">
+			<field name="name">Internal Move Sequence</field>
+			<field name="code">internal.move</field>
+		</record>
+
+		<record id="internal_move_set_seq" model="ir.sequence">
+			<field name="name">Internal Move Sequence</field>
+			<field name="code">internal.move</field>
+			<field name="padding">4</field>
+		</record>
+
+
+		<record id="internal_move_tree" model="ir.ui.view">
+			<field name="name">internal.move.tree</field>
+			<field name="model">internal.move</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Internal Move">
+					<field name="name" />
+					<field name="source" />
+					<field name="destination" />
+					<field name="due_date_preparation" />
+					<field name="state" widget="statusbar" />
+				</tree>
+			</field>
+		</record>
+
+
+		<record id="internal_move_form" model="ir.ui.view">
+			<field name="name">internal.move.form</field>
+			<field name="model">internal.move</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Internal Move Form" version="7.0">
+					<header>
+						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,ready,transfered,done" />
+						<button name="confirmInternalMove" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_set,sbm_inherit.group_im_confirmer" />
+
+						<button name="setAsDraftInternalMove" type="object" string="Set to Draft" icon="gtk-apply" states="confirmed,ready" confirm="Are You Sure to set This Document to Draft ? If this confirmed then the confirmed process will be closed and stock will be refunded!" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
+
+						<button name="setAsReady" type="object" string="Ready To Deliver" icon="gtk-apply" states="confirmed" confirm="Sure ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+
+						<button name="transferMove" type="object" string="Transfer Move" icon="gtk-apply" states="ready" confirm="Sure ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
+
+						<button name="printInternalMovePreparation" type="object" string="Print Preparation" icon="gtk-print" states="confirmed"  groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_inherit.group_im_set"/>
+
+						<button name="printInternalMoveNotes" type="object" string="Print" icon="gtk-print" states="ready" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
+
+
+						<button name="receiveMove" type="object" string="Receive Move" icon="gtk-apply" states="transfered" confirm="All Item Has Been Received ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+
+
+					</header>
+					<sheet>
+						<group>
+							<field name="name" readonly="True" />
+							<field name="internal_move_request_id" on_change="load_request(internal_move_request_id)" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="due_date_preparation" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
+							<field name="due_date_transfer" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
+							<field name="date_prepared" readonly="True" />
+							<field name="source" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
+
+							<field name="manual_pb_no" required="True" />
+							<field name="ref_no" />
+
+							<field name="picking_id" />
+
+							<field name="lines">
+								<tree string="Items">
+									<field name="no"/>
+									<field name="product_id"/>
+									<field name="desc"/>
+									<field name="qty_available" readonly="1"/>
+									<field name="qty"/>
+									<field name="uom_id"/>
+									<field name="stock_move_id" readonly="1"/>
+									<field name="detail_ids"/>
+								</tree>
+							</field>
+
+							<field name="notes"/>
+
+							<!-- <field name="detail_ids">
+								<tree string="Details">
+									<field name="product_id"/>
+									<field name="desc"/>
+									<field name="uom_id"/>
+									<field name="qty"/>
+									<field name="stock_move_id"/>
+									<field name="stock_prod_lot_id"/>
+									<field name="type"/>
+							
+								</tree>
+							</field> -->
+						</group>
+					</sheet>
+
+					<div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers"/>
+						<field name="message_ids" widget="mail_thread"/>
+					</div>
+				</form>
+			</field>
+		</record>
+
+
+		<record id="internal_move_line_form" model="ir.ui.view">
+			<field name="name">internal.move.line.form</field>
+			<field name="model">internal.move.line</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="internal Move Line" version="7.0">
+					<header>
+						<field name="state" widget="statusbar" />
+					</header>
+					<group colspan="4">
+						<field name="name" readonly="1" />
+						<field name="no" attrs="{'readonly':[('state','not in',['','draft','confirmed'])]}"/>
+						<field name="product_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+						<field name="desc" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}"/>
+						<field name="qty_available" attrs="{'readonly':[('state','!=','draft')]}"/>
+						<field name="qty" attrs="{'readonly':[('state','!=','draft')]}" on_change="on_change_qty_line(product_id,qty,no)"/>
+
+						<field name="uom_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+						<field name="stock_move_id" readonly="1"/>
+						<field name="detail_ids">
+							<tree editable="bottom">
+								<!-- <field name="name" readonly="1" /> -->
+								<field name="no" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}"/>
+								<field name="type" on_change="on_change_type(type,parent.product_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
+								<field name="product_id" on_change="on_change_product(product_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
+								<field name="stock_prod_lot_id" attrs="{'required':[('type','=','batch')],'readonly':[('state','!=','draft')]}" on_change="on_change_batch(stock_prod_lot_id)" domain="[('product_id','=',product_id)]" />
+								<field name="desc" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}"/>
+								<field name="qty_available"/>
+								<field name="qty" on_change="validateQty(qty,qty_available,product_id,stock_prod_lot_id)" attrs="{'readonly':[('state','!=','draft')]}" />
+								<field name="uom_id" attrs="{'readonly':[('state','!=','draft')]}" />
+								
+								
+								<field name="stock_move_id" readonly="True" />
+								<field name="state" readonly="True" />
+								
+							</tree>
+						</field>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record id="internal_move_line_detail_form" model="ir.ui.view">
+			<field name="name">internal.move.line.detail.form</field>
+			<field name="model">internal.move.line.detail</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Internal Move Detail" version="7.0">
+					<group>
+
+						<field name="name" readonly="1" />
+						<field name="internal_move_line_id" readonly="1" />
+						<field name="no" />
+						<field name="type" />
+						<field name="product_id" />
+						<field name="stock_prod_lot_id" domain="[('product_id','=',product_id)]" />
+						<field name="desc" />
+						<field name="qty" />
+						<field name="uom_id" />
+						<field name="stock_move_id" readonly="True" />
+						
+					</group>
+				</form>
+			</field>
+		</record>
+
+
+
+
+		<record model="ir.actions.act_window" id="action_internal_move">
+			<field name="name">Internal Move Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">internal.move</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+
+	
+		<menuitem name="Material Request" parent="base.menu_base_partner" id="mr_menu_sales" sequence="3" />
+		
+		<!-- <menuitem name="Internal Move Request" parent="base.menu_sales" id="internal_move_req_menu" action="action_internal_move_request" /> -->
+		<menuitem name="Internal Move Request" parent="sbm_inherit.mr_menu_sales" id="internal_move_req_sales_menu" action="action_internal_move_request" />
+		<!-- <menuitem name="Internal Move" parent="base.menu_sales" id="internal_move_menu" action="action_internal_move" /> -->
+		<menuitem name="Internal Move" parent="sbm_inherit.mr_menu_sales" id="internal_move_sales_menu" action="action_internal_move" />
+		
+		
+
+		<record model="ir.actions.act_window" id="action_internal_move_confirmed">
+			<field name="name">Internal Move Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">internal.move</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('state','!=','draft')]</field>
+			<field name="filter" eval="True"/>
+		</record>
+		<menuitem name="Material Request" parent="stock.menu_stock_root" id="mr_menu_ws" sequence="3" />
+		<menuitem name="Internal Move" parent="sbm_inherit.mr_menu_ws" id="internal_move_ws_menu" action="action_internal_move_confirmed" />
+
+
+
+	</data>
+</openerp>

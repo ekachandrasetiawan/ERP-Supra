@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="view_super_notes_form" model="ir.ui.view">
+			<field name="name">view.super.notes.form</field>
+			<field name="model">super.notes</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Super Notes" version="7.0">
+					<group>
+						<field name="name" />
+						<field name="desc" />
+						<field name="template_note" />
+						<field name="show_in_do_line" />
+						<field name="show_in_dn_line" />
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="view_product_product_super_notes_inherit" model="ir.ui.view">
+			<field name="name">product.product.form</field>
+			<field name="model">product.product</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="product.product_normal_form_view" />
+
+			<field name="arch" type="xml">
+				
+					
+				<xpath expr="//page[@string='Sales']" position="after">
+					<page string="Super Note">
+						<field name="super_notes_ids" widget="many2many" />
+					</page>
+				</xpath>
+			</field>
+		</record>
+	</data>
+</openerp>

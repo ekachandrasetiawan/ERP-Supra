@@ -1,5 +1,5 @@
 openerp.sbm_inherit = function (instance) {
-    instance.web.client_actions.add('account.invoice.print.faktur', 'instance.sbm_inherit.action');
+    instance.web.client_actions.add('print.out', 'instance.sbm_inherit.action');
     instance.sbm_inherit.action = instance.web.Widget.extend({
         className: 'oe_web_example',
         init:function(parent,action){
