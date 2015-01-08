@@ -63,7 +63,7 @@ class stock_picking(osv.osv):
 		
 		return {
 			'type'	: 'ir.actions.client',
-			# 'target': 'new',
+			'target': 'new',
 			'tag'	: 'print.int.move',
 			'params': {
 				# 'id'	: ids[0],
@@ -264,7 +264,9 @@ class stock_picking(osv.osv):
 	def create(self, cr, uid, vals, context=None):
 		# print "VALSSSSS",vals
 		# print "CONTEXT",context
-		
+
+
+
 		getMoves  = vals.get('move_lines')
 		# print "GET MOVESSSSSS======================",getMoves
 		if getMoves:
@@ -786,6 +788,17 @@ class delivery_note(osv.osv):
 	
 	 
 	def create(self, cr, uid, vals, context=None):
+		# validate dn input
+		print vals
+		prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
+		print "-----------------------------",prepareExists
+		if prepareExists:
+			no = ""
+			for nt in self.browse(cr,uid,prepareExists,context):
+				no += "["+nt.name+"]\n"
+			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
+
+
 		if vals['special']==True:
 			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 			# saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
