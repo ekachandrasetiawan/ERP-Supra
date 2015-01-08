@@ -792,7 +792,7 @@ class delivery_note(osv.osv):
 			usa = 'SPC'
 			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
 			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-			vals['name'] ='14'+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+			vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
 			return super(delivery_note, self).create(cr, uid, vals, context=context)
 		else:    
 			# ex: 000001C/SBM-ADM/JH-NR/X/13
@@ -801,7 +801,7 @@ class delivery_note(osv.osv):
 			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
 			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
 			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-			vals['name'] ='14'+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+			vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
 			return super(delivery_note, self).create(cr, uid, vals, context=context)
 	def package_draft(self, cr, uid, ids, context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
