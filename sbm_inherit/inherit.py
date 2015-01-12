@@ -1412,6 +1412,7 @@ class InternalMove(osv.osv):
 		res = {
 			'no':line.no,
 			'product_id':line.product_id.id,
+			'desc':line.desc,
 			'uom_id':line.uom_id.id,
 			'qty':line.qty-line.processed_item_qty,
 			'qty_available':line.product_id.qty_available,
@@ -1468,7 +1469,22 @@ class InternalMove(osv.osv):
 	def _update_im_line_stock_move(self,cr,uid,line_ids,stock_move_id,to='line',context={}):
 		return self.pool.get('internal.move.'+to).write(cr,uid,line_ids,{'stock_move_id':stock_move_id},context)
 
+	def _checkLine(self,cr,uid,line_data,context={}):
+		res = False
+		if line_data.product_id.bom_ids and line_data.product_id.supply_method=="manufacture":
+			# if has bom
+			if line_data.detail_ids:
+				res = True
+			else:
+				raise osv.except_osv(_("Error!!!"),_(str(line_data.product_id.name_template+" is defined as SET product, please define the BOM inside the line!")))
 
+		else:
+			if line_data.product_id.track_outgoing:
+				if line_data.detail_ids:
+					res = True
+				else:
+					raise osv.except_osv(_("Error!!!"),_(str(line_data.product_id.name_template+" defined as a batches product, Please pick 1 or more batch/es!!!")))
+		return res
 	def confirmInternalMove(self,cr,uid,ids,context={}):
 		res = True
 		valid = True
@@ -1496,7 +1512,10 @@ class InternalMove(osv.osv):
 				move_line = self._prepare_move(data,line,picking_id)
 				move_line_id = self.pool.get('stock.move').create(cr,uid,move_line,context)
 				self._update_im_line_stock_move(cr,uid,line.id,move_line_id,'line',context)
-				
+
+				self._checkLine(cr,uid,line,context)
+
+				# EACH DETAILS
 				if line.detail_ids:
 					for detail in line.detail_ids:
 						move_detail = self._prepare_move(data,detail,picking_id)
@@ -1584,7 +1603,7 @@ class InternalMove(osv.osv):
 			# data.picking.action_move
 			# self.action_move(cr, uid, [new_picking], context=context)
 			self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
-			data.pickign_id.write({'state':'done'})
+			data.picking_id.write({'state':'done'})
 			data.write({'state':'transfered'})
 			res = True
 			
@@ -1739,7 +1758,7 @@ class InternalMove(osv.osv):
 		
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"moves/print-internal-move-notes&id="+str(ids[0])+"&uid="+str(uid)
+		urlTo = str(browseConf.value)+"moves/print-internal-move&id="+str(ids[0])+"&uid="+str(uid)
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
@@ -1784,7 +1803,14 @@ class InternalMoveLine(osv.osv):
 	def _getStates(self,cr,uid,context={}):
 		im_r = self.pool.get('internal.move').getStates(cr,uid,context)
 		return im_r
-
+	def _getStockState(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		
+		for data in self.browse(cr,uid,ids,context):
+			res[data.id] = "draft"
+			if data.stock_move_id:
+				res[data.id] = data.stock_move_id.state
+		return res
 	_name = 'internal.move.line'
 	_columns={
 		'name':fields.char('Name'),
@@ -1800,7 +1826,14 @@ class InternalMoveLine(osv.osv):
 
 		'qty_available':fields.function(_get_available,string="Available Stock",store=False),
 
-		'state':fields.function(_getParentState,store=False,method=True,string="State",type="selection",selection=_getStates)
+		'state':fields.function(_getParentState,store=False,method=True,string="State",type="selection",selection=_getStates),
+		'stock_state':fields.function(_getStockState,store=False,method=True,string="Stock Status",type="selection",selection=[('draft', 'New'),
+                                   ('cancel', 'Cancelled'),
+                                   ('waiting', 'Waiting Another Move'),
+                                   ('confirmed', 'Waiting Availability'),
+                                   ('assigned', 'Available'),
+                                   ('done', 'Done'),
+                                   ]),
 	}
 	_defaults={
 		'state':'draft',
@@ -1887,6 +1920,15 @@ class InternalMoveLineDetail(osv.osv):
 		states = self.pool.get('internal.move.line').getStates(cr,uid,context)
 		return states
 
+	def _getStockState(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		
+		for data in self.browse(cr,uid,ids,context):
+			res[data.id] = "draft"
+			if data.stock_move_id:
+				res[data.id] = data.stock_move_id.state
+		return res
+
 	_name = 'internal.move.line.detail'
 	_columns = {
 		'no':fields.integer('Line No',required=False),
@@ -1904,11 +1946,20 @@ class InternalMoveLineDetail(osv.osv):
 		'qty_available':fields.function(_default_qty_availability,string="Available",store=False),
 
 		'state':fields.function(_getParentState,store=False,method=True,string="State",type="selection",selection=_getStates),
+		'stock_state':fields.function(_getStockState,store=False,method=True,string="Stock Status",type="selection",selection=[
+			('draft', 'New'),
+			('cancel', 'Cancelled'),
+			('waiting', 'Waiting Another Move'),
+			('confirmed', 'Waiting Availability'),
+			('assigned', 'Available'),
+			('done', 'Done'),
+			]),
 	}
 	
 	_defaults = {
 		# 'product_id':_get_default_product,
 		# 'type':'batch'
+		'state':'draft',
 	}
 
 
@@ -1952,6 +2003,8 @@ class InternalMoveLineDetail(osv.osv):
 		res = {}
 		if batch:
 			data = self.pool.get('stock.production.lot').browse(cr,uid,batch,{})
+
+			print "STOCK AVAILABLE ",data.stock_available
 			if data:
 				if data.exp_date:
 					if data.desc:

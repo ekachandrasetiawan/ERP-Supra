@@ -318,6 +318,7 @@
 									<field name="uom_id"/>
 									<field name="stock_move_id" readonly="1"/>
 									<field name="detail_ids"/>
+									<field name="stock_state"/>
 								</tree>
 							</field>
 
@@ -380,6 +381,7 @@
 								
 								
 								<field name="stock_move_id" readonly="True" />
+								<field name="stock_state" />
 								<field name="state" readonly="True" />
 								
 							</tree>
