@@ -1214,10 +1214,14 @@ class InternalMoveRequest(osv.osv):
 		return roman[number]
 
 	def _validateStorage(self,source,dest):
+
 		if source.id==dest.id:
 			raise osv.except_osv(_('Error !'),_('Please Check Destination and Source Location, It Can be same as'))
 
-		return 'MR-'+dest.code+'/'+str(time.strftime('%y'))+'/'+str(self.monthToRoman(time.strftime('%m')))
+		if not source.code:
+			raise osv.except_osv(_('Error !'),_('Please define a storage code for '+dest.name))
+
+		return 'MR-'+destCode+'/'+str(time.strftime('%y'))+'/'+str(self.monthToRoman(time.strftime('%m')))
 	def _getNewNO(self,cr,uid,ids,context={}):
 		# NUMBER FORMAT {code of source location}-{code of destination location}/{2 last year number}/{month in rome}/sequence number
 		data = self.browse(cr,uid,ids,context)[0]
