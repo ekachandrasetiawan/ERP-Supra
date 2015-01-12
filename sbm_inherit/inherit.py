@@ -1218,7 +1218,9 @@ class InternalMoveRequest(osv.osv):
 		if source.id==dest.id:
 			raise osv.except_osv(_('Error !'),_('Please Check Destination and Source Location, It Can be same as'))
 
-		if not source.code:
+		if dest.code:
+			destCode = dest.code
+		else:
 			raise osv.except_osv(_('Error !'),_('Please define a storage code for '+dest.name))
 
 		return 'MR-'+destCode+'/'+str(time.strftime('%y'))+'/'+str(self.monthToRoman(time.strftime('%m')))
