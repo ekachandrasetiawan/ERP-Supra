@@ -1475,8 +1475,10 @@ class InternalMove(osv.osv):
 	def _update_im_line_stock_move(self,cr,uid,line_ids,stock_move_id,to='line',context={}):
 		return self.pool.get('internal.move.'+to).write(cr,uid,line_ids,{'stock_move_id':stock_move_id},context)
 
-	def _checkLine(self,cr,uid,line_data,context={}):
+	# CHECK LINE PRODUCT IF DEFINED AS SET OR DEFINED AS BATCHES PRODUCT IT WILL BE HAVA ONE OR MORE detail_ids
+	def _checkLineForDetail(self,cr,uid,line_data,context={}):
 		res = False
+		print "CHECKED"
 		if line_data.product_id.bom_ids and line_data.product_id.supply_method=="manufacture":
 			# if has bom
 			if line_data.detail_ids:
@@ -1490,6 +1492,31 @@ class InternalMove(osv.osv):
 					res = True
 				else:
 					raise osv.except_osv(_("Error!!!"),_(str(line_data.product_id.name_template+" defined as a batches product, Please pick 1 or more batch/es!!!")))
+		return res
+	# Validate Qty
+	def _finalyCheckQty(self,cr,uid,data,context={}):
+		res = True
+		for line in data.lines:
+			if line.detail_ids:
+				# validate available detail
+				for detail in line.detail_ids:
+					if detail.stock_prod_lot_id:
+						# if has batch number defined
+						# check available by batch number
+						if detail.qty > detail.stock_prod_lot_id.stock_available:
+							res = False
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" on "+detail.stock_prod_lot_id.name+" is "+detail.stock_prod_lot_id.stock_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+					else:
+						# else set not batches
+						if detail.qty > detail.product_id.qty_available:
+							res = False
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" is "+detail.product_id.qty_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+			else:
+				# if not has detail
+				if line.qty>line.product_id.qty_available:
+					res = False
+					raise osv.except_osv(_("Error !!!"),_("Available Stock For "+line.product_id.name_template+" is "+str(line.product_id.qty_available)+" "+line.product_id.uom_id.name+". Requested Item is "+str(line.qty)+" "+line.uom_id.name+"!"))
+
 		return res
 	def confirmInternalMove(self,cr,uid,ids,context={}):
 		res = True
@@ -1520,8 +1547,8 @@ class InternalMove(osv.osv):
 				move_line_id = self.pool.get('stock.move').create(cr,uid,move_line,context)
 				self._update_im_line_stock_move(cr,uid,line.id,move_line_id,'line',context)
 
-				self._checkLine(cr,uid,line,context)
-
+				self._checkLineForDetail(cr,uid,line,context)
+				# self._checkQty(cr,uid,line,context)
 				# EACH DETAILS
 				if line.detail_ids:
 					for detail in line.detail_ids:
@@ -1567,6 +1594,7 @@ class InternalMove(osv.osv):
 					
 				
 			if res:
+				self._finalyCheckQty(cr,uid,data)
 				print "OK"
 				# add doc number
 				updateIm = {}
@@ -1707,6 +1735,7 @@ class InternalMove(osv.osv):
 
 
 	_name='internal.move'
+	_description = "Internal Move"
 	_inherit = ['mail.thread']
 	_columns={
 		'name':fields.char('I.M No.'),
@@ -1779,6 +1808,7 @@ class InternalMove(osv.osv):
 		}
 
 class InternalMoveLine(osv.osv):
+	_description = "Internal Move Line"
 	def create(self,cr,uid,vals,context={}):
 		# stock_move = self.pool.get('stock.move')
 		# im = self.pool.get('internal.move')
@@ -1879,6 +1909,7 @@ class InternalMoveLine(osv.osv):
 		return res
 
 class InternalMoveLineDetail(osv.osv):
+	_description = "Internal Move Line Detail"
 	def validateQty(self,cr,uid,ids,qty,available=0,product_id=None,prod_lot_id=None):
 		res = True
 		if not product_id:
@@ -1889,7 +1920,7 @@ class InternalMoveLineDetail(osv.osv):
 				res = {
 					'value':{
 						'qty':0.00,
-						'qty_available':qty_available
+						'qty_available':available
 					},
 					'warning':{
 						'title':'Qty Not Valid',
