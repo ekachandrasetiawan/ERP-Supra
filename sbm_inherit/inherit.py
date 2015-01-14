@@ -1504,6 +1504,7 @@ class InternalMove(osv.osv):
 				raise osv.except_osv(_('Error !'),_('Source and Destination Location is Not Valid..!Please Check!'))
 			# prepare for new picking
 			prepare_picking = {
+				'name':self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.inernal.move.seq'),
 				'origin':data.manual_pb_no+", "+data.internal_move_request_id.name,
 				'state':'confirmed',
 				'internal_move_id':data.id
@@ -1610,7 +1611,7 @@ class InternalMove(osv.osv):
 			# self.action_move(cr, uid, [new_picking], context=context)
 			self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
 			data.picking_id.write({'state':'done'})
-			data.write({'state':'transfered'})
+			data.write({'state':'transfered','date_transfered':time.strftime('%Y-%m-%d')})
 			res = True
 			
 
@@ -1622,7 +1623,7 @@ class InternalMove(osv.osv):
 			for move in data.picking_id.move_lines:
 				move.write({'location_dest_id':data.destination.id})
 			data.picking_id.write({'state':'done'})
-			data.write({'state':'done'})
+			data.write({'state':'done','date_received':time.strftime('%Y-%m-%d')})
 			res = True
 		return res
 
@@ -1713,6 +1714,8 @@ class InternalMove(osv.osv):
 		'due_date_transfer':fields.date('Transfer Due Date'),
 		'due_date_preparation':fields.date('Preparation Due Date'),
 		'date_prepared':fields.date('Prepared Date'),
+		'date_transfered':fields.date('Transfered Date',required=False),
+		'date_received':fields.date('Received Date',required=False),
 		'source':fields.many2one('stock.location',required=True,string="Source Location"),
 		'destination':fields.many2one('stock.location',required=True,string="Destination Location"),
 		'state':fields.selection(STATES,string="State"),
