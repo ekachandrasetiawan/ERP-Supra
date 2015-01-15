@@ -1185,7 +1185,7 @@ class stockPicking(osv.osv):
 class StockLocation(osv.osv):
 	_inherit = 'stock.location'
 	_columns = {
-		'code':fields.char(size=3,string='Code'),
+		'code':fields.char(size=4,string='Code'),
 	}
 class InternalMoveRequest(osv.osv):
 	STATES = [
@@ -1622,6 +1622,8 @@ class InternalMove(osv.osv):
 			tid.write({'state':'ready','date_prepared':time.strftime('%Y-%m-%d')})
 		return res
 
+
+
 	def transferMove(self,cr,uid,ids,context={}):
 		res = False
 		searchLoc = self.pool.get('stock.location').search(cr,uid,[('code','=','TRS')])
@@ -1644,6 +1646,19 @@ class InternalMove(osv.osv):
 			
 
 		return res
+	def _checkRequestProcessed(self,cr,uid,data,context={}):
+		res =True
+
+		for reqLine in data.internal_move_request_id.lines:
+
+			# print "=======================>",reqLine.processed_item_qty
+			if reqLine.processed_item_qty < reqLine.qty:
+				res = False
+
+		if res==True:
+			# write request to done
+			self.pool.get('internal.move.request').write(cr,uid,[data.internal_move_request_id.id],{'state':'done'})
+		return res
 
 	def receiveMove(self,cr,uid,ids,context={}):
 		res = False
@@ -1652,6 +1667,8 @@ class InternalMove(osv.osv):
 				move.write({'location_dest_id':data.destination.id})
 			data.picking_id.write({'state':'done'})
 			data.write({'state':'done','date_received':time.strftime('%Y-%m-%d')})
+			self._checkRequestProcessed(cr,uid,data,context)
+			# raise osv.except_osv(_("error"),_("aaaaaaaaaaaaaaaaaaaaaa"))
 			res = True
 		return res
 
