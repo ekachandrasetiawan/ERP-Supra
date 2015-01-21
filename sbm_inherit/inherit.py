@@ -1263,7 +1263,7 @@ class InternalMoveRequest(osv.osv):
 		'name':fields.char('MR No',required=True),
 		'source':fields.many2one('stock.location',required=True,string="Source Location"),
 		'destination':fields.many2one('stock.location',required=True,string="Destination Location"),
-		'due_date':fields.date('Due Date',required=True),
+		'due_date':fields.date('Due Date',required=False),
 		'manual_pb_no':fields.char('Manual PB NO'),
 		'ref_no':fields.char('Ref No'),
 		'request_by':fields.many2one('res.users',string="Request By",required=True),
