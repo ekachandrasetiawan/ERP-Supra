@@ -5,6 +5,16 @@
             <field name="name">Internal Move</field>
         </record>
 		
+		<record model="res.groups" id="group_im_request_admin">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Request Admin</field>
+		</record>
+
+		<record model="res.groups" id="group_im_request_user">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Request User</field>
+		</record>
+
 		<!-- GROUP FOR ADMINISTRATOR / SUPER ADMIN USER -->
 		<record model="res.groups" id="group_im_manager">
 			<field name="category_id" ref="module_category_internal_move"/>
