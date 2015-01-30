@@ -792,7 +792,7 @@ class delivery_note(osv.osv):
 		print vals
 		prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
 		print "-----------------------------",prepareExists
-		if prepareExists:
+		if prepareExists and vals['special']==False:
 			no = ""
 			for nt in self.browse(cr,uid,prepareExists,context):
 				no += "["+nt.name+"]\n"
