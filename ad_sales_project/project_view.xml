@@ -122,14 +122,16 @@
                     <page string="Scope of Work">
                         <separator string="PT. Supra Bakti Mandiri"/>
                         <group>
-                            <field name="scope_work_supra" nolabel="1"/>
+                            <!-- <field name="scope_work_supra" nolabel="1"/> -->
+                            <field name="scope_supra"/>
 	                     </group>
 	                     <separator string="Customer"/>
                          <group>
-	                     	<field name="scope_work_customer" nolabel="1"/>
+	                     	<!-- <field name="scope_work_customer" nolabel="1"/> -->
+	                     	<field name="scope_customer"/>
                     	</group>
                     </page>
-                    <page string="Terms and Conditions">
+                    <page string="Terms Of Payment">
                          <group>
 	                     	<field name="term_condition" nolabel="1"/>
                     	</group>
