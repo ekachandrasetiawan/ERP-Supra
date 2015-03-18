@@ -447,6 +447,7 @@
 			<field name="filter" eval="True"/>
 		</record>
 		<menuitem name="Material Request" parent="stock.menu_stock_root" id="mr_menu_ws" sequence="3" />
+		<menuitem name="Internal Move Request" parent="sbm_inherit.mr_menu_ws" id="internal_move_req_ws_menu" action="action_internal_move_request" />
 		<menuitem name="Internal Move" parent="sbm_inherit.mr_menu_ws" id="internal_move_ws_menu" action="action_internal_move_confirmed" />
 
 
