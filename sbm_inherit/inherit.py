@@ -40,23 +40,10 @@ class stock_picking_in(osv.osv):
 		'cust_doc_ref' : fields.char('External Doc Ref',200,required=False,store=True),
 		'lbm_no' : fields.char('LBM No',200,required=False,store=True),
 	}
-	# def __init__(self, pool, cr):
-	# 	super(StockPickingIn, self).__init__(pool, cr)
-	# 	self._columns['cust_doc_ref'] = self.pool['stock.picking']._columns['cust_doc_ref']
 
 	def action_process(self, cr, uid, ids, context=None):
 		# picking_obj = self.browse(cr, uid, ids, context=context)
 		picking_obj=self.pool.get('stock.picking.in').browse(cr, uid, ids)
-		# print "pickingobject.custdocref ====== > ",str(picking_obj[0].cust_doc_ref)
-
-		# if(picking_obj[0].backorder_id == False):
-		# 	raise osv.except_osv(('Warning !!!'),('Please Change Other Doc No Ref Field..!!'))
-		# el
-		# print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>POBJ",picking_obj[0].backorder_id.name
-		# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<docRef",picking_obj[0].cust_doc_ref
-		# if picking_obj[0].backorder_id.name not is None:
-			# if picking is not partial that not have backorder
-			# check if cust doc is same with back order cust doc ref
 
 		if(picking_obj[0].cust_doc_ref is None or picking_obj[0].cust_doc_ref is False):
 			raise osv.except_osv(('Warning !!!'), ('Plase Fill "External Doc Ref" Field!!'))
@@ -571,6 +558,12 @@ class account_invoice(osv.osv):
 	_inherit='account.invoice'
 	_columns={
 		'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
+		'payment_for':fields.selection([('dp','DP'),('completion','Completion')],string="Payment For",required=False),
+		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
+		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
+	}
+	_defaults={
+		'print_all_taxes_line':True,
 	}
 
 
@@ -635,6 +628,54 @@ class account_invoice_tax(osv.osv):
 	_name='account.invoice.tax'
 	_inherit='account.invoice.tax'
 
+class GroupSales(osv.osv):
+	_inherit = 'group.sales'
+	_columns = {
+		'desc':fields.char('Short Description',required=False),
+		'is_main_group':fields.boolean('Is a Main Group', required=True),
+		'parent_id':fields.many2one('group.sales',string="Parent Group",required=False,ondelete="restrict",onupdate="cascade")
+	}
+	_rec_name = 'desc';
+	_defaults = {
+		'is_main_group':False,
+	}
+	
+class SaleOrder(osv.osv):
+	_inherit = 'sale.order'
+	_columns = {
+		'group_id':fields.many2one('group.sales',required=True,string="Sale Group"),
+	}
+
+	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+
+		group_id = False
+		groupDomain = [("is_main_group","=",True)]
+
+		main_groups = self.pool.get('group.sales').search(cr,uid,[('is_main_group','=',True)])
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+		group_id = False
+		groups_sale_lines = self.pool.get('group.sales.line').search(cr,uid,[('name','=',user_id),('kelompok_id','in',main_groups)])
+		
+
+		if len(groups_sale_lines) == 1:
+			if user.kelompok_id:
+				
+				if user.kelompok_id.parent_id:
+					group_id = user.kelompok_id.parent_id.id
+				else:
+					if user.kelompok_id.is_main_group:
+						group_id = user.kelompok_id.id
+					else:
+						group_id = False
+		res = {
+			'value':{
+				'group_id':group_id,
+			}
+		}
+		return res
+
+
 class SaleOrderLine(osv.osv):
 	_name = 'sale.order.line'
 	_inherit = 'sale.order.line'
@@ -648,8 +689,6 @@ class AccountBankStatement(osv.osv):
 	def _getSubTotal(self, cr, uid, ids, name, arg, context=None):
 		res = {}
 
-		
-		
 		accounts= self.browse(cr, uid, ids, context=context)
 		for account in accounts:
 			# dis[order.id]=order.amount_bruto-order.amount_untaxed
@@ -1185,7 +1224,7 @@ class stockPicking(osv.osv):
 class StockLocation(osv.osv):
 	_inherit = 'stock.location'
 	_columns = {
-		'code':fields.char(size=3,string='Code'),
+		'code':fields.char(size=4,string='Code'),
 	}
 class InternalMoveRequest(osv.osv):
 	STATES = [
@@ -1195,11 +1234,12 @@ class InternalMoveRequest(osv.osv):
 		('done','Done'),
 		('cancel','Cancel')
 	]
+	
 	def monthToRoman(self,number):
 		roman = {
 			'01':'I',
 			'02':'II',
-			'03':'IV',
+			'03':'III',
 			'04':'IV',
 			'05':'V',
 			'06':'VI',
@@ -1263,7 +1303,7 @@ class InternalMoveRequest(osv.osv):
 		'name':fields.char('MR No',required=True),
 		'source':fields.many2one('stock.location',required=True,string="Source Location"),
 		'destination':fields.many2one('stock.location',required=True,string="Destination Location"),
-		'due_date':fields.date('Due Date',required=True),
+		'due_date':fields.date('Due Date',required=False),
 		'manual_pb_no':fields.char('Manual PB NO'),
 		'ref_no':fields.char('Ref No'),
 		'request_by':fields.many2one('res.users',string="Request By",required=True),
@@ -1356,11 +1396,13 @@ class InternalMove(osv.osv):
 	STATES = [
 		('draft','Draft'),
 		('confirmed','Confirmed'),
+		('checked','Checked'),
 		('ready','Ready to Transfer'),
 		('transfered','Transfer'),
 		('done','Received'),
 		('cancel','Cancel'),
 	]
+
 
 	# GET STATE CONSTANT
 	def getStates(self,cr,uid,context={}):
@@ -1392,11 +1434,10 @@ class InternalMove(osv.osv):
 			'no':im_line.no,
 			'product_id':bom_line.product_id.id,
 			'uom_id':bom_line.product_uom.id,
-			'qty':im_line.qty*bom_line.product_qty,
+			'qty':(im_line.qty-im_line.processed_item_qty)*bom_line.product_qty,
 			'qty_available':bom_line.product_id.qty_available,
 			'type':'sets',
 			'state':'draft',
-
 		}
 		return res
 	# to load internal move line detail automatic by detecting product is has set phantom bom
@@ -1441,6 +1482,7 @@ class InternalMove(osv.osv):
 				'manual_pb_no':data.manual_pb_no,
 				'ref_no':data.ref_no,
 				'state':'draft',
+				'notes':data.notes,
 			}
 		return res
 
@@ -1475,8 +1517,10 @@ class InternalMove(osv.osv):
 	def _update_im_line_stock_move(self,cr,uid,line_ids,stock_move_id,to='line',context={}):
 		return self.pool.get('internal.move.'+to).write(cr,uid,line_ids,{'stock_move_id':stock_move_id},context)
 
-	def _checkLine(self,cr,uid,line_data,context={}):
+	# CHECK LINE PRODUCT IF DEFINED AS SET OR DEFINED AS BATCHES PRODUCT IT WILL BE HAVA ONE OR MORE detail_ids
+	def _checkLineForDetail(self,cr,uid,line_data,context={}):
 		res = False
+		print "CHECKED"
 		if line_data.product_id.bom_ids and line_data.product_id.supply_method=="manufacture":
 			# if has bom
 			if line_data.detail_ids:
@@ -1491,6 +1535,36 @@ class InternalMove(osv.osv):
 				else:
 					raise osv.except_osv(_("Error!!!"),_(str(line_data.product_id.name_template+" defined as a batches product, Please pick 1 or more batch/es!!!")))
 		return res
+	# Validate Qty
+	def _finalyCheckQty(self,cr,uid,data,context={}):
+		res = True
+		for line in data.lines:
+			if line.detail_ids:
+				# validate available detail
+				for detail in line.detail_ids:
+					if detail.stock_prod_lot_id:
+						# if has batch number defined
+						# check available by batch number
+						if detail.qty > detail.stock_prod_lot_id.stock_available:
+							res = False
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" on "+detail.stock_prod_lot_id.name+" is "+detail.stock_prod_lot_id.stock_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+					else:
+						# else set not batches
+						if detail.qty > detail.product_id.qty_available:
+							res = False
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" is "+detail.product_id.qty_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+			else:
+				# if not has detail
+				if line.qty>line.product_id.qty_available:
+					res = False
+					raise osv.except_osv(_("Error !!!"),_("Available Stock For "+line.product_id.name_template+" is "+str(line.product_id.qty_available)+" "+line.product_id.uom_id.name+". Requested Item is "+str(line.qty)+" "+line.uom_id.name+"!"))
+
+		return res
+
+	def checkedInternalMove(self,cr,uid,ids,context={}):
+		res = True
+		self.write(cr,uid,ids,{'state':'checked'},context)
+		return True
 	def confirmInternalMove(self,cr,uid,ids,context={}):
 		res = True
 		valid = True
@@ -1504,6 +1578,7 @@ class InternalMove(osv.osv):
 				raise osv.except_osv(_('Error !'),_('Source and Destination Location is Not Valid..!Please Check!'))
 			# prepare for new picking
 			prepare_picking = {
+				'name':self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.inernal.move.seq'),
 				'origin':data.manual_pb_no+", "+data.internal_move_request_id.name,
 				'state':'confirmed',
 				'internal_move_id':data.id
@@ -1519,8 +1594,8 @@ class InternalMove(osv.osv):
 				move_line_id = self.pool.get('stock.move').create(cr,uid,move_line,context)
 				self._update_im_line_stock_move(cr,uid,line.id,move_line_id,'line',context)
 
-				self._checkLine(cr,uid,line,context)
-
+				self._checkLineForDetail(cr,uid,line,context)
+				# self._checkQty(cr,uid,line,context)
 				# EACH DETAILS
 				if line.detail_ids:
 					for detail in line.detail_ids:
@@ -1562,11 +1637,12 @@ class InternalMove(osv.osv):
 							move_detail_id = self.pool.get('stock.move').create(cr,uid,move_detail,{})
 							self._update_im_line_stock_move(cr,uid,detail.id,move_detail_id,'line.detail',context)
 
-				print "MOVE LINE =====>",move_line
+				# print "MOVE LINE =====>",move_line
 					
 				
 			if res:
-				print "OK"
+				self._finalyCheckQty(cr,uid,data)
+
 				# add doc number
 				updateIm = {}
 				if not data.name:
@@ -1593,6 +1669,8 @@ class InternalMove(osv.osv):
 			tid.write({'state':'ready','date_prepared':time.strftime('%Y-%m-%d')})
 		return res
 
+
+
 	def transferMove(self,cr,uid,ids,context={}):
 		res = False
 		searchLoc = self.pool.get('stock.location').search(cr,uid,[('code','=','TRS')])
@@ -1610,10 +1688,23 @@ class InternalMove(osv.osv):
 			# self.action_move(cr, uid, [new_picking], context=context)
 			self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
 			data.picking_id.write({'state':'done'})
-			data.write({'state':'transfered'})
+			data.write({'state':'transfered','date_transfered':time.strftime('%Y-%m-%d')})
 			res = True
 			
 
+		return res
+	def _checkRequestProcessed(self,cr,uid,data,context={}):
+		res =True
+
+		for reqLine in data.internal_move_request_id.lines:
+
+			# print "=======================>",reqLine.processed_item_qty
+			if reqLine.processed_item_qty < reqLine.qty:
+				res = False
+
+		if res==True:
+			# write request to done
+			self.pool.get('internal.move.request').write(cr,uid,[data.internal_move_request_id.id],{'state':'done'})
 		return res
 
 	def receiveMove(self,cr,uid,ids,context={}):
@@ -1622,7 +1713,9 @@ class InternalMove(osv.osv):
 			for move in data.picking_id.move_lines:
 				move.write({'location_dest_id':data.destination.id})
 			data.picking_id.write({'state':'done'})
-			data.write({'state':'done'})
+			data.write({'state':'done','date_received':time.strftime('%Y-%m-%d')})
+			self._checkRequestProcessed(cr,uid,data,context)
+			# raise osv.except_osv(_("error"),_("aaaaaaaaaaaaaaaaaaaaaa"))
 			res = True
 		return res
 
@@ -1706,6 +1799,7 @@ class InternalMove(osv.osv):
 
 
 	_name='internal.move'
+	_description = "Internal Move"
 	_inherit = ['mail.thread']
 	_columns={
 		'name':fields.char('I.M No.'),
@@ -1713,6 +1807,8 @@ class InternalMove(osv.osv):
 		'due_date_transfer':fields.date('Transfer Due Date'),
 		'due_date_preparation':fields.date('Preparation Due Date'),
 		'date_prepared':fields.date('Prepared Date'),
+		'date_transfered':fields.date('Transfered Date',required=False),
+		'date_received':fields.date('Received Date',required=False),
 		'source':fields.many2one('stock.location',required=True,string="Source Location"),
 		'destination':fields.many2one('stock.location',required=True,string="Destination Location"),
 		'state':fields.selection(STATES,string="State"),
@@ -1738,6 +1834,7 @@ class InternalMove(osv.osv):
 		'note':{},
 		'state':{
 			'sbm_inherit.im_confirmed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirmed',
+			'sbm_inherit.im_checked': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'checked',
 			'sbm_inherit.im_ready': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'ready',
 			'sbm_inherit.im_transfered': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'transfered',
 			'sbm_inherit.im_received': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'received',
@@ -1776,6 +1873,7 @@ class InternalMove(osv.osv):
 		}
 
 class InternalMoveLine(osv.osv):
+	_description = "Internal Move Line"
 	def create(self,cr,uid,vals,context={}):
 		# stock_move = self.pool.get('stock.move')
 		# im = self.pool.get('internal.move')
@@ -1834,12 +1932,12 @@ class InternalMoveLine(osv.osv):
 
 		'state':fields.function(_getParentState,store=False,method=True,string="State",type="selection",selection=_getStates),
 		'stock_state':fields.function(_getStockState,store=False,method=True,string="Stock Status",type="selection",selection=[('draft', 'New'),
-                                   ('cancel', 'Cancelled'),
-                                   ('waiting', 'Waiting Another Move'),
-                                   ('confirmed', 'Waiting Availability'),
-                                   ('assigned', 'Available'),
-                                   ('done', 'Done'),
-                                   ]),
+								   ('cancel', 'Cancelled'),
+								   ('waiting', 'Waiting Another Move'),
+								   ('confirmed', 'Waiting Availability'),
+								   ('assigned', 'Available'),
+								   ('done', 'Done'),
+								   ]),
 	}
 	_defaults={
 		'state':'draft',
@@ -1876,6 +1974,7 @@ class InternalMoveLine(osv.osv):
 		return res
 
 class InternalMoveLineDetail(osv.osv):
+	_description = "Internal Move Line Detail"
 	def validateQty(self,cr,uid,ids,qty,available=0,product_id=None,prod_lot_id=None):
 		res = True
 		if not product_id:
@@ -1886,7 +1985,7 @@ class InternalMoveLineDetail(osv.osv):
 				res = {
 					'value':{
 						'qty':0.00,
-						'qty_available':qty_available
+						'qty_available':available
 					},
 					'warning':{
 						'title':'Qty Not Valid',
@@ -1941,7 +2040,7 @@ class InternalMoveLineDetail(osv.osv):
 		'name':fields.char('Name',required=False),
 		'desc':fields.text('Description',required=False),
 		# 'internal_move_id':fields.many2one('internal.move',string="Internal Move",required=True),
-		'internal_move_line_id':fields.many2one('internal.move.line',string="Internal Move Line No"),
+		'internal_move_line_id':fields.many2one('internal.move.line',string="Internal Move Line No",ondelete="CASCADE",onupdate="CASCADE"),
 		'product_id':fields.many2one('product.product',required=True,string="Product"),
 		'uom_id':fields.many2one('product.uom',required=True,string="UOM"),
 		'qty':fields.float('Qty',required=True),
@@ -2060,3 +2159,27 @@ class ProductSuperNotes(osv.osv):
 	_columns = {
 		'super_notes_ids':fields.many2many('super.notes','super_note_product_rel','product_id','super_note_id',string="Note Templates"),
 	}
+
+
+class SalesManTarget(osv.osv):
+	_name = 'sales.man.target'
+	_columns = {
+		'name': fields.char('Code',required=True),
+		'user_id':fields.many2one('res.users',string="Sales Man",required=True,ondelete="RESTRICT",onupdate="CASCADE"),
+		'year':fields.char('Year',required=True),
+		'amount_target':fields.float('Target',required=True),
+	}
+
+	def create(self,cr,uid,vals,context={}):
+
+		target_exists = self.pool.get('sales.man.target').search(cr, uid, [('user_id','=',vals['user_id']),('year','=',vals['year'])],context=context)
+
+		name = ""
+		print target_exists,"****************************"
+		sales = self.pool.get('res.users').browse(cr,uid,vals['user_id'],{})
+		if target_exists:
+			raise osv.except_osv(('Warning !!!'), ('Target For Sales Man '+sales.name+' in '+vals['year']+' Already Set!'))
+		else:
+			
+			vals['name'] = sales['initial']+"="+vals['year']
+		return super(SalesManTarget,self).create(cr,uid,vals,context=context)

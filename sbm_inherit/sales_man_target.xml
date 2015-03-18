@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="sales_man_target_tree" model="ir.ui.view">
+			<field name="name">sales.man.target.tree</field>
+			<field name="model">sales.man.target</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Sales Man Target">
+					<field name="user_id"/>
+					<field name="year"/>
+					<field name="amount_target" />
+				</tree>
+			</field>
+		</record>
+		
+		<record id="sales_man_target_form" model="ir.ui.view">
+			<field name="name">sales.man.target.form</field>
+			<field name="model">sales.man.target</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Sales man Target" version="7.0">
+					<sheet>
+						<group>
+							<field name="user_id"/>
+							<field name="year"/>
+							<field name="amount_target" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+	</data>
+</openerp>

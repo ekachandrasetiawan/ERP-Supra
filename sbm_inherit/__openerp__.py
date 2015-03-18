@@ -27,6 +27,9 @@
         "po_line_cancel.xml",
         "internal_move.xml",
         "super_notes.xml",
+        "menu.xml",
+        "sales_man_target.xml",
+        "sale_order.xml",
         # "report/faktur.xml"
         # "purchase_order.xml",
     ],

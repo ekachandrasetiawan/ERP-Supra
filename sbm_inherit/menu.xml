@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="open_so_tracker_action" model="ir.actions.client">
+            <field name="name">SO Tracker Action</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+            	{
+            		"redir":"http://192.168.9.26/OpenPrint/web/index.php?r=sale-order/index"
+            	}
+            </field>
+        </record>
+		<menuitem name="Sales Tracker" parent="base.menu_sales" id="sales_order_tracker_menu" action="open_so_tracker_action" />
+
+		<record id="sale_order_received_dashboard_action" model="ir.actions.client">
+            <field name="name">Order Received</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+            	{
+            		"redir":"http://192.168.9.26/OpenPrint/web/index.php?r=sale-order/sales-achievement"
+            	}
+            </field>
+        </record>
+		<menuitem name="Sale Order Received" parent="base.menu_sales" id="sale_order_received_dashboard_menu" action="sale_order_received_dashboard_action" />
+
+
+
+
+        <!-- SALES MAN TARGET -->
+        <record model="ir.module.category" id="module_category_sales_man_target">
+            <field name="name">Internal Move</field>
+        </record>
+        
+        <!-- GROUP FOR ADMINISTRATOR / SUPER ADMIN USER -->
+        <record model="res.groups" id="group_im_manager">
+            <field name="category_id" ref="module_category_sales_man_target"/>
+            <field name="name">Sales Man Target Manager</field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="yearly_target_action">
+            <field name="name">Sales Man yearly Target</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sales.man.target</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="filter" eval="True"/>
+        </record>
+        <menuitem name="Yearly Target" parent="base.menu_sales" id="yearly_target_menu" action="yearly_target_action" />
+        <!-- END SALES MAN TARGET -->
+	</data>
+</openerp>
