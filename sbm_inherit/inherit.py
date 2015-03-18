@@ -656,7 +656,7 @@ class SaleOrder(osv.osv):
 		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
 		group_id = False
 		groups_sale_lines = self.pool.get('group.sales.line').search(cr,uid,[('name','=',user_id),('kelompok_id','in',main_groups)])
-		print len(groups_sale_lines)
+		
 
 		if len(groups_sale_lines) == 1:
 			if user.kelompok_id:
@@ -668,7 +668,6 @@ class SaleOrder(osv.osv):
 						group_id = user.kelompok_id.id
 					else:
 						group_id = False
-
 		res = {
 			'value':{
 				'group_id':group_id,
@@ -1643,7 +1642,7 @@ class InternalMove(osv.osv):
 				
 			if res:
 				self._finalyCheckQty(cr,uid,data)
-				# print "OK"
+
 				# add doc number
 				updateIm = {}
 				if not data.name:

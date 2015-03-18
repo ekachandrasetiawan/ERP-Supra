@@ -5,6 +5,16 @@
             <field name="name">Internal Move</field>
         </record>
 		
+		<record model="res.groups" id="group_im_request_admin">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Request Admin</field>
+		</record>
+
+		<record model="res.groups" id="group_im_request_user">
+			<field name="category_id" ref="module_category_internal_move"/>
+			<field name="name">Internal Move Request User</field>
+		</record>
+
 		<!-- GROUP FOR ADMINISTRATOR / SUPER ADMIN USER -->
 		<record model="res.groups" id="group_im_manager">
 			<field name="category_id" ref="module_category_internal_move"/>
@@ -68,6 +78,19 @@
 			<field name="res_model">internal.move</field>
 		</record>
 		
+		<record id="stock_picking_internal_move_seq" model="ir.sequence.type">
+			<field name="name">Stock Picking Internal Move Sequence</field>
+			<field name="code">stock.picking.inernal.move.seq</field>
+		</record>
+
+		<record id="stock_picking_internal_move_set_seq" model="ir.sequence">
+			<field name="name">Stock Picking Internal Move Sequence</field>
+			<field name="code">stock.picking.inernal.move.seq</field>
+			<!-- <field name="padding">11</field> -->
+			<field name="prefix">INT/MV/%(y)s/</field>
+
+		</record>
+
 		<record id="internal_move_line_seq" model="ir.sequence.type">
 			<field name="name">Internal Move Line Sequence</field>
 			<field name="code">internal.move.line</field>
@@ -286,7 +309,7 @@
 
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation" icon="gtk-print" states="confirmed"  groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_inherit.group_im_set"/>
 
-						<button name="printInternalMoveNotes" type="object" string="Print" icon="gtk-print" states="ready" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
+						<button name="printInternalMoveNotes" type="object" string="Print" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
 
 
 						<button name="receiveMove" type="object" string="Receive Move" icon="gtk-apply" states="transfered" confirm="All Item Has Been Received ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
@@ -300,6 +323,8 @@
 							<field name="due_date_preparation" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="due_date_transfer" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="date_prepared" readonly="True" />
+							<field name="date_transfered" readonly="True" />
+							<field name="date_received" readonly="True" />
 							<field name="source" attrs="{'readonly':[('state','!=','draft')]}" />
 							<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
 
