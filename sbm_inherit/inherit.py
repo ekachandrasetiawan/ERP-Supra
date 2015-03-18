@@ -492,16 +492,6 @@ class wizard_suplier_first_payment(osv.osv_memory):
 	
 
 class account_invoice(osv.osv):
-	def actionTest(self,cr,uid,ids,context=None):
-		# pick = self.browse(cr,uid,ids)
-		# print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>CALLLLEDDD"
-		return {
-
-			'type': 'ir.actions.act_url',
-			'target': 'new',
-			'url': 'http://www.google.com',
-			
-		}
 	def actionPrintCustInv(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
@@ -561,10 +551,40 @@ class account_invoice(osv.osv):
 		'payment_for':fields.selection([('dp','DP'),('completion','Completion')],string="Payment For",required=False),
 		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
 		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
+		'group_id':fields.many2one('group.sales',required=True,string="Sale Group"),
 	}
 	_defaults={
 		'print_all_taxes_line':True,
 	}
+
+	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+
+		group_id = False
+		groupDomain = [("is_main_group","=",True)]
+
+		main_groups = self.pool.get('group.sales').search(cr,uid,[('is_main_group','=',True)])
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+		group_id = False
+		groups_sale_lines = self.pool.get('group.sales.line').search(cr,uid,[('name','=',user_id),('kelompok_id','in',main_groups)])
+		
+
+		if len(groups_sale_lines) == 1:
+			if user.kelompok_id:
+				
+				if user.kelompok_id.parent_id:
+					group_id = user.kelompok_id.parent_id.id
+				else:
+					if user.kelompok_id.is_main_group:
+						group_id = user.kelompok_id.id
+					else:
+						group_id = False
+		res = {
+			'value':{
+				'group_id':group_id,
+			}
+		}
+		return res
 
 
 class account_invoice_tax(osv.osv):

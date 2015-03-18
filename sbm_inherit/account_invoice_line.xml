@@ -16,6 +16,11 @@
 					<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" />
 					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" />
 				</xpath>
+				<xpath expr="//field[@name='user_id']" position="replace">
+					<field name="user_id" on_change="getGroupByUser(user_id)"  />
+					<field name="group_id" />
+					<field name="approver"/>
+				</xpath>
 				<xpath expr="//page[@string='Payments']" position="after">
 					<page string="Settings">
 						<group>
