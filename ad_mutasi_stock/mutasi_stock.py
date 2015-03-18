@@ -47,7 +47,7 @@ class ReportTransaksiAccount(osv.osv_memory):
     _columns = {
                 'date_from' : fields.date('From'),
                 'date_to' : fields.date('To'),
-                'name': fields.many2one('account.account', 'Account')
+                'name': fields.many2many('account.account', 'pre_account_rel', 'account_id', 'name_id', 'Data Account'),
     }
     _defaults = {
                 'date_from': time.strftime('%Y-%m-%d'),
@@ -59,7 +59,13 @@ class ReportTransaksiAccount(osv.osv_memory):
         browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
         
         val = self.browse(cr, uid, ids)[0]
-        account=str(val.name.id)
+        # account=str(val.name.id)
+        print '========================',val.name
+        # idacc= []
+        # for x in val.name:
+        #     idacc = x.id
+
+        print '==============================',idacc
         # print '=====================================',account
         urlTo = str(browseConf.value)+"report-accounting/transaksi-account&account="+account+"&from="+val.date_from+"&to="+val.date_to
         
@@ -76,6 +82,18 @@ class ReportTransaksiAccount(osv.osv_memory):
         }
 
 ReportTransaksiAccount()
+
+
+class AccountAccount(osv.osv_memory):
+    _inherit = 'account.account'
+    _name = 'account.account'
+
+    _columns = {
+        'account': fields.many2many('report.transaksi.account', 'pre_account_rel', 'name_id', 'account_id', 'Account'),
+    }
+
+AccountAccount()
+
 
 class MutasiStock(osv.osv_memory):
     _name = "mutasi.stock"

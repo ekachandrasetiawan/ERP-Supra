@@ -149,6 +149,22 @@ table.main tr td { padding: 5px;}
 						${o.attention.email or o.partner_id.email or "-"}
 					</td>
 				</tr>
+				%if o.partner_id==o.partner_shipping_id:
+				
+				%else:
+					<tr width="100%" valign="top">
+						<td width="20%">
+							<b>Delivery Address<b/>
+						</td>
+						<td width="2%">
+							<b>:</b>
+						</td>
+						<td width="80%">
+						${o.partner_shipping_id.street or ""} <br/>
+						${o.partner_shipping_id.street2 or ""}
+						</td>
+					</tr>
+				%endif
 			</table>
 		</td>
 		<td width="50%">

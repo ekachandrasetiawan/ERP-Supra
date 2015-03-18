@@ -541,6 +541,12 @@ account_statement_from_invoice_lines()
 
 class account_move_line(osv.osv):
     _inherit = "account.move.line"
+    _columns = {
+        'ref_doc': fields.char('Ref Doc', size=64),
+        'amount_dpp': fields.float('Amount DPP', digits=(12,2)),
+        'amount_pajak': fields.float('Amount Pajak', digits=(12,2)),
+    }
+
     def _update_check(self, cr, uid, ids, context=None):
         done = {}
         for line in self.browse(cr, uid, ids, context=context):
