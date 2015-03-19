@@ -350,6 +350,9 @@ class SaleOrder(osv.osv):
         print prepareNewSO
 
         for line in rec.order_line:
+            prepareTax = []
+            for tax in line.tax_id:
+                prepareTax.append(tax.id)
             newLineObj = self.pool.get('sale.order.line')
             newLine = {
                 'product_uos_qty':line.product_uos_qty,
@@ -374,11 +377,12 @@ class SaleOrder(osv.osv):
                 'product_onhand':line.product_onhand,
                 'product_future':line.product_future,
                 'discount_nominal':line.discount_nominal,
+                'tax_id':[(6,0,prepareTax)]
             }
-            print "NEW LINE ",newLine
+            # print "NEW LINE ",newLine
             newLineObj.create(cr,uid,newLine,context)
 
-        print "NEW ID    ",newOrderId
+        # print "NEW ID    ",newOrderId
         
         
         dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')
