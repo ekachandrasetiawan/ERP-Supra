@@ -88,7 +88,7 @@ table.main tr td { padding: 5px;}
 			</table>
 		</td>
 	</tr>
-	<tr width="100%" align="center"><td colspan="2"><font size="5"><b>QUOTATION TESSS 2</b></font><br/><br/></td></tr>
+	<tr width="100%" align="center"><td colspan="2"><font size="5"><b>SALES ORDER </b></font><br/><br/></td></tr>
 	<tr width="100%" valign="top">
 		<td width="50%">
 			<table width="100%" >
@@ -149,7 +149,6 @@ table.main tr td { padding: 5px;}
 						${o.attention.email or o.partner_id.email or "-"}
 					</td>
 				</tr>
-
 				%if o.partner_id==o.partner_shipping_id:
 
 				%else:
@@ -172,7 +171,7 @@ table.main tr td { padding: 5px;}
 			<table width="100%">
 				<tr width="100%" class="alignTop">
 					<td width="20%" class="alignTop">
-						<b>Ref.No.<b/>
+						<b>SO.No.<b/>
 					</td>
 					<td width="2%">
 						<b>:</b>
@@ -183,7 +182,7 @@ table.main tr td { padding: 5px;}
 				</tr>
 				<tr width="100%" class="alignTop">
 					<td width="20%" class="alignTop">
-						<b>Customer Ref.<b/>
+						<b>PO No.<b/>
 					</td>
 					<td width="2%">
 						<b>:</b>
@@ -257,8 +256,8 @@ table.main tr td { padding: 5px;}
 				<tr width="100%">
 					<th width="5%">No</th>
 					<th width="10%">Quantity</th>
-					<th width="15%">Unit</th>
-					<th width="40%">Description</th>
+					<th width="7%">Unit</th>
+					<th width="47%">Description</th>
 					<th width="15%">Unit Price<br>(${o.pricelist_id.currency_id.name})</th>
 					<th width="15%">Price<br>(${o.pricelist_id.currency_id.name})</th>
 				</tr>
@@ -269,8 +268,8 @@ table.main tr td { padding: 5px;}
 				<tr width="100%">
 					<td width="5%" class="alignTop">${i}</td>
 					<td width="10%" class="alignCenter alignTop">${line.product_uom_qty}</td>
-					<td width="15%" class="alignCenter alignTop">${line.product_uom.name}</td>
-					<td width="40%" class="alignTop">${line.name}</td>
+					<td width="7%" class="alignCenter alignTop">${line.product_uom.name}</td>
+					<td width="47%" class="alignTop">${line.name}</td>
 					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit),digits=2)}</td>
 					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit*line.product_uom_qty),digits=2)}</td>
 				</tr>
@@ -309,65 +308,70 @@ table.main tr td { padding: 5px;}
 			</table>
 		</td>
 	</tr>
-	<!--<tr width="100%" align="left">
-		<td colspan="2"><font size="3"><br/><b>Term and Condition:</b><br/>
-		%if o.note==False:
-			-
-		%else:
-		<br>${o.note.replace("\n","<br/>")}
-		%endif
-		</font></td>
-	</tr>-->
-	<tr width="100%" align="left">
+	
+<tr width="100%" align="left">
 		<td colspan="2"><font size="3"><br/><b><i>Scope Of Work by PT.Suprabakti Mandiri</i></b><br/>
-		<ul>
-		%if o.scope_work_supra:
-			%for sws in o.scope_work_supra:
-				<li>${sws.name}</li>
-			%endfor
-		%else:
-			-
-		%endif
-		</ul>
+			<font style="margin-left:20px;">
+			%if o.scope_work_supra_text==False:
+				-
+			%else:
+				${o.scope_work_supra_text.replace('\n','<br/>')}
+			%endif
+			</font>
 		</font></td>
 	</tr>
 	<tr width="100%" align="left">
 		<td colspan="2"><font size="3"><br/><b><i>Scope Of Work by ${o.partner_id.name}</i></b><br/>
-		<ul>
-		%if o.scope_work_customer:
-			%for swc in o.scope_work_customer:
-				<li>${swc.name}</li>
-			%endfor
-		%else:
-			-
-		%endif
-		</ul>
+			
+			<font style="margin-left:20px;">
+				%if o.scope_work_customer_text==False:
+					-
+				%else:
+					${o.scope_work_customer_text.replace('\n','<br/>')}
+				%endif
+			</font>
 		</font></td>
 	</tr>
 
+
+
 	<tr width="100%" align="left">
-                <td colspan="2"><font size="3"><br/><b><i>Note</i></b><br/>
-		%if o.note==False:
-			-
-		%else:
-			${o.note.replace('\n','<br/>')}
-		%endif
+       <td colspan="2"><font size="3"><br/><b><i>Notes</i></b><br/>
+       	<font style="margin-left:20px;">
+			%if o.note==False:
+				-
+			%else:
+				${o.note.replace('\n','<br/>')}
+			%endif
+		</font>
                 </font></td>
         </tr>
 
 	<tr width="100%" align="left">
-		<td colspan="2"><font size="3"><br/><b><i>Terms and Conditions</i></b><br/>
+		<td colspan="2"><font size="3"><br/><b><i>Terms Of Payment </i></b><br/>
 		<ul>
 		%if o.term_condition:
 			%for tc in o.term_condition:
 				<li>${tc.name}</li>
 			%endfor
 		%else:
-			-
+			<li>-</li>
 		%endif
 		</ul>
 		</font></td>
 	</tr>
+		<tr width="100%" align="left">
+       <td colspan="2"><font size="3"><br/><b><i>Terms Conditions</i></b><br/>
+			<font style="margin-left:20px; display:block;">
+			%if o.internal_notes==False:
+				-
+			%else:
+				${o.internal_notes.replace('\n','<br/>')}
+			%endif
+
+			</font>
+                </font></td>
+     </tr>
 </table>
 <br/>
 <br/>
@@ -375,7 +379,15 @@ table.main tr td { padding: 5px;}
 <br/>
 <br/>
 <br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 <p></p>
+<p></p>
+<p></p>
+<p style="margin-top:20px;"></p>
 Thank You and best Regards,<br/>
 <strong>PT.Suprabakti Mandiri</strong>
 <br/>

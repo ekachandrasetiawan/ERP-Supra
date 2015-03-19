@@ -25,7 +25,8 @@ class quotation_form(report_sxw.rml_parse):
 
 report_sxw.report_sxw('report.quotation.report', 'sale.order', 'ad_perintah_kerja/report/quotation.mako', parser=quotation_form,header=False)
 report_sxw.report_sxw('report.salesorder.report', 'sale.order', 'ad_perintah_kerja/report/salesorder.mako', parser=quotation_form,header=False)
-
+report_sxw.report_sxw('report.quotation.report.new', 'sale.order', 'ad_perintah_kerja/report/quotation_new.mako', parser=quotation_form,header=False)
+report_sxw.report_sxw('report.salesorder.report.new', 'sale.order', 'ad_perintah_kerja/report/salesorder_new.mako', parser=quotation_form,header=False)
 
 
 class external_pdf(render):
