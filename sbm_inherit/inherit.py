@@ -703,6 +703,7 @@ class SaleOrderLine(osv.osv):
 		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
 	}
 	_order = 'sequence ASC'
+
 SaleOrderLine()
 
 class AccountBankStatement(osv.osv):

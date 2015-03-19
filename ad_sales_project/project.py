@@ -5,9 +5,6 @@ from datetime import date, timedelta, datetime
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
-
-
-
 class product_product(osv.osv):
 	_inherit = "product.product"
 	_columns = {
@@ -180,6 +177,19 @@ class term_condition(osv.osv):
 	}
 	
 term_condition()
+class sale_order_line(osv.osv):
+	
+	_inherit = 'sale.order.line'
+	_columns = {
+		'product_no_cus': fields.char('Customer No'),
+	}
+
+	_defaults = {
+		'sequence': 0,
+	}
+
+sale_order_line()
+
 
 class sale_order(osv.osv):
 	_inherit = "sale.order"
@@ -194,7 +204,9 @@ class sale_order(osv.osv):
 			'attention': fields.many2one('res.partner', 'Attention', domain="[('parent_id', '=', partner_id)]"),
 			'scope_work_supra': fields.many2many('scope.work.supra', 'scope_work_supra_rel', 'scope_supra_id', 'order_id', 'Scope of Work Supra'),
 			'scope_work_customer': fields.many2many('scope.work.customer', 'scope_work_customer_rel', 'scope_customer_id', 'order_id', 'Scope of Work Customer'),
-			'term_condition': fields.many2many('term.condition', 'term_condition_rel','term_id', 'order_id', 'Term and Condition') 
+			'term_condition': fields.many2many('term.condition', 'term_condition_rel','term_id', 'order_id', 'Term and Condition'),
+			'scope_work_supra_text':fields.text('Scope Of Work Supra'),
+			'scope_work_customer_text':fields.text('Scope Of Work Customer'),
 			
 #             'sow1': fields.boolean('Supply of Rubber Lining material (rubber sheet, adhesive, primer and solvent)'),
 #             'sow2': fields.boolean('Supply sufficient working tools and other consumable'),

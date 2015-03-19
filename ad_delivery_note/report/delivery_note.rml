@@ -88,6 +88,7 @@
     
     <paraStyle name="terp_default_Bold_8" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="10.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Bold_18" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="11.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+        <paraStyle name="terp_default_Bold_18_po" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="11.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
   <paraStyle name="terp_default_Bold_182" rightIndent="0.0" leftIndent="0.0" fontName="Arial-Bold" fontSize="11.0" leading="12" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_Bold_Centre_889" rightIndent="0.0" leftIndent="0.0" fontName="Arial" fontSize="14.0" leading="15" alignment="LEFT" spaceBefore="1.0" spaceAfter="1.0"/>
 
@@ -152,7 +153,7 @@
             </tr>
             <tr>
               <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
-              <td><para style="terp_default_Bold_18">[[ get_lines(o)['prepare_no'] ]]</para></td>
+              <td><para style="terp_default_Bold_18_po">[[ get_lines(o)['prepare_no'] ]]</para></td>
             </tr>
              <tr>
               <td> <para style="terp_default_8"><font color="white"> .</font></para></td>
@@ -165,10 +166,11 @@
             <tr>
               <td>
                    <para style="terp_default_8"><font color="white"> .</font></para>
+                   <para style="terp_default_8"><font color="white"> .</font></para>
               </td>
               <td> 
-                
-                <para style="terp_default_8">[[ o.poc ]]</para>
+                <para style="terp_default_8"><font color="white"> .</font></para>
+                <para style="terp_default_8_poc">[[ o.poc ]]</para>
               </td>
               
             </tr>
@@ -197,7 +199,7 @@
                                 <tr>
                                 <td><para style="terp_default_8">[[ x.no ]]</para></td>
                                 <td><para style="terp_default_Right_8">[[ x.product_qty ]] [[ x.product_uom.name ]] </para></td>
-                                <td><para style="terp_default_8">[[ x.name ]]</para></td>
+                                <td><xpre style="terp_default_8">[[ x.name ]]</xpre></td>
                                 <td><para style="terp_default_Right_8">[[ x.product_id.default_code ]]</para></td>
                                 </tr>
                               </blockTable>

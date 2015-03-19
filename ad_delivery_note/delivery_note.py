@@ -521,6 +521,10 @@ class sale_order_line(osv.osv):
 		'product_onhand': fields.float('On Hand', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
 		'product_future': fields.float('Available', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
 	}
+
+	_defaults = {
+		'sequence': 0,
+	}
 	def product_id_change(self, cr, uid, ids, pricelist, product, qty=0, uom=False, qty_uos=0, uos=False, name='', partner_id=False, lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
 		context = context or {}
 		lang = lang or context.get('lang',False)

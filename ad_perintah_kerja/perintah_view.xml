@@ -21,12 +21,12 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form" />
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='state']" position="before">
+<!--                 <xpath expr="//field[@name='state']" position="before">
 	                <button name="%(form_quotation)d" string="Print Penawaran" type="action" states="draft,sent" class="oe_highlight" />
 	            </xpath>
 	              <xpath expr="//field[@name='state']" position="before">
 	                <button name="%(form_salesorder)d" string="Print Sales Order" type="action" states="progress,manual" class="oe_highlight" />
-	            </xpath>
+	            </xpath> -->
 	            <xpath expr="//button[@name='copy_quotation']" position="replace">
 	            	<button confirm="Are You Sure to Copy This Document Into a New Document?" name="copy_pure_quotation" string="New Copy of Quotation" type="object"/>
 	            </xpath> 
