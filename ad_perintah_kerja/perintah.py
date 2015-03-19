@@ -264,8 +264,6 @@ class SaleOrder(osv.osv):
     _columns = {
         'pricelist_id': fields.many2one('product.pricelist', 'Currency', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Pricelist for current sales order."),
         'partner_shipping_id2': fields.many2one('res.partner', 'Delivery Address 2', readonly=False, required=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Delivery address for current sales order."),
-        'scope_supra':fields.text('Scope Of Work Supra'),
-        'scope_customer':fields.text('Scope Of Work Customer'),
     }
 
     def onchange_shop_id(self, cr, uid, ids, shop_id, context=None):
@@ -295,9 +293,9 @@ class SaleOrder(osv.osv):
             'fiscal_position': fiscal_position,
             'user_id': dedicated_salesman,
         }
-        print '============================',addr
-        if addr is None:
-            val['partner_shipping_id']= addr['delivery'],
+        # print '============================',addr
+        # if addr is None:
+        #     val['partner_shipping_id']= addr['delivery'],
         # if pricelist:
         #     val['pricelist_id'] = pricelist
         return {'value': val}
@@ -330,6 +328,7 @@ class SaleOrder(osv.osv):
             'project_id':rec.project_id.id,
             'pricelist_id':rec.pricelist_id.id,
             'partner_invoice_id':rec.partner_invoice_id.id,
+            'group_id':rec.group_id.id
 
         }
         ListScope1 = []
