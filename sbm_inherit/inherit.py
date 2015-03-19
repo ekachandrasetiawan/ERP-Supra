@@ -78,7 +78,7 @@ class PurchaseOrder(osv.osv):
 		orders= self.browse(cr, uid, ids, context=context)
 		for order in orders:
 			dis[order.id]=order.amount_bruto-order.amount_untaxed
-		print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",dis
+		# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",dis
 		return dis
 
 
@@ -235,7 +235,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 		
 
 	def action_invoice_create(self, cr, uid, ids, context=None):
-		# print ">>>>>>>>>>>>>>>>>>>>>>.<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+		
 		"""Generates invoice for given ids of purchase orders and links that invoice ID to purchase order.
 		:param ids: list of ids of purchase orders.
 		:return: ID of created invoice.
@@ -268,7 +268,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 			allWithPPN = True
 			listInvPPN = {"vat":[],"nonVat":[]}
 			for po_line in order.order_line:
-				print po_line.id,"<<<<<<<<<<<<<<<<<<<<<<<"
+				# print po_line.id,"<<<<<<<<<<<<<<<<<<<<<<<"
 				if not po_line.taxes_id:
 					allWithPPN=False
 					listInvPPN["nonVat"].append(po_line.id)
@@ -281,7 +281,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 				inv_lines.append(inv_line_id)
 
 				po_line.write({'invoice_lines': [(4, inv_line_id)]}, context=context)
-				print ">>>>>>>>>>",inv_line_id,">>>>>>>>>>>>>>>>>>>>>>>>>",po_line.taxes_id
+				# print ">>>>>>>>>>",inv_line_id,">>>>>>>>>>>>>>>>>>>>>>>>>",po_line.taxes_id
 
 			
 			# print listInvPPN
@@ -339,10 +339,10 @@ class PurchaseOrderFullInvoice(osv.osv):
 				'fiscal_position': order.fiscal_position.id or False,
 				'payment_term': order.payment_term_id.id or False,
 				'company_id': order.company_id.id,
+				'group_id':False
 			}
 			inv_id = inv_obj.create(cr, uid, inv_data, context=context)
-
-			# compute the invoice
+			print "INV ID ",inv_id			# compute the invoice
 			inv_obj.button_compute(cr, uid, [inv_id], context=context, set_total=True)
 
 			# Link this new invoice to related purchase order
@@ -551,7 +551,7 @@ class account_invoice(osv.osv):
 		'payment_for':fields.selection([('dp','DP'),('completion','Completion')],string="Payment For",required=False),
 		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
 		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
-		'group_id':fields.many2one('group.sales',required=True,string="Sale Group"),
+		'group_id':fields.many2one('group.sales',required=True,string="Sale Group",domain=[('is_main_group','=',True)]),
 	}
 	_defaults={
 		'print_all_taxes_line':True,
@@ -652,7 +652,7 @@ class GroupSales(osv.osv):
 	_inherit = 'group.sales'
 	_columns = {
 		'desc':fields.char('Short Description',required=False),
-		'is_main_group':fields.boolean('Is a Main Group', required=True),
+		'is_main_group':fields.boolean('Is a Main Group', required=False),
 		'parent_id':fields.many2one('group.sales',string="Parent Group",required=False,ondelete="restrict",onupdate="cascade")
 	}
 	_rec_name = 'desc';
@@ -665,6 +665,49 @@ class SaleOrder(osv.osv):
 	_columns = {
 		'group_id':fields.many2one('group.sales',required=True,string="Sale Group"),
 	}
+
+	def _prepare_invoice(self, cr, uid, order, lines, context=None):
+		print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		"""Prepare the dict of values to create the new invoice for a
+		   sales order. This method may be overridden to implement custom
+		   invoice generation (making sure to call super() to establish
+		   a clean extension chain).
+
+		   :param browse_record order: sale.order record to invoice
+		   :param list(int) line: list of invoice line IDs that must be
+								  attached to the invoice
+		   :return: dict of value to create() the invoice
+		"""
+		if context is None:
+			context = {}
+		journal_ids = self.pool.get('account.journal').search(cr, uid,
+			[('type', '=', 'sale'), ('company_id', '=', order.company_id.id)],
+			limit=1)
+		if not journal_ids:
+			raise osv.except_osv(_('Error!'),
+				_('Please define sales journal for this company: "%s" (id:%d).') % (order.company_id.name, order.company_id.id))
+		invoice_vals = {
+			'name': order.client_order_ref or '',
+			'origin': order.name,
+			'type': 'out_invoice',
+			'reference': order.client_order_ref or order.name,
+			'account_id': order.partner_id.property_account_receivable.id,
+			'partner_id': order.partner_invoice_id.id,
+			'journal_id': journal_ids[0],
+			'invoice_line': [(6, 0, lines)],
+			'currency_id': order.pricelist_id.currency_id.id,
+			'comment': order.note,
+			'payment_term': order.payment_term and order.payment_term.id or False,
+			'fiscal_position': order.fiscal_position.id or order.partner_id.property_account_position.id,
+			'date_invoice': context.get('date_invoice', False),
+			'company_id': order.company_id.id,
+			'user_id': order.user_id and order.user_id.id or False,
+			'group_id':order.group_id.id or False,
+		}
+		
+		# Care for deprecated _inv_get() hook - FIXME: to be removed after 6.1
+		invoice_vals.update(self._inv_get(cr, uid, order, context=context))
+		return invoice_vals
 
 	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
 		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
@@ -2204,3 +2247,94 @@ class SalesManTarget(osv.osv):
 			
 			vals['name'] = sales['initial']+"="+vals['year']
 		return super(SalesManTarget,self).create(cr,uid,vals,context=context)
+
+class sale_advance_payment_inv(osv.osv_memory):
+	_inherit = "sale.advance.payment.inv"
+	_description = "Sales Advance Payment Invoice"
+
+
+	def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		sale_obj = self.pool.get('sale.order')
+		ir_property_obj = self.pool.get('ir.property')
+		fiscal_obj = self.pool.get('account.fiscal.position')
+		inv_line_obj = self.pool.get('account.invoice.line')
+		wizard = self.browse(cr, uid, ids[0], context)
+		sale_ids = context.get('active_ids', [])
+
+		result = []
+		for sale in sale_obj.browse(cr, uid, sale_ids, context=context):
+			val = inv_line_obj.product_id_change(cr, uid, [], wizard.product_id.id,
+					uom_id=False, partner_id=sale.partner_id.id, fposition_id=sale.fiscal_position.id)
+			res = val['value']
+
+			# determine and check income account
+			if not wizard.product_id.id :
+				prop = ir_property_obj.get(cr, uid,
+							'property_account_income_categ', 'product.category', context=context)
+				prop_id = prop and prop.id or False
+				account_id = fiscal_obj.map_account(cr, uid, sale.fiscal_position or False, prop_id)
+				if not account_id:
+					raise osv.except_osv(_('Configuration Error!'),
+							_('There is no income account defined as global property.'))
+				res['account_id'] = account_id
+			if not res.get('account_id'):
+				raise osv.except_osv(_('Configuration Error!'),
+						_('There is no income account defined for this product: "%s" (id:%d).') % \
+							(wizard.product_id.name, wizard.product_id.id,))
+
+			# determine invoice amount
+			if wizard.amount <= 0.00:
+				raise osv.except_osv(_('Incorrect Data'),
+					_('The value of Advance Amount must be positive.'))
+			if wizard.advance_payment_method == 'percentage':
+				inv_amount = sale.amount_total * wizard.amount / 100
+				if not res.get('name'):
+					res['name'] = _("Advance of %s %%") % (wizard.amount)
+			else:
+				inv_amount = wizard.amount
+				if not res.get('name'):
+					#TODO: should find a way to call formatLang() from rml_parse
+					symbol = sale.pricelist_id.currency_id.symbol
+					if sale.pricelist_id.currency_id.position == 'after':
+						res['name'] = _("Advance of %s %s") % (inv_amount, symbol)
+					else:
+						res['name'] = _("Advance of %s %s") % (symbol, inv_amount)
+
+			# determine taxes
+			if res.get('invoice_line_tax_id'):
+				res['invoice_line_tax_id'] = [(6, 0, res.get('invoice_line_tax_id'))]
+			else:
+				res['invoice_line_tax_id'] = False
+
+			# create the invoice
+			inv_line_values = {
+				'name': res.get('name'),
+				'origin': sale.name,
+				'account_id': res['account_id'],
+				'price_unit': inv_amount,
+				'quantity': wizard.qtty or 1.0,
+				'discount': False,
+				'uos_id': res.get('uos_id', False),
+				'product_id': wizard.product_id.id,
+				'invoice_line_tax_id': res.get('invoice_line_tax_id'),
+				'account_analytic_id': sale.project_id.id or False,
+			}
+			inv_values = {
+				'name': sale.client_order_ref or sale.name,
+				'origin': sale.name,
+				'type': 'out_invoice',
+				'reference': False,
+				'account_id': sale.partner_id.property_account_receivable.id,
+				'partner_id': sale.partner_invoice_id.id,
+				'invoice_line': [(0, 0, inv_line_values)],
+				'currency_id': sale.pricelist_id.currency_id.id,
+				'comment': '',
+				'payment_term': sale.payment_term.id,
+				'fiscal_position': sale.fiscal_position.id or sale.partner_id.property_account_position.id,
+				'group_id':sale.group_id.id,
+			}
+			result.append((sale.id, inv_values))
+		return result
+	

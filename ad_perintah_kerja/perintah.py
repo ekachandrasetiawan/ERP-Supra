@@ -293,9 +293,9 @@ class SaleOrder(osv.osv):
             'fiscal_position': fiscal_position,
             'user_id': dedicated_salesman,
         }
-        print '============================',addr
-        if addr is None:
-            val['partner_shipping_id']= addr['delivery'],
+        # print '============================',addr
+        # if addr is None:
+        #     val['partner_shipping_id']= addr['delivery'],
         # if pricelist:
         #     val['pricelist_id'] = pricelist
         return {'value': val}
@@ -328,6 +328,7 @@ class SaleOrder(osv.osv):
             'project_id':rec.project_id.id,
             'pricelist_id':rec.pricelist_id.id,
             'partner_invoice_id':rec.partner_invoice_id.id,
+            'group_id':rec.group_id.id
 
         }
         ListScope1 = []
@@ -349,6 +350,9 @@ class SaleOrder(osv.osv):
         print prepareNewSO
 
         for line in rec.order_line:
+            prepareTax = []
+            for tax in line.tax_id:
+                prepareTax.append(tax.id)
             newLineObj = self.pool.get('sale.order.line')
             newLine = {
                 'product_uos_qty':line.product_uos_qty,
@@ -373,11 +377,12 @@ class SaleOrder(osv.osv):
                 'product_onhand':line.product_onhand,
                 'product_future':line.product_future,
                 'discount_nominal':line.discount_nominal,
+                'tax_id':[(6,0,prepareTax)]
             }
-            print "NEW LINE ",newLine
+            # print "NEW LINE ",newLine
             newLineObj.create(cr,uid,newLine,context)
 
-        print "NEW ID    ",newOrderId
+        # print "NEW ID    ",newOrderId
         
         
         dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')
