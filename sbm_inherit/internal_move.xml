@@ -54,6 +54,12 @@
 			<field name="res_model">internal.move</field>
 		</record>
 
+		<record id="im_checked" model="mail.message.subtype">
+			<field name="name">Moves Checked</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">internal.move</field>
+		</record>
+
 		<record id="im_ready" model="mail.message.subtype">
 			<field name="name">Ready to Transfer</field>
 			<field name="default" eval="False"/>
@@ -298,21 +304,22 @@
 			<field name="arch" type="xml">
 				<form string="Internal Move Form" version="7.0">
 					<header>
-						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,ready,transfered,done" />
+						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,checked,ready,transfered,done" />
 						<button name="confirmInternalMove" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_set,sbm_inherit.group_im_confirmer" />
 
-						<button name="setAsDraftInternalMove" type="object" string="Set to Draft" icon="gtk-apply" states="confirmed,ready" confirm="Are You Sure to set This Document to Draft ? If this confirmed then the confirmed process will be closed and stock will be refunded!" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
+						<button name="checkedInternalMove" type="object" string="Checked" icon="gtk-apply" states="confirmed" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
-						<button name="setAsReady" type="object" string="Ready To Deliver" icon="gtk-apply" states="confirmed" confirm="Sure ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+						<button name="setAsDraftInternalMove" type="object" string="Set to Draft" icon="gtk-apply" states="confirmed,ready,checked" confirm="Are You Sure to set This Document to Draft ? If this confirmed then the confirmed process will be closed and stock will be refunded!" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
+
+						<button name="setAsReady" type="object" string="Ready To Deliver" icon="gtk-apply" states="checked" confirm="Sure ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
 
 						<button name="transferMove" type="object" string="Transfer Move" icon="gtk-apply" states="ready" confirm="Sure ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
-						<button name="printInternalMovePreparation" type="object" string="Print Preparation" icon="gtk-print" states="confirmed"  groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_inherit.group_im_set"/>
+						<button name="printInternalMovePreparation" type="object" string="Print Preparation" icon="gtk-print" states="confirmed,checked,ready"  groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_inherit.group_im_set"/>
 
-						<button name="printInternalMoveNotes" type="object" string="Print" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
+						<button name="printInternalMovePreparation" type="object" string="Print Preparation WS" icon="gtk-print" states="checked,ready,transfered,done"  groups="sbm_inherit.group_im_ws_checker"/>
 
-
-						<button name="receiveMove" type="object" string="Receive Move" icon="gtk-apply" states="transfered" confirm="All Item Has Been Received ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
 
 
 					</header>
@@ -468,7 +475,7 @@
 			<field name="res_model">internal.move</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[('state','!=','draft')]</field>
+			<!-- <field name="domain">[('state','!=','draft')]</field> -->
 			<field name="filter" eval="True"/>
 		</record>
 		<menuitem name="Material Request" parent="stock.menu_stock_root" id="mr_menu_ws" sequence="3" />
