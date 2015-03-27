@@ -47,5 +47,125 @@
         </record>
         <menuitem name="Yearly Target" parent="base.menu_sales" id="yearly_target_menu" action="yearly_target_action" />
         <!-- END SALES MAN TARGET -->
+
+        <!-- Activity
+        Prospect
+        Sales Summary
+        Invoice Summary
+        Executive Summary (By Group)
+        Executive Summary (By Salesman) -->
+        <!-- <menuitem name="Sales Prospect" id="report_sales_prospect" /> -->
+
+        <record model="ir.module.category" id="module_category_report_sales_activity_timeline">
+            <field name="name">Sales Activity Timeline Module</field>
+        </record>
+        
+
+        <record model="res.groups" id="group_sales_activity_timeline">
+            <field name="category_id" ref="module_category_report_sales_activity_timeline"/>
+            <field name="name">Sales Activities Timeline</field>
+        </record>
+        
+        <record id="sale_activity_timeline_action" model="ir.actions.client">
+            <field name="name">Redir Sales Activity Timeline</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=sales-activity/view-time-line"
+                }
+            </field>
+        </record>
+        <menuitem name="Sales Report" id="sales_report" parent="base.menu_base_partner" />
+        <menuitem name="Sale Activity Timeline" parent="sales_report" id="sale_activity_timeline_menu" action="sale_activity_timeline_action" />
+
+        
+        <!-- ORDER SUMMARY REPORT -->
+
+        <record model="ir.module.category" id="module_category_order_summary_report">
+            <field name="name">Order Summary Report Module</field>
+        </record>
+
+        <record model="res.groups" id="group_order_summary_report">
+            <field name="category_id" ref="module_category_order_summary_report"/>
+            <field name="name">Order Summary Report</field>
+        </record>
+        
+        <record id="order_summary_report_action" model="ir.actions.client">
+            <field name="name">Order Summary Report</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=sale-order/sales-achievement"
+                }
+            </field>
+        </record>
+        <menuitem name="Order Summary Report" parent="sales_report" id="order_summary_report_sales_menu" action="order_summary_report_action" />
+
+
+
+        <!-- INVOICE SUMMARY REPORT -->
+        <record model="ir.module.category" id="module_category_invoice_summary_report">
+            <field name="name">Invoice Summary Report Module</field>
+        </record>
+
+        <record model="res.groups" id="group_invoice_summary_report">
+            <field name="category_id" ref="module_category_invoice_summary_report"/>
+            <field name="name">Invoice Summary Report</field>
+        </record>
+        
+        <record id="invoice_summary_report_action" model="ir.actions.client">
+            <field name="name">Invoice Summary Report</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=account-invoice/dashboard"
+                }
+            </field>
+        </record>
+        <menuitem name="Invoice Summary Report" parent="sales_report" id="invoice_summary_report_sales_menu" action="invoice_summary_report_action" />
+
+
+        <!-- EXECUTIVE SUMMARY REPORT (GROUP) -->
+        <record model="ir.module.category" id="module_category_executive_summary_group_report">
+            <field name="name">Executive Summary Group Report Module</field>
+        </record>
+
+        <record model="res.groups" id="group_executive_summary_group_report">
+            <field name="category_id" ref="module_category_executive_summary_group_report"/>
+            <field name="name">Executive Summary Group Report</field>
+        </record>
+        
+        <record id="executive_summary_group_report_action" model="ir.actions.client">
+            <field name="name">Executive Summary Group Report</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=account-invoice/executive-summary-by-group"
+                }
+            </field>
+        </record>
+        <menuitem name="Executive Summary Group Report" parent="sales_report" id="executive_summary_group_report_sales_menu" action="executive_summary_group_report_action" />
+
+
+        <!-- EXECUTIVE SUMMARY REPORT (SALES MAN) -->
+        <record model="ir.module.category" id="module_category_executive_summary_salesman_report">
+            <field name="name">Executive Summary Sales Man Report Module</field>
+        </record>
+
+        <record model="res.groups" id="group_executive_summary_salesman_report">
+            <field name="category_id" ref="module_category_executive_summary_salesman_report"/>
+            <field name="name">Executive Summary Sales Man Report</field>
+        </record>
+        
+        <record id="executive_summary_salesman_report_action" model="ir.actions.client">
+            <field name="name">Executive Summary Sales Man Report</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=account-invoice/executive-summary-by-sales-man"
+                }
+            </field>
+        </record>
+        <menuitem name="Executive Summary Sales Man Report" parent="sales_report" id="executive_summary_salesman_report_sales_menu" action="executive_summary_salesman_report_action" />
 	</data>
 </openerp>
