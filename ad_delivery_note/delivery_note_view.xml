@@ -47,7 +47,7 @@
                     </page>
 				</xpath>
 				<button string="Create Invoice" position="replace">
-					<button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice" type="action" class="oe_highlight" groups="base.group_user"/>
+					<button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice" states="manual,progress" type="action" class="oe_highlight" groups="base.group_user"/>
 				</button>
 			</field>
 		</record>

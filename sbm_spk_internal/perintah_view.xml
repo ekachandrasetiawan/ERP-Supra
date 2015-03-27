@@ -8,9 +8,9 @@
 				rml="sbm_spk_internal/report/spk_continue.rml"
 				auto="False" menu="False"/>
 
-		<report auto="False" id="form_quotation" model="sale.order" 
+<!-- 		<report auto="False" id="form_quotation" model="sale.order" 
 				name="quotation.report" file="sbm_spk_internal/report/quotation.mako" 
-				string="Penawaran" usage="default" menu="False" report_type="webkit"/>
+				string="Penawaran" usage="default" menu="False" report_type="webkit"/> -->
 			
      <record id="view_sale_order_poc" model="ir.ui.view">
             <field name="name">sale.order.tree</field>
