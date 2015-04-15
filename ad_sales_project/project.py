@@ -188,16 +188,10 @@ class sale_order_line(osv.osv):
 
 	_defaults = {
 		'sequence': 0,
-<<<<<<< HEAD
-	}
-
-=======
-		# 'sequence':lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'sale.order.line'),  
 	}
 
 
 	def onchange_line(self, cr, uid, ids, lines,context=None):
-		print '================CHANDRA',lines
 		result = {}
 		result['value'] = {}
 		#do the proper checking
@@ -220,7 +214,6 @@ class sale_order_line(osv.osv):
 		result['value'].update({'sequence':lines})
 		return result
 
->>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 sale_order_line()
 
 
@@ -263,13 +256,8 @@ class sale_order(osv.osv):
 #             'kondisi1': fields.boolean('The above price does not include 10 % VAT'),
 #             'kondisi2': fields.boolean('Payment : As Previously following ASC Term of Payment'),
 #             'kondisi3': fields.boolean('Validity : 2(two) months from the date of quotation'),
-						
 	}
-<<<<<<< HEAD
-	
-=======
 
->>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 	def onchange_dateorder(self, cr, uid, ids, tgl):
 		if tgl:
 			week = 0
@@ -336,10 +324,7 @@ class week_status(osv.osv):
 					('g4', 'G4'), 
 					('g5', 'G5'), 
 					('g6', 'G6'),
-<<<<<<< HEAD
 					('g7', 'G7'),
-=======
->>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 					('g2jtt', 'G2JTT'),
 					('g1sub', 'G1 Subordinat'), 
 					('g2sub', 'G2 Subordinat'), 
@@ -388,10 +373,7 @@ class week_status(osv.osv):
 					('jtttatok','Jawa Timur/Tengah Tatok'),
 					('jttjudy','Jawa Timur/Tengah Judy'),
 					('jttali','Jawa Timur/Tengah Ali Wahyudi'),
-<<<<<<< HEAD
 					('jttdarma','Jawa Timur/Tengah Darma'),
-=======
->>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 					('sulkristanto','Sulawesi Kristanto'),
 					('suldedison','Sulawesi Dedison'),
 					('suljansen','Sulawesi Jansen'),
@@ -425,11 +407,7 @@ class week_status(osv.osv):
 		
 		if context is None:
 			context = {}
-<<<<<<< HEAD
 
-
-=======
->>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 		for x in val.status_line:
 			data.append([
 							x.name.name, 
