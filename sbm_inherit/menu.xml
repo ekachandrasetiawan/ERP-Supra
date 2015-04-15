@@ -167,5 +167,9 @@
             </field>
         </record>
         <menuitem name="Executive Summary Sales Man Report" parent="sales_report" id="executive_summary_salesman_report_sales_menu" action="executive_summary_salesman_report_action" />
+        <record model="res.groups" id="group_sale_order_cancel">
+            <field name="category_id" ref="base.module_category_sales_management"/>
+            <field name="name">Sale Order Cancel</field>
+        </record>
 	</data>
 </openerp>
