@@ -110,7 +110,6 @@ table.main tr td { padding: 5px;}
 							${o.partner_id.street or ""} <br/>
 							${o.partner_id.street2 or ""}<br/>
 							${o.partner_id.city or ""} ${o.partner_id.state_id.name or ""}  ${o.partner_id.zip or ""}
-							
 						%endif
 					</td>
 				</tr>

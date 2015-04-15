@@ -83,10 +83,13 @@
 			<field name="inherit_id" ref="sale.view_order_form" />
 			<field name="arch" type="xml">
 				<xpath expr="//tree[@string='Sales Order Lines']/field[@name='product_id']" position="before">
-                	<field name="sequence" string="No"/>
+                	<field name="sequence" string="No" on_change="onchange_line(sequence)"/>
                 </xpath>
 				<xpath expr="//field[@name='product_id']" position="before">
-					<field name="sequence" string="No"/>
+					<field name="sequence" string="No" on_change="onchange_line(sequence)"/>
+				</xpath>
+				<xpath expr="//field[@name='product_id']" position="before">
+					<field name="product_no_cus" string="Customer No"/>
 				</xpath>
 				<xpath expr="//field[@name='product_id']" position="before">
 					<field name="product_no_cus" string="Customer No"/>
@@ -250,6 +253,17 @@
             </field>
         </record>
 	
+        <record id="seq_type_sale_order_line" model="ir.sequence.type">
+		     <field name="name">Sale Order Line</field>
+		     <field name="code">sale.order.line</field>
+		</record>
+		<record id="seq_sale_order_line" model="ir.sequence">
+		     <field name="name">Sale Order Line</field>
+		     <field name="code">sale.order.line</field>            
+		     <field name="padding">4</field>
+		     <field name="number_increment">1</field>
+		</record> 
+
 
         <record id="seq_type_week_status_new" model="ir.sequence.type">
 			<field name="name">Week Status</field>

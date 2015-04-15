@@ -78,7 +78,7 @@ class PurchaseOrder(osv.osv):
 		orders= self.browse(cr, uid, ids, context=context)
 		for order in orders:
 			dis[order.id]=order.amount_bruto-order.amount_untaxed
-		print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",dis
+		# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",dis
 		return dis
 
 
@@ -235,7 +235,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 		
 
 	def action_invoice_create(self, cr, uid, ids, context=None):
-		# print ">>>>>>>>>>>>>>>>>>>>>>.<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+		
 		"""Generates invoice for given ids of purchase orders and links that invoice ID to purchase order.
 		:param ids: list of ids of purchase orders.
 		:return: ID of created invoice.
@@ -268,7 +268,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 			allWithPPN = True
 			listInvPPN = {"vat":[],"nonVat":[]}
 			for po_line in order.order_line:
-				print po_line.id,"<<<<<<<<<<<<<<<<<<<<<<<"
+				# print po_line.id,"<<<<<<<<<<<<<<<<<<<<<<<"
 				if not po_line.taxes_id:
 					allWithPPN=False
 					listInvPPN["nonVat"].append(po_line.id)
@@ -281,7 +281,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 				inv_lines.append(inv_line_id)
 
 				po_line.write({'invoice_lines': [(4, inv_line_id)]}, context=context)
-				print ">>>>>>>>>>",inv_line_id,">>>>>>>>>>>>>>>>>>>>>>>>>",po_line.taxes_id
+				# print ">>>>>>>>>>",inv_line_id,">>>>>>>>>>>>>>>>>>>>>>>>>",po_line.taxes_id
 
 			
 			# print listInvPPN
@@ -339,10 +339,10 @@ class PurchaseOrderFullInvoice(osv.osv):
 				'fiscal_position': order.fiscal_position.id or False,
 				'payment_term': order.payment_term_id.id or False,
 				'company_id': order.company_id.id,
+				'group_id':False
 			}
 			inv_id = inv_obj.create(cr, uid, inv_data, context=context)
-
-			# compute the invoice
+			print "INV ID ",inv_id			# compute the invoice
 			inv_obj.button_compute(cr, uid, [inv_id], context=context, set_total=True)
 
 			# Link this new invoice to related purchase order
@@ -746,6 +746,7 @@ class SaleOrderLine(osv.osv):
 		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
 	}
 	_order = 'sequence ASC'
+
 SaleOrderLine()
 
 class AccountBankStatement(osv.osv):
@@ -2336,4 +2337,3 @@ class sale_advance_payment_inv(osv.osv_memory):
 			}
 			result.append((sale.id, inv_values))
 		return result
-	

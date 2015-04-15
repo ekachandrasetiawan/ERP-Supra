@@ -101,7 +101,6 @@ table.main tr td { padding: 5px;}
 					</td>
 					<td width="80%">
 						${o.partner_id.name or ""} <br/>
-						
 						%if o.attention:
 							${o.attention.street or ""} <br/>
 							${o.attention.street2 or ""}<br/>

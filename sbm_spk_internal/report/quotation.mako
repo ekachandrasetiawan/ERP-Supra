@@ -88,7 +88,9 @@ table.main tr td { padding: 5px;}
 			</table>
 		</td>
 	</tr>
+
 	<tr width="100%" align="center"><td colspan="2"><font size="5"><b>QUOTATION</b></font><br/><br/></td></tr>
+
 	<tr width="100%" valign="top">
 		<td width="50%">
 			<table width="100%" >

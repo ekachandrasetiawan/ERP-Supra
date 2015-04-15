@@ -188,8 +188,39 @@ class sale_order_line(osv.osv):
 
 	_defaults = {
 		'sequence': 0,
+<<<<<<< HEAD
 	}
 
+=======
+		# 'sequence':lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'sale.order.line'),  
+	}
+
+
+	def onchange_line(self, cr, uid, ids, lines,context=None):
+		print '================CHANDRA',lines
+		result = {}
+		result['value'] = {}
+		#do the proper checking
+		count_dict = {}
+		count = 10
+		had_seq = 0
+		for index,line in enumerate(lines):
+		# for index,line in lines:
+			if line[0] == 0:
+				count_dict[index] = count
+				count +=10
+			else:
+				had_seq +=1
+				#seqnece_no is the new sequence field defined
+		for k in count_dict:
+			if had_seq:
+				lines[k][2]['sequence'] = had_seq*10 + count_dict[k]
+			else:
+				lines[k][2]['sequence'] = count_dict[k] 
+		result['value'].update({'sequence':lines})
+		return result
+
+>>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 sale_order_line()
 
 
@@ -234,7 +265,11 @@ class sale_order(osv.osv):
 #             'kondisi3': fields.boolean('Validity : 2(two) months from the date of quotation'),
 						
 	}
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 	def onchange_dateorder(self, cr, uid, ids, tgl):
 		if tgl:
 			week = 0
@@ -301,7 +336,10 @@ class week_status(osv.osv):
 					('g4', 'G4'), 
 					('g5', 'G5'), 
 					('g6', 'G6'),
+<<<<<<< HEAD
 					('g7', 'G7'),
+=======
+>>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 					('g2jtt', 'G2JTT'),
 					('g1sub', 'G1 Subordinat'), 
 					('g2sub', 'G2 Subordinat'), 
@@ -350,7 +388,10 @@ class week_status(osv.osv):
 					('jtttatok','Jawa Timur/Tengah Tatok'),
 					('jttjudy','Jawa Timur/Tengah Judy'),
 					('jttali','Jawa Timur/Tengah Ali Wahyudi'),
+<<<<<<< HEAD
 					('jttdarma','Jawa Timur/Tengah Darma'),
+=======
+>>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 					('sulkristanto','Sulawesi Kristanto'),
 					('suldedison','Sulawesi Dedison'),
 					('suljansen','Sulawesi Jansen'),
@@ -384,8 +425,11 @@ class week_status(osv.osv):
 		
 		if context is None:
 			context = {}
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
 		for x in val.status_line:
 			data.append([
 							x.name.name, 

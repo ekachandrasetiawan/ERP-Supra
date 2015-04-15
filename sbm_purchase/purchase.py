@@ -221,6 +221,7 @@ class Set_PO(osv.osv):
                                          'taxes_id': [(6,0,taxes_ids)],
                                          })
 			noline=noline+1
+			print '===================TEST NO====================',noline
 
 		# purchase ==> Nama Module nya purchase_order_form ==> Nama Id Form nya
 		pool_data=self.pool.get("ir.model.data")
