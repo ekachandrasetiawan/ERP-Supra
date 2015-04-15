@@ -88,7 +88,7 @@ table.main tr td { padding: 5px;}
 			</table>
 		</td>
 	</tr>
-	<tr width="100%" align="center"><td colspan="2"><font size="5"><b>QUOTATION TES</b></font><br/><br/></td></tr>
+	<tr width="100%" align="center"><td colspan="2"><font size="5"><b>QUOTATION</b></font><br/><br/></td></tr>
 	<tr width="100%" valign="top">
 		<td width="50%">
 			<table width="100%" >
@@ -164,6 +164,8 @@ table.main tr td { padding: 5px;}
 						${o.name or ""}
 					</td>
 				</tr>
+						
+			</tr>
 					<tr width="100%" class="alignTop">
 					<td width="20%" class="alignTop">
 						<b>Customer Ref.<b/>
@@ -255,7 +257,7 @@ table.main tr td { padding: 5px;}
 					<td width="15%" class="alignCenter alignTop">${line.product_uom.name}</td>
 					<td width="40%" class="alignTop">${line.name}</td>
 					<td width="15%" class="alignRight alignTop">${line.price_unit}</td>
-					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit*line.product_uom_qty),digits=2)}</td>
+					<td width="15%" class="alignRight alignTop">${formatLang(float((line.price_unit*line.product_uom_qty)-line.discount_nominal),digits=2)}</td>
 				</tr>
 				
 				<% i+=1 %>

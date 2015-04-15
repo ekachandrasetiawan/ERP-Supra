@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        
+        <record id="view_account_voucher_form" model="ir.ui.view">
+               <field name="name">account.voucher.form</field>
+               <field name="model">account.voucher</field>
+               <field name="type">form</field>
+               <field name="inherit_id" ref="account_voucher.view_vendor_payment_form"/>
+               <field name="arch" type="xml">
+               		<field name="move_line_id" position="after">
+	                	<field name="ref_doc"/>
+	                </field>
+
+               		<field name="amount_original" position="after">
+	                	<field name="amount_dpp"/>
+	                	<field name="amount_tax"/>
+	                </field>
+               </field>
+        </record>
 
 		<record id="view_bank_statement_tree_voucher" model="ir.ui.view">
             <field name="name">account.bank.statement.tree.voucher</field>
@@ -85,9 +100,7 @@
 					<field name="kwitansi"/>
 					<field name="faktur_pajak_no" on_change="onchange_format_faktur(faktur_pajak_no)"/>
                 </field>
-                <field name="user_id" position="after">
-					<field name="approver"/>
-				</field>
+                
                 <field name="partner_id" position="after">
 					<field name="kmk"/>
 					<field name="pajak"/>

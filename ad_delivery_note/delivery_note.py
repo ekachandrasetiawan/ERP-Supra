@@ -729,7 +729,7 @@ class delivery_note(osv.osv):
 
 	_columns = {
 		'name': fields.char('Delivery Note', required=True, size=64, readonly=True, states={'draft': [('readonly', False)]}),
-		'prepare_id': fields.many2one('order.preparation', 'Order Packaging', domain=[('state', 'in', ['approve','done'])], required=False, readonly=True, states={'draft': [('readonly', False)]}),
+		'prepare_id': fields.many2one('order.preparation', 'Order Packaging', domain=[('state', 'in', ['done'])], required=False, readonly=True, states={'draft': [('readonly', False)]}),
 		'tanggal' : fields.date('Delivery Date',track_visibility='onchange'),
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel')], 'State', readonly=True,track_visibility='onchange'),
 		'note_lines': fields.one2many('delivery.note.line', 'note_id', 'Note Lines', readonly=True, states={'draft': [('readonly', False)]}),
@@ -792,7 +792,7 @@ class delivery_note(osv.osv):
 		print vals
 		prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
 		print "-----------------------------",prepareExists
-		if prepareExists:
+		if prepareExists and vals['special']==False:
 			no = ""
 			for nt in self.browse(cr,uid,prepareExists,context):
 				no += "["+nt.name+"]\n"

@@ -512,7 +512,7 @@
     <td>
       <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
       <para style="terp_tblheader_Details_right"><font color="white">ORDER</font></para>
-      <para style="terp_default_Bold_8"><font color="white">ORDER</font></para>
+	<para style="terp_default_Bold_8"><font color="white">ORDER</font></para>
       <para style="terp_tblheader_Details_Left"><u>PURCHASE ORDER</u></para>
     </td>
     </tr>
@@ -590,14 +590,14 @@
     <blockTable colWidths="25.0,60.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
     <tr>
       <td><para style="terp_default_Bold_Centre_8">[[ lines['no'] ]]</para></td>
-      <td><para style="terp_default_Bold_Centre_8">[[ koma('%.0f', lines['qty']) ]] [[ lines['satuan'].name ]]</para></td>
+      <td><para style="terp_default_Bold_Centre_8">[[ koma('%.1f', lines['qty']) ]] [[ lines['satuan'].name ]]</para></td>
       <td><para style="terp_default_8">[[ lines['name'] ]]</para></td>
       <td><para style="terp_default_Bold_Centre_8">[[ koma('%.2f', lines['harga']) ]]</para></td>
       <td><para style="terp_default_Bold_Centre_8">[[ koma('%.2f', lines['harga'] * lines['qty']) ]]</para></td>
     </tr>
     </blockTable>
     </section>
-
+<!--
     <blockTable colWidths="25.0,60.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
     <tr>
       <td><para style="terp_default_8"><font color="white">:</font></para></td>
@@ -612,7 +612,7 @@
       <td><para style="terp_default_Bold_Centre_8">[[ koma('%.2f',get_amount(o)['discountamount']) ]]</para></td>
     </tr>
     </blockTable>
-
+-->
     <!-- <para style="terp_default_8"><font color="white">:</font></para> -->
     <para style="terp_default_Right_8"><font color="white"> </font></para>
     <blockTable colWidths="85.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
@@ -648,6 +648,7 @@
         <td><para style="terp_default_8">Delivery  </para></td>
         <td><para style="terp_default_8">: [[ o.delivery ]]</para></td>
     </tr>
+
     <tr>
         <td><para style="terp_default_8">Payment </para></td>
         <td><para style="terp_default_8">: [[ o.term_of_payment ]]</para></td>

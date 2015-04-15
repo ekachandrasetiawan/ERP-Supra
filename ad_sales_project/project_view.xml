@@ -88,6 +88,9 @@
 				<xpath expr="//field[@name='product_id']" position="before">
 					<field name="sequence" string="No"/>
 				</xpath>
+				<xpath expr="//field[@name='product_id']" position="before">
+					<field name="product_no_cus" string="Customer No"/>
+				</xpath>
 				<field name="date_order" position="replace">
 					<field name="date_order" on_change="onchange_dateorder(date_order)"/>
 					<field name="week" on_change="onchange_dateorder(date_order)"/>
@@ -121,15 +124,13 @@
                     </page>
                     <page string="Scope of Work">
                         <separator string="PT. Supra Bakti Mandiri"/>
-                        <group>
-                            <field name="scope_work_supra" nolabel="1"/>
-	                     </group>
+                            <!-- <field name="scope_work_supra" nolabel="1"/> -->
+                            <field name="scope_work_supra_text"/>
 	                     <separator string="Customer"/>
-                         <group>
-	                     	<field name="scope_work_customer" nolabel="1"/>
-                    	</group>
+	                     	<!-- <field name="scope_work_customer" nolabel="1"/> -->
+	                     	<field name="scope_work_customer_text"/>
                     </page>
-                    <page string="Terms and Conditions">
+                    <page string="Terms Of Payment">
                          <group>
 	                     	<field name="term_condition" nolabel="1"/>
                     	</group>

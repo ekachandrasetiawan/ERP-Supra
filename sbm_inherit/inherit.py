@@ -40,23 +40,10 @@ class stock_picking_in(osv.osv):
 		'cust_doc_ref' : fields.char('External Doc Ref',200,required=False,store=True),
 		'lbm_no' : fields.char('LBM No',200,required=False,store=True),
 	}
-	# def __init__(self, pool, cr):
-	# 	super(StockPickingIn, self).__init__(pool, cr)
-	# 	self._columns['cust_doc_ref'] = self.pool['stock.picking']._columns['cust_doc_ref']
 
 	def action_process(self, cr, uid, ids, context=None):
 		# picking_obj = self.browse(cr, uid, ids, context=context)
 		picking_obj=self.pool.get('stock.picking.in').browse(cr, uid, ids)
-		# print "pickingobject.custdocref ====== > ",str(picking_obj[0].cust_doc_ref)
-
-		# if(picking_obj[0].backorder_id == False):
-		# 	raise osv.except_osv(('Warning !!!'),('Please Change Other Doc No Ref Field..!!'))
-		# el
-		# print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>POBJ",picking_obj[0].backorder_id.name
-		# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<docRef",picking_obj[0].cust_doc_ref
-		# if picking_obj[0].backorder_id.name not is None:
-			# if picking is not partial that not have backorder
-			# check if cust doc is same with back order cust doc ref
 
 		if(picking_obj[0].cust_doc_ref is None or picking_obj[0].cust_doc_ref is False):
 			raise osv.except_osv(('Warning !!!'), ('Plase Fill "External Doc Ref" Field!!'))
@@ -505,16 +492,6 @@ class wizard_suplier_first_payment(osv.osv_memory):
 	
 
 class account_invoice(osv.osv):
-	def actionTest(self,cr,uid,ids,context=None):
-		# pick = self.browse(cr,uid,ids)
-		# print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>CALLLLEDDD"
-		return {
-
-			'type': 'ir.actions.act_url',
-			'target': 'new',
-			'url': 'http://www.google.com',
-			
-		}
 	def actionPrintCustInv(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
@@ -571,7 +548,43 @@ class account_invoice(osv.osv):
 	_inherit='account.invoice'
 	_columns={
 		'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
+		'payment_for':fields.selection([('dp','DP'),('completion','Completion')],string="Payment For",required=False),
+		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
+		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
+		'group_id':fields.many2one('group.sales',required=True,string="Sale Group",domain=[('is_main_group','=',True)]),
 	}
+	_defaults={
+		'print_all_taxes_line':True,
+	}
+
+	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+
+		group_id = False
+		groupDomain = [("is_main_group","=",True)]
+
+		main_groups = self.pool.get('group.sales').search(cr,uid,[('is_main_group','=',True)])
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+		group_id = False
+		groups_sale_lines = self.pool.get('group.sales.line').search(cr,uid,[('name','=',user_id),('kelompok_id','in',main_groups)])
+		
+
+		if len(groups_sale_lines) == 1:
+			if user.kelompok_id:
+				
+				if user.kelompok_id.parent_id:
+					group_id = user.kelompok_id.parent_id.id
+				else:
+					if user.kelompok_id.is_main_group:
+						group_id = user.kelompok_id.id
+					else:
+						group_id = False
+		res = {
+			'value':{
+				'group_id':group_id,
+			}
+		}
+		return res
 
 
 class account_invoice_tax(osv.osv):
@@ -635,6 +648,97 @@ class account_invoice_tax(osv.osv):
 	_name='account.invoice.tax'
 	_inherit='account.invoice.tax'
 
+class GroupSales(osv.osv):
+	_inherit = 'group.sales'
+	_columns = {
+		'desc':fields.char('Short Description',required=False),
+		'is_main_group':fields.boolean('Is a Main Group', required=False),
+		'parent_id':fields.many2one('group.sales',string="Parent Group",required=False,ondelete="restrict",onupdate="cascade")
+	}
+	_rec_name = 'desc';
+	_defaults = {
+		'is_main_group':False,
+	}
+	
+class SaleOrder(osv.osv):
+	_inherit = 'sale.order'
+	_columns = {
+		'group_id':fields.many2one('group.sales',required=True,string="Sale Group"),
+	}
+
+	def _prepare_invoice(self, cr, uid, order, lines, context=None):
+		print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		"""Prepare the dict of values to create the new invoice for a
+		   sales order. This method may be overridden to implement custom
+		   invoice generation (making sure to call super() to establish
+		   a clean extension chain).
+
+		   :param browse_record order: sale.order record to invoice
+		   :param list(int) line: list of invoice line IDs that must be
+								  attached to the invoice
+		   :return: dict of value to create() the invoice
+		"""
+		if context is None:
+			context = {}
+		journal_ids = self.pool.get('account.journal').search(cr, uid,
+			[('type', '=', 'sale'), ('company_id', '=', order.company_id.id)],
+			limit=1)
+		if not journal_ids:
+			raise osv.except_osv(_('Error!'),
+				_('Please define sales journal for this company: "%s" (id:%d).') % (order.company_id.name, order.company_id.id))
+		invoice_vals = {
+			'name': order.client_order_ref or '',
+			'origin': order.name,
+			'type': 'out_invoice',
+			'reference': order.client_order_ref or order.name,
+			'account_id': order.partner_id.property_account_receivable.id,
+			'partner_id': order.partner_invoice_id.id,
+			'journal_id': journal_ids[0],
+			'invoice_line': [(6, 0, lines)],
+			'currency_id': order.pricelist_id.currency_id.id,
+			'comment': order.note,
+			'payment_term': order.payment_term and order.payment_term.id or False,
+			'fiscal_position': order.fiscal_position.id or order.partner_id.property_account_position.id,
+			'date_invoice': context.get('date_invoice', False),
+			'company_id': order.company_id.id,
+			'user_id': order.user_id and order.user_id.id or False,
+			'group_id':order.group_id.id or False,
+		}
+		
+		# Care for deprecated _inv_get() hook - FIXME: to be removed after 6.1
+		invoice_vals.update(self._inv_get(cr, uid, order, context=context))
+		return invoice_vals
+
+	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+
+		group_id = False
+		groupDomain = [("is_main_group","=",True)]
+
+		main_groups = self.pool.get('group.sales').search(cr,uid,[('is_main_group','=',True)])
+		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
+		group_id = False
+		groups_sale_lines = self.pool.get('group.sales.line').search(cr,uid,[('name','=',user_id),('kelompok_id','in',main_groups)])
+		
+
+		if len(groups_sale_lines) == 1:
+			if user.kelompok_id:
+				
+				if user.kelompok_id.parent_id:
+					group_id = user.kelompok_id.parent_id.id
+				else:
+					if user.kelompok_id.is_main_group:
+						group_id = user.kelompok_id.id
+					else:
+						group_id = False
+		res = {
+			'value':{
+				'group_id':group_id,
+			}
+		}
+		return res
+
+
 class SaleOrderLine(osv.osv):
 	_name = 'sale.order.line'
 	_inherit = 'sale.order.line'
@@ -648,8 +752,6 @@ class AccountBankStatement(osv.osv):
 	def _getSubTotal(self, cr, uid, ids, name, arg, context=None):
 		res = {}
 
-		
-		
 		accounts= self.browse(cr, uid, ids, context=context)
 		for account in accounts:
 			# dis[order.id]=order.amount_bruto-order.amount_untaxed
@@ -1195,11 +1297,12 @@ class InternalMoveRequest(osv.osv):
 		('done','Done'),
 		('cancel','Cancel')
 	]
+	
 	def monthToRoman(self,number):
 		roman = {
 			'01':'I',
 			'02':'II',
-			'03':'IV',
+			'03':'III',
 			'04':'IV',
 			'05':'V',
 			'06':'VI',
@@ -1356,11 +1459,13 @@ class InternalMove(osv.osv):
 	STATES = [
 		('draft','Draft'),
 		('confirmed','Confirmed'),
+		('checked','Checked'),
 		('ready','Ready to Transfer'),
 		('transfered','Transfer'),
 		('done','Received'),
 		('cancel','Cancel'),
 	]
+
 
 	# GET STATE CONSTANT
 	def getStates(self,cr,uid,context={}):
@@ -1392,11 +1497,10 @@ class InternalMove(osv.osv):
 			'no':im_line.no,
 			'product_id':bom_line.product_id.id,
 			'uom_id':bom_line.product_uom.id,
-			'qty':im_line.qty*bom_line.product_qty,
+			'qty':(im_line.qty-im_line.processed_item_qty)*bom_line.product_qty,
 			'qty_available':bom_line.product_id.qty_available,
 			'type':'sets',
 			'state':'draft',
-
 		}
 		return res
 	# to load internal move line detail automatic by detecting product is has set phantom bom
@@ -1441,6 +1545,7 @@ class InternalMove(osv.osv):
 				'manual_pb_no':data.manual_pb_no,
 				'ref_no':data.ref_no,
 				'state':'draft',
+				'notes':data.notes,
 			}
 		return res
 
@@ -1518,6 +1623,11 @@ class InternalMove(osv.osv):
 					raise osv.except_osv(_("Error !!!"),_("Available Stock For "+line.product_id.name_template+" is "+str(line.product_id.qty_available)+" "+line.product_id.uom_id.name+". Requested Item is "+str(line.qty)+" "+line.uom_id.name+"!"))
 
 		return res
+
+	def checkedInternalMove(self,cr,uid,ids,context={}):
+		res = True
+		self.write(cr,uid,ids,{'state':'checked'},context)
+		return True
 	def confirmInternalMove(self,cr,uid,ids,context={}):
 		res = True
 		valid = True
@@ -1590,12 +1700,12 @@ class InternalMove(osv.osv):
 							move_detail_id = self.pool.get('stock.move').create(cr,uid,move_detail,{})
 							self._update_im_line_stock_move(cr,uid,detail.id,move_detail_id,'line.detail',context)
 
-				print "MOVE LINE =====>",move_line
+				# print "MOVE LINE =====>",move_line
 					
 				
 			if res:
 				self._finalyCheckQty(cr,uid,data)
-				print "OK"
+
 				# add doc number
 				updateIm = {}
 				if not data.name:
@@ -1787,6 +1897,7 @@ class InternalMove(osv.osv):
 		'note':{},
 		'state':{
 			'sbm_inherit.im_confirmed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirmed',
+			'sbm_inherit.im_checked': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'checked',
 			'sbm_inherit.im_ready': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'ready',
 			'sbm_inherit.im_transfered': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'transfered',
 			'sbm_inherit.im_received': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'received',
@@ -1884,12 +1995,12 @@ class InternalMoveLine(osv.osv):
 
 		'state':fields.function(_getParentState,store=False,method=True,string="State",type="selection",selection=_getStates),
 		'stock_state':fields.function(_getStockState,store=False,method=True,string="Stock Status",type="selection",selection=[('draft', 'New'),
-                                   ('cancel', 'Cancelled'),
-                                   ('waiting', 'Waiting Another Move'),
-                                   ('confirmed', 'Waiting Availability'),
-                                   ('assigned', 'Available'),
-                                   ('done', 'Done'),
-                                   ]),
+								   ('cancel', 'Cancelled'),
+								   ('waiting', 'Waiting Another Move'),
+								   ('confirmed', 'Waiting Availability'),
+								   ('assigned', 'Available'),
+								   ('done', 'Done'),
+								   ]),
 	}
 	_defaults={
 		'state':'draft',
@@ -1992,7 +2103,7 @@ class InternalMoveLineDetail(osv.osv):
 		'name':fields.char('Name',required=False),
 		'desc':fields.text('Description',required=False),
 		# 'internal_move_id':fields.many2one('internal.move',string="Internal Move",required=True),
-		'internal_move_line_id':fields.many2one('internal.move.line',string="Internal Move Line No"),
+		'internal_move_line_id':fields.many2one('internal.move.line',string="Internal Move Line No",ondelete="CASCADE",onupdate="CASCADE"),
 		'product_id':fields.many2one('product.product',required=True,string="Product"),
 		'uom_id':fields.many2one('product.uom',required=True,string="UOM"),
 		'qty':fields.float('Qty',required=True),
@@ -2111,3 +2222,118 @@ class ProductSuperNotes(osv.osv):
 	_columns = {
 		'super_notes_ids':fields.many2many('super.notes','super_note_product_rel','product_id','super_note_id',string="Note Templates"),
 	}
+
+
+class SalesManTarget(osv.osv):
+	_name = 'sales.man.target'
+	_columns = {
+		'name': fields.char('Code',required=True),
+		'user_id':fields.many2one('res.users',string="Sales Man",required=True,ondelete="RESTRICT",onupdate="CASCADE"),
+		'year':fields.char('Year',required=True),
+		'amount_target':fields.float('Target',required=True),
+	}
+
+	def create(self,cr,uid,vals,context={}):
+
+		target_exists = self.pool.get('sales.man.target').search(cr, uid, [('user_id','=',vals['user_id']),('year','=',vals['year'])],context=context)
+
+		name = ""
+		print target_exists,"****************************"
+		sales = self.pool.get('res.users').browse(cr,uid,vals['user_id'],{})
+		if target_exists:
+			raise osv.except_osv(('Warning !!!'), ('Target For Sales Man '+sales.name+' in '+vals['year']+' Already Set!'))
+		else:
+			
+			vals['name'] = sales['initial']+"="+vals['year']
+		return super(SalesManTarget,self).create(cr,uid,vals,context=context)
+
+class sale_advance_payment_inv(osv.osv_memory):
+	_inherit = "sale.advance.payment.inv"
+	_description = "Sales Advance Payment Invoice"
+
+
+	def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		sale_obj = self.pool.get('sale.order')
+		ir_property_obj = self.pool.get('ir.property')
+		fiscal_obj = self.pool.get('account.fiscal.position')
+		inv_line_obj = self.pool.get('account.invoice.line')
+		wizard = self.browse(cr, uid, ids[0], context)
+		sale_ids = context.get('active_ids', [])
+
+		result = []
+		for sale in sale_obj.browse(cr, uid, sale_ids, context=context):
+			val = inv_line_obj.product_id_change(cr, uid, [], wizard.product_id.id,
+					uom_id=False, partner_id=sale.partner_id.id, fposition_id=sale.fiscal_position.id)
+			res = val['value']
+
+			# determine and check income account
+			if not wizard.product_id.id :
+				prop = ir_property_obj.get(cr, uid,
+							'property_account_income_categ', 'product.category', context=context)
+				prop_id = prop and prop.id or False
+				account_id = fiscal_obj.map_account(cr, uid, sale.fiscal_position or False, prop_id)
+				if not account_id:
+					raise osv.except_osv(_('Configuration Error!'),
+							_('There is no income account defined as global property.'))
+				res['account_id'] = account_id
+			if not res.get('account_id'):
+				raise osv.except_osv(_('Configuration Error!'),
+						_('There is no income account defined for this product: "%s" (id:%d).') % \
+							(wizard.product_id.name, wizard.product_id.id,))
+
+			# determine invoice amount
+			if wizard.amount <= 0.00:
+				raise osv.except_osv(_('Incorrect Data'),
+					_('The value of Advance Amount must be positive.'))
+			if wizard.advance_payment_method == 'percentage':
+				inv_amount = sale.amount_total * wizard.amount / 100
+				if not res.get('name'):
+					res['name'] = _("Advance of %s %%") % (wizard.amount)
+			else:
+				inv_amount = wizard.amount
+				if not res.get('name'):
+					#TODO: should find a way to call formatLang() from rml_parse
+					symbol = sale.pricelist_id.currency_id.symbol
+					if sale.pricelist_id.currency_id.position == 'after':
+						res['name'] = _("Advance of %s %s") % (inv_amount, symbol)
+					else:
+						res['name'] = _("Advance of %s %s") % (symbol, inv_amount)
+
+			# determine taxes
+			if res.get('invoice_line_tax_id'):
+				res['invoice_line_tax_id'] = [(6, 0, res.get('invoice_line_tax_id'))]
+			else:
+				res['invoice_line_tax_id'] = False
+
+			# create the invoice
+			inv_line_values = {
+				'name': res.get('name'),
+				'origin': sale.name,
+				'account_id': res['account_id'],
+				'price_unit': inv_amount,
+				'quantity': wizard.qtty or 1.0,
+				'discount': False,
+				'uos_id': res.get('uos_id', False),
+				'product_id': wizard.product_id.id,
+				'invoice_line_tax_id': res.get('invoice_line_tax_id'),
+				'account_analytic_id': sale.project_id.id or False,
+			}
+			inv_values = {
+				'name': sale.client_order_ref or sale.name,
+				'origin': sale.name,
+				'type': 'out_invoice',
+				'reference': False,
+				'account_id': sale.partner_id.property_account_receivable.id,
+				'partner_id': sale.partner_invoice_id.id,
+				'invoice_line': [(0, 0, inv_line_values)],
+				'currency_id': sale.pricelist_id.currency_id.id,
+				'comment': '',
+				'payment_term': sale.payment_term.id,
+				'fiscal_position': sale.fiscal_position.id or sale.partner_id.property_account_position.id,
+				'group_id':sale.group_id.id,
+			}
+			result.append((sale.id, inv_values))
+		return result
+	

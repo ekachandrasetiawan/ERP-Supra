@@ -14,7 +14,7 @@ class partner(osv.osv):
             elif not npwp.isdigit():
                 return {'warning': warning, 'value': {'npwp': result}}
             else:
-                result = npwp[:2] + '.' + npwp[2:5] + '.' + npwp[5:8] + '.' + npwp[8] + '.' + npwp[9:12] + '-' + npwp[-3:] 
+                result = npwp[:2] + '.' + npwp[2:5] + '.' + npwp[5:8] + '.' + npwp[8] + '-' + npwp[9:12] + '.' + npwp[-3:] 
                 return {'value': {'npwp': result}}
         return True
 

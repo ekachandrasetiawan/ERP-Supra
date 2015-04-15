@@ -1,0 +1,18 @@
+import time
+import pooler
+from report import report_sxw
+
+
+class outgoing(report_sxw.rml_parse):
+    def __init__(self, cr, uid, name, context):
+        super(outgoing, self).__init__(cr, uid, name, context=context)
+        self.localcontext.update({
+            'time': time,
+            'nourut': self.nourut,
+        }) 
+        
+    def nourut(self, lis, val):
+        return lis.index(val) + 1
+
+report_sxw.report_sxw('report.quality.form', 'quality.control', 'addons/eid_quality_control/report/report_quality.rml', parser=outgoing, header=False)
+report_sxw.report_sxw('report.out.going', 'outgoing.material', 'addons/eid_quality_control/report/report_outgoing.rml', parser=outgoing, header=False)

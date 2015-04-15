@@ -2,8 +2,6 @@
 <openerp>
 	<data>
 		
-        <!-- Report Accounting Stock Move -->
-
 		<record model="ir.ui.view" id="view_wizard_mutasi_stock">
             <field name="name">Mutasi Stock</field>
             <field name="model">mutasi.stock</field>
@@ -38,73 +36,114 @@
 
 
         <menuitem id="menu_mutasi_stock" name="Mutasi Stock" action="action_mutasi_stock" parent="account.final_accounting_reports"/>
-
-        <!-- Report Accounting Transaksi Per Account  -->
-
-        <record model="ir.ui.view" id="view_wizard_transaksi_account">
-            <field name="name">Report Transaksi Per Account</field>
-            <field name="model">report.transaksi.account</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string="Report" version="7.0">
-                    <group>
-                        <field name="name"/>
-                        <field name="date_from"/>
-                        <field name="date_to"/>
-                    </group>
-                    <footer>
-                        <button icon="gtk-ok" type="object" name="eksport_report_transaksi_account" string="Eksport" default_focus="1" class="oe_highlight"/>
-                        or
-                        <button string="Cancel" class="oe_link" special="cancel"/>
-                    </footer>
-                </form>
-            </field>
-        </record>
-
+<!-- 
         <record model="ir.actions.act_window" id="action_transaksi_account">
             <field name="name">Report Transaksi Per Account</field>
-            <field name="res_model">report.transaksi.account</field>
+            <field name="res_model">mutasi.stock</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
 
 
-        <menuitem id="menu_transaksi_account" name="Transaksi Account" action="action_transaksi_account" parent="account.final_accounting_reports"/>
+        <menuitem id="menu_transaksi_account" name="Transaksi Account" action="action_transaksi_account" parent="account.final_accounting_reports"/> -->
 
 
-        <!-- Report Saldo Akhir Product  -->
 
-        <record model="ir.ui.view" id="view_wizard_saldo_akhir">
-            <field name="name">Report Product Saldo Akhir</field>
-            <field name="model">report.saldo.akhir</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string="Report" version="7.0">
-                    <group>
-                        <field name="date_from"/>
-                        <field name="date_to"/>
-                    </group>
-                    <footer>
-                        <button icon="gtk-ok" type="object" name="eksport_report_saldo_akhir" string="Eksport" default_focus="1" class="oe_highlight"/>
-                        or
-                        <button string="Cancel" class="oe_link" special="cancel"/>
-                    </footer>
-                </form>
+                <record id="open_jurnal_ar_tracker_action" model="ir.actions.client">
+            <field name="name">Report Jurnal AR Action</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=report-accounting%2Fjurnalar"
+                }
             </field>
         </record>
+        <menuitem name="Jurnal AR" parent="account.final_accounting_reports" id="jurnal_ar_tracker_menu" action="open_jurnal_ar_tracker_action" />
 
 
-        <record model="ir.actions.act_window" id="action_saldo_akhir">
-            <field name="name">Report Saldo Akhir Product</field>
-            <field name="res_model">report.saldo.akhir</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
+
+        
+        <record id="open_aging_ar_summary_tracker_action" model="ir.actions.client">
+            <field name="name">Report Aging AR Summary</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=report-accounting%2Farsummary"
+                }
+            </field>
         </record>
+        <menuitem name="Aging AR Summary" parent="account.final_accounting_reports" id="jurnal_aging_ar_summary_tracker_menu" action="open_aging_ar_summary_tracker_action" />
 
-        <menuitem id="menu_saldo_akhir" name="Saldo Akhir Product" action="action_saldo_akhir" parent="account.final_accounting_reports"/>
 
+        
+        <record id="open_aging_ar_detail_tracker_action" model="ir.actions.client">
+            <field name="name">Report Aging AR Detail</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=report-accounting%2Fardetail"
+                }
+            </field>
+        </record>
+        <menuitem name="Aging AR Detail" parent="account.final_accounting_reports" id="jurnal_aging_ar_detail_tracker_menu" action="open_aging_ar_detail_tracker_action" />
+
+
+
+        
+        <record id="open_jurnal_ap_tracker_action" model="ir.actions.client">
+            <field name="name">Report Jurnal AP Action</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=report-accounting%2Fjurnalap"
+                }
+            </field>
+        </record>
+        <menuitem name="Jurnal AP" parent="account.final_accounting_reports" id="jurnal_ap_tracker_menu" action="open_jurnal_ap_tracker_action" />
+
+
+        
+        <record id="open_aging_ap_summary_tracker_action" model="ir.actions.client">
+            <field name="name">Report Aging AP Summary</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=report-accounting%2Fapsummary"
+                }
+            </field>
+        </record>
+        <menuitem name="Aging AP Summary" parent="account.final_accounting_reports" id="jurnal_aging_ap_summary_tracker_menu" action="open_aging_ap_summary_tracker_action" />
+
+
+
+
+        
+        <record id="open_aging_ap_detail_tracker_action" model="ir.actions.client">
+            <field name="name">Report Aging AP Detail</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=report-accounting%2Fapdetail"
+                }
+            </field>
+        </record>
+        <menuitem name="Aging AP Detail" parent="account.final_accounting_reports" id="jurnal_aging_ap_detail_tracker_menu" action="open_aging_ap_detail_tracker_action" />
+
+
+        
+        <record id="open_jurnal_pengeluaran_tracker_action" model="ir.actions.client">
+            <field name="name">Report Jurnal Pengeluaran</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=report-accounting%2Fapdetail"
+                }
+            </field>
+        </record>
+        <menuitem name="Jurnal Pengeluaran" parent="account.final_accounting_reports" id="jurnal_pengeluaran_tracker_menu" action="open_jurnal_pengeluaran_tracker_action" />
+
+        
 	</data>
 </openerp>
 

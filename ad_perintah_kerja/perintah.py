@@ -261,6 +261,45 @@ raw_material_line()
 class SaleOrder(osv.osv):
     _inherit = 'sale.order'
     _name = 'sale.order'
+    _columns = {
+        'pricelist_id': fields.many2one('product.pricelist', 'Currency', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Pricelist for current sales order."),
+        'partner_shipping_id2': fields.many2one('res.partner', 'Delivery Address 2', readonly=False, required=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Delivery address for current sales order."),
+    }
+
+    def onchange_shop_id(self, cr, uid, ids, shop_id, context=None):
+        v = {}
+        if shop_id:
+            shop = self.pool.get('sale.shop').browse(cr, uid, shop_id, context=context)
+            # if shop.project_id.id:
+            #     v['project_id'] = shop.project_id.id
+            # if shop.pricelist_id.id:
+            #     v['pricelist_id'] = shop.pricelist_id.id
+        return {'value': v}
+
+    def onchange_partner_id(self, cr, uid, ids, part, context=None):
+        if not part:
+            return {'value': {'partner_invoice_id': False, 'partner_shipping_id': False,  'payment_term': False, 'fiscal_position': False}}
+
+        part = self.pool.get('res.partner').browse(cr, uid, part, context=context)
+        addr = self.pool.get('res.partner').address_get(cr, uid, [part.id], ['delivery', 'invoice', 'contact'])
+        pricelist = part.property_product_pricelist and part.property_product_pricelist.id or False
+        payment_term = part.property_payment_term and part.property_payment_term.id or False
+        fiscal_position = part.property_account_position and part.property_account_position.id or False
+        dedicated_salesman = part.user_id and part.user_id.id or uid
+        val = {
+            'partner_invoice_id': addr['invoice'],
+            # 'partner_shipping_id': addr['delivery'],
+            'payment_term': payment_term,
+            'fiscal_position': fiscal_position,
+            'user_id': dedicated_salesman,
+        }
+        # print '============================',addr
+        # if addr is None:
+        #     val['partner_shipping_id']= addr['delivery'],
+        # if pricelist:
+        #     val['pricelist_id'] = pricelist
+        return {'value': val}
+
     def copy_pure_quotation(self,cr,uid,ids,context=None):
         # print "CALLEDDD",ids;
         rec = self.browse(cr,uid,ids,context)[0]
@@ -275,9 +314,9 @@ class SaleOrder(osv.osv):
             'user_id':rec.user_id.id,
             'payment_term':rec.payment_term.id,
             'company_id':rec.company_id.id,
-            'amount_tax':rec.amount_tax,
+            # 'amount_tax':rec.amount_tax,
             'state':'draft',
-            'amount_untaxed':rec.amount_untaxed,
+            # 'amount_untaxed':rec.amount_untaxed,
             'partner_shipping_id':rec.partner_shipping_id.id,
             'picking_policy':rec.picking_policy,
             'incoterm':rec.incoterm.id,
@@ -289,6 +328,7 @@ class SaleOrder(osv.osv):
             'project_id':rec.project_id.id,
             'pricelist_id':rec.pricelist_id.id,
             'partner_invoice_id':rec.partner_invoice_id.id,
+            'group_id':rec.group_id.id
 
         }
         ListScope1 = []
@@ -310,16 +350,19 @@ class SaleOrder(osv.osv):
         print prepareNewSO
 
         for line in rec.order_line:
+            prepareTax = []
+            for tax in line.tax_id:
+                prepareTax.append(tax.id)
             newLineObj = self.pool.get('sale.order.line')
             newLine = {
                 'product_uos_qty':line.product_uos_qty,
                 'product_uom':line.product_uom.id,
                 'product_uom_qty':line.product_uom_qty,
-                'discount':line.discount,
+                # 'discount':line.discount,
                 'product_uos':line.product_uos.id,
                 'sequence':line.sequence,
                 'order_id':newOrderId,
-                'price_unit':line.price_unit,
+                # 'price_unit':line.price_unit,
                 'name':line.name,
                 'company_id':line.company_id.id,
                 'salesman_id':line.salesman_id.id,
@@ -334,11 +377,12 @@ class SaleOrder(osv.osv):
                 'product_onhand':line.product_onhand,
                 'product_future':line.product_future,
                 'discount_nominal':line.discount_nominal,
+                'tax_id':[(6,0,prepareTax)]
             }
-            print "NEW LINE ",newLine
+            # print "NEW LINE ",newLine
             newLineObj.create(cr,uid,newLine,context)
 
-        print "NEW ID    ",newOrderId
+        # print "NEW ID    ",newOrderId
         
         
         dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')

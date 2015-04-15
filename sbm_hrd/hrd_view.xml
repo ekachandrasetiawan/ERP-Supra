@@ -27,7 +27,7 @@
 							</group>
 						</field>
 						<field name="job_id" position="replace"/>
-						<field name="category_ids" position="replace"/>
+						<!-- <field name="category_ids" position="replace"/> -->
 						<field name="work_location" position="replace"/>
 						<field name="address_id" position="after">
 							<field name="alamat_tinggal"/>
