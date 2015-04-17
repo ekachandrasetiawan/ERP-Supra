@@ -391,6 +391,7 @@ class account_invoice_line(osv.osv):
 	_columns={
 		'amount_discount':fields.float('Amount Discount',required=False),
 		'price_subtotal': fields.function(_amount_line, string='Amount', type="float",digits_compute= dp.get_precision('Account'), store=True),
+		'state':fields.related('invoice_id','state',type='char',store=False,string="State"),
 	}
 
 # INHERIT CLASS FOR ACCOUNT BANK STATEMENT LINE
@@ -509,6 +510,20 @@ class account_invoice(osv.osv):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"account-invoice/print&id="+str(ids[0])+"&uid="+str(uid)
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.out',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo
+			},
+		}
+
+	def actionPrintKwitansi(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"account-invoice/print-kwitansi&id="+str(ids[0])+"&uid="+str(uid)
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
@@ -720,7 +735,6 @@ class SaleOrder(osv.osv):
 		group_id = False
 		groups_sale_lines = self.pool.get('group.sales.line').search(cr,uid,[('name','=',user_id),('kelompok_id','in',main_groups)])
 		
-
 		if len(groups_sale_lines) == 1:
 			if user.kelompok_id:
 				
