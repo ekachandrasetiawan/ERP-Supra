@@ -175,9 +175,13 @@ scope_work_customer()
 
 
 class term_condition(osv.osv):
-	_name = "term.condition"        
+	_name = "term.condition"
 	_columns = {
 		'name': fields.char('Term and Condition', required=True, size=256),
+		'active':fields.boolean('Active'),
+	}
+	_defaults = {
+		'active':True
 	}
 	
 term_condition()
@@ -193,28 +197,28 @@ class sale_order_line(osv.osv):
 	}
 
 
-	def onchange_line(self, cr, uid, ids, lines,context=None):
-		result = {}
-		result['value'] = {}
-		#do the proper checking
-		count_dict = {}
-		count = 10
-		had_seq = 0
-		for index,line in enumerate(lines):
-		# for index,line in lines:
-			if line[0] == 0:
-				count_dict[index] = count
-				count +=10
-			else:
-				had_seq +=1
-				#seqnece_no is the new sequence field defined
-		for k in count_dict:
-			if had_seq:
-				lines[k][2]['sequence'] = had_seq*10 + count_dict[k]
-			else:
-				lines[k][2]['sequence'] = count_dict[k] 
-		result['value'].update({'sequence':lines})
-		return result
+	# def onchange_line(self, cr, uid, ids, lines,context=None):
+	# 	result = {}
+	# 	result['value'] = {}
+	# 	#do the proper checking
+	# 	count_dict = {}
+	# 	count = 10
+	# 	had_seq = 0
+	# 	for index,line in enumerate(lines):
+	# 	# for index,line in lines:
+	# 		if line[0] == 0:
+	# 			count_dict[index] = count
+	# 			count +=10
+	# 		else:
+	# 			had_seq +=1
+	# 			#seqnece_no is the new sequence field defined
+	# 	for k in count_dict:
+	# 		if had_seq:
+	# 			lines[k][2]['sequence'] = had_seq*10 + count_dict[k]
+	# 		else:
+	# 			lines[k][2]['sequence'] = count_dict[k] 
+	# 	result['value'].update({'sequence':lines})
+	# 	return result
 
 sale_order_line()
 
