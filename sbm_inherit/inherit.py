@@ -681,8 +681,17 @@ class SaleOrder(osv.osv):
 		'group_id':fields.many2one('group.sales',required=True,string="Sale Group"),
 	}
 
+	def action_button_confirm(self, cr, uid, ids, context=None):
+		data = self.browse(cr,uid,ids,context)[0]
+		if data.pricelist_id.name == 'IDR':
+			# if idr then check amount total of order
+			# if amount total of order < 1 hundred thousand rupiah then block it
+			if data.amount_total < 100000:
+				raise osv.except_osv(_('Error!'),_('Tidak bisa menjual dengan nilai total penjualan dibawah IDR 100.000,-'))
+		return super(SaleOrder, self).action_button_confirm(cr, uid, ids, context)
+
 	def _prepare_invoice(self, cr, uid, order, lines, context=None):
-		print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		# print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 		"""Prepare the dict of values to create the new invoice for a
 		   sales order. This method may be overridden to implement custom
 		   invoice generation (making sure to call super() to establish
