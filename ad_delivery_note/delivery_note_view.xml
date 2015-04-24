@@ -96,6 +96,8 @@
                     <button name="print_dn_out" type="object" states="done" string="Print DN" icon="gtk-dnd-multiple"/>
                     <button name="print_pack_list" type="object" states="done" string="Print Pack List" icon="gtk-dnd-multiple"/>
 
+                    <button name="return_product" type="object" states="done" string="Return Products"/>
+
 		              <!--
                     <button name="print_deliveryA4" type="object" states="approve,done" string="Print A4" icon="gtk-print"/>
                     <button name="%(print_continue_note)d" type="action" states="approve,done" string="Print Continuous" icon="gtk-print"/>-->

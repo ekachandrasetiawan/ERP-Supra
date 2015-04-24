@@ -451,23 +451,23 @@ class PurchaseOrder(osv.osv):
 						for bom in order_line.product_id.bom_ids[0].bom_lines:
 							moveBom = {
 								'name': bom.product_id.name_template or order_line.name or '',
-					            'product_id': bom.product_id.id,
-					            'product_qty': order_line.product_qty,
-					            'product_uos_qty': order_line.product_qty*bom.product_qty,
-					            'product_uom': bom.product_uom.id,
-					            'product_uos': bom.product_uom.id,
-					            'date': self.date_to_datetime(cr, uid, order.date_order, context),
-					            'date_expected': self.date_to_datetime(cr, uid, order_line.date_planned, context),
-					            'location_id': order.partner_id.property_stock_supplier.id,
-					            'location_dest_id': order.location_id.id,
-					            'picking_id': picking_id,
-					            'partner_id': order.dest_address_id.id or order.partner_id.id,
-					            'move_dest_id': order_line.move_dest_id.id,
-					            'state': 'draft',
-					            'type':'in',
-					            'purchase_line_id': order_line.id,
-					            'company_id': order.company_id.id,
-					            'price_unit': order_line.price_unit
+								'product_id': bom.product_id.id,
+								'product_qty': order_line.product_qty,
+								'product_uos_qty': order_line.product_qty*bom.product_qty,
+								'product_uom': bom.product_uom.id,
+								'product_uos': bom.product_uom.id,
+								'date': self.date_to_datetime(cr, uid, order.date_order, context),
+								'date_expected': self.date_to_datetime(cr, uid, order_line.date_planned, context),
+								'location_id': order.partner_id.property_stock_supplier.id,
+								'location_dest_id': order.location_id.id,
+								'picking_id': picking_id,
+								'partner_id': order.dest_address_id.id or order.partner_id.id,
+								'move_dest_id': order_line.move_dest_id.id,
+								'state': 'draft',
+								'type':'in',
+								'purchase_line_id': order_line.id,
+								'company_id': order.company_id.id,
+								'price_unit': order_line.price_unit
 							}
 							move = stock_move.create(cr,uid,moveBom)
 							todo_moves.append(move)
@@ -735,7 +735,7 @@ class delivery_note(osv.osv):
 		'name': fields.char('Delivery Note', required=True, size=64, readonly=True, states={'draft': [('readonly', False)]}),
 		'prepare_id': fields.many2one('order.preparation', 'Order Packaging', domain=[('state', 'in', ['done'])], required=False, readonly=True, states={'draft': [('readonly', False)]}),
 		'tanggal' : fields.date('Delivery Date',track_visibility='onchange'),
-		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel')], 'State', readonly=True,track_visibility='onchange'),
+		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'Torefund'), ('refunde', 'Refunde')], 'State', readonly=True,track_visibility='onchange'),
 		'note_lines': fields.one2many('delivery.note.line', 'note_id', 'Note Lines', readonly=True, states={'draft': [('readonly', False)]}),
 		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange'),
 		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]}),
@@ -871,7 +871,46 @@ class delivery_note(osv.osv):
 			res['attn'] = data.sale_id.attention.id
 			
 			return  {'value': res}
-					 
+
+	def return_product(self, cr, uid, ids, context=None):
+		res = {}
+		val = self.browse(cr, uid, ids)[0]
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_stock_return_picking_form')
+		# return {
+		# 	'view_mode': 'form',
+		# 	'view_id': val.prepare_id.id,
+		# 	'view_type': 'form',
+		# 	'view_name':'order.preparation.form',
+		# 	'res_model': 'order.preparation',
+		# 	# 'src_model':'stock.picking',
+		# 	'type': 'ir.actions.act_window',
+		# 	'target': 'new',
+		# 	'res_id':val.prepare_id.id,
+		# 	'key2':'client_action_multi',
+		# 	'multi':'True',
+		# 	'id':'act_stock_return_picking',
+		# }
+		res = {
+			'name':'Return Shipment',
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'stock.view_stock_return_picking_form',
+			'res_model': 'stock.return.picking',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'res_id':val.prepare_id.picking_id.id,
+			'domain': "[('id','=',"+str(val.prepare_id.picking_id.id)+")]",
+			'key2':'client_action_multi',
+            'multi':"True",
+            'context':{
+            	'active_id':val.prepare_id.picking_id.id
+            }
+		}
+
+		print res
+		return res
+
 
 	def package_validate(self, cr, uid, ids, context=None):
 
