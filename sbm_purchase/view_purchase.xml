@@ -155,6 +155,41 @@
             </field>
          </record>
 
+         <record id="view_set_po_form2" model="ir.ui.view">
+            <field name="name">set.po.form2</field>
+            <field name="model">set.po</field>
+            <field name="type">form</field>
+ 			<field name="arch" type="xml">
+            	<form string="Regular Requisition" version="7.0">
+            		<sheet>
+		            <separator string="Regular Requisition Order"/>
+						<group col="4" colspan="4">
+		            	 	<field name="name" />
+		            	 	<field name="pricelist_id"/>
+			            </group>
+		            	<notebook colspan="4">
+					    	<page string="Product Detail ">
+					    		<!--<button name="search_pb" string="Search Product" type="object"/>-->
+			                    <field name="permintaan" nolabel="1" colspan="4" string="Detail Permintaan Barang">
+			                    	<tree string="Detail Barang" editable="bottom">
+			                          	<field name="detail_pb_id"/>
+			                          	<field name="name" string="Product Name"/>
+			                          	<field name="variants" string="Variants"/>
+			                          	<field name="qty_available" string="Qty"/>
+			                          	<field name="satuan" string="UOM"/>
+			                          	<field name="harga" string="Price"/>
+			                        </tree>
+			                    </field>
+			                </page>
+			            </notebook>
+		            </sheet>
+		            <footer>
+		            <button name="create_po" string="Create PO" type="object" class="oe_highlight" icon="gtk-apply"/>
+		            </footer>
+            	</form>
+            </field>
+         </record>
+
 		<record model="ir.actions.act_window" id="master_wizard_list_action">
             <field name="name">Regular Requisition Process</field>
             <field name="res_model">set.po</field>

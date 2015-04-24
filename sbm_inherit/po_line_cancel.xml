@@ -98,7 +98,7 @@
 	                
 	            </record> -->
 		<menuitem name="Item To Cancel" parent="purchase.menu_procurement_management" id="po_line_cancel_waiting_to_approve" action="action_po_line_waiting_approval"/>
-		<menuitem name="Canceled Order" parent="sbm_purchase_rent.purchase_order_menu" id="po_line_cancel_menu" action="action_po_line_cancel"/>
+		<menuitem name="Canceled Order" parent="purchase.menu_procurement_management" id="po_line_cancel_menu" action="action_po_line_cancel"/>
 
 
 

@@ -8,9 +8,9 @@
     for Subcont Project Management """,
     "init_xml": [],
     'data': [
+        'wizard/purchase_order_from_requisition_view.xml',
         'purchase_subcont_view.xml',
         'purchase_requisition_subcont_view.xml',
-        'wizard/purchase_order_from_requisition_view.xml',
     ],
     'demo_xml': [],
     'installable': True,

@@ -202,5 +202,7 @@
             <field name="category_id" ref="base.module_category_accounting_and_finance"/>
             <field name="name">Customer Invoice - Admin Creator</field>
         </record>
+
+        
 	</data>
 </openerp>

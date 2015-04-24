@@ -686,7 +686,7 @@ class SaleOrder(osv.osv):
 		if data.pricelist_id.name == 'IDR':
 			# if idr then check amount total of order
 			# if amount total of order < 1 hundred thousand rupiah then block it
-			if data.amount_total < 100000:
+			if data.amount_total < 100000 and data.amount_total > 0:
 				raise osv.except_osv(_('Error!'),_('Tidak bisa menjual dengan nilai total penjualan dibawah IDR 100.000,-'))
 		return super(SaleOrder, self).action_button_confirm(cr, uid, ids, context)
 
@@ -1035,7 +1035,7 @@ class stock_picking(osv.osv):
 		if pick[0].name==False:
 			# GENERATE NUMBER
 			self.generateSeq(cr,uid,ids,context)
-
+		
 		return super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
 	def generateSeq(self,cr,uid,ids,context=None):
 		pick = self.browse(cr,uid,ids)

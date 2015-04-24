@@ -11,29 +11,29 @@
 			<field name="inherit_id" ref="account.view_invoice_line_form" />
 			<field name="arch" type="xml">
 				<field name="product_id" position="before">
-					<field name="state" invisible="True" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}"/>
-					<field name="sequence" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}"/>
+					<field name="state" invisible="True"/>
+					<field name="sequence" attrs="{'readonly':[('state','not in',['draft','proforma2','proforma'])]}"/>
 				</field>
 				<field name="name" position="replace">
-					<field name="name" attrs="{'readonly':[('state','not in',['draft'])]}" />
+					<field name="name" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" />
 				</field>
 				<field name="product_id" position="replace">
-					<field name="product_id" attrs="{'readonly':[('state','not in','draft')]}" on_change="product_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" />
+					<field name="product_id" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" on_change="product_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" />
 				</field>
 				<field name="quantity" position="replace">
-					<field name="quantity" class="oe_inline" attrsF="{'readonly':[('state','not in','draft')]}" />
+					<field name="quantity" class="oe_inline" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" />
 				</field>
 				<field name="uos_id" position="replace">
-					<field name="uos_id" class="oe_inline" groups="product.group_uom" on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" attrs="{'readonly':[('state','not in','draft')]}" />
+					<field name="uos_id" class="oe_inline" groups="product.group_uom" on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" />
 				</field>
 				<field name="price_unit" position="replace">
-					<field name="price_unit" attrs="{'readonly':[('state','not in','draft')]}"/>
+					<field name="price_unit" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}"/>
 				</field>
 				<field name="discount" position="replace">
-					<field name="discount" attrs="{'readonly':[('state','not in','draft')]}"/>
+					<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}"/>
 				</field>
 				<field name="invoice_line_tax_id" position="replace">
-					<field name="invoice_line_tax_id" attrs="{'readonly':[('state','not in','draft')]}" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]" widget="many2many_tags"/>
+					<field name="invoice_line_tax_id" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]" widget="many2many_tags"/>
 				</field>
 			</field>
 		</record>
@@ -77,7 +77,7 @@
 					<field name="account_id" groups="account.group_account_user" domain="[('company_id', '=', parent.company_id), ('journal_id', '=', parent.journal_id), ('type', '=', 'other')]" on_change="onchange_account_id(product_id, parent.partner_id, parent.type, parent.fiscal_position,account_id)" attrs="{'readonly':[('state','not in',['draft','proforma'])]}"/>
 				</xpath> -->
 				<xpath expr="//page[@string='Invoice Lines']/field[@name='invoice_line']" position="replace">
-					 <field name="invoice_line" nolabel="1" widget="one2many_list" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}" context="{'type': type}">
+					 <field name="invoice_line" nolabel="1" widget="one2many_list" context="{'type': type}" attrs="{'readonly':[('state','not in',['draft','proforma','proforma2','done'])]}">
 						<tree string="Invoice Lines">
 							<field name="sequence" widget="handle"/>
 							<field name="product_id" on_change="product_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" domain="[('sale_ok', '=', True)]"/>
@@ -93,30 +93,7 @@
 							<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
 							<field name="price_subtotal"/>
 						</tree>
-						<!-- <form string="Invoice Lines" version="7.0">
-							<sheet>
-								<group colspan="6">
-									<field name="sequence" widget="handle" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}"/>
-									
-									<field name="product_id" on_change="product_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" domain="[('sale_ok', '=', True)]" attrs="{'readonly':[('state','not in',['draft'])]}"/>
-									
-									<field name="company_id" invisible="1"/>
-									<field name="state" invisible="1"/>
-									<field name="name" attrs="{'readonly':[('state','not in',['draft'])]}"/>
-									
-									<field name="quantity" attrs="{'readonly':[('state','not in',['draft'])]}"/>
-									<field name="uos_id" groups="product.group_uom" on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" attrs="{'readonly':[('state','not in',['draft'])]}"/>
-									<field name="price_unit" attrs="{'readonly':[('state','not in',['draft'])]}"/>
-									<field name="discount" groups="sale.group_discount_per_so_line" attrs="{'readonly':[('state','not in',['draft'])]}"/>
-									<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]" attrs="{'readonly':[('state','not in',['draft'])]}" />
-									<field name="price_subtotal"/>
-								
-									<field name="account_id" groups="account.group_account_user" domain="[('company_id', '=', parent.company_id), ('journal_id', '=', parent.journal_id), ('type', '=', 'other')]" on_change="onchange_account_id(product_id, parent.partner_id, parent.type, parent.fiscal_position,account_id)" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}"/>
-									<field name="account_analytic_id" groups="analytic.group_analytic_accounting" domain="[('type','!=','view'), ('company_id', '=', parent.company_id)]" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}"/>
-								</group>
-							</sheet>
 						
-						</form> -->
 					</field>
 				</xpath>
 				

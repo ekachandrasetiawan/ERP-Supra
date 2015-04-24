@@ -927,6 +927,8 @@ class delivery_note(osv.osv):
 											'location_id' : mad.location_id.id,
 											'location_dest_id' : mad.location_dest_id.id,
 											'picking_id': val.prepare_id.picking_id.id})
+							# print "MOVE ID = ",move_id
+							# print "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
 							stock_move.action_confirm(cr, uid, [move_id], context)
 							   
 						partial_data['move%s' % (move_id)] = {
@@ -934,8 +936,10 @@ class delivery_note(osv.osv):
 							'product_qty': b.product_qty,
 							'product_uom': b.product_uom.id,
 							'prodlot_id': mad.prodlot_id.id}
+
 						# self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
 					iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
+					print "++++++++++++++++++++++++++++++++++++++++++++++++"
 					id_done = iddo.items()
 					getMove = self.pool.get('stock.move').browse(cr,uid,move_id,context={})
 					prepare_obj = self.pool.get('order.preparation')
