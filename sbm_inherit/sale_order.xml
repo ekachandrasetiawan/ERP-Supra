@@ -26,6 +26,9 @@
             	<field name="user_id" position="after">
             		<field name="group_id" domain='[("is_main_group","=",True)]' />
             	</field>
+            	<button name="action_cancel" position="replace">
+            		<button name="action_cancel" states="manual,progress" string="Cancel Order" type="object" groups="sbm_inherit.group_sale_order_cancel"/>
+            	</button>
             </field>
         </record>
 		<!-- <record model="ir.actions.act_window" id="action_special_dn">

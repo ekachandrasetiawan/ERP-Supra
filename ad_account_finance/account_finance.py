@@ -386,15 +386,6 @@ class account_invoice(osv.osv):
             #                 i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,(i['amount_currency'] * inv.pajak))
             #             else:
             #                 i['price'] = cur_obj.round(cr,uid,self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id,i['amount_currency'] * inv.pajak)
-
-            # ending = 0
-            # if diff_currency_p:
-            #     for i in iml:    
-            #         ending += abs(i['price']) 
-            #     if total < 0:
-            #         total = -(ending)
-            #     else:
-            #         total = abs(ending)
             
             name = inv['name'] or inv['supplier_invoice_number']
             # name = inv['name'] or inv['supplier_invoice_number'] or '/'

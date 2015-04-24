@@ -33,7 +33,7 @@
 						</field>
 				</field>
 		</record>
-		<record model="ir.ui.view" id="hrd_form_holidays_allocation_view">
+		<!-- <record model="ir.ui.view" id="hrd_form_holidays_allocation_view">
 				<field name="name">hr.holidays</field>
 				<field name="model">hr.holidays</field>
 				<field name="type">form</field>
@@ -49,6 +49,6 @@
 							<field name="state" widget="statusbar" statusbar_visible="draft,confirm,done" statusbar_colors='{"confirm":"blue","done":"blue","refuse":"red"}'/>
 						</field>
 				</field>
-		</record>
+		</record> -->
 	</data>
 </openerp>

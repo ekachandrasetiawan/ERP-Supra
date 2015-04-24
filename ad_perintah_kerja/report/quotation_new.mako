@@ -101,13 +101,14 @@ table.main tr td { padding: 5px;}
 					</td>
 					<td width="80%">
 						${o.partner_id.name or ""} <br/>
-						
-						%if o.attention==False:
+						%if o.attention:
 							${o.attention.street or ""} <br/>
-							${o.attention.street2 or ""}
+							${o.attention.street2 or ""}<br/>
+							${o.attention.city or ""} ${o.attention.state_id.name or ""}  ${o.attention.zip or ""}
 						%else:
 							${o.partner_id.street or ""} <br/>
-							${o.partner_id.street2 or ""}
+							${o.partner_id.street2 or ""}<br/>
+							${o.partner_id.city or ""} ${o.partner_id.state_id.name or ""}  ${o.partner_id.zip or ""}
 						%endif
 					</td>
 				</tr>
@@ -318,7 +319,7 @@ table.main tr td { padding: 5px;}
 	
 	<tr width="100%" align="left">
 		<td colspan="2"><font size="3"><br/><b><i>Scope Of Work by PT.Suprabakti Mandiri</i></b><br/>
-			  <font style="margin-left:20px;">
+			<font style="margin-left:20px;">
 			%if o.scope_work_supra_text==False:
 				-
 			%else:

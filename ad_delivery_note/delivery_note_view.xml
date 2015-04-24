@@ -40,14 +40,14 @@
                 <field name="partner_shipping_id" position="replace">
 	            	<field name="partner_shipping_id" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery','search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
 	            </field>
-              
+
                 <xpath expr="//page[@string='Other Information']" position="after">
                     <page string="Terms Condition">
                         <field colspan="4" name="internal_notes" nolabel="1"/>
                     </page>
 				</xpath>
 				<button string="Create Invoice" position="replace">
-					<button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice" states="manual,progress" type="action" class="oe_highlight" groups="base.group_user"/>
+					<button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice" type="action" class="oe_highlight" groups="base.group_user" states="manual,progress"/>
 				</button>
 			</field>
 		</record>

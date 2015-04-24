@@ -77,7 +77,7 @@ class order_preparation(osv.osv):
         
         return {
             'type'  : 'ir.actions.client',
-            'target': 'new',
+            # 'target': 'new',
             'tag'   : 'print.out.op',
             'params': {
                 # 'id'  : ids[0],
@@ -247,7 +247,8 @@ class order_preparation(osv.osv):
                              'product_uom': x.product_uom.id,
                              'name': x.name,
                              'move_id':x.id
-                             })
+                })
+                # raise osv.except_osv(_("Demo"),x.id)
              
             res['prepare_lines'] = line
             return  {'value': res}
@@ -258,7 +259,6 @@ class order_preparation(osv.osv):
         'state': 'draft',
         'tanggal': time.strftime(DEFAULT_SERVER_DATE_FORMAT), 
     }
-
      
         
 order_preparation()
@@ -278,7 +278,6 @@ class order_preparation_line(osv.osv):
         'prodlot_id':fields.one2many('order.preparation.batch','batch_id','Serial Number', ondelete='cascade'),
         'move_id':fields.many2one('stock.move','Move'),
     }
-    _order='no ASC'
          
 order_preparation_line()
 

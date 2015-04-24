@@ -124,6 +124,17 @@
   margin-right: 2%;
 
 }
+button .oe_form_m2o_sc_button{
+ display:none;
+}
+.openerp.ui-dialog .ui-dialog-buttonpane button .eo_form_sc_button{
+    margin: 0px 4px 0px 0px;
+   display:none;
+ 
+}
+.oe_selectcreatepopup-search-create{
+ display:none;
+}
 /*
 .openerp.ui-autocomplete li:not(.oe_m2o_dropdown_option) + li.oe_m2o_dropdown_option{
  display: block !important; 

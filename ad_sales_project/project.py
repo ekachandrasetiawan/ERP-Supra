@@ -41,6 +41,9 @@ class groups_sales(osv.osv):
 					('g4', 'G4'), 
 					('g5', 'G5'), 
 					('g6', 'G6'),
+					('g7', 'G7'),
+					('g8', 'G8'),
+					('suma', 'SUMA'),
 					('g2jtt', 'G2JTT'),
 					('g1sub', 'G1 Subordinat'), 
 					('g2sub', 'G2 Subordinat'), 
@@ -89,6 +92,7 @@ class groups_sales(osv.osv):
 					('jtttatok','Jawa Timur/Tengah Tatok'),
 					('jttjudy','Jawa Timur/Tengah Judy'),
 					('jttali','Jawa Timur/Tengah Ali Wahyudi'),
+					('jttdarma','Jawa Timur/Tengah Darma'),
 					('sulkristanto','Sulawesi Kristanto'),
 					('suldedison','Sulawesi Dedison'),
 					('suljansen','Sulawesi Jansen'),
@@ -171,9 +175,13 @@ scope_work_customer()
 
 
 class term_condition(osv.osv):
-	_name = "term.condition"        
+	_name = "term.condition"
 	_columns = {
 		'name': fields.char('Term and Condition', required=True, size=256),
+		'active':fields.boolean('Active'),
+	}
+	_defaults = {
+		'active':True
 	}
 	
 term_condition()
@@ -186,33 +194,31 @@ class sale_order_line(osv.osv):
 
 	_defaults = {
 		'sequence': 0,
-		# 'sequence':lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'sale.order.line'),  
 	}
 
 
-	def onchange_line(self, cr, uid, ids, lines,context=None):
-		print '================CHANDRA',lines
-		result = {}
-		result['value'] = {}
-		#do the proper checking
-		count_dict = {}
-		count = 10
-		had_seq = 0
-		for index,line in enumerate(lines):
-		# for index,line in lines:
-			if line[0] == 0:
-				count_dict[index] = count
-				count +=10
-			else:
-				had_seq +=1
-				#seqnece_no is the new sequence field defined
-		for k in count_dict:
-			if had_seq:
-				lines[k][2]['sequence'] = had_seq*10 + count_dict[k]
-			else:
-				lines[k][2]['sequence'] = count_dict[k] 
-		result['value'].update({'sequence':lines})
-		return result
+	# def onchange_line(self, cr, uid, ids, lines,context=None):
+	# 	result = {}
+	# 	result['value'] = {}
+	# 	#do the proper checking
+	# 	count_dict = {}
+	# 	count = 10
+	# 	had_seq = 0
+	# 	for index,line in enumerate(lines):
+	# 	# for index,line in lines:
+	# 		if line[0] == 0:
+	# 			count_dict[index] = count
+	# 			count +=10
+	# 		else:
+	# 			had_seq +=1
+	# 			#seqnece_no is the new sequence field defined
+	# 	for k in count_dict:
+	# 		if had_seq:
+	# 			lines[k][2]['sequence'] = had_seq*10 + count_dict[k]
+	# 		else:
+	# 			lines[k][2]['sequence'] = count_dict[k] 
+	# 	result['value'].update({'sequence':lines})
+	# 	return result
 
 sale_order_line()
 
@@ -256,7 +262,6 @@ class sale_order(osv.osv):
 #             'kondisi1': fields.boolean('The above price does not include 10 % VAT'),
 #             'kondisi2': fields.boolean('Payment : As Previously following ASC Term of Payment'),
 #             'kondisi3': fields.boolean('Validity : 2(two) months from the date of quotation'),
-						
 	}
 
 	def onchange_dateorder(self, cr, uid, ids, tgl):
@@ -325,6 +330,9 @@ class week_status(osv.osv):
 					('g4', 'G4'), 
 					('g5', 'G5'), 
 					('g6', 'G6'),
+					('g7', 'G7'),
+					('g8', 'G8'),
+					('suma', 'SUMA'),
 					('g2jtt', 'G2JTT'),
 					('g1sub', 'G1 Subordinat'), 
 					('g2sub', 'G2 Subordinat'), 
@@ -373,6 +381,7 @@ class week_status(osv.osv):
 					('jtttatok','Jawa Timur/Tengah Tatok'),
 					('jttjudy','Jawa Timur/Tengah Judy'),
 					('jttali','Jawa Timur/Tengah Ali Wahyudi'),
+					('jttdarma','Jawa Timur/Tengah Darma'),
 					('sulkristanto','Sulawesi Kristanto'),
 					('suldedison','Sulawesi Dedison'),
 					('suljansen','Sulawesi Jansen'),
@@ -406,6 +415,7 @@ class week_status(osv.osv):
 		
 		if context is None:
 			context = {}
+
 		for x in val.status_line:
 			data.append([
 							x.name.name, 

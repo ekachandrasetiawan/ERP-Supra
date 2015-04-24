@@ -167,5 +167,42 @@
             </field>
         </record>
         <menuitem name="Executive Summary Sales Man Report" parent="sales_report" id="executive_summary_salesman_report_sales_menu" action="executive_summary_salesman_report_action" />
+        <record model="res.groups" id="group_sale_order_cancel">
+            <field name="category_id" ref="base.module_category_sales_management"/>
+            <field name="name">Sale Order Cancel</field>
+        </record>
+
+        
+
+        <!-- GROUP FOR INVOICE VALIDATOR USER -->
+        <record model="res.groups" id="group_customer_invoice_validator">
+            <field name="category_id" ref="base.module_category_accounting_and_finance"/>
+            <field name="name">Customer Invoice Validator</field>
+        </record>
+
+        <!-- GROUP FOR INVOICE ADMINISTRATOR USER -->
+        <record model="res.groups" id="group_customer_invoice_administrator">
+            <field name="category_id" ref="base.module_category_accounting_and_finance"/>
+            <field name="name">Customer Invoice Administrator</field>
+        </record>
+
+        <!-- GROUP FOR INVOICE USER WHO NOT AN INVOICE ADMINISTRATOR BUT CAN SET INVOICE TO DRAFT -->
+        <record model="res.groups" id="group_customer_invoice_set_to_draft">
+            <field name="category_id" ref="base.module_category_accounting_and_finance"/>
+            <field name="name">Customer Invoice - Set to Draft</field>
+        </record>
+
+
+        <record model="res.groups" id="group_customer_invoice_admin_supervisor">
+            <field name="category_id" ref="base.module_category_accounting_and_finance"/>
+            <field name="name">Customer Invoice - Admin Supervisor</field>
+        </record>
+
+        <record model="res.groups" id="group_customer_invoice_admin_creator">
+            <field name="category_id" ref="base.module_category_accounting_and_finance"/>
+            <field name="name">Customer Invoice - Admin Creator</field>
+        </record>
+
+        
 	</data>
 </openerp>

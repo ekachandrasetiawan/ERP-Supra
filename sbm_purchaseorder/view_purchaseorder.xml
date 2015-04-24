@@ -9,6 +9,7 @@
                <field name="type">form</field>
                <field name="inherit_id" ref="purchase.purchase_order_form"/>
                <field name="arch" type="xml">
+
                     <button name="print_quotation" position="after">
                          <button name="print_po_out" type="object" states="approved,draft" string="New Print" icon="gtk-print"/>
                     </button>
@@ -17,6 +18,11 @@
                          <button class="oe_highlight" name="%(printpo)d" states="approved,draft" string="Print Purchase Order" type="action"/>
                     </button>
 
+<<<<<<< HEAD
+                   <!-- <xpath expr="//button[@name='print_quotation']" position="after">
+                         <button name="print_po_out" type="object" states="approved,draft" string="Print" icon="gtk-print"/>
+                    </xpath>-->
+=======
                     
 
                     <!-- <button name="print_po_out" type="object" states="approved,draft" string="Print" icon="gtk-print"/> -->
@@ -24,6 +30,7 @@
                     <!-- <xpath expr="//button[@name='print_quotation']" position="after">
                          <button name="print_po_out" type="object" states="approved,draft" string="Print" icon="gtk-print"/>
                     </xpath> -->
+>>>>>>> fa1e397e34a7437b7b56bb2a6076808edc940dda
                        
                     <field name="name" position="replace">
                          <field name="name"/>
