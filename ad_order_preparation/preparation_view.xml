@@ -71,20 +71,12 @@
             <field name="arch" type="xml">
                 <form string="Order Packaging" version="7.0">
                 <header>
-                        <!-- <button name="%(print_preparationA4_rev)d" type="action" states="approve,draft" string="Print A4" icon="gtk-print"/> -->
                         <button name="print_preparationA5" type="object" states="approve,draft,done" string="Print A5 PDF" icon="gtk-print"/>
 
                          <button name="print_preparationA4" type="object" states="approve,draft,done" string="Print A4 PDF" icon="gtk-print"/>
-                         
-                         <!--  <button name="%(print_A4)d" type="action" states="approve,draft,done" string="Print 1 Page" icon="gtk-print"/> -->
-<!-- 
-                          <button name="%(print_A4multi)d" type="action" states="approve,draft,done" string="Print Multi Page" icon="gtk-print"/> -->
-
-                           <button name="print_op_out" type="object" states="approve,draft,done" string="Print" icon="gtk-print"/>
-
-
                         
-                        <!-- <button name="%(print_continue)d" type="action" states="approve,draft,done" string="Print Continuous" icon="gtk-print"/> -->
+                        <button name="print_op_out" type="object" states="approve,draft,done" string="Print" icon="gtk-print"/>
+
                         <button name="preparation_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize" confirm="Are you sure to ancel Order Preparation"/>
                         <button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
                         <button name="preparation_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation"/>

@@ -2,12 +2,14 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import time
 import openerp.exceptions
+from lxml import etree
 from openerp import pooler
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 import openerp.addons.decimal_precision as dp
 from openerp import netsvc
+from openerp.tools.float_utils import float_compare
 
 class sale_order(osv.osv):
 	_inherit = "sale.order"
@@ -735,7 +737,7 @@ class delivery_note(osv.osv):
 		'name': fields.char('Delivery Note', required=True, size=64, readonly=True, states={'draft': [('readonly', False)]}),
 		'prepare_id': fields.many2one('order.preparation', 'Order Packaging', domain=[('state', 'in', ['done'])], required=False, readonly=True, states={'draft': [('readonly', False)]}),
 		'tanggal' : fields.date('Delivery Date',track_visibility='onchange'),
-		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'Torefund'), ('refunde', 'Refunde')], 'State', readonly=True,track_visibility='onchange'),
+		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunde', 'Refunded')], 'State', readonly=True,track_visibility='onchange'),
 		'note_lines': fields.one2many('delivery.note.line', 'note_id', 'Note Lines', readonly=True, states={'draft': [('readonly', False)]}),
 		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange'),
 		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=', True)], readonly=True, states={'draft': [('readonly', False)]}),
@@ -748,6 +750,7 @@ class delivery_note(osv.osv):
 		'note': fields.text('Notes'),
 		'terms':fields.text('Terms & Condition'),
 		'attn':fields.many2one('res.partner',string="Attention"),
+		'refund_id':fields.many2one('stock.picking',string="Refund No", domain=[('type','=', 'in')], readonly=True),
 	}
 	_defaults = {
 		'name': '/',
@@ -759,6 +762,26 @@ class delivery_note(osv.osv):
 	 
 	_order = "name desc"
 
+	def action_process(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		if context is None:
+			context = {}
+		"""Open the partial picking wizard"""
+		context.update({
+			'active_model': 'stock.picking',
+			'active_ids': [val.refund_id.id],
+			'active_id': len([val.refund_id.id]) and [val.refund_id.id][0] or False
+		})
+		
+		return {
+			'view_type': 'form',
+			'view_mode': 'form',
+			'res_model': 'stock.partial.picking',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
 
 	def print_deliveryA4(self, cr, uid, ids, context=None):
 		data = {}
@@ -872,52 +895,39 @@ class delivery_note(osv.osv):
 			
 			return  {'value': res}
 
+
 	def return_product(self, cr, uid, ids, context=None):
 		res = {}
 		val = self.browse(cr, uid, ids)[0]
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_stock_return_picking_form')
-		# return {
-		# 	'view_mode': 'form',
-		# 	'view_id': val.prepare_id.id,
-		# 	'view_type': 'form',
-		# 	'view_name':'order.preparation.form',
-		# 	'res_model': 'order.preparation',
-		# 	# 'src_model':'stock.picking',
-		# 	'type': 'ir.actions.act_window',
-		# 	'target': 'new',
-		# 	'res_id':val.prepare_id.id,
-		# 	'key2':'client_action_multi',
-		# 	'multi':'True',
-		# 	'id':'act_stock_return_picking',
-		# }
 		res = {
 			'name':'Return Shipment',
 			'view_mode': 'form',
 			'view_id': view_id,
 			'view_type': 'form',
-			'view_name':'stock.view_stock_return_picking_form',
-			'res_model': 'stock.return.picking',
+			'view_name':'stock.stock_return_picking_memory',
+			'res_model': 'stock.return.picking.memory',
 			'type': 'ir.actions.act_window',
 			'target': 'new',
 			'res_id':val.prepare_id.picking_id.id,
 			'domain': "[('id','=',"+str(val.prepare_id.picking_id.id)+")]",
 			'key2':'client_action_multi',
-            'multi':"True",
-            'context':{
-            	'active_id':val.prepare_id.picking_id.id
-            }
+			'multi':"True",
+			'context':{
+				'active_id':val.prepare_id.picking_id.id,
+				'active_model':'stock.return.picking',
+				'active_ids':val.prepare_id.picking_id.id,
+			}
 		}
 
-		print res
-		return res
-
+		# print res
 
 	def package_validate(self, cr, uid, ids, context=None):
 
 		val = self.browse(cr, uid, ids, context={})[0]
 		print val.special
 
-		print '==================================',val.prepare_id.picking_id.state
+		# print '==================================',val.prepare_id.picking_id.state
 		if val.special==False:
 			if val.prepare_id.picking_id.state == 'confirmed' or val.prepare_id.picking_id.state == 'assigned':
 				if val.prepare_id is None:
@@ -1012,6 +1022,63 @@ class delivery_note(osv.osv):
 			return True
 			
 		return False
+
+	def do_partial(self, cr, uid, ids, context=None):
+		print '===================================EKA CHANDRA======'
+		val = self.browse(cr, uid, ids)[0]
+		assert len([val.refund_id.id]) == 1, 'Partial picking processing may only be done one at a time.'
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+		uom_obj = self.pool.get('product.uom')
+		partial = self.browse(cr, uid, [val.refund_id.id][0], context=context)
+		partial_data = {
+			'delivery_date' : partial.date
+		}
+		picking_type = partial.picking_id.type
+		for wizard_line in partial.move_ids:
+			line_uom = wizard_line.product_uom
+			move_id = wizard_line.move_id.id
+
+			if wizard_line.quantity < 0:
+				raise osv.except_osv(_('Warning!'), _('Please provide proper Quantity.'))
+
+			qty_in_line_uom = uom_obj._compute_qty(cr, uid, line_uom.id, wizard_line.quantity, line_uom.id)
+			if line_uom.factor and line_uom.factor <> 0:
+				if float_compare(qty_in_line_uom, wizard_line.quantity, precision_rounding=line_uom.rounding) != 0:
+					raise osv.except_osv(_('Warning!'), _('The unit of measure rounding does not allow you to ship "%s %s", only rounding of "%s %s" is accepted by the Unit of Measure.') % (wizard_line.quantity, line_uom.name, line_uom.rounding, line_uom.name))
+			if move_id:
+				initial_uom = wizard_line.move_id.product_uom
+
+				qty_in_initial_uom = uom_obj._compute_qty(cr, uid, line_uom.id, wizard_line.quantity, initial_uom.id)
+				without_rounding_qty = (wizard_line.quantity / line_uom.factor) * initial_uom.factor
+				if float_compare(qty_in_initial_uom, without_rounding_qty, precision_rounding=initial_uom.rounding) != 0:
+					raise osv.except_osv(_('Warning!'), _('The rounding of the initial uom does not allow you to ship "%s %s", as it would let a quantity of "%s %s" to ship and only rounding of "%s %s" is accepted by the uom.') % (wizard_line.quantity, line_uom.name, wizard_line.move_id.product_qty - without_rounding_qty, initial_uom.name, initial_uom.rounding, initial_uom.name))
+			else:
+				seq_obj_name =  'stock.picking.' + picking_type
+				move_id = stock_move.create(cr,uid,{'name' : self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+													'product_id': wizard_line.product_id.id,
+													'product_qty': wizard_line.quantity,
+													'product_uom': wizard_line.product_uom.id,
+													'prodlot_id': wizard_line.prodlot_id.id,
+													'location_id' : wizard_line.location_id.id,
+													'location_dest_id' : wizard_line.location_dest_id.id,
+													'picking_id': partial.picking_id.id
+													},context=context)
+				stock_move.action_confirm(cr, uid, [move_id], context)
+			partial_data['move%s' % (move_id)] = {
+				'product_id': wizard_line.product_id.id,
+				'product_qty': wizard_line.quantity,
+				'product_uom': wizard_line.product_uom.id,
+				'prodlot_id': wizard_line.prodlot_id.id,
+			}
+			if (picking_type == 'in') and (wizard_line.product_id.cost_method == 'average'):
+				partial_data['move%s' % (wizard_line.move_id.id)].update(product_price=wizard_line.cost,
+																		product_currency=wizard_line.currency.id)
+
+		stock_picking.do_partial(cr, uid, [partial.picking_id.id], partial_data, context=context)
+	
+		# return {'type': 'ir.actions.act_window_close'}
+
 delivery_note()
  
 
@@ -1171,3 +1238,413 @@ class stock_move(osv.osv):
 		return {'value': result}
    
 stock_move()
+
+
+# Stock return Picking
+
+class stock_return_picking_memory(osv.osv_memory):
+	_name = "stock.return.picking.memory"
+	_rec_name = 'product_id'
+
+	_columns = {
+		'product_id' : fields.many2one('product.product', string="Product", required=True),
+		'quantity' : fields.float("Quantity", digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
+		'wizard_id' : fields.many2one('stock.return.picking', string="Wizard"),
+		'move_id' : fields.many2one('stock.move', "Move"),
+		'prodlot_id': fields.related('move_id', 'prodlot_id', type='many2one', relation='stock.production.lot', string='Serial Number', readonly=True),
+
+	}
+
+stock_return_picking_memory()
+
+
+class stock_return_picking(osv.osv_memory):
+	_name = 'stock.return.picking'
+	_description = 'Return Picking'
+	_columns = {
+		'product_return_moves' : fields.one2many('stock.return.picking.memory', 'wizard_id', 'Moves'),
+		'invoice_state': fields.selection([('2binvoiced', 'To be refunded/invoiced'), ('none', 'No invoicing')], 'Invoicing',required=True),
+	}
+
+	def default_get(self, cr, uid, fields, context=None):
+		"""
+		 To get default values for the object.
+		 @param self: The object pointer.
+		 @param cr: A database cursor
+		 @param uid: ID of the user currently logged in
+		 @param fields: List of fields for which we want default values
+		 @param context: A standard dictionary
+		 @return: A dictionary with default values for all field in ``fields``
+		"""
+	   
+		result1 = []
+		if context is None:
+			context = {}
+		res = super(stock_return_picking, self).default_get(cr, uid, fields, context=context)
+
+		record_idx = context and context.get('active_id', False) or False
+
+		if context.get('active_model') == 'stock.picking':
+			record_id = context and context.get('active_id', False)
+		else:
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			record_id = val.prepare_id.picking_id.id
+
+		pick_obj = self.pool.get('stock.picking')
+		pick = pick_obj.browse(cr, uid, record_id, context=context)
+		if pick:
+			if 'invoice_state' in fields:
+				if pick.invoice_state=='invoiced':
+					res.update({'invoice_state': '2binvoiced'})
+				else:
+					res.update({'invoice_state': 'none'})
+			return_history = self.get_return_history(cr, uid, record_id, context)       
+			for line in pick.move_lines:
+				qty = line.product_qty - return_history.get(line.id, 0)
+				if qty > 0:
+					result1.append({'product_id': line.product_id.id, 'quantity': qty,'move_id':line.id, 'prodlot_id': line.prodlot_id and line.prodlot_id.id or False})
+
+			if 'product_return_moves' in fields:
+				res.update({'product_return_moves': result1})
+		return res
+
+	def view_init(self, cr, uid, fields_list, context=None):
+		"""
+		 Creates view dynamically and adding fields at runtime.
+		 @param self: The object pointer.
+		 @param cr: A database cursor
+		 @param uid: ID of the user currently logged in
+		 @param context: A standard dictionary
+		 @return: New arch of view with new columns.
+		"""
+		
+		if context is None:
+			context = {}
+		res = super(stock_return_picking, self).view_init(cr, uid, fields_list, context=context)
+		# record_id = context and context.get('active_id', False)
+		record_idx = context and context.get('active_id', False)
+
+		if context.get('active_model') == 'stock.picking':
+			record_id = context and context.get('active_id', False)
+		else:
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			record_id = val.prepare_id.picking_id.id
+
+		if record_id:
+			pick_obj = self.pool.get('stock.picking')
+			pick = pick_obj.browse(cr, uid, record_id, context=context)
+			if pick.state not in ['done','confirmed','assigned']:
+				raise osv.except_osv(_('Warning!'), _("You may only return pickings that are Confirmed, Available or Done!"))
+			valid_lines = 0
+			return_history = self.get_return_history(cr, uid, record_id, context)
+			for m  in pick.move_lines:
+				if m.state == 'done' and m.product_qty * m.product_uom.factor > return_history.get(m.id, 0):
+					valid_lines += 1
+			
+			if not valid_lines:
+				raise osv.except_osv(_('Warning!'), _("No products to return (only lines in Done state and not fully returned yet can be returned)!"))
+		return res
+	
+	def get_return_history(self, cr, uid, pick_id, context=None):
+		""" 
+		 Get  return_history.
+		 @param self: The object pointer.
+		 @param cr: A database cursor
+		 @param uid: ID of the user currently logged in
+		 @param pick_id: Picking id
+		 @param context: A standard dictionary
+		 @return: A dictionary which of values.
+		"""
+		pick_obj = self.pool.get('stock.picking')
+		pick = pick_obj.browse(cr, uid, pick_id, context=context)
+		return_history = {}
+		for m  in pick.move_lines:
+			if m.state == 'done':
+				return_history[m.id] = 0
+				for rec in m.move_history_ids2:
+					# only take into account 'product return' moves, ignoring any other
+					# kind of upstream moves, such as internal procurements, etc.
+					# a valid return move will be the exact opposite of ours:
+					#     (src location, dest location) <=> (dest location, src location))
+					if rec.location_dest_id.id == m.location_id.id \
+						and rec.location_id.id == m.location_dest_id.id:
+						return_history[m.id] += (rec.product_qty * rec.product_uom.factor)
+		return return_history
+
+	def create_returns(self, cr, uid, ids, context=None):
+		""" 
+		 Creates return picking.
+		 @param self: The object pointer.
+		 @param cr: A database cursor
+		 @param uid: ID of the user currently logged in
+		 @param ids: List of ids selected
+		 @param context: A standard dictionary
+		 @return: A dictionary which of fields with values.
+		"""
+		if context is None:
+			context = {} 
+		record_idx = context and context.get('active_id', False) or False
+
+		if context.get('active_model') == 'stock.picking':
+			record_id = context and context.get('active_id', False) or False
+		else:
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			record_id = val.prepare_id.picking_id.id
+
+		move_obj = self.pool.get('stock.move')
+		pick_obj = self.pool.get('stock.picking')
+		uom_obj = self.pool.get('product.uom')
+		data_obj = self.pool.get('stock.return.picking.memory')
+		act_obj = self.pool.get('ir.actions.act_window')
+		model_obj = self.pool.get('ir.model.data')
+		#  Delivery Note
+		del_note = self.pool.get('delivery.note')
+
+		wf_service = netsvc.LocalService("workflow")
+		pick = pick_obj.browse(cr, uid, record_id, context=context)
+		data = self.read(cr, uid, ids[0], context=context)
+		date_cur = time.strftime('%Y-%m-%d %H:%M:%S')
+		set_invoice_state_to_none = True
+		returned_lines = 0
+		
+#        Create new picking for returned products
+
+		seq_obj_name = 'stock.picking'
+		new_type = 'internal'
+		if pick.type =='out':
+			new_type = 'in'
+			seq_obj_name = 'stock.picking.in'
+		elif pick.type =='in':
+			new_type = 'out'
+			seq_obj_name = 'stock.picking.out'
+		new_pick_name = self.pool.get('ir.sequence').get(cr, uid, seq_obj_name)
+		new_picking = pick_obj.copy(cr, uid, pick.id, {
+										'name': _('%s-%s-return') % (new_pick_name, pick.name),
+										'move_lines': [], 
+										'state':'draft', 
+										'type': new_type,
+										'date':date_cur, 
+										'invoice_state': data['invoice_state'],
+		})
+		
+		val_id = data['product_return_moves']
+		for v in val_id:
+			data_get = data_obj.browse(cr, uid, v, context=context)
+			mov_id = data_get.move_id.id
+			if not mov_id:
+				raise osv.except_osv(_('Warning !'), _("You have manually created product lines, please delete them to proceed"))
+			new_qty = data_get.quantity
+			move = move_obj.browse(cr, uid, mov_id, context=context)
+			new_location = move.location_dest_id.id
+			returned_qty = move.product_qty
+			for rec in move.move_history_ids2:
+				returned_qty -= rec.product_qty
+
+			if returned_qty != new_qty:
+				set_invoice_state_to_none = False
+			if new_qty:
+				returned_lines += 1
+				new_move=move_obj.copy(cr, uid, move.id, {
+											'product_qty': new_qty,
+											'product_uos_qty': uom_obj._compute_qty(cr, uid, move.product_uom.id, new_qty, move.product_uos.id),
+											'picking_id': new_picking, 
+											'state': 'draft',
+											'location_id': new_location, 
+											'location_dest_id': move.location_id.id,
+											'date': date_cur,
+				})
+				move_obj.write(cr, uid, [move.id], {'move_history_ids2':[(4,new_move)]}, context=context)
+		if not returned_lines:
+			raise osv.except_osv(_('Warning!'), _("Please specify at least one non-zero quantity."))
+
+		if set_invoice_state_to_none:
+			pick_obj.write(cr, uid, [pick.id], {'invoice_state':'none'}, context=context)
+		wf_service.trg_validate(uid, 'stock.picking', new_picking, 'button_confirm', cr)
+		pick_obj.force_assign(cr, uid, [new_picking], context)
+		# Update view id in context, lp:702939
+
+		# update Delivery Note
+		del_note.write(cr, uid, val.id, {'state':'torefund','refund_id':new_picking}, context=context)
+
+		model_list = {
+				'out': 'stock.picking.out',
+				'in': 'stock.picking.in',
+				'internal': 'stock.picking',
+		}
+		return {
+			'domain': "[('id', 'in', ["+str(new_picking)+"])]",
+			'name': _('Returned Picking'),
+			'view_type':'form',
+			'view_mode':'tree,form',
+			'res_model': model_list.get(new_type, 'stock.picking'),
+			'type':'ir.actions.act_window',
+			'context':context,
+		}
+
+stock_return_picking()
+
+
+class stock_invoice_onshipping(osv.osv_memory):
+
+	def _get_journal(self, cr, uid, context=None):
+
+		res = self._get_journal_id(cr, uid, context=context)
+		if res:
+			return res[0][0]
+		return False
+
+	def _get_journal_id(self, cr, uid, context=None):
+		if context is None:
+			context = {}
+		print context,"--------------"
+		model = context.get('active_model')
+		viewFromDn = False
+		
+		# if not model or 'stock.picking' not in model:
+		if not model or 'stock.picking' not in model:
+			# jika dn
+			if model == 'delivery.note':
+				# jika dn
+				model = 'stock.picking'
+				viewFromDn = True
+			else:
+				return []
+		model_pool = self.pool.get(model)
+		journal_obj = self.pool.get('account.journal')
+		# res_idsx = context.get('active_ids', [])
+		if not viewFromDn:
+			# active_ids  = id stock_picking
+			res_ids = context and context.get('active_ids', [])
+		else:
+			# active_ids = id dn
+			# ambil refund_id.id
+			dn = self.pool.get('delivery.note').browse(cr,uid,context.get('active_ids'),{})[0]
+
+			res_ids = [dn.refund_id.id]
+
+		vals = []
+		browse_picking = model_pool.browse(cr, uid, res_ids, context=context)
+
+		for pick in browse_picking:
+			if not pick.move_lines:
+				continue
+			src_usage = pick.move_lines[0].location_id.usage
+			dest_usage = pick.move_lines[0].location_dest_id.usage
+			type = pick.type
+			if type == 'out' and dest_usage == 'supplier':
+				journal_type = 'purchase_refund'
+			elif type == 'out' and dest_usage == 'customer':
+				journal_type = 'sale'
+			elif type == 'in' and src_usage == 'supplier':
+				journal_type = 'purchase'
+			elif type == 'in' and src_usage == 'customer':
+				journal_type = 'sale_refund'
+			else:
+				journal_type = 'sale'
+
+			value = journal_obj.search(cr, uid, [('type', '=',journal_type )])
+			for jr_type in journal_obj.browse(cr, uid, value, context=context):
+				t1 = jr_type.id,jr_type.name
+				if t1 not in vals:
+					vals.append(t1)
+		return vals
+
+	_name = "stock.invoice.onshipping"
+	_description = "Stock Invoice Onshipping"
+
+	_columns = {
+		'journal_id': fields.selection(_get_journal_id, 'Destination Journal',required=True),
+		'group': fields.boolean("Group by partner"),
+		'invoice_date': fields.date('Invoiced date'),
+	}
+
+	_defaults = {
+		'journal_id' : _get_journal,
+	}
+
+	def view_init(self, cr, uid, fields_list, context=None):
+		if context is None:
+			context = {}
+		res = super(stock_invoice_onshipping, self).view_init(cr, uid, fields_list, context=context)
+		pick_obj = self.pool.get('stock.picking')
+		count = 0
+		active_idsx = context.get('active_ids',[])
+
+		if context.get('active_model') == 'delivery.note':
+			val = self.pool.get('delivery.note').browse(cr, uid, active_idsx[0], context=context)
+			active_ids = [val.refund_id.id]
+		else:
+			active_ids = context.get('active_ids',[])
+
+		
+
+		for pick in pick_obj.browse(cr, uid, active_ids, context=context):
+			if pick.invoice_state != '2binvoiced':
+				count += 1
+		if len(active_ids) == 1 and count:
+			raise osv.except_osv(_('Warning!'), _('This picking list does not require invoicing.'))
+		if len(active_ids) == count:
+			raise osv.except_osv(_('Warning!'), _('None of these picking lists require invoicing.'))
+		return res
+
+	def open_invoice(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		invoice_ids = []
+		data_pool = self.pool.get('ir.model.data')
+		res = self.create_invoice(cr, uid, ids, context=context)
+		invoice_ids += res.values()
+		inv_type = context.get('inv_type', False)
+		action_model = False
+		action = {}
+		if not invoice_ids:
+			raise osv.except_osv(_('Error!'), _('Please create Invoices.'))
+		if inv_type == "out_invoice":
+			action_model,action_id = data_pool.get_object_reference(cr, uid, 'account', "action_invoice_tree1")
+		elif inv_type == "in_invoice":
+			action_model,action_id = data_pool.get_object_reference(cr, uid, 'account', "action_invoice_tree2")
+		elif inv_type == "out_refund":
+			action_model,action_id = data_pool.get_object_reference(cr, uid, 'account', "action_invoice_tree3")
+		elif inv_type == "in_refund":
+			action_model,action_id = data_pool.get_object_reference(cr, uid, 'account', "action_invoice_tree4")
+		if action_model:
+			action_pool = self.pool.get(action_model)
+			action = action_pool.read(cr, uid, action_id, context=context)
+			action['domain'] = "[('id','in', ["+','.join(map(str,invoice_ids))+"])]"
+		return action
+
+	def create_invoice(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		picking_pool = self.pool.get('stock.picking')
+		
+
+		onshipdata_obj = self.read(cr, uid, ids, ['journal_id', 'group', 'invoice_date'])
+		if context.get('new_picking', False):
+			onshipdata_obj['id'] = onshipdata_obj.new_picking
+			onshipdata_obj[ids] = onshipdata_obj.new_picking
+		context['date_inv'] = onshipdata_obj[0]['invoice_date']
+		active_idsx = context.get('active_ids', [])
+
+		if context.get('active_model') == 'delivery.note':
+			val = self.pool.get('delivery.note').browse(cr, uid, active_idsx[0], context=context)
+			active_ids = [val.refund_id.id]
+		else:
+			active_ids = context.get('active_ids',[])
+
+
+		print '======================ACTIVE ID================',context.get('active_id')
+		
+		active_picking = picking_pool.browse(cr, uid, context.get('active_id',False), context=context)
+		inv_type = picking_pool._get_invoice_type(active_picking)
+		context['inv_type'] = inv_type
+		if isinstance(onshipdata_obj[0]['journal_id'], tuple):
+			onshipdata_obj[0]['journal_id'] = onshipdata_obj[0]['journal_id'][0]
+		res = picking_pool.action_invoice_create(cr, uid, active_ids,
+			  journal_id = onshipdata_obj[0]['journal_id'],
+			  group = onshipdata_obj[0]['group'],
+			  type = inv_type,
+			  context=context)
+		return res
+
+stock_invoice_onshipping()

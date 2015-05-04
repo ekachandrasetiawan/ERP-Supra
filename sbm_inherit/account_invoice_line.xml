@@ -57,6 +57,9 @@
 					<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" />
 					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" />
 					<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" />
+
+					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" type="object"  class="oe_highlight" />
+					
 				</xpath>
 				<xpath expr="//field[@name='user_id']" position="replace">
 					<field name="user_id" on_change="getGroupByUser(user_id)" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}" />

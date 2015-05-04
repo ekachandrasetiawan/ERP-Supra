@@ -535,6 +535,21 @@ class account_invoice(osv.osv):
 		}
 
 
+	def actionInvoiceRefund(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"report-accounting/nota-retur&id="+str(ids[0])+"&uid="+str(uid)
+		# urlTo = 'http://localhost/OpenPrint/web/index.php?r='+"report-accounting/nota-retur&id="+str(ids[0])+"&uid="+str(uid)
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.out',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo
+			},
+		}
+		
 	def _get_total_discount(self,cr,uid,ids,name,arg,context=None):
 		# get total discount from line
 		acc_discount_id=271
