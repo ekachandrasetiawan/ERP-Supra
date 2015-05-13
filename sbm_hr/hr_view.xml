@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+			<record id="view_permission_employee_tree" model="ir.ui.view">
+            <field name="name">hr.permission.employee.tree</field>
+            <field name="model">hr.permission.employee</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Employee Permission">
+	                <field name="employee_id"/>
+	                <field name="dept_id"/>
+	                <field name="keperluan"/>
+	                <field name="kembali"/>
+	                <field name="tanggal_jam_keluar"/>
+	                <field name="tanggal_jam_masuk"/>
+	                <field name="security"/>
+                </tree>
+            </field>
+        	</record>
+
+        	<record id="view_permission_employee_form" model="ir.ui.view">
+            <field name="name">hr.permission.employee.form</field>
+            <field name="model">hr.permission.employee</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Employee Permission" version="7.0">
+            		<header>
+	            		<button name="submit" states="draft" string="Submit" type="object" icon="gtk-apply"/>
+
+	            		<button name="approve" states="confirm" string="Approve By Manager" type="object" icon="gtk-apply"/>
+
+	            		<button name="validate" states="confirm2" string="Validate By HRD" type="object"  class="oe_highlight" icon="gtk-jump-to"/>
+
+	            		<button name="setdraft" states="confirm2,confirm" string="Set to Draft" type="object"  icon="gtk-apply"/>
+
+	            		<field name="state" widget="statusbar" statusbar_visible="draft,confirm,confirm2,done"/>
+                	</header>
+            		<sheet>
+		            <separator string="Employee Permission"/>
+					<group col="4" colspan="4">
+							<field name="name" colspan="4"/>
+		            	 	<field name="employee_id" on_change="dept_change(employee_id)"/>
+			                <field name="dept_id"  on_change="dept_change(employee_id)"/>
+			                <field name="keperluan"/>
+			                <field name="kembali"/>
+			                <field name="tanggal_jam_keluar"/>
+			                <field name="tanggal_jam_masuk"/>
+			                <field name="tujuan"/>
+			                <field name="security"/>
+		            	 </group>
+	            	</sheet>
+            	</form>
+            </field>
+         	</record>
+	        
+	        <!-- End View Form -->
+			<record model="ir.actions.act_window" id="hr_permession_list_action">
+				<field name="name">Permission Employee</field>
+				<field name="res_model">hr.permission.employee</field>
+				<field name="view_type">form</field>
+				<field name="view_mode">tree,form</field>			
+			</record>
+			
+			<record id="seq_permesion_type_new" model="ir.sequence.type">
+				<field name="name">Permesion Employee</field>
+				<field name="code">hr.permission.employee</field>
+			</record>
+			
+			<record id="seq_permesion_new" model="ir.sequence">
+				<field name="name">Permesion Employee</field>
+				<field name="code">hr.permission.employee</field>
+				<field name="prefix">TD/%(y)s/%(month)s/</field>
+				<field name="padding">5</field>
+			</record>
+
+		<!-- <menuitem id="menu_hr_main" parent="menu_hr_root" name="Permission" sequence="1"/> -->
+
+		<menuitem name="Employee Permission" parent="hr.menu_hr_main" id="menu_employee_permission" action="hr_permession_list_action" sequence="30"/>
+
+	</data>
+</openerp>
