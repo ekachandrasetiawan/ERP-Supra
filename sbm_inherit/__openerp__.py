@@ -14,6 +14,9 @@
     "description": """This module is for update openerp standart module to suprabakti mandiri
     1. Add External Doc Reference to Incoming Shipment (stock.picking.in) and validate Receive Button""",
     "init_xml": [], 
+    # 'data':[
+    #     'data/religion.xml'
+    # ],
     'update_xml': [
         "stock_picking.xml",
         "po.xml",
@@ -34,6 +37,8 @@
         # "purchase_order.xml",
     ],
     'demo_xml': [],
+    # 'demo':True,
+
     'installable': True,
     'active': False,
     'js':['static/src/js/account_invoice.js'],
