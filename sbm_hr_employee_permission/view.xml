@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
+			<record id="im_draft" model="mail.message.subtype">
+				<field name="name">Document as Draft</field>
+				<field name="default" eval="False"/>
+				<field name="res_model">hr.employee.permission</field>
+			</record>
+
+			<record id="im_confirm" model="mail.message.subtype">
+				<field name="name">Document as Check Manager</field>
+				<field name="default" eval="False"/>
+				<field name="res_model">hr.employee.permission</field>
+			</record>
+
+			<record id="im_confirm2" model="mail.message.subtype">
+				<field name="name">Document as Check HRD</field>
+				<field name="default" eval="False"/>
+				<field name="res_model">hr.employee.permission</field>
+			</record>
+
+			<record id="im_done" model="mail.message.subtype">
+				<field name="name">Document as Done</field>
+				<field name="default" eval="False"/>
+				<field name="res_model">hr.employee.permission</field>
+			</record>
+
 			<record id="view_permission_employee_tree" model="ir.ui.view">
             <field name="name">hr.employee.permission.tree</field>
             <field name="model">hr.employee.permission</field>
@@ -40,17 +64,17 @@
             		<sheet>
 		            <separator string="Employee Permission"/>
 					<group col="4" colspan="4">
-							<field name="name" colspan="4"/>
-		            	 	<field name="employee_id" on_change="dept_change(employee_id)"/>
-			                <field name="dept_id"  on_change="dept_change(employee_id)"/>
-			                <field name="affairs_type"/>
-			                <field name="back_to_office"/>
-			                <field name="date_p" />
-			                <field name="time_out" widget="float_time"/>
-			                <field name="time_back" widget="float_time"/>
-			                <field name="destination"/>
-			                <field name="security_name"/>
-		            	 </group>
+						<field name="name" colspan="4"/>
+	            	 	<field name="employee_id" on_change="dept_change(employee_id)"/>
+		                <field name="dept_id"  on_change="dept_change(employee_id)"/>
+		                <field name="affairs_type"/>
+		                <field name="back_to_office"/>
+		                <field name="date_p" />
+		                <field name="time_out" widget="float_time" on_change="onchange_time_out(time_out)"/>
+		                <field name="time_back" widget="float_time" on_change="onchange_time_back(time_back)"/>
+		                <field name="destination"/>
+		                <field name="security_name"/>
+		            </group>
 	            	</sheet>
 	            	<div class="oe_chatter">
 						<field name="message_follower_ids" widget="mail_followers"/>

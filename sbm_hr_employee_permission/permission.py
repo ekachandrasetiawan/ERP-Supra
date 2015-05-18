@@ -1,6 +1,7 @@
 import time
 from datetime import date, timedelta, datetime
 import netsvc
+from tools.translate import _
 from osv import osv, fields
 
 class HREmployeePermission(osv.osv):
@@ -8,15 +9,15 @@ class HREmployeePermission(osv.osv):
 	_name = 'hr.employee.permission'
 	_columns = {
 		'name':fields.char('No',required=True, readonly=True),
-		'employee_id':fields.many2one('hr.employee','Employee',required=True),
-		'dept_id':fields.many2one('hr.department','Department',required=True),
-		'affairs_type':fields.selection([('company','Company'),('personal','Personal affairs')],'Type of Affair',required=True),
-		'back_to_office':fields.boolean(string='Back to Office'),
-		'destination':fields.text('Destination', required=True),
-		'date_p': fields.date(string="Date", required=True),
-		'time_out':fields.float('Time Out', required=True),
-		'time_back':fields.float('Time Back'),
-		'security_name':fields.char('Security',size=30),
+		'employee_id':fields.many2one('hr.employee','Employee',required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'dept_id':fields.many2one('hr.department','Department',required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'affairs_type':fields.selection([('company','Company'),('personal','Personal affairs')],'Type of Affair',required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'back_to_office':fields.boolean(string='Back to Office',readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'destination':fields.text('Destination', required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'date_p': fields.date(string="Date",required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'time_out':fields.float('Time Out', required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'time_back':fields.float('Time Back', readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'security_name':fields.char('Security',size=30, readonly=True, states={'done':[('readonly',False)]}),
     	'state': fields.selection([
             ('draft', 'Draft'),
             ('confirm', 'Check Manager'),
@@ -47,6 +48,18 @@ class HREmployeePermission(osv.osv):
 	        return depds
 	    return False
 
+	def onchange_time_out(self, cr, uid, ids, no):
+		if float(no) < 23.9833333333 and float(no) > 0:
+			return {'value' : {'time_out' : no}}
+		else:
+			return {'warning': {"title": _("Perhatian"), "message": _("Format Time Out Not Applicable")}, 'value': {'time_out': False}}
+
+	def onchange_time_back(self, cr, uid, ids, no):
+		if float(no) < 23.9833333333 and float(no) > 0:
+			return {'value' : {'time_back' : no}}
+		else:
+			return {'warning': {"title": _("Perhatian"), "message": _("Format Time Out Not Applicable")}, 'value': {'time_back': False}}
+
 	def dept_change(self,cr,uid,ids,pid):
 		employee_id = self.pool.get('hr.employee').browse(cr,uid,pid) 
 		dept_id = employee_id.department_id.id
@@ -54,7 +67,6 @@ class HREmployeePermission(osv.osv):
 
 	def create(self, cr, uid, vals, context=None):
 		vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'hr.employee.permission.seq')
-		print "AAAAAAAAAAAAAAAAAAAAAAAAAAA",vals
 		return super(HREmployeePermission, self).create(cr, uid, vals, context=context)
 
 	def submit(self,cr,uid,ids,context=None):
@@ -85,4 +97,13 @@ class HREmployeePermission(osv.osv):
         'state': 'draft',
     }
 
+	_track = {
+		'state':{
+			'sbm_hr_employee_permission.im_confirm': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm',
+			'sbm_hr_employee_permission.im_confirm2': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm2',
+			'sbm_hr_employee_permission.im_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
+			'sbm_hr_employee_permission.im_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+		},
+	}
+	
 HREmployeePermission()

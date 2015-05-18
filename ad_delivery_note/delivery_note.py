@@ -1464,7 +1464,8 @@ class stock_return_picking(osv.osv_memory):
 		# Update view id in context, lp:702939
 
 		# update Delivery Note
-		del_note.write(cr, uid, val.id, {'state':'torefund','refund_id':new_picking}, context=context)
+		if context.get('active_model') == 'delivery.note':
+			del_note.write(cr, uid, val.id, {'state':'torefund','refund_id':new_picking}, context=context)
 
 		model_list = {
 				'out': 'stock.picking.out',
