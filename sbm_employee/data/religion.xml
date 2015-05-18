@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="data_religion_moeslem" model="hr.employee.religion">
+			<field name="name">Moeslem</field>
+		</record>
+		<record id="data_religion_christian" model="hr.employee.religion">
+			<field name="name">Christian</field>
+		</record>
+		<record id="data_religion_budha" model="hr.employee.religion">
+			<field name="name">Budha</field>
+		</record>
+		<record id="data_religion_hindu" model="hr.employee.religion">
+			<field name="name">Hindu</field>
+		</record>
+	</data>
+</openerp>

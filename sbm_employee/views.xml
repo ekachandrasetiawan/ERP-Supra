@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="data_religion_moeslem" model="hr.employee.religion">
+			<field name="name">Moeslem</field>
+		</record>
+		<record id="data_religion_christian" model="hr.employee.religion">
+			<field name="name">Christian</field>
+		</record>
+		<record id="data_religion_budha" model="hr.employee.religion">
+			<field name="name">Budha</field>
+		</record>
+		<record id="data_religion_hindu" model="hr.employee.religion">
+			<field name="name">Hindu</field>
+		</record>
+		<record id="sbm_employee_view_employee_form" model="ir.ui.view">
+			<field name="name">hr.employee.form</field>
+			<field name="model">hr.employee</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="hr.view_employee_form" />
+			<field name="arch" type="xml">
+				<sheet position="before">
+					<header>
+						<button name="action_test" string="Test Py" type="object" />
+					</header>
+				</sheet>
+				<field name="coach_id" position="after">
+					<field name="carrier_level_id" />
+				</field>
+				<field name="bank_account_id" position="after">
+					<field name="religion_id" />
+					<field name="blood_type" />
+					<field name="identity_card_expire_date" />
+					<!-- <field name="identity_card_image" /> -->
+					<field name="identity_attachment_ids" widget="many2many_binary"/>
+				</field>
+
+				<field name="address_home_id" position="after">
+					<field name="home_phone" />
+					<field name="private_mobile_no" />
+				</field>
+
+				
+				<field name="birthday" position="after">
+					<field name="birth_place" />
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>
