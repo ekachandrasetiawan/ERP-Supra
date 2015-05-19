@@ -8,15 +8,15 @@ class HREmployeePermission(osv.osv):
 	_inherit = ['mail.thread']
 	_name = 'hr.employee.permission'
 	_columns = {
-		'name':fields.char('No',required=True, readonly=True),
-		'employee_id':fields.many2one('hr.employee','Employee',required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
-		'dept_id':fields.many2one('hr.department','Department',required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
-		'affairs_type':fields.selection([('company','Company'),('personal','Personal affairs')],'Type of Affair',required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
-		'back_to_office':fields.boolean(string='Back to Office',readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
-		'destination':fields.text('Destination', required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
-		'date_p': fields.date(string="Date",required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
-		'time_out':fields.float('Time Out', required=True, readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
-		'time_back':fields.float('Time Back', readonly=True, states={'draft':[('readonly',False)],'confirm2':[('readonly',False)]}),
+		'name':fields.char('No',required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'employee_id':fields.many2one('hr.employee','Employee',required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'dept_id':fields.many2one('hr.department','Department',required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'affairs_type':fields.selection([('company','Company'),('personal','Personal affairs')],'Type of Affair',required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'back_to_office':fields.boolean(string='Back to Office', readonly=True, states={'draft':[('readonly',False)]}),
+		'destination':fields.text('Destination', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'date_p': fields.date(string="Date",required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'time_out':fields.float('Time Out', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'time_back':fields.float('Time Back', readonly=True, states={'draft':[('readonly',False)]}),
 		'security_name':fields.char('Security',size=30, readonly=True, states={'done':[('readonly',False)]}),
     	'state': fields.selection([
             ('draft', 'Draft'),
