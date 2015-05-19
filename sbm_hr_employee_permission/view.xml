@@ -6,7 +6,7 @@
 				<field name="default" eval="False"/>
 				<field name="res_model">hr.employee.permission</field>
 			</record>
-			
+
 			<record id="hep_confirm" model="mail.message.subtype">
 				<field name="name">Document as Check Manager</field>
 				<field name="default" eval="False"/>
@@ -92,6 +92,7 @@
             <field name="arch" type="xml">
                 <search string="Employee Permission">
                     <group>
+                    	<!-- Group By  -->
                         <filter icon="terp-stock_effects-object-colorize" name="employee_id" string="Group By Employee" domain="[]" context="{'group_by':'employee_id'}"/>
 
                         <filter icon="terp-stock_effects-object-colorize" name="state" string="Group By State" domain="[]" context="{'group_by':'state'}"/>
@@ -100,7 +101,16 @@
 
                         <filter icon="terp-stock_effects-object-colorize" name="date_p" string="Group By Date" domain="[]" context="{'group_by':'date_p'}"/>
 
+                        <filter icon="terp-stock_effects-object-colorize" name="dept_id" string="Group By Dept" domain="[]" context="{'group_by':'dept_id'}"/>
+
+                        <!-- Search By  -->
                         <field name="employee_id" string="Employee" filter_domain="[('employee_id','ilike',self)]"/>
+
+                        <field name="dept_id" string="Dept" filter_domain="[('dept_id','ilike',self)]"/>
+
+                        <field name="state" string="State" filter_domain="[('state','ilike',self)]"/>
+
+                        <field name="affairs_type" string="Affairs Type" filter_domain="[('affairs_type','ilike',self)]"/>
                     </group>
                 </search>
             </field>
