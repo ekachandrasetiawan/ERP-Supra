@@ -99,10 +99,10 @@ class HREmployeePermission(osv.osv):
 
 	_track = {
 		'state':{
-			'sbm_hr_employee_permission.im_confirm': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm',
-			'sbm_hr_employee_permission.im_confirm2': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm2',
-			'sbm_hr_employee_permission.im_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
-			'sbm_hr_employee_permission.im_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+			'sbm_hr_employee_permission.hep_confirm': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm',
+			'sbm_hr_employee_permission.hep_confirm2': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm2',
+			'sbm_hr_employee_permission.hep_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
+			'sbm_hr_employee_permission.hep_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
 		},
 	}
 	

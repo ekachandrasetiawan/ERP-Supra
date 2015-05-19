@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-			<record id="im_draft" model="mail.message.subtype">
+			<record id="hep_draft" model="mail.message.subtype">
 				<field name="name">Document as Draft</field>
 				<field name="default" eval="False"/>
 				<field name="res_model">hr.employee.permission</field>
 			</record>
-
-			<record id="im_confirm" model="mail.message.subtype">
+			
+			<record id="hep_confirm" model="mail.message.subtype">
 				<field name="name">Document as Check Manager</field>
 				<field name="default" eval="False"/>
 				<field name="res_model">hr.employee.permission</field>
 			</record>
 
-			<record id="im_confirm2" model="mail.message.subtype">
+			<record id="hep_confirm2" model="mail.message.subtype">
 				<field name="name">Document as Check HRD</field>
 				<field name="default" eval="False"/>
 				<field name="res_model">hr.employee.permission</field>
 			</record>
 
-			<record id="im_done" model="mail.message.subtype">
+			<record id="hep_done" model="mail.message.subtype">
 				<field name="name">Document as Done</field>
 				<field name="default" eval="False"/>
 				<field name="res_model">hr.employee.permission</field>
@@ -85,6 +85,27 @@
             </field>
          	</record>
 	        
+	        <record id="view_permission_employee_filter" model="ir.ui.view">
+            <field name="name">hr.employee.permission.select</field>
+            <field name="model">hr.employee.permission</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Employee Permission">
+                    <group>
+                        <filter icon="terp-stock_effects-object-colorize" name="employee_id" string="Group By Employee" domain="[]" context="{'group_by':'employee_id'}"/>
+
+                        <filter icon="terp-stock_effects-object-colorize" name="state" string="Group By State" domain="[]" context="{'group_by':'state'}"/>
+
+                        <filter icon="terp-stock_effects-object-colorize" name="affairs_type" string="Group By Type" domain="[]" context="{'group_by':'affairs_type'}"/>
+
+                        <filter icon="terp-stock_effects-object-colorize" name="date_p" string="Group By Date" domain="[]" context="{'group_by':'date_p'}"/>
+
+                        <field name="employee_id" string="Employee" filter_domain="[('employee_id','ilike',self)]"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
 	        <!-- End View Form -->
 			<record model="ir.actions.act_window" id="sbm_hr_employee_permission_action">
 				<field name="name">Employee Permission</field>
@@ -106,6 +127,11 @@
 			</record>
 
 		<!-- <menuitem id="menu_hr_main" parent="menu_hr_root" name="Permission" sequence="1"/> -->
+		<record model="ir.actions.act_window" id="sbm_hr_employee_permission_action">
+            <field name="name">Employee Permission</field>
+            <field name="res_model">hr.employee.permission</field>
+            <field name="search_view_id" ref="view_permission_employee_filter" />
+        </record>
 
 		<menuitem name="Employee Permission" parent="hr.menu_hr_main" id="menu_employee_permission" action="sbm_hr_employee_permission_action" sequence="30"/>
 
