@@ -24,8 +24,8 @@
 		            	<group>
 		            		<field name="join_on"/>
 		            		<field name="join_ages"/>
-		            		<field name="hr_employee_mutasi_ids" nolabel="1" colspan="4">
-  								<tree string="History Mutasi" editable="buttom">
+		            		<field name="hr_employee_mutasi_ids" nolabel="1" colspan="4" domain="[('state','=',approved)]">
+  								<tree string="Approval Information" editable="buttom">
 			            			<field name="type"/>
 					                <field name="source_department"/>
 					                <field name="source_job"/>
@@ -79,6 +79,7 @@
                 	</header>
             		<sheet>
 		            <separator string="Employee Mutasi"/>
+
 					<group col="4" colspan="4">
 						<field name="name" colspan="4"/>
 	            	 	<field name="employee_id"/>
@@ -90,6 +91,15 @@
 	            	 	<field name="active_on"/>
 	            	 	<field name="end_on"/>
 		            </group>
+		             <notebook colspan="4">
+				    		<page string="History Approval">			                 
+				    			<group>
+				            	 	<field name="submitted_by" colspan="2"/>
+				            	 	<field name="approval_1_by" colspan="2"/>
+				            	 	<field name="approval_2_by" colspan="2"/>
+			            	 	</group>
+		                	</page>
+			        </notebook>
 	            	</sheet>
             	</form>
             </field>
