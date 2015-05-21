@@ -19,8 +19,8 @@
 			<field name="type">form</field>
 			<field name="inherit_id" ref="hr.view_employee_form"/>
 			<field name="arch" type="xml">
-				<xpath expr="//page[@string='Public Information']" position="after">
-					<page string="Employeement Information">
+				<xpath expr="//page[@string='Personal Information']" position="after">
+					<page string="Employement Information">
 		            	<group>
 		            		<field name="join_on"/>
 		            		<field name="join_ages"/>

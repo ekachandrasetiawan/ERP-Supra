@@ -92,7 +92,7 @@ class HREmployeeMutasi(osv.osv):
 
 	def create(self, cr, uid, vals, context=None):
 		if vals['type'] == 'join':
-			self._validateJoin(self,cr, uid, ids, vals, context)
+			self._validateJoin(cr, uid, vals, context)
 		elif vals['type'] == 'mutation':
 			self._validateMutation(self, cr, uid, vals, context)
 		elif vals['type'] == 'promotion':
