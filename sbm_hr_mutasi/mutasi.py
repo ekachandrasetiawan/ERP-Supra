@@ -1,16 +1,47 @@
 import time
 from datetime import date, timedelta, datetime
+import datetime
 import netsvc
 from tools.translate import _
 from osv import osv, fields
 
 class EmployeeMutasi(osv.osv):
     _inherit ='hr.employee'
+
+
+    def _count_join_ages(self, cr, uid, ids, name, arg, context=None):
+    	x={}
+    	now = datetime.datetime.now()
+    	employee= self.browse(cr, uid, ids, context=context)
+    	for data in employee:
+    		if data.join_on :
+    			a = datetime.datetime.strptime(data.join_on, "%Y-%m-%d")
+    			b = now-a
+    			cek = b.days / 30
+
+    			if(cek >= 12):
+    				year= cek/12
+    			else: 
+    				year= 0
+    			
+    			if(b.days >= 30):
+    				bulan = b.days/30 % 12
+    			else:
+    				bulan = 0
+
+    			hari = b.days % 30
+
+    			x[data.id] = str(year) + " Year " + str(bulan) + " Month " + str(hari) + " Days"
+    		else:
+    			x[data.id] = "-"
+    	return x
+
     _columns = {
                 'join_on':fields.date("Join w' Company"),
-                'join_ages':fields.char('Length Of Work'),
+                'join_ages': fields.function(_count_join_ages,string="Length Of Work",type="char", store=False),
                 'hr_employee_mutasi_ids': fields.one2many('hr.employee.mutasi', 'employee_id', 'History Mutasi',readonly=True),
                 }
+
 
 EmployeeMutasi()
 
