@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record model="ir.ui.view" id="hrd_job_form_view">
+			<field name="name">hr.job</field>
+			<field name="model">hr.job</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="hr.view_hr_job_form"/>
+			<field name="arch" type="xml">
+				<field name="department_id" position="after">
+					<field name="is_dept_manager"/>
+				</field>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="hrd_detail_form_view">
+			<field name="name">hr.employee</field>
+			<field name="model">hr.employee</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="hr.view_employee_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//page[@string='Public Information']" position="after">
+					<page string="Employeement Information">
+		            	<group>
+		            		<field name="join_on"/>
+		            		<field name="join_ages"/>
+		            		<field name="hr_employee_mutasi_ids" nolabel="1" colspan="4">
+  								<tree string="History Mutasi" editable="buttom">
+			            			<field name="type"/>
+					                <field name="source_department"/>
+					                <field name="source_job"/>
+					                <field name="active_on"/>
+					                <field name="end_on"/>
+					                <field name="state"/>
+					            </tree>
+		            		</field>
+		            	</group>
+		            </page>
+				</xpath>
+			</field>
+		</record>
+
+
+		<record id="view_mutasi_employee_tree" model="ir.ui.view">
+            <field name="name">hr.employee.mutasi.tree</field>
+            <field name="model">hr.employee.mutasi</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Employee Mutasi">
+	                <field name="employee_id"/>
+	                <field name="type"/>
+	                <field name="source_department"/>
+	                <field name="source_job"/>
+	                <field name="active_on"/>
+	                <field name="end_on"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_mutasi_employee_form" model="ir.ui.view">
+            <field name="name">hr.employee.mutasi.form</field>
+            <field name="model">hr.employee.mutasi</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+            	<form string="Employee Mutasi" version="7.0">
+            		<header>
+	            		<button name="submit" states="draft" string="Submit" type="object" icon="gtk-apply"/>
+
+	            		<button name="approve" states="submitted" string="Approve By Manager" type="object" icon="gtk-apply"/>
+
+	            		<button name="waitingApproval1" states="waitingApproval1" string="Approve By HRD" type="object"  icon="gtk-apply"/>
+
+	            		<button name="waitingApproval2" states="waitingApproval2" string="Validate" type="object"  icon="gtk-apply"/>
+
+	            		<field name="state" widget="statusbar" statusbar_visible="draft,submitted,waitingApproval1,waitingApproval2,approved"/>
+
+                	</header>
+            		<sheet>
+		            <separator string="Employee Mutasi"/>
+					<group col="4" colspan="4">
+						<field name="name" colspan="4"/>
+	            	 	<field name="employee_id"/>
+	            	 	<field name="type"/>
+	            	 	<field name="source_department"/>
+	            	 	<field name="destination_department"/>
+	            	 	<field name="source_job"/>
+	            	 	<field name="destination_job"/>
+	            	 	<field name="active_on"/>
+	            	 	<field name="end_on"/>
+		            </group>
+	            	</sheet>
+            	</form>
+            </field>
+         	</record>
+
+
+		<record model="ir.actions.act_window" id="sbm_hr_employee_mutasi_action">
+			<field name="name">Employee Mutasi</field>
+			<field name="res_model">hr.employee.mutasi</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+
+		<record id="seq_permesion_type_new" model="ir.sequence.type">
+			<field name="name">Employee Mutasi Sequence</field>
+			<field name="code">hr.employee.mutasi.seq</field>
+		</record>
+			
+		<record id="seq_permesion_new" model="ir.sequence">
+			<field name="name">Employee Mutasi Seq</field>
+			<field name="code">hr.employee.mutasi.seq</field>
+			<field name="prefix">HR/MT/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+
+<!-- 		<record model="ir.actions.act_window" id="sbm_hr_employee_mutasi_action">
+            <field name="name">Employee Mutasi</field>
+            <field name="res_model">hr.employee.mutasi</field>
+            <field name="search_view_id" ref="view_mutasi_employee_filter" />
+        </record> -->
+
+		<menuitem name="Employee Mutasi" parent="hr.menu_hr_main" id="menu_employee_mutasi" action="sbm_hr_employee_mutasi_action" sequence="31"/>
+	</data>
+</openerp>
