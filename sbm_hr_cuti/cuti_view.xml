@@ -1,0 +1,52 @@
+<openerp>
+	<data>
+	<!-- 	<record model="ir.module.category" id="module_category_human_resources">
+            <field name="name">Employee Leave</field>
+        </record> -->
+
+		<record model="res.groups" id="group_hec_request_hr_staff">
+			<field name="category_id" ref="base.module_category_human_resources"/>
+			<field name="name">HR Staff</field>
+		</record>
+
+		<record model="res.groups" id="group_hec_request_supra_management">
+			<field name="category_id" ref="base.module_category_human_resources"/>
+			<field name="name">Supra Management</field>
+		</record>
+
+		<record model="res.groups" id="group_hec_request_hr_manager">
+			<field name="category_id" ref="base.module_category_human_resources"/>
+			<field name="name">HR Manager</field>
+		</record>
+
+		<record model="ir.ui.view" id="hrd_form_cuti_view">
+				<field name="name">hr.holidays</field>
+				<field name="model">hr.holidays</field>
+				<field name="type">form</field>
+				<field name="inherit_id" ref="hr_holidays.edit_holiday_new"/>
+				<field name="arch" type="xml">
+						<button name="refuse" position="replace">
+							<button string="Refuse" name="refuse" states="confirm,validate,approve_manager,approve_hrd" type="workflow" />
+						</button>
+						<button name="validate" position="replace">
+						 	<button string="Approve HRD" name="holidays_validate" states="validate1" type="object" groups="base.group_hr_user, sbm_hr_cuti.group_hec_request_hr_staff" class="oe_highlight"/>
+						</button>
+						<button name="second_validate" position="replace">
+						 	<button string="Approve Manager" name="approve_manager" states="confirm" type="object" groups="base.group_hr_user, sbm_hr_cuti.group_hec_request_supra_management" class="oe_highlight"/>
+						</button>  
+						<field name="state" position="replace">
+							<field name="state" widget="statusbar" statusbar_visible="draft,confirm,refuse,validate1,done" statusbar_colors='{"confirm":"blue","refuse":"red"}'/>
+						</field> 
+						<field name="holiday_status_id" position="after">
+								<field name="join_ages"/>
+								<field name="current_legal_leave_remain"/>
+						</field>
+						<field name="department_id" position="after">
+								<field name="holidays_addr"/>
+								<field name="notes"/>
+						</field>
+
+				</field>
+		</record>
+	</data>
+</openerp>

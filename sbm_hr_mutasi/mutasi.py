@@ -8,7 +8,6 @@ from osv import osv, fields
 class EmployeeMutasi(osv.osv):
     _inherit ='hr.employee'
 
-
     def _count_join_ages(self, cr, uid, ids, name, arg, context=None):
     	x={}
     	now = datetime.datetime.now()
