@@ -24,8 +24,8 @@
 		            	<group>
 		            		<field name="join_on"/>
 		            		<field name="join_ages"/>
-		            		<field name="hr_employee_mutasi_ids" nolabel="1" colspan="4">
-  								<tree string="History Mutasi" editable="buttom">
+		            		<field name="hr_employee_mutasi_ids" nolabel="1" colspan="4" domain="[('state','=',approved)]">
+  								<tree string="Approval Information" editable="buttom">
 			            			<field name="type"/>
 					                <field name="source_department"/>
 					                <field name="source_job"/>
@@ -39,7 +39,6 @@
 				</xpath>
 			</field>
 		</record>
-
 
 		<record id="view_mutasi_employee_tree" model="ir.ui.view">
             <field name="name">hr.employee.mutasi.tree</field>
@@ -79,6 +78,7 @@
                 	</header>
             		<sheet>
 		            <separator string="Employee Mutasi"/>
+
 					<group col="4" colspan="4">
 						<field name="name" colspan="4"/>
 	            	 	<field name="employee_id"/>
@@ -90,18 +90,45 @@
 	            	 	<field name="active_on"/>
 	            	 	<field name="end_on"/>
 		            </group>
+		             <notebook colspan="4">
+				    		<page string="History Approval">			                 
+				    			<group>
+				            	 	<field name="submitted_by" colspan="2"/>
+				            	 	<field name="approval_1_by" colspan="2"/>
+				            	 	<field name="approval_2_by" colspan="2"/>
+			            	 	</group>
+		                	</page>
+			        </notebook>
 	            	</sheet>
             	</form>
             </field>
          	</record>
 
 
-		<record model="ir.actions.act_window" id="sbm_hr_employee_mutasi_action">
-			<field name="name">Employee Mutasi</field>
-			<field name="res_model">hr.employee.mutasi</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">tree,form</field>			
-		</record>
+
+         	<record id="view_mutasi_employee_filter" model="ir.ui.view">
+            <field name="name">hr.employee.mutasi.select</field>
+            <field name="model">hr.employee.mutasi</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Employee Mutasi">
+                    <group>
+                    	<!-- Group By  -->
+                        <filter icon="terp-stock_effects-object-colorize" name="employee_id" string="Group By Employee" domain="[]" context="{'group_by':'employee_id'}"/>
+
+                        <filter icon="terp-stock_effects-object-colorize" name="state" string="Group By State" domain="[]" context="{'group_by':'state'}"/>
+
+                        <!-- Search By  -->
+                        <field name="employee_id" string="Employee" filter_domain="[('employee_id','ilike',self)]"/>
+
+                        <field name="state" string="State" filter_domain="[('state','ilike',self)]"/>
+                    </group>
+                    <group expand="1" string="Group By...">
+                        <filter icon="terp-personal" name="group_employee" string="Employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
 
 		<record id="seq_permesion_type_new" model="ir.sequence.type">
 			<field name="name">Employee Mutasi Sequence</field>
@@ -115,11 +142,17 @@
 			<field name="padding">5</field>
 		</record>
 
-<!-- 		<record model="ir.actions.act_window" id="sbm_hr_employee_mutasi_action">
+		<record model="ir.actions.act_window" id="sbm_hr_employee_mutasi_action">
             <field name="name">Employee Mutasi</field>
+            <field name="type">ir.actions.act_window</field>
             <field name="res_model">hr.employee.mutasi</field>
+            <field name="view_type">form</field>
+	        <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="view_mutasi_employee_filter" />
-        </record> -->
+
+            <field name="tree_view_id" ref="view_mutasi_employee_tree" />
+            <field name="context">{'search_default_group_employee':1}</field>
+        </record>
 
 		<menuitem name="Employee Mutasi" parent="hr.menu_hr_main" id="menu_employee_mutasi" action="sbm_hr_employee_mutasi_action" sequence="31"/>
 	</data>

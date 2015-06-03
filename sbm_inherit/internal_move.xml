@@ -13,7 +13,7 @@
 		<record model="res.groups" id="group_im_request_user">
 			<field name="category_id" ref="module_category_internal_move"/>
 			<field name="name">Internal Move Request User</field>
-		</record>f
+		</record>
 
 		<!-- GROUP FOR ADMINISTRATOR / SUPER ADMIN USER -->
 		<record model="res.groups" id="group_im_manager">

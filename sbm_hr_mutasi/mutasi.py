@@ -8,7 +8,6 @@ from osv import osv, fields
 class EmployeeMutasi(osv.osv):
     _inherit ='hr.employee'
 
-
     def _count_join_ages(self, cr, uid, ids, name, arg, context=None):
     	x={}
     	now = datetime.datetime.now()
@@ -80,9 +79,9 @@ class HREmployeeMutasi(osv.osv):
 					('approved','Approved'),
 					('canceled','Canceled')
 					], 'State'),
-		'submitted_by': fields.many2one('hr.employee', "Submitted By", required=False),
-		'approval_1_by': fields.many2one('hr.employee', "HRD Approval By"),
-		'approval_2_by': fields.many2one('hr.employee', "GM Approval By")
+		'submitted_by': fields.many2one('hr.employee', "Submitted By", required=False, readonly=True),
+		'approval_1_by': fields.many2one('hr.employee', "HRD Approval By", readonly=True),
+		'approval_2_by': fields.many2one('hr.employee', "GM Approval By", readonly=True)
 	}
 
 	_defaults = {
@@ -94,13 +93,13 @@ class HREmployeeMutasi(osv.osv):
 		if vals['type'] == 'join':
 			self._validateJoin(cr, uid, vals, context)
 		elif vals['type'] == 'mutation':
-			self._validateMutation(self, cr, uid, vals, context)
+			self._validateMutation(cr, uid, vals, context)
 		elif vals['type'] == 'promotion':
-			self._validatePromotion(self, cr, uid, vals, context)
+			self._validatePromotion(cr, uid, vals, context)
 		elif vals['type'] == 'demotion':
-			self._validateDemotion(self, cr, uid, vals, context)
+			self._validateDemotion(cr, uid, vals, context)
 		elif vals['type'] == 'resign':
-			self._validateResign(self, cr, uid, vals, context)
+			self._validateResign(cr, uid, vals, context)
 		else:
 			raise osv.except_osv(('Info..!!'), ('Type Error..'))
 
@@ -127,23 +126,23 @@ class HREmployeeMutasi(osv.osv):
 		employee_mutas = self.pool.get('hr.employee.mutasi')
 
 		mutasi = employee_mutas.browse(cr, uid, ids, context=context)[0]
-
-		#  Update Master Employee
 		employee=self.pool.get('hr.employee').search(cr,uid,[('user_id', '=' ,uid)])
-		hr_employee.write(cr, uid, mutasi.employee_id.id, {'join_on':mutasi.active_on}, context=context)
-		
+		if mutasi.type == "join":
+			#  Update Master Employee
+			hr_employee.write(cr, uid, mutasi.employee_id.id, {'join_on':mutasi.active_on}, context=context)
+
 		return self.write(cr,uid,ids,{'state':'approved','approval_2_by':employee[1]})
 
 
-	def _validateMutation(obj, cr, uid, context=None):
+	def _validateMutation(self,cr,uid,vals,context=None):
 
 		return True
 
-	def _validateDemotion(obj, cr, uid, context=None):
+	def _validateDemotion(self,cr,uid,vals,context=None):
 
 		return True
 
-	def _validatePromotion(obj, cr, uid, context=None):
+	def _validatePromotion(self,cr,uid,vals,context=None):
 
 		return True
 
