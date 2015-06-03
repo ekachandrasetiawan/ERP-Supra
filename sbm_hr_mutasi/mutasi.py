@@ -117,10 +117,10 @@ class HREmployeeMutasi(osv.osv):
 	def waitingApproval1(self, cr, uid, ids, context=None):
 		employee=self.pool.get('hr.employee').search(cr,uid,[('user_id', '=' ,uid)])
 		hasil=self.pool.get('hr.employee').browse(cr,uid,employee[1])
-		if hasil.department_id.name != 'HRD' :
-			raise osv.except_osv(('Perhatian..!!'), ('Harus Dept HRD langsung ..'))
-		else:
-			return self.write(cr,uid,ids,{'state':'waitingApproval2','approval_1_by':employee[1]})
+		# if hasil.department_id.name != 'HRD' :
+		# 	raise osv.except_osv(('Perhatian..!!'), ('Harus Dept HRD langsung ..'))
+		# else:
+		return self.write(cr,uid,ids,{'state':'waitingApproval2','approval_1_by':employee[1]})
 
 	def waitingApproval2(self, cr, uid, ids, vals, context=None):
 		hr_employee = self.pool.get('hr.employee')
