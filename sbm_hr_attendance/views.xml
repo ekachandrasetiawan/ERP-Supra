@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<!-- <record id="data_religion_moeslem" model="hr.employee.religion">
+			<field name="name">Moeslem</field>
+		</record>
+		<record id="data_religion_christian" model="hr.employee.religion">
+			<field name="name">Christian</field>
+		</record>
+		<record id="data_religion_budha" model="hr.employee.religion">
+			<field name="name">Budha</field>
+		</record>
+		<record id="data_religion_hindu" model="hr.employee.religion">
+			<field name="name">Hindu</field>
+		</record> -->
+		
+		<record id="data_attendance_manual_reason_power_err" model="hr.attendance.manual.reason">
+			<field name="name">Power System Down</field>
+			<field name="desc">Cause of power system is down and it make machine can't starting up, or machine read off</field>
+		</record>
+		<record id="data_attendance_manual_reason_machine_err" model="hr.attendance.manual.reason">
+			<field name="name">Machine Can't Work Well</field>
+			<field name="desc">Machine not work well cause system mallfunction or something</field>
+		</record>
+
+
+
+
+		<record id="view_employee_form" model="ir.ui.view">
+			<field name="name">hr.employee.form</field>
+			<field name="model">hr.employee</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="hr.view_employee_form" />
+			<field name="arch" type="xml">
+				<field name="active" position="before">
+					<field name="att_pin" />
+				</field>
+			</field>
+		</record>
+
+
+		<record id="sbm_attendance_machine_tree" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.machine.tree</field>
+			<field name="model">hr.attendance.machine</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Attendance Machine">
+					<field name="machine_id" />
+					<field name="name" />
+					<field name="desc" />
+					<field name="ip" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="sbm_atendance_machine_form" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.machine.form</field>
+			<field name="model">hr.attendance.machine</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Machine" version="7.0">
+					<header>
+						<button name="stream_data_http" type="object" string="Stream Data" />
+					</header>
+					<sheet>
+						<group col="4">
+							<field name="machine_id" />
+							<field name="name" />
+							<field name="ip" />
+							<field name="port" />
+							<field name="key" />
+							<field name="desc" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_attendance_machine">
+			<field name="name">Attendance Machine Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">hr.attendance.machine</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem name="Machine" parent="hr.menu_hr_configuration" id="sbm_hr_attendance_machine_menu" sequence="1" action="action_attendance_machine" />
+		
+
+
+		<!-- ATTENDANCE LOG -->
+		<record id="sbm_attendance_log_tree" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.log.tree</field>
+			<field name="model">hr.attendance.log</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree create="false" string="Attendance Log">
+					<field name="name" />
+					<field name="employee_id" />
+					<!-- <field name="datetime_log" /> -->
+					<field name="log_time" />
+					<field name="m_status" />
+					<field name="m_work_code" />
+					<field name="manual_reason_id" />
+				</tree>
+			</field>
+		</record>
+		
+		<record id="sbm_attendance_log_form" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.log.form</field>
+			<field name="model">hr.attendance.log</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form create="false" edit="false" string="Log" version="7.0">
+					<sheet>
+						<group col="1">
+							<field name="name" />
+							<field name="employee_id" />
+							<field name="log_time"/>
+							<field name="manual_log_time" widget="date" />
+							<field name="m_status" />
+							<field name="m_work_code" />
+							<field name="manual_reason_id" />
+							<field name="state" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		
+
+		<record id="sbm_attendance_manual_log_tree" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.manual.log.tree</field>
+			<field name="model">hr.attendance.log</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Attendance Log">
+					<field name="name" />
+					<field name="employee_id" />
+					<field name="manual_log_time" />
+					<field name="state" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="sbm_attendance_manual_log_form" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.manual.log.form</field>
+			<field name="model">hr.attendance.log</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Log" version="7.0">
+					<sheet>
+						<group col="1">
+							<field name="employee_id" />
+							<field name="manual_log_time" widget="datetime" />
+							<field name="m_status"/>
+							<field name="state" widget="statusbar" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		<record model="ir.actions.act_window" id="action_attendance_log">
+			<field name="name">Attendance Log Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">hr.attendance.log</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('is_manual','=',False)]</field>
+			<!-- <field name="view_id" ref="sbm_attendance_log_tree" /> -->
+		</record>
+		<record model="ir.actions.act_window.view" id="action_attendance_log_tree_view">
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="sbm_attendance_log_tree" />
+			<field name="act_window_id" ref="action_attendance_log" />
+		</record>
+		<record model="ir.actions.act_window.view" id="action_attendance_log_form_view">
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="sbm_attendance_log_form" />
+			<field name="act_window_id" ref="action_attendance_log" />
+		</record>
+
+		<!-- MANUAL LOG ACTION -->
+		<record model="ir.actions.act_window" id="action_manual_attendance_log">
+			<field name="name">Attendance Log Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">hr.attendance.log</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('is_manual','=',True)]</field>
+			<!-- <field name="view_id" ref="sbm_attendance_manual_log_tree" /> -->
+		</record>
+
+		<record model="ir.actions.act_window.view" id="action_manual_attendance_log_tree_view">
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="sbm_attendance_manual_log_tree" />
+			<field name="act_window_id" ref="action_manual_attendance_log" />
+		</record>
+		<record model="ir.actions.act_window.view" id="action_manual_attendance_log_form_view">
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="sbm_attendance_manual_log_form" />
+			<field name="act_window_id" ref="action_manual_attendance_log" />
+		</record>
+		<!-- END MANUAL LOG ACTION -->
+
+
+
+		<menuitem name="Attendances" parent="hr.menu_hr_root" id="sbm_hr_attendance_menu" groups="base.group_user" />
+		<menuitem name="Machine Log" parent="sbm_hr_attendance.sbm_hr_attendance_menu" id="sbm_hr_attendance_log_menu" sequence="1" action="action_attendance_log" />
+		<menuitem name="Manual Log" parent="sbm_hr_attendance.sbm_hr_attendance_menu" id="sbm_hr_manual_attendance_log_menu" sequence="1" action="action_manual_attendance_log" />
+		
+
+		
+
+
+		<record id="sbm_attendance_min_max_log_tree" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.min.max.log.tree</field>
+			<field name="model">hr.attendance.min.max.log</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Attendance Min Max Log">
+					<field name="y_log" />
+					<field name="m_log" />
+					<field name="d_log" invisible="1" />
+					<field name="dept_id" />
+					<field name="employee_id" />
+					<field name="min_log" />
+					<field name="max_log" />
+					<field name="attendance_time" />
+					<!-- <field name="datetime_log" /> -->
+				</tree>
+			</field>
+		</record>
+
+		<record id="sbm_attendance_min_max_log_form" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.min.max.log.form</field>
+			<field name="model">hr.attendance.min.max.log</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Log" version="7.0">
+					<sheet>
+						<group col="1">
+							<field name="employee_id" />
+							<field name="min_log" />
+							<field name="min_state_log" />
+							<field name="max_log" />
+							<field name="max_state_log" />
+							<field name="attendance_time" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="sbm_attendance_min_max_log_search" model="ir.ui.view">
+			<field name="name">sbm.hr.attendance.min.max.log.search</field>
+			<field name="model">hr.attendance.min.max.log</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Min Max Log Att Search">
+					<group expand="!" string="Filter By">
+						<filter string="Today Log" name="today_log_min_max" icon="terp-check" domain="[('state','=','draft')]" help="Show Only Log "/>
+						<filter string="My Attendance" name="" icon="terp-check" domain="[('employee_id.user_id','=', uid)]" help="Show Only My Attendance Record"/>
+						<filter string="Refused" name="" icon="terp-check" domain="[('state','=','refuse')]" help="Show Only Refused Leave Request"/>
+						<filter string="Approved" name="" icon="terp-check" domain="[('state','=','validate1')]" help="Show Leave where already aproved by manager"/>
+					</group>
+					<group expand="1" string="Group By...">
+						<filter icon="terp-personal" name="group_dept" string="Department." domain="[]" context="{'group_by':'dept_id'}"/>
+						<filter icon="terp-personal" name="group_year_n_month" string="Years and Months" domain="[]" context="{'group_by':['y_log','m_log']}"/>
+						<filter icon="terp-personal" name="group_day" string="Day" domain="[]" context="{'group_by':'d_log'}"/>
+					</group>
+					<newline/>
+				</search>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_attendance_min_max_log">
+			<field name="name">Attendance Min Max Log Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">hr.attendance.min.max.log</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{'search_default_group_year_n_month':1}</field>
+		</record>
+		
+
+		<menuitem name="Min Max Log" parent="sbm_hr_attendance.sbm_hr_attendance_menu" id="sbm_hr_attendance_min_max_log_menu" sequence="1" action="action_attendance_min_max_log" groups="base.group_user" />
+	</data>
+</openerp>
