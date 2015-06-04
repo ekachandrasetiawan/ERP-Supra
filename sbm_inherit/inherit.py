@@ -2359,3 +2359,8 @@ class sale_advance_payment_inv(osv.osv_memory):
 			}
 			result.append((sale.id, inv_values))
 		return result
+	class res_partner_fix(osv.Model):
+		_inherit = "res.partner"
+		_columns = {
+			'commercial_partner_id': fields.integer("commercial_partner_id",required=False),
+		}
