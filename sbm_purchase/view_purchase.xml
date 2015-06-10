@@ -42,7 +42,6 @@
 			                <field name="employee_id" on_change="setDept(employee_id)"/>
 			                <field name="spk_no"/>
 			                <field name="department_id" on_change="setDept(employee_id)"/>
-			                <!--<field name="customer_id"/>-->
 			                <field name="tanggal" on_change="setDeuDate(tanggal)"/>
 			                <field name="duedate" on_change="setTanggal(tanggal,duedate)"/>
 			                <field name="ref_pb"/>
@@ -56,7 +55,7 @@
 			                            <field name="part_no"/>
 			                            <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
 			                            <field name="qty_available" on_change="jmlQty(jumlah_diminta)"/>
-			                            <field name="satuan"/>
+			                            <field name="satuan" on_change="onchange_product_new(name, satuan)"/>
 			                            <field name="stok"/>
 						    <field name="keterangan"/>
 			                            <field name="state"/>

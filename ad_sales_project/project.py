@@ -860,7 +860,7 @@ class before_plan_senin(osv.osv):
 	_name = "before.plan.senin"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -872,7 +872,7 @@ class after_plan_senin(osv.osv):
 	_name = "after.plan.senin"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -886,7 +886,7 @@ class before_actual_senin(osv.osv):
 	_idx = 1
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -949,7 +949,7 @@ class after_actual_senin(osv.osv):
 	_idx = 1
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1015,7 +1015,7 @@ class before_plan_selasa(osv.osv):
 	_name = "before.plan.selasa"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1027,7 +1027,7 @@ class after_plan_selasa(osv.osv):
 	_name = "after.plan.selasa"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1041,7 +1041,7 @@ class before_actual_selasa(osv.osv):
 	_idx = 2
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1107,7 +1107,7 @@ class after_actual_selasa(osv.osv):
 	_idx=2
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1175,7 +1175,7 @@ class before_plan_rabu(osv.osv):
 	_name = "before.plan.rabu"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1187,7 +1187,7 @@ class after_plan_rabu(osv.osv):
 	_name = "after.plan.rabu"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1201,7 +1201,7 @@ class before_actual_rabu(osv.osv):
 	_idx=3
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1267,7 +1267,7 @@ class after_actual_rabu(osv.osv):
 	_idx=3
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1335,7 +1335,7 @@ class before_plan_kamis(osv.osv):
 	_name = "before.plan.kamis"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1347,7 +1347,7 @@ class after_plan_kamis(osv.osv):
 	_name = "after.plan.kamis"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1361,7 +1361,7 @@ class before_actual_kamis(osv.osv):
 	_idx=4
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1427,7 +1427,7 @@ class after_actual_kamis(osv.osv):
 	_idx=4
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1493,7 +1493,7 @@ class before_plan_jumat(osv.osv):
 	_name = "before.plan.jumat"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1505,7 +1505,7 @@ class after_plan_jumat(osv.osv):
 	_name = "after.plan.jumat"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1519,7 +1519,7 @@ class before_actual_jumat(osv.osv):
 	_idx=5
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1585,7 +1585,7 @@ class after_actual_jumat(osv.osv):
 	_idx=5
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'batal': fields.boolean('Cancel ?', help="Check jika actual tidak sesuai plan"),
 		'jenis': fields.selection([('plan', 'Plan'), ('actual', 'Actual')], 'Jenis'),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
@@ -1652,7 +1652,7 @@ class before_plan_sabtu(osv.osv):
 	_name = "before.plan.sabtu"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1664,7 +1664,7 @@ class after_plan_sabtu(osv.osv):
 	_name = "after.plan.sabtu"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1678,7 +1678,7 @@ class before_actual_sabtu(osv.osv):
 	_idx=6
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1717,7 +1717,7 @@ class after_actual_sabtu(osv.osv):
 	_idx=6
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1759,7 +1759,7 @@ class before_plan_ahad(osv.osv):
 
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1771,7 +1771,7 @@ class after_plan_ahad(osv.osv):
 	_name = "after.plan.ahad"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1785,7 +1785,7 @@ class before_actual_ahad(osv.osv):
 	_idx=0
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1824,7 +1824,7 @@ class after_actual_ahad(osv.osv):
 	_idx=0
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation'),
 		'location': fields.char('Location', size=64, required=True),
 		'activity_id': fields.many2one('sales.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1868,7 +1868,7 @@ class wizard_before_plan_senin(osv.osv):
 	_name = "wizard.before.plan.senin"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1880,7 +1880,7 @@ class wizard_after_plan_senin(osv.osv):
 	_name = "wizard.after.plan.senin"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1893,7 +1893,7 @@ class wizard_before_actual_senin(osv.osv):
 	_name = "wizard.before.actual.senin"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1905,7 +1905,7 @@ class wizard_after_actual_senin(osv.osv):
 	_name = "wizard.after.actual.senin"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1919,7 +1919,7 @@ class wizard_before_plan_selasa(osv.osv):
 	_name = "wizard.before.plan.selasa"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1931,7 +1931,7 @@ class wizard_after_plan_selasa(osv.osv):
 	_name = "wizard.after.plan.selasa"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1944,7 +1944,7 @@ class wizard_before_actual_selasa(osv.osv):
 	_name = "wizard.before.actual.selasa"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1956,7 +1956,7 @@ class wizard_after_actual_selasa(osv.osv):
 	_name = "wizard.after.actual.selasa"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1970,7 +1970,7 @@ class wizard_before_plan_rabu(osv.osv):
 	_name = "wizard.before.plan.rabu"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1982,7 +1982,7 @@ class wizard_after_plan_rabu(osv.osv):
 	_name = "wizard.after.plan.rabu"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -1995,7 +1995,7 @@ class wizard_before_actual_rabu(osv.osv):
 	_name = "wizard.before.actual.rabu"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2007,7 +2007,7 @@ class wizard_after_actual_rabu(osv.osv):
 	_name = "wizard.after.actual.rabu"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2021,7 +2021,7 @@ class wizard_before_plan_kamis(osv.osv):
 	_name = "wizard.before.plan.kamis"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2033,7 +2033,7 @@ class wizard_after_plan_kamis(osv.osv):
 	_name = "wizard.after.plan.kamis"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2046,7 +2046,7 @@ class wizard_before_actual_kamis(osv.osv):
 	_name = "wizard.before.actual.kamis"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2058,7 +2058,7 @@ class wizard_after_actual_kamis(osv.osv):
 	_name = "wizard.after.actual.kamis"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2072,7 +2072,7 @@ class wizard_before_plan_jumat(osv.osv):
 	_name = "wizard.before.plan.jumat"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2084,7 +2084,7 @@ class wizard_after_plan_jumat(osv.osv):
 	_name = "wizard.after.plan.jumat"
 	_columns = {
 		'name': fields.text('Objectives', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2097,7 +2097,7 @@ class wizard_before_actual_jumat(osv.osv):
 	_name = "wizard.before.actual.jumat"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),
@@ -2109,7 +2109,7 @@ class wizard_after_actual_jumat(osv.osv):
 	_name = "wizard.after.actual.jumat"
 	_columns = {
 		'name': fields.text('Results', required=True),
-		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True)]),
+		'partner_id': fields.many2one('res.partner', 'Customer', domain=[('customer','=',True),('is_company','=',True)]),
 		'order_id': fields.many2one('sale.order', 'Quotation', readonly=True),
 		'location': fields.char('Location', size=64, required=True),
 		'wizard_id': fields.many2one('wizard.activity', 'Sales Activity', required=True, ondelete='cascade'),

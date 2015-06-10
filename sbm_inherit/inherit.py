@@ -1310,9 +1310,21 @@ class stock_move(osv.osv):
 	
 	_inherit = 'stock.move'
 	_columns = {
-		'cancel_notes':fields.text('Cancel Notes',required=False)
+		'cancel_notes':fields.text('Cancel Notes',required=False),
+		'product_uom': fields.many2one('product.uom', 'Unit of Measure', required=True,states={'done': [('readonly', True)]}),
 	}
 	
+	def onchange_product_new(self, cr, uid, ids, name, satuan, context=None):
+		if name:
+			product_id =self.pool.get('product.product').browse(cr,uid,name)
+			if product_id.categ_id.id == 105:
+				uom=satuan
+			else:
+				uom=product_id.uom_id.id
+		else:
+			uom=1
+		return {'value':{'product_uom':uom}}
+
 # Fixing bug min_date on picking when null it will be filled timestamp
 class stockPicking(osv.osv):
 	_inherit = 'stock.picking'

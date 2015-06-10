@@ -29,8 +29,17 @@
 			<field name="arch" type="xml">
 				<field name="price_unit" position="after">
 					<field name="product_onhand" on_change="product_id_change(parent.pricelist_id, product_id, product_uom_qty, product_uom, product_uos_qty, product_uos, name, parent.partner_id, False, True, parent.date_order, False, parent.fiscal_position, False, context)"/>
+
+
 					<field name="product_future" on_change="product_id_change(parent.pricelist_id, product_id, product_uom_qty, product_uom, product_uos_qty, product_uos, name, parent.partner_id, False, True, parent.date_order, False, parent.fiscal_position, False, context)"/>
 				</field>								
+                    
+
+                <field name="product_uom" position="replace">
+                      <field name="product_uom" groups="product.group_uom" class="oe_inline oe_no_button"
+                        on_change="product_uom_change_new(product_id,product_uom)"/>
+                </field>
+
 				<field name="partner_id" position="replace">
 					<field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True), ('is_company', '=', True)]" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
 				</field>
@@ -275,7 +284,6 @@
             <field name="arch" type="xml">
                 <field name="name" position="after">
                     <field name="desc" />
-                    
                 </field>
             </field>
         </record>
