@@ -131,6 +131,18 @@ class Detail_PB(osv.osv):
 
     _defaults = {'state': 'draft'}
 
+
+    def onchange_product_new(self, cr, uid, ids, name, satuan, context=None):
+    	if name:
+    		product_id =self.pool.get('product.product').browse(cr,uid,name)
+    		if product_id.categ_id.id == 105:
+    			uom=satuan
+    		else:
+    			uom=product_id.uom_id.id
+    	else:
+    		uom=1
+    	return {'value':{'satuan':uom}}
+
     def setvariants(self,cr,uid,ids, pid):
     	if pid:
 	    	cek=self.pool.get('product.variants').search(cr,uid,[('product_id', '=' ,pid)])

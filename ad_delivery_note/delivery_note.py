@@ -522,11 +522,27 @@ class sale_order_line(osv.osv):
 	_columns = {
 		'product_onhand': fields.float('On Hand', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
 		'product_future': fields.float('Available', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
+		'product_uom': fields.many2one('product.uom', 'Unit of Measure ', required=True, readonly=True, states={'draft': [('readonly', False)]}),
+		'product_uos': fields.many2one('product.uom', 'Product UoS'),
+		'product_uom_qty': fields.float('Quantity', digits_compute= dp.get_precision('Product UoS'), required=True, readonly=True, states={'draft': [('readonly', False)]}),
 	}
 
 	_defaults = {
 		'sequence': 0,
 	}
+
+	def product_uom_change_new(self, cr, uid, ids, product, product_uom, context=None):
+		if product:
+			product_id =self.pool.get('product.product').browse(cr,uid,product)
+			if product_id.categ_id.id == 12:
+				uom=product_uom
+			else:
+				uom=product_id.uom_id.id
+		else:
+			uom=1
+		return {'value':{'product_uom':uom}}
+
+
 	def product_id_change(self, cr, uid, ids, pricelist, product, qty=0, uom=False, qty_uos=0, uos=False, name='', partner_id=False, lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
 		context = context or {}
 		lang = lang or context.get('lang',False)
@@ -1188,10 +1204,11 @@ class stock_move(osv.osv):
 	_columns = {
 		'no': fields.integer('No', size=3),
 		'desc':fields.text('Description',required=False),
+		'product_uom': fields.many2one('product.uom', 'Unit of Measure', required=True,states={'done': [('readonly', True)]}),
 		'name':fields.text('Product Name',required=False),
 		'set_id':fields.many2one('move.set.data',string="Set Product",ondelete="cascade")
 	}
-	
+
 	# def onchange_product_id(self,cr,uid,ids,prd,location_id, location_dest_id, partner):
 	#     hasil=self.pool.get('product.product').browse(cr,uid,[prd])[0]
 	#     uom=self.pool.get('product.template').browse(cr,uid,[prd])[0]
@@ -1236,7 +1253,20 @@ class stock_move(osv.osv):
 		if loc_dest_id:
 			result['location_dest_id'] = loc_dest_id
 		return {'value': result}
-   
+
+
+	def onchange_product_uom_new(self, cr, uid, ids, product, product_uom, context=None):
+		if product:
+			product_id =self.pool.get('product.product').browse(cr,uid,product)
+			if product_id.categ_id.id == 12:
+				uom=product_uom
+			else:
+				uom=product_id.uom_id.id
+		else:
+			uom=1
+		return {'value':{'product_uom':uom}}
+
+
 stock_move()
 
 

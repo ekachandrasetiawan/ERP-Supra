@@ -168,6 +168,10 @@
 				<xpath expr="//field[@name='name']" position="after">
 					<field name="cancel_notes" />
 				</xpath>
+
+				<field name="product_uom" position="replace">
+					 <field name="product_uom" on_change="onchange_product_new(product_id,product_uom)"/>
+				</field>
 			</field>
 		</record>
 	</data>

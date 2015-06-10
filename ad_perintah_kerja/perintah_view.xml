@@ -29,13 +29,6 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form" />
             <field name="arch" type="xml">
-               <!--  <xpath expr="//field[@name='state']" position="before">
-	                <button name="%(form_quotation)d" string="Print Penawaran" type="action" states="draft,sent" class="oe_highlight" />
-	            </xpath>
-	              <xpath expr="//field[@name='state']" position="before">
-	                <button name="%(form_salesorder)d" string="Print Sales Order" type="action" states="progress,manual" class="oe_highlight" />
-	            </xpath> -->
-
 	             <xpath expr="//field[@name='state']" position="before">
 	                <button name="%(form_quotation_new)d" string="Print Penawaran" type="action" states="draft,sent" class="oe_highlight" />
 	            </xpath>
