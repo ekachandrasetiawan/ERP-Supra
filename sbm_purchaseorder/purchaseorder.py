@@ -218,7 +218,7 @@ class purchase_order_line_detail(osv.osv):
 			variants=[('id','in',tuple(product))]
 		res['domain'] =False
 		res['domain'] = {'variants': [('product_id','=',product_id)]}
-		print '===============================================ok=================',res
+		# print '===============================================ok=================',res
 		return res
 
 	def onchange_product_new(self, cr, uid, ids, product, product_uom, context=None):
@@ -227,9 +227,12 @@ class purchase_order_line_detail(osv.osv):
 			if product_id.categ_id.id == 12:
 				uom=product_uom
 			else:
-				uom=product_id.uom_id.id
+				if product_id.sale_ok and product_id.purchase_ok:
+					uom=product_uom
+				else:
+					uom=product_id.uom_id.id
 		else:
-			uom=1
+			uom=product_uom
 		return {'value':{'product_uom':uom}}
 
 		
