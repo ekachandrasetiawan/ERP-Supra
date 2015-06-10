@@ -67,7 +67,20 @@ class PurchaseOrder(osv.osv):
 	# 	'bank_statement_lines':fields.one2many('account.bank.statement.line','po_id',string="First Payments"),
 	# }
 
-
+	def actionInvoiceRefund(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"report-accounting/nota-retur&id="+str(ids[0])+"&uid="+str(uid)
+		# urlTo = 'http://localhost/OpenPrint/web/index.php?r='+"report-accounting/nota-retur&id="+str(ids[0])+"&uid="+str(uid)
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.out',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo
+			},
+		}
 	def _get_total_discount(self, cr, uid, ids, name, arg, context=None):
 		dis = {}
 		
@@ -535,21 +548,6 @@ class account_invoice(osv.osv):
 		}
 
 
-	def actionInvoiceRefund(self,cr,uid,ids,context=None):
-		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
-		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"report-accounting/nota-retur&id="+str(ids[0])+"&uid="+str(uid)
-		# urlTo = 'http://localhost/OpenPrint/web/index.php?r='+"report-accounting/nota-retur&id="+str(ids[0])+"&uid="+str(uid)
-		return {
-			'type'	: 'ir.actions.client',
-			'target': 'new',
-			'tag'	: 'print.out',
-			'params': {
-				# 'id'	: ids[0],
-				'redir'	: urlTo
-			},
-		}
-		
 	def _get_total_discount(self,cr,uid,ids,name,arg,context=None):
 		# get total discount from line
 		acc_discount_id=271
@@ -1111,7 +1109,7 @@ class ClassName(osv.osv):
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_inherit', 'wizard_po_cancel_item_form')
 
-		print "<<<<<<<<<<<<<<<<<<<<",view_id
+		# print "<<<<<<<<<<<<<<<<<<<<",view_id
 
 		context.update({
 			'active_model': self._name,
@@ -1134,7 +1132,7 @@ class ClassName(osv.osv):
 class WizardPOCancelItem(osv.osv_memory):
 
 	def default_get(self, cr, uid, fields, context=None):
-		print "CALLLLEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+		# print "CALLLLEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
 		if context is None: context = {}
 		po_ids = context.get('active_ids', [])
 		active_model = context.get('active_model')
@@ -1804,9 +1802,8 @@ class InternalMove(osv.osv):
 			data.picking_id.write({'state':'done'})
 			data.write({'state':'transfered','date_transfered':time.strftime('%Y-%m-%d')})
 			res = True
-			
-
 		return res
+	
 	def _checkRequestProcessed(self,cr,uid,data,context={}):
 		res =True
 
@@ -2387,3 +2384,8 @@ class sale_advance_payment_inv(osv.osv_memory):
 			}
 			result.append((sale.id, inv_values))
 		return result
+	class res_partner_fix(osv.Model):
+		_inherit = "res.partner"
+		_columns = {
+			'commercial_partner_id': fields.integer("commercial_partner_id",required=False),
+		}
