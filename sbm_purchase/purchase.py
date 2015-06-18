@@ -153,7 +153,6 @@ class Detail_PB(osv.osv):
 	    	return {'domain': {'variants': [('id','in',tuple(product))]},'value':{'part_no':pn,'stok':products.qty_available,'satuan':products.uom_id.id}}
 
 	def productvar(self,cr,uid,ids,idp):
-		# cek=self.pool.get('product.variants').search(cr,uid,[('product_id', '=' ,idp)])
 		print '========================',idp
 		hasil=self.pool.get('product.variants').browse(cr,uid,idp)
 		return {'value':{ 

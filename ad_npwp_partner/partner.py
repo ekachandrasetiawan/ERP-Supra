@@ -18,6 +18,25 @@ class partner(osv.osv):
                 return {'value': {'npwp': result}}
         return True
 
+    def create(self, cr, uid, vals, context=None):
+
+        if vals['is_company']==True:
+            cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])
+            if cek:
+                raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
+        return super(partner, self).create(cr, uid, vals, context=context)
+
+    def write(self,cr,uid,ids,vals,context={}):
+        cek=self.pool.get('res.partner').search(cr,uid,[('id', '=' ,ids)])
+        hasil=self.pool.get('res.partner').browse(cr,uid,cek)[0]
+        print '=========================oooooo===========',hasil['is_company']
+        if hasil['is_company']==True:
+            cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,hasil['npwp'])])
+            if cek:
+                raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
+
+        return super(partner, self).write(cr, uid, ids, vals, context=context)
+
 partner()
 
 

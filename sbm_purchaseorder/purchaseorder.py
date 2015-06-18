@@ -219,7 +219,6 @@ class purchase_order_line_detail(osv.osv):
 			res['value']['product_uom'] = products.uom_id.id
 		res['domain'] =False
 		res['domain'] = {'variants': [('product_id','=',product_id)]}
-		print '===============================================ok=================',res
 		return res
 
 	def onchange_product_new(self, cr, uid, ids, product, product_uom, context=None):
