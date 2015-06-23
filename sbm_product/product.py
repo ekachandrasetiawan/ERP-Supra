@@ -22,13 +22,13 @@ class product_product(osv.osv):
 				raise osv.except_osv(('Perhatian..!!'), ('Part Number Unique ..'))
 		return super(product_product, self).create(cr, uid, vals, context=context)
 
-	def write(self,cr,uid,ids,vals,context={}):
-		cek=self.pool.get('product.product').search(cr,uid,[('id', '=' ,ids)])
-		hasil=self.pool.get('product.product').browse(cr,uid,cek)[0]
-		if vals['default_code']:
-			cek=self.pool.get('product.product').search(cr,uid,[('default_code', '=' ,vals['default_code'])])
-			if cek:
-				raise osv.except_osv(('Perhatian..!!'), ('Part Number Unique ..'))
-		return super(product_product, self).write(cr, uid, ids, vals, context=context)
+	# def write(self,cr,uid,ids,vals,context={}):
+	# 	cek=self.pool.get('product.product').search(cr,uid,[('id', '=' ,ids)])
+	# 	hasil=self.pool.get('product.product').browse(cr,uid,cek)[0]
+	# 	if vals['default_code']:
+	# 		cek=self.pool.get('product.product').search(cr,uid,[('default_code', '=' ,vals['default_code'])])
+	# 		if cek:
+	# 			raise osv.except_osv(('Perhatian..!!'), ('Part Number Unique ..'))
+	# 	return super(product_product, self).write(cr, uid, ids, vals, context=context)
 
 product_product()
