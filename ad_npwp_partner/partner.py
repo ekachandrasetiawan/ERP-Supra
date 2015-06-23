@@ -36,28 +36,39 @@ class partner(osv.osv):
 
 	def write(self,cr,uid,ids,vals,context={}):
 		cek=self.pool.get('res.partner').search(cr,uid,[('id', '=' ,ids)])
-		hasil=self.pool.get('res.partner').browse(cr,uid,cek)[0]
+		partner_ids=self.pool.get('res.partner').browse(cr,uid,cek)
 		
-		if hasil['is_company']==True:
-			# NPWP di awal tidak ada, maka hasilnya False
-			if hasil['npwp']==False:
-				if vals['npwp']=='11111111111111111111':
-					vals['npwp']=='11111111111111111111'
-				else:
-					cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])	
-					if cek:
-						raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
-			
-			# NPWP awal ada valuenya
-			else:
-				if 'npwp' in vals:
-					if vals['npwp']=='11111111111111111111':
+		if partner_ids:
+			hasil = partner_ids[0]
+			if hasil['is_company']==True:
+				# NPWP di awal tidak ada, maka hasilnya False
+				if hasil['npwp']==False:
+					if 'npwp' in vals and vals['npwp']=='11111111111111111111':
 						vals['npwp']=='11111111111111111111'
 					else:
-						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])
-						if cek:
+						if 'npwp' in vals:
+							ceknpwp =vals['npwp'] 
+						else:
+							ceknpwp=hasil['npwp']
+						if 'is_company' in vals:
+							is_company = vals['is_company']
+						else:
+							is_company = hasil['is_company']
+						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,ceknpwp), ('is_company', '=' ,True)])
+
+						if cek and is_company:
 							raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
-							
+				
+				# NPWP awal ada valuenya
+				else:
+					if 'npwp' in vals:
+						if vals['npwp']=='11111111111111111111':
+							vals['npwp']=='11111111111111111111'
+						else:
+							cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp']), ('is_company', '=' ,True)])
+							if cek:
+								raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
+		print '======================',vals, ids, context
 		return super(partner, self).write(cr, uid, ids, vals, context=context)
 
 partner()
