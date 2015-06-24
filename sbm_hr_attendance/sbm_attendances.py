@@ -12,10 +12,35 @@ from openerp.tools.translate import _
 from osv import osv, fields
 from xml.etree import ElementTree as ET
 
+
+class hr_attendance_type(osv.osv):
+	_name = 'hr.attendance.type'
+	_columns = {
+		'name': fields.char('Name',required=True),
+		'desc': fields.text('Desc',required=False),
+		# 'notes': fields.text('Notes'),
+		'is_shift_time':fields.boolean('Shift Time'),
+		'employees': fields.one2many('hr.employee','attendance_type_id', required=False,string="Employees In This Attendance")
+	}
+
+class hr_attendance_non_shift_timetable(osv.osv):
+	_name = 'hr.attendance.non.shift.timetable'
+
+	_columns = {
+		'att_type_id': fields.many2one('hr.attendance.type',string="Attendance Type",required=True),
+		'day_index': fields.integer('Day Index',required=True),
+		'name': fields.char('Day Name',required=True),
+		'start_at': fields.float('Start Work At',required=True),
+		'finish_work_at': fields.float('Finish Work At',required=True),
+		'as_ot_day': fields.boolean('As OT Day'),
+	}
+
 class hr_employee(osv.osv):
 	_inherit = 'hr.employee'
 	_columns = {
 		'att_pin': fields.integer(size=5,string="Attendance Machine PIN",required=False),
+		'attendance_type_id': fields.many2one('hr.attendance.type',string="Attendance Type"),
+		'attendance_log': fields.one2many('hr.attendance.log','employee_id', string="Attendance Log", ondelete="RESTRICT",onupdate="RESTRICT")
 	}
 
 	# use for check employee id on list (integer value)
@@ -24,8 +49,9 @@ class hr_employee(osv.osv):
 
 		res['available'] = list(self.search(cr,uid,[('att_pin','in',ids)]))
 		res['not_available'] = [eid for eid in ids if eid not in res['available']]
-		print res
+		# print res
 		return res
+
 
 class hr_attendance_machine(osv.osv):
 	_name = 'hr.attendance.machine'
@@ -166,18 +192,29 @@ class hr_attendance_manual_reason(osv.osv):
 
 
 class hr_attendance_log(osv.osv):
-	def _convert_date_to_epoch(self,str_datetime):
+	def _convert_date_to_epoch(self,datetime_obj):
 		res = False
-		res = int(time.mktime(time.strptime(str_datetime, '%Y-%m-%d %H:%M:%S')))
+		res = datetime_obj.strftime('%s')
 		return res
 	def create(self,cr,uid,vals, context={}):
 		# IF MANUAL
 		if 'manual_log_time' in vals:
-			vals['datetime_log'] = self._convert_date_to_epoch(vals['manual_log_time'])
-			print vals, '----------------------', context
+			# print vals['manual_log_time']
+			manual_log_time = datetime.datetime.strptime(vals['manual_log_time'],'%Y-%m-%d %H:%M:%S')
+			gmt7 = manual_log_time+datetime.timedelta(hours=7)
+			datetime_log = self._convert_date_to_epoch(gmt7)
+			if datetime_log:
+				employee = self.pool.get('hr.employee').browse(cr,uid,vals['employee_id'])
+				vals['datetime_log'] = datetime_log
+				vals['is_manual'] = True
+				vals['att_pin'] = employee.att_pin
+				vals['name'] = time.strftime('%Y/%m')+"/"+str(employee.att_pin)+"/"+str(datetime_log)
+				vals['state'] = '0'
 
-		else:
-			return super(hr_attendance_log, self).create(cr, uid, vals, context=context)
+				machine = self.pool.get('hr.attendance.machine').search(cr,uid,[('key','=','0')])[0]
+				vals['machine_id'] = machine
+			
+		return super(hr_attendance_log, self).create(cr, uid, vals, context=context)
 	def read(self,cr,uid,ids,fields=None, context=None, load='_classic_read'):
 		if context is None:
 			context = {}
@@ -230,7 +267,7 @@ class hr_attendance_log(osv.osv):
 		'm_status': fields.selection([('0','IN'),('1','OUT/HOME'), ('2','OUT/PERMIT'), ('3','IN/PERMIT'),('4','IN/Over Time'), ('5','OUT/Over Time')], string="Machine State", required=False),
 		'm_verified': fields.integer(string="Verified", required=False),
 		'm_work_code': fields.integer(string="Work Code", required=False),
-		'state': fields.selection([('0','Draft'), ('1','Machine Validation'), ('2', 'Ask For Revision'), ('3', 'Done')], string="State"),
+		'state': fields.selection([('0','Draft'), ('1','Machine Validation'), ('2', 'Need Approval'), ('3', 'Done')], string="State"),
 		'is_manual': fields.boolean(string="Is Manual Input"),
 		'manual_reason_id': fields.many2one('hr.attendance.manual.reason',string="Reason"),
 		'manual_log_time': fields.datetime('Manual Log Time',required=False),
@@ -255,12 +292,16 @@ class hr_attendance_min_max_log(osv.osv):
 		'dept_id': fields.many2one('hr.department',string="HR Department"),
 		'employee_name': fields.char('Employee Name'),
 		'dept_name': fields.char('Department'),
-		'y_log': fields.char('Year'),
-		'm_log': fields.char('Month'),
-		'd_log': fields.char('Day'),
+		'y_log': fields.integer('Year'),
+		'm_log': fields.integer('Month'),
+		'd_log': fields.integer('Day'),
 		'min_log': fields.char('Min Scanned Time'),
+		'hh_min_log': fields.char('Min Hour'),
+		'mm_min_log': fields.char('Min Minute'),
 		'min_state_log': fields.integer('Min Time Scanned State'),
 		'max_log': fields.char('Max Scanned Time'),
+		'hh_max_log': fields.char('Max Hour'),
+		'mm_max_log': fields.char('Max Minute'),
 		'max_state_log': fields.integer('Max Time Scanned State'),
 		'attendance_time': fields.char('Attendance Time'),
 
@@ -276,15 +317,22 @@ class hr_attendance_min_max_log(osv.osv):
 				grouped3.dept_name,
 				grouped3.employee_id,
 				grouped3.employee_name,
+				to_date(grouped3.y_log || '-' || grouped3.m_log || '-' || grouped3.d_log, 'YYYY-MM-DD') AS full_date,
 				grouped3.y_log,
 				grouped3.m_log,
 				grouped3.d_log,
+				grouped3.dow_log,
 				grouped3.scan_times_a_day,
 				grouped3.min_log,
+				grouped3.hh_min_log,
+				grouped3.mm_min_log,
 				grouped3.min_state_log,
-				(CASE WHEN grouped3.max_log = grouped3.min_log THEN '-' ELSE grouped3.max_log END) AS max_log,
+				grouped3.max_log,
+				grouped3.hh_max_log,
+				grouped3.mm_max_log,
 				grouped3.max_state_log,
-				to_char((EXTRACT(EPOCH FROM attendance_time) || ' second')::interval, 'HH24:MI:SS') as attendance_time
+				to_char((EXTRACT(EPOCH FROM attendance_time) || ' second')::interval, 'HH24:MI:SS') as attendance_time,
+				(CASE WHEN grouped3.max_log = '-' THEN 401 ELSE 1 END) AS err_code
 			FROM (
 				SELECT
 					grouped2.dept_id,
@@ -293,14 +341,75 @@ class hr_attendance_min_max_log(osv.osv):
 					grouped2.y_log,
 					grouped2.m_log,
 					grouped2.d_log,
+					grouped2.dow_log,
 					grouped2.employee_name,
 					grouped2.scan_times_a_day,
-					to_char(grouped2.min_log,'YYYY-MM-DD HH24:MI:SS') AS min_log,
+					(
+						CASE WHEN 
+							EXTRACT(hour from grouped2.min_log) >=12 AND scan_times_a_day = 1 THEN NULL
+						ELSE
+							to_char(grouped2.min_log,'YYYY-MM-DD HH24:MI:SS')
+						END
+					) as min_log,
+					
+					(
+						CASE WHEN 
+							EXTRACT(hour from grouped2.min_log) >=12 AND scan_times_a_day = 1 THEN NULL
+						ELSE
+							to_char(grouped2.min_log,'HH24')
+						END
+					) AS hh_min_log,
+					
+					(
+						CASE WHEN 
+							EXTRACT(hour from grouped2.min_log) >=12 AND scan_times_a_day = 1 THEN NULL
+						ELSE
+							to_char(grouped2.min_log,'MI')
+						END
+					) AS MM_min_log,
+					
+					
 					grouped2.min_state_log,
-					to_char(grouped2.max_log,'YYYY-MM-DD HH24:MI:SS') AS max_log,
+					(
+						CASE WHEN grouped2.max_log = grouped2.min_log THEN 
+							(
+								CASE WHEN EXTRACT(hour from grouped2.min_log) >=12 AND scan_times_a_day = 1 THEN
+									to_char(grouped2.max_log,'YYYY-MM-DD HH24:MI:SS') 
+								ELSE
+									NULL
+								END
+							)
+						ELSE 
+							to_char(grouped2.max_log,'YYYY-MM-DD HH24:MI:SS') 
+						END
+					) AS max_log,
+					(
+						CASE WHEN grouped2.max_log = grouped2.min_log THEN 
+							(
+								CASE WHEN EXTRACT(hour from grouped2.min_log) >=12 AND scan_times_a_day = 1 THEN
+									to_char(grouped2.max_log,'HH24')
+								ELSE
+									NULL
+								END
+							)
+						ELSE to_char(grouped2.max_log,'HH24') 
+						END
+					) AS hh_max_log,
+					(
+						CASE WHEN grouped2.max_log = grouped2.min_log THEN 
+							(
+								CASE WHEN EXTRACT(hour from grouped2.min_log) >=12 AND scan_times_a_day = 1 THEN
+									to_char(grouped2.max_log,'MI')
+								ELSE
+									NULL
+								END
+							)
+						ELSE 
+							to_char(grouped2.max_log,'MI') 
+						END
+					) AS mm_max_log,
 					grouped2.max_state_log,
 					age(max_log,min_log) as attendance_time
-					--age(max_log,min_log) - interval '1 hour' as attendance_time
 				FROM
 				(
 					SELECT
@@ -311,6 +420,7 @@ class hr_attendance_min_max_log(osv.osv):
 						grouped1.y_log,
 						grouped1.m_log,
 						grouped1.d_log,
+						grouped1.dow_log,
 						(
 							SELECT count(log_time) as scan_times_a_day
 							FROM hr_attendance_log AS hral_min 
@@ -337,7 +447,8 @@ class hr_attendance_min_max_log(osv.osv):
 							att_log_dec.*,
 							EXTRACT(YEAR FROM att_log_dec.timestamp_log) AS y_log,
 							EXTRACT(MONTH FROM att_log_dec.timestamp_log) AS m_log,
-							EXTRACT(DAY FROM att_log_dec.timestamp_log) AS d_log
+							EXTRACT(DAY FROM att_log_dec.timestamp_log) AS d_log,
+							EXTRACT(DOW FROM att_log_dec.timestamp_log) AS dow_log
 						FROM(
 							SELECT
 								id, 
@@ -350,10 +461,71 @@ class hr_attendance_min_max_log(osv.osv):
 					) AS grouped1
 					JOIN hr_employee as hem ON grouped1.employee_id = hem.id
 					JOIN hr_department as hdep ON hem.department_id = hdep.id
-					GROUP BY hdep.id, hdep.name, grouped1.employee_id, hem.name_related, grouped1.y_log, grouped1.m_log, d_log
-					-- ORDER BY hdep.name, hem.name_related, grouped1.y_log, grouped1.m_log, d_log
-					ORDER BY grouped1.y_log DESC, grouped1.m_log DESC, d_log DESC, hdep.name,hem.name_related,  min_log DESC
+					GROUP BY hdep.id, hdep.name, grouped1.employee_id, hem.name_related, grouped1.y_log, grouped1.m_log, d_log, dow_log
+					ORDER BY grouped1.y_log DESC, grouped1.m_log DESC, hem.name_related ASC, d_log ASC, hdep.name,  min_log DESC
 				) AS grouped2
 			) AS grouped3
 		)""")
 hr_attendance_min_max_log()
+
+
+class hr_attendance_base_calendar_log(osv.osv):
+	def init(self,cr):
+		tools.sql.drop_view_if_exists(cr,'hr_attendance_base_calendar_log')
+		cr.execute("""
+			CREATE OR REPLACE VIEW hr_attendance_base_calendar_log AS ( 
+				SELECT
+				row_number() over() as id,
+				e_series.*,
+				min_max.hh_min_log::INTEGER,
+				min_max.mm_min_log::INTEGER,
+				min_max.hh_max_log::INTEGER,
+				min_max.mm_max_log::INTEGER,
+				min_max.attendance_time
+			FROM
+			(
+				SELECT 
+					
+					i_series.i,
+					EXTRACT(YEAR FROM i_series.i) as i_year,
+					EXTRACT(MONTH FROM i_series.i) as i_month,
+					EXTRACT(DAY FROM i_series.i) as i_day,
+					to_char(i_series.i, 'MONTH') AS month_name,
+					to_char(i_series.i, 'DAY') as day_name,
+					hr_employee.id as employee_id,
+					hr_employee.name_related as employee_name,
+					hr_department.name as dept_name
+
+				FROM
+				(
+					SELECT i::DATE FROM generate_series('2015-06-01',NOW(), '1 day'::INTERVAL) AS i
+				) AS i_series
+				LEFT JOIN hr_employee ON hr_employee.attendance_type_id=1
+				JOIN hr_department ON hr_employee.department_id = hr_department.id
+				
+			) AS e_series
+			LEFT JOIN 
+				hr_attendance_min_max_log AS min_max 
+				ON min_max.full_date = e_series.i AND min_max.employee_id = e_series.employee_id
+			ORDER BY e_series.employee_name, e_series.i
+			)
+		""")
+	_name = 'hr.attendance.base.calendar.log'
+	_description = "HR Attendance Base Calendar Log"
+	_auto = False
+	_columns = {
+		'i': fields.date('Date'),
+		'i_year': fields.integer('Year'),
+		'i_month': fields.integer('Month'),
+		'i_day': fields.integer('Day'),
+		'month_name': fields.char('Month Name'),
+		'day_name': fields.char('Day Name'),
+		'employee_id': fields.many2one('hr.employee',string="Employee"),
+		'employee_name': fields.char('Employee Name'),
+		'dept_name': fields.char('Dept Name'),
+		'hh_min_log': fields.integer('In Hour'),
+		'mm_min_log': fields.integer('In Minute'),
+		'hh_max_log': fields.integer('Out Hour'),
+		'mm_max_log': fields.integer('Out Minute'),
+		'attendance_time': fields.char('Attendance Time')
+	}
