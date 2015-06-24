@@ -22,7 +22,7 @@ class partner(osv.osv):
 		return True
 
 	def create(self, cr, uid, vals, context=None):
-		if vals['parent_id']:
+		if 'parent_id' in vals:
 			return super(partner, self).create(cr, uid, vals, context=context)
 		else:
 			if vals['is_company']==True:
