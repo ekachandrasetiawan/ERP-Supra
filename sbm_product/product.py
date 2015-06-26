@@ -31,4 +31,56 @@ class product_product(osv.osv):
 	# 			raise osv.except_osv(('Perhatian..!!'), ('Part Number Unique ..'))
 	# 	return super(product_product, self).write(cr, uid, ids, vals, context=context)
 
+
+	def exportCSV(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+
+		val = self.browse(cr, uid, ids)[0]
+		idproduct=str(val.id)
+		print '=====================================',idproduct
+		urlTo = str(browseConf.value)+"product-product/export-csv&id="+idproduct
+
+		return {
+			'type'  : 'ir.actions.client',
+			'target': 'new',
+			'tag'   : 'print.out.exportcsv',
+			'params': {
+				# 'id'  : ids[0],
+				'redir' : urlTo,
+				'uid':uid
+			},
+		}
+
+	def export_product_csv(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		idsToConfirm = context['active_ids']
+
+		lineProduct = []
+		for dataProduct in self.browse(cr,uid,idsToConfirm,context):
+			line = self.pool.get('product.product').browse(cr,uid,dataProduct.id,context)
+			lineProduct+=[line.id]
+
+		print lineProduct
+
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+
+		
+		urlTo = str(browseConf.value)+"product-product/export-csv-tree&id="+','.join(map(str,idsToConfirm))
+
+
+		print '==============url============',urlTo
+		return {
+			'type'  : 'ir.actions.client',
+			'target': 'new',
+			'tag'   : 'print.out.exportcsv',
+			'params': {
+				# 'id'  : ids[0],
+				'redir' : urlTo,
+				'uid':uid
+			},
+		}
+
 product_product()

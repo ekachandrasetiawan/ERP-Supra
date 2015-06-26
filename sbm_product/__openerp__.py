@@ -10,4 +10,6 @@
     'demo_xml': [],
     'installable': True,
     'active': False,
+    'certificate': '',
+    'js':['static/src/js/product.js'],
 }
