@@ -1,0 +1,15 @@
+{
+    "name": "SBM Master Partner",
+    "version": "1.0",
+    "depends": ["base", "account"],
+    "author": "Suprabakti Mandiri",
+    "category": "SBM Master Partner",
+    "description": """Modul ini digunakan untuk Menggolah Master Partner""",
+    "init_xml": [],
+    'update_xml': ["partner_view.xml"],
+    'demo_xml': [],
+    'installable': True,
+    'active': False,
+    'certificate': '',
+    'js':['static/src/js/Partner.js'],
+}

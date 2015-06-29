@@ -95,7 +95,7 @@ class ZbExcelExport(ExcelExport):
             self.from_data(data.get('headers', []), data.get('rows', [])),
                            headers=[
                                     ('Content-Disposition', 'attachment; filename="%s"'
-                                        % data.get('model', 'Export.xls')),
+                                        % data.get('model', 'Export.csv')),
                                     ('Content-Type', self.content_type)
                                     ],
                                  cookies={'fileToken': token}

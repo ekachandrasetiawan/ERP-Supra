@@ -1,14 +1,11 @@
 <openerp>
 	<data>
-		<record model="ir.ui.view" id="product_view">
-				<field name="name">product.product</field>
-				<field name="model">product.product</field>
+		<record model="ir.ui.view" id="partner_view">
+				<field name="name">res.partner</field>
+				<field name="model">res.partner</field>
 				<field name="type">form</field>
-				<field name="inherit_id" ref="product.product_normal_form_view"/>
+				<field name="inherit_id" ref="base.view_partner_form"/>
 				<field name="arch" type="xml">
-					<field name="default_code" position="replace">
-						<field name="default_code" on_change="code_change(default_code)"/>
-					</field>
 					 <xpath expr="//div[@name='buttons']" position="inside">
 	                   <button icon="gtk-ok" type="object" name="exportCSV" string="Export CSV" default_focus="1" class="oe_highlight"/>
 	                </xpath>
