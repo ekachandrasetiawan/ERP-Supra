@@ -5,7 +5,7 @@ import csv
 from openerp import tools
 from openerp.tools.translate import _
 from osv import osv, fields
-
+import urllib
 from cStringIO import StringIO
 
 # import web.http as openerpweb
@@ -17,18 +17,31 @@ class acount_invoice(osv.osv):
 	_inherit = 'account.invoice'
 	
 	def efak_invoices_export(self,cr,uid,ids,context={}):
-		res = {
-			'type':'ir.actions.act_url',
-			'url': '/my',
-			'target':'new'
+		if context is None:
+			context = {}
+		try:
+			ids = context['active_ids']
+		except:
+			ids = ids
+
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"service/get-invoices-csv&ids="+str(','.join(map(str,ids)))+"&uid="+str(uid)
+		print urlTo
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.out',
+			'params': {
+				'redir'	: urlTo
+			},
 		}
-		return res
 	def efak_invoice_data(self,cr,uid,ids,context={}):
 
 		faktur_data = []
 		res = False
 		outp = StringIO()
-		sw = csv.writer(outp,delimiter=',',quotechar='"')
+		# sw = csv.writer(outp,delimiter=',',quotechar='"')
 		tax_obj = self.pool.get('account.tax')
 		cur_obj = self.pool.get('res.currency') 
 		for inv in self.browse(cr,uid,ids,context):
@@ -103,13 +116,9 @@ class acount_invoice(osv.osv):
 						"0","0.0"
 					]
 				)
-
-			# print faktur_data
-			# sw.writerow(['FK',KD_JENIS_TRANSAKSI,FG_PENGGANTI,NOMOR_FAKTUR,MASA_PAJAK,TAHUN_PAJAK,TANGGAL_FAKTUR,NPWP,NAMA,ALAMAT_LENGKAP,JUMLAH_DPP,JUMLAH_PPN,JUMLAH_PPNBM,ID_KETERANGAN_TAMBAHAN,FG_UANG_MUKA,UANG_MUKA_DPP,UANG_MUKA_PPN,UANG_MUKA_PPNBM,REFERENSI])
-			sw.writerows(faktur_data)
-		# print outp.getvalue()
-		outp.seek(0)
-		data = outp.read()
-		outp.close()
-		return data
+			# sw.writerows(faktur_data)
+		# outp.seek(0)
+		# data = outp.read()
+		# outp.close()
+		return faktur_data
 
