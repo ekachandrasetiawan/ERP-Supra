@@ -36,27 +36,26 @@ class partner(osv.osv):
 
 	def write(self,cr,uid,ids,vals,context={}):
 		cek=self.pool.get('res.partner').search(cr,uid,[('id', '=' ,ids)])
-		hasil=self.pool.get('res.partner').browse(cr,uid,cek)[0]
-		
-		if hasil['is_company']==True:
-			# NPWP di awal tidak ada, maka hasilnya False
-			if hasil['npwp']==False:
-				if vals['npwp']=='11111111111111111111':
-					vals['npwp']=='11111111111111111111'
-				else:
-					cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])	
-					if cek:
-						raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
-			
-			# NPWP awal ada valuenya
-			else:
-				if 'npwp' in vals:
+		for hasil in self.pool.get('res.partner').browse(cr,uid,cek):
+			if hasil['is_company']==True:
+				# NPWP di awal tidak ada, maka hasilnya False
+				if hasil['npwp']==False:
 					if vals['npwp']=='11111111111111111111':
 						vals['npwp']=='11111111111111111111'
 					else:
-						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])
+						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])	
 						if cek:
 							raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
+				
+				# NPWP awal ada valuenya
+				else:
+					if 'npwp' in vals:
+						if vals['npwp']=='11111111111111111111':
+							vals['npwp']=='11111111111111111111'
+						else:
+							cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])
+							if cek:
+								raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
 							
 		return super(partner, self).write(cr, uid, ids, vals, context=context)
 
