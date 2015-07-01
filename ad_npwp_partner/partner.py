@@ -22,7 +22,7 @@ class partner(osv.osv):
 		return True
 
 	def create(self, cr, uid, vals, context=None):
-		if vals['parent_id']:
+		if 'parent_id' in vals:
 			return super(partner, self).create(cr, uid, vals, context=context)
 		else:
 			if vals['is_company']==True:
@@ -36,27 +36,15 @@ class partner(osv.osv):
 
 	def write(self,cr,uid,ids,vals,context={}):
 		cek=self.pool.get('res.partner').search(cr,uid,[('id', '=' ,ids)])
-		partner_ids=self.pool.get('res.partner').browse(cr,uid,cek)
-		
-		if partner_ids:
-			hasil = partner_ids[0]
+		for hasil in self.pool.get('res.partner').browse(cr,uid,cek):
 			if hasil['is_company']==True:
 				# NPWP di awal tidak ada, maka hasilnya False
 				if hasil['npwp']==False:
-					if 'npwp' in vals and vals['npwp']=='11111111111111111111':
+					if vals['npwp']=='11111111111111111111':
 						vals['npwp']=='11111111111111111111'
 					else:
-						if 'npwp' in vals:
-							ceknpwp =vals['npwp'] 
-						else:
-							ceknpwp=hasil['npwp']
-						if 'is_company' in vals:
-							is_company = vals['is_company']
-						else:
-							is_company = hasil['is_company']
-						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,ceknpwp), ('is_company', '=' ,True)])
-
-						if cek and is_company:
+						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])	
+						if cek:
 							raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
 				
 				# NPWP awal ada valuenya
@@ -65,10 +53,10 @@ class partner(osv.osv):
 						if vals['npwp']=='11111111111111111111':
 							vals['npwp']=='11111111111111111111'
 						else:
-							cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp']), ('is_company', '=' ,True)])
+							cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])
 							if cek:
 								raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
-		print '======================',vals, ids, context
+							
 		return super(partner, self).write(cr, uid, ids, vals, context=context)
 
 partner()

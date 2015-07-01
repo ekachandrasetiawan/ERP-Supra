@@ -58,7 +58,11 @@
 					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" />
 					<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" />
 
-					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" type="object"  class="oe_highlight" />
+					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','cancel','done'])]}" type="object" class="oe_highlight" />
+
+					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" type="object" attrs="{'invisible':[('state','in',['draft','cancel'])]}" class="oe_highlight" />
+
+					<button name="action_to_tax_replacement" string="Replace Tax" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','cancel','done','paid'])]}" type="object"  class="oe_highlight" />
 					
 				</xpath>
 				<xpath expr="//field[@name='user_id']" position="replace">
@@ -98,6 +102,13 @@
 						</tree>
 						
 					</field>
+				</xpath>
+				<xpath expr="//field[@name='date_due']" position="after">
+					
+					
+					    <field name="tax_invoice_origin_id" attrs="{'invisible':[('tax_invoice_origin_id','=',False)]}" />
+					
+					
 				</xpath>
 				
 			</field>
