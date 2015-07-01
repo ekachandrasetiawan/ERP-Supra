@@ -179,7 +179,7 @@ class Set_PO(osv.osv):
 	_name = 'set.po'
 	_columns ={
 		'name':fields.many2one('res.partner','Supplier',required=True, domain=[('supplier','=',True),('is_company', '=', True)]),
-		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True),
+		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True, domain=[('type','=','purchase')]),
 		'permintaan': fields.many2many('detail.pb', 'pre_item_rel', 'item_id', 'permintaan_id', 'Detail Permintaan',domain=[('state','=','onproses')]),
 	}
 	

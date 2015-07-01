@@ -42,11 +42,7 @@ class Partner(osv.osv):
 
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-
-		
 		urlTo = str(browseConf.value)+"res-partner/export-csv-tree&id="+','.join(map(str,idsToConfirm))
-
-
 		print '==============url============',urlTo
 		return {
 			'type'  : 'ir.actions.client',
