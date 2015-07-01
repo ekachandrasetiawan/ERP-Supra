@@ -16,6 +16,8 @@ import openerp.addons.web.http as oeweb
 class acount_invoice(osv.osv):
 	_inherit = 'account.invoice'
 	
+
+
 	def efak_invoices_export(self,cr,uid,ids,context={}):
 		if context is None:
 			context = {}
@@ -27,7 +29,12 @@ class acount_invoice(osv.osv):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"service/get-invoices-csv&ids="+str(','.join(map(str,ids)))+"&uid="+str(uid)
-		print urlTo
+		for browse in self.browse(cr,uid,ids):
+			if browse.partner_id.npwp == '11111111111111111111':
+				raise osv.except_osv(_('Error!'),_('NPWP '+browse.partner_id.name+' = '+browse.partner_id.npwp+'\r\n\r\nTolong Update NPWP terlebih dahulu untuk export data. Jika Customer ini tidak mempunyai NPWP atau merupakan Customer Perorangan maka Update NPWP menjadi 00.000.000.0-000.000'))
+			elif browse.partner_id.npwp == False:
+				raise osv.except_osv(_('Error'),_('NPWP '+browse.partner_id.name+' kosong.\r\n\r\nHarus diisi..!!!'))
+		
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
