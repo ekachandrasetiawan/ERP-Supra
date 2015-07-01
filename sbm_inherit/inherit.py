@@ -511,6 +511,9 @@ class account_invoice(osv.osv):
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"account-invoice/print-invoice&id="+str(ids[0])+"&uid="+str(uid)
 		
+		for browse in self.browse(cr,uid,ids):
+			if browse.partner_id.npwp == '11111111111111111111':
+				raise osv.except_osv(_('Error!'),_('NPWP Customer = '+browse.partner_id.npwp+'\r\nTolong Update NPWP terlebih dahulu. Jika Customer ini tidak mempunyai NPWP tolong Update NPWP menjadi 00.000.000.0-000.000'))
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
@@ -519,10 +522,15 @@ class account_invoice(osv.osv):
 				'redir'	: urlTo
 			},
 		}
+
 	def actionPrintFaktur(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"account-invoice/print&id="+str(ids[0])+"&uid="+str(uid)
+
+		for browse in self.browse(cr,uid,ids):
+			if browse.partner_id.npwp == '11111111111111111111':
+				raise osv.except_osv(_('Error!'),_('NPWP Customer = '+browse.partner_id.npwp+'\r\nTolong Update NPWP terlebih dahulu. Jika Customer ini tidak mempunyai NPWP tolong Update NPWP menjadi 00.000.000.0-000.000'))
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
@@ -570,7 +578,37 @@ class account_invoice(osv.osv):
 					res[inv.id]+=line.price_subtotal
 
 		return res
+	def action_to_tax_replacement(self,cr,uid,ids,context={}):
+		res = False
+		invs = self.browse(cr,uid,ids,context=context)
+		newids = []
+		for inv in invs:
+			newid = self.copy(cr,uid,inv.id,context=context)
+			newids = [newid]
+			newInv = self.browse(cr,uid,newid,context=context)
+			fp_no = newInv.faktur_pajak_no[0:3]+'1'+newInv.faktur_pajak_no[4:20]
+			print fp_no,"8**************************"
+			# self.write(cr,uid,newid,{'faktur_pajak_no':fp_no})
+			self.write(cr,uid,[inv.id],{'state':'cancel','tax_invoice_origin_id':inv.id})
 
+		mod_obj = self.pool.get('ir.model.data')
+		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
+		res_id = res and res[1] or False,
+
+		return {
+			'name': _('Customer Invoices'),
+			'view_type': 'form',
+			'view_mode': 'form',
+			'view_id': [res_id],
+			'res_model': 'account.invoice',
+			'context': "{'type':'out_invoice'}",
+			'type': 'ir.actions.act_window',
+			'nodestroy': True,
+			'target': 'current',
+			'res_id': newids and newids[0] or False,
+		}
+		
+		# return res
 
 	_name='account.invoice'
 	_inherit='account.invoice'
@@ -580,6 +618,7 @@ class account_invoice(osv.osv):
 		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
 		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
 		'group_id':fields.many2one('group.sales',required=True,string="Sale Group",domain=[('is_main_group','=',True)]),
+		'tax_invoice_origin_id': fields.many2one('account.invoice',string="Invoice Origin",required=False, ondelete='RESTRICT',onupdate='RESTRICT'),
 	}
 	_defaults={
 		'print_all_taxes_line':True,
@@ -1311,17 +1350,6 @@ class stock_move(osv.osv):
 		'cancel_notes':fields.text('Cancel Notes',required=False),
 		'product_uom': fields.many2one('product.uom', 'Unit of Measure', required=True,states={'done': [('readonly', True)]}),
 	}
-	
-	def onchange_product_new(self, cr, uid, ids, name, satuan, context=None):
-		if name:
-			product_id =self.pool.get('product.product').browse(cr,uid,name)
-			if product_id.categ_id.id == 105:
-				uom=satuan
-			else:
-				uom=product_id.uom_id.id
-		else:
-			uom=1
-		return {'value':{'product_uom':uom}}
 
 # Fixing bug min_date on picking when null it will be filled timestamp
 class stockPicking(osv.osv):
