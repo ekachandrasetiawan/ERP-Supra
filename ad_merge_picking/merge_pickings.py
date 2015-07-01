@@ -172,9 +172,3 @@ class merge_pickings(osv.osv_memory):
 		return action
 	
 merge_pickings()
-
-
-
-
-
-
