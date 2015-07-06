@@ -15,9 +15,57 @@ import openerp.addons.web.http as oeweb
 
 class acount_invoice(osv.osv):
 	_inherit = 'account.invoice'
-	
+	_columns = {
+		'faktur_pajak_no': fields.char('No Faktur Pajak',size=20,required=True),
+		'state': fields.selection([
+			('draft','Draft'),
+			('submited','Submited'), #NEW FLOW TO SUBMIT TO VALIDATE THE INVOICE
+			('proforma','Pro-forma'),
+			('proforma2','Pro-forma'),
+			('open','Open'),
+			('paid','Paid'),
+			('cancel','Cancelled'),
+			],'Status', select=True, readonly=True, track_visibility='onchange',
+			help=' * The \'Draft\' status is used when a user is encoding a new and unconfirmed Invoice. \
+			\n* The \'Pro-forma\' when invoice is in Pro-forma status,invoice does not have an invoice number. \
+			\n* The \'Open\' status is used when user create invoice,a invoice number is generated.Its in open status till user does not pay invoice. \
+			\n* The \'Paid\' status is set automatically when the invoice is paid. Its related journal entries may or may not be reconciled. \
+			\n* The \'Cancelled\' status is used when user cancel invoice.'),
+	}
 
+	def draft_submited(self,cr,uid,ids,context={}):
+		for s in self.browse(cr,uid,ids,context=context):
+			if s.state != 'submited':
+				raise osv.except_osv(_('Error'),_('Tidak bisa merubah status menjadi draft karena status sudah validate!'))
+			
+		self.write(cr,uid,ids,{'state':'draft'})
 
+		return True
+	def submit_to_validate(self,cr,uid,ids,context={}):
+		# res = {}
+		res = False
+		for d in self.browse(cr,uid,ids,context=context):
+			if d.faktur_pajak_no != '000.000-00.00000000':
+				num = d.faktur_pajak_no.split('.')
+				fp = num[2]
+				# search same number
+				sameFP = self.search(cr,uid,[('faktur_pajak_no','like',fp),('state','!=','cancel'),('id','!=',d.id)])
+				# print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",sameFP
+				if len(sameFP) > 0:
+					# if exist
+					res = False
+					browseAllSame = self.browse(cr,uid,sameFP,context=context)
+					errSame = [str(bs.id) for bs in browseAllSame]
+					print "==============================",errSame
+					raise osv.except_osv(_('Error'),_('Nomor Faktur Pajak Sudah dipakai, tidak bisa menggunakan nomor faktur lebih dari 1 kali, Jika Nomor tersebut diganti silahkan cancel terlebih dahulu invoice yang lama\r\n.'+',\r\n'.join(errSame)))
+
+				res=  True
+				if res:
+					self.write(cr,uid,d.id,{'state':'submited'},context=context)
+
+		
+		
+		return True
 	def efak_invoices_export(self,cr,uid,ids,context={}):
 		if context is None:
 			context = {}
