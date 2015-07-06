@@ -340,7 +340,7 @@
 
 							<field name="picking_id" />
 
-							<field name="lines">
+							<field name="lines" widget="one2many_list" attrs="{'delete':[('state','=','draft')]}">
 								<tree string="Items">
 									<field name="no"/>
 									<field name="product_id"/>
@@ -351,6 +351,7 @@
 									<field name="stock_move_id" readonly="1"/>
 									<field name="detail_ids"/>
 									<field name="stock_state"/>
+									<field name="state"/>
 								</tree>
 							</field>
 
