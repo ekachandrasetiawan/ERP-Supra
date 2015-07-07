@@ -29,14 +29,14 @@
 			<field name="inherit_id" ref="sbm_inherit.invoice_customer_form" />
 			<field name="arch" type="xml">
 				<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" position="replace">
-					<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','proforma2','proforma','submited'])]}" />
+					<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','submited'])]}" />
 				</button>
 
 				<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" position="replace" >
-					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','proforma2','proforma','submited'])]}"/>
+					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','submited'])]}"/>
 				</button>
 				<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" position="replace">
-					<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','proforma2','proforma','submited'])]}" />
+					<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','submited'])]}" />
 				</button>
 
 				
