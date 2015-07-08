@@ -72,9 +72,17 @@ class merge_pickings(osv.osv_memory):
 		
 		if not journal_ids:
 			raise osv.except_osv(('Error !'), ('There is no sale/purchase journal defined for this company'))            
-		 
+
+		origin = ''
+		namepick = ''
+		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
+			origin += picking.origin +':'+ (picking.note_id.name)[:7] + ', '
+			namepick += picking.sale_id.client_order_ref + ', '
+		print '========================Test Pickings===============',origin
+
 		invoice_id = pool_invoice.create(cr, uid, {
-			'name': 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
+			'name': namepick[:-2],
+			# 'name': 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
 			'type': type_inv,
 			'account_id': account_id,
 			'partner_id': partner_obj.id,
@@ -83,6 +91,7 @@ class merge_pickings(osv.osv_memory):
 			'address_contact_id': address_contact_id,
 			'date_invoice': time.strftime('%Y-%m-%d'),
 			'user_id': uid,
+			'origin':origin[:-2],
 			'currency_id': curency or False,
 			'picking_ids': [(6,0, picking_ids)]})
 						 

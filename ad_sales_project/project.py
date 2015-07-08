@@ -985,6 +985,8 @@ class after_actual_senin(osv.osv):
 		log_obj = self.pool.get('log.activity')
 		
 		tgl = datetime.strptime(dat, "%Y-%m-%d")
+		datetime.date.today() + datetime.timedelta(days=1)
+		
 		if date.today() > date(int(tgl.strftime('%Y')), int(tgl.strftime('%m')), int(tgl.strftime('%d'))):
 			return {'warning': {"title": _("Attention !"), "message": _("Time has expired !")}, 
 					'value': {'name': False, 'partner_id': False, 'order_id': False, 'location': False}}
