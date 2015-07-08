@@ -76,9 +76,13 @@ class merge_pickings(osv.osv_memory):
 		origin = ''
 		namepick = ''
 		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
-			origin += picking.origin +':'+ (picking.note_id.name)[:7] + ', '
+			if picking.note_id.id:
+				origin += picking.origin +':'+ (picking.note_id.name)[:7] + ', '
+			else:
+				origin += picking.origin+ ', '
+
 			namepick += picking.sale_id.client_order_ref + ', '
-		print '========================Test Pickings===============',origin
+		# print '========================Test Pickings===============',origin
 
 		invoice_id = pool_invoice.create(cr, uid, {
 			'name': namepick[:-2],
