@@ -17,6 +17,11 @@
 				<button name="invoice_proforma2" states="draft" string="PRO-FORMA" groups="account.group_proforma_invoices">
 					<button name="invoice_proforma2" states="submited" string="PRO-FORMA" groups="account.group_proforma_invoices"/>
 				</button>
+
+
+				<field name="origin" position="replace" >
+					<field name="origin" required="1" groups="base.group_user"/>
+				</field>
 				
 
 				
