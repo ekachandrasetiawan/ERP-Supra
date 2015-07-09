@@ -68,7 +68,8 @@ class perintah_kerja_internal(osv.osv):
                              'product_id' : x.product_id.id,
                              'product_qty': x.product_uom_qty,
                              'product_uom': x.product_uom.id,
-                             'name': '['+str(x.product_id.code)+']' + ' ' + str(x.product_id.name)
+                             'name': x.name
+                             # 'name': '['+str(x.product_id.code)+']' + ' ' + str(x.product_id.name)
                              })
               
             res['perintah_lines'] = line
