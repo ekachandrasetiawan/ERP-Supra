@@ -10,6 +10,20 @@
                 <field name="email" position="after">
                 	<field name="npwp" on_change="onchange_format_npwp(npwp)" />
                 </field>
+                  <field name="street2" position="after">
+                	<div class="address_format">
+						<field name="blok" class="oe_no_button" placeholder="Blok" style="width:30%%"/>
+						<field name="nomor" class="oe_no_button" placeholder="Nomor" style="width:30%%"/>
+						<field name="rt" class="oe_no_button" placeholder="RT" style="width:18%%"/>
+						<field name="rw" class="oe_no_button" placeholder="RW" style="width:19%%"/>
+
+						<field name="kelurahan" class="oe_no_button" placeholder="Kelurahan" style="width:49%%"/>
+						<field name="kecamatan" class="oe_no_button" placeholder="Kecamatan" style="width:49%%"/>
+
+						<field name="kabupaten" class="oe_no_button" placeholder="Kabupaten" style="width:49%%"/>
+						<field name="propinsi" class="oe_no_button" placeholder="Propinsi" style="width:49%%"/>
+					</div>
+                </field>
             </field>		
 		</record>
 		

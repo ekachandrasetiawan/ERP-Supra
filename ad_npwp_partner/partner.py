@@ -3,7 +3,17 @@ from tools.translate import _
 
 class partner(osv.osv):
 	_inherit = 'res.partner'
-	_columns = {'npwp' : fields.char('No. NPWP', size=20, required=False, help='Misal 01.540.674.7.431-000'),}
+	_columns = {
+			'npwp' : fields.char('No. NPWP', size=20, required=False, help='Misal 01.540.674.7.431-000'),
+			'blok':fields.char('Blok'),
+			'nomor':fields.char('Nomor'),
+			'rt':fields.char('RT',size=3),
+			'rw':fields.char('RW',size=3),
+			'kelurahan':fields.char('Kelurahan'),
+			'kecamatan':fields.char('Kecamatan'),
+			'kabupaten':fields.char('Kabupaten'),
+			'propinsi':fields.char('Propinsi'),
+		}
 
 	def onchange_format_npwp(self, cr, uid, ids, npwp):
 		if npwp:
