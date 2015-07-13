@@ -58,12 +58,25 @@ class merge_pickings(osv.osv_memory):
 		address_invoice_id = alamat['invoice']
 			   
 		picking = pool_picking.browse(cr, uid, picking_ids[0], context=context)
-				 
+		namepick = False
+		origin = False
 		if data.type == 'out':
 			type_inv = 'out_invoice'
 			account_id = partner_obj.property_account_receivable.id
 			curency = picking.sale_id.pricelist_id.currency_id.id
 			journal_ids = journal_obj.search(cr, uid, [('type','=','sale'),('company_id', '=', 1)], limit=1)
+
+
+			origin = ''
+			namepick = ''
+			for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
+				if picking.note_id.id:
+					origin += picking.origin +':'+ (picking.note_id.name)[:7] + ', '
+				else:
+					origin += picking.origin+ ', '
+
+				namepick += picking.sale_id.client_order_ref + ', '
+
 		elif data.type == 'in':
 			type_inv = 'in_invoice'
 			account_id = partner_obj.property_account_payable.id
@@ -73,19 +86,11 @@ class merge_pickings(osv.osv_memory):
 		if not journal_ids:
 			raise osv.except_osv(('Error !'), ('There is no sale/purchase journal defined for this company'))            
 
-		origin = ''
-		namepick = ''
-		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
-			if picking.note_id.id:
-				origin += picking.origin +':'+ (picking.note_id.name)[:7] + ', '
-			else:
-				origin += picking.origin+ ', '
-
-			namepick += picking.sale_id.client_order_ref + ', '
-		# print '========================Test Pickings===============',origin
+		
+		
 
 		invoice_id = pool_invoice.create(cr, uid, {
-			'name': namepick[:-2],
+			'name': namepick[:-2] if namepick else 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
 			# 'name': 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
 			'type': type_inv,
 			'account_id': account_id,
@@ -95,7 +100,7 @@ class merge_pickings(osv.osv_memory):
 			'address_contact_id': address_contact_id,
 			'date_invoice': time.strftime('%Y-%m-%d'),
 			'user_id': uid,
-			'origin':origin[:-2],
+			'origin':origin[:-2] if origin else False,
 			'currency_id': curency or False,
 			'picking_ids': [(6,0, picking_ids)]})
 						 
