@@ -86,9 +86,6 @@ class merge_pickings(osv.osv_memory):
 		if not journal_ids:
 			raise osv.except_osv(('Error !'), ('There is no sale/purchase journal defined for this company'))            
 
-		
-		
-
 		invoice_id = pool_invoice.create(cr, uid, {
 			'name': namepick[:-2] if namepick else 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
 			# 'name': 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),

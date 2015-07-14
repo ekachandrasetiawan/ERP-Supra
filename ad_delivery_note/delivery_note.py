@@ -976,8 +976,13 @@ class delivery_note(osv.osv):
 					for b in val.note_lines:
 						move_id = False
 						# mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
-						mid = stock_move.search(cr, uid, [('id', '=', b.op_line_id.move_id.id)])[0]
-						mad = stock_move.browse(cr, uid, mid)
+						if b.op_line_id.move_id:
+							mid = stock_move.search(cr, uid, [('id', '=', b.op_line_id.move_id.id)])[0]
+							mad = stock_move.browse(cr, uid, mid)
+						else:
+							mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
+							mad = stock_move.browse(cr, uid, mid)
+
 						if b.product_qty == mad.product_qty:
 							move_id = mid
 						else:
