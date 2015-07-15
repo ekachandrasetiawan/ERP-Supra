@@ -120,18 +120,45 @@ class merge_pickings(osv.osv_memory):
 				#origin = (picking.delivery_note).strip() +';'+ (picking.name).strip()
 				if picking.note_id:
 					# search op line id by move line ID
+					
 					cekopline=self.pool.get('order.preparation.line').search(cr,uid,[('move_id', '=' ,move_line.id)])
-					op_line=self.pool.get('order.preparation.line').browse(cr,uid,cekopline)[0]
 
-					#Search DN Line ID By OP Line ID
-					cek=self.pool.get('delivery.note.line').search(cr,uid,[('op_line_id', '=' ,op_line.id)])
-					product_dn=self.pool.get('delivery.note.line').browse(cr,uid,cek)[0]
+					op_line=self.pool.get('order.preparation.line').browse(cr,uid,cekopline)
+					
+					if op_line:
+						for opl in op_line:
+							#Search DN Line ID By OP Line ID
+							cek=self.pool.get('delivery.note.line').search(cr,uid,[('op_line_id', '=' ,opl.id)])
+							product_dn=self.pool.get('delivery.note.line').browse(cr,uid,cek)[0]
 
-					if cek:
+							if cek:
+								pool_invoice_line.create(
+									cr, uid, 
+									{
+										'name': product_dn.name,
+										'picking_id': picking.id,
+										'origin': origin,
+										'uos_id': move_line.product_uos.id or move_line.product_uom.id,
+										'product_id': move_line.product_id.id,
+										'price_unit': price_unit,
+										'discount': discount,
+										'quantity': move_line.product_qty,
+										'invoice_id': invoice_id,
+										'invoice_line_tax_id': [(6, 0, tax_ids)],
+										'account_analytic_id': pool_picking._get_account_analytic_invoice(cr, uid, picking, move_line),
+										'account_id': self.pool.get('account.fiscal.position').map_account(cr, uid, partner_obj.property_account_position, line_account_id),
+										'amount_discount':disc_amount
+									}
+								)
+							else:
+								raise osv.except_osv(('Perhatian..!!'), ('No Delivery Note Tidak Ditemukan'))
+						# end for
+					else:
 						pool_invoice_line.create(
 							cr, uid, 
 							{
-								'name': product_dn.name,
+								# 'name': picking.origin +':'+ (picking.name).strip(), #move_line.name,
+								'name': move_line.name,
 								'picking_id': picking.id,
 								'origin': origin,
 								'uos_id': move_line.product_uos.id or move_line.product_uom.id,
@@ -146,8 +173,6 @@ class merge_pickings(osv.osv_memory):
 								'amount_discount':disc_amount
 							}
 						)
-					else:
-						raise osv.except_osv(('Perhatian..!!'), ('No Delivery Note Tidak Ditemukan'))
 				else:
 					pool_invoice_line.create(
 						cr, uid, 
@@ -167,7 +192,7 @@ class merge_pickings(osv.osv_memory):
 							'account_id': self.pool.get('account.fiscal.position').map_account(cr, uid, partner_obj.property_account_position, line_account_id),
 							'amount_discount':disc_amount
 						}
-					),
+					)
 		pool_invoice.button_compute(cr, uid, [invoice_id], context=context, set_total=False)           
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'account', "invoice_form")
 		if data.type == 'in':
