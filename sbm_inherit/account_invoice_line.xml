@@ -62,7 +62,7 @@
 
 					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" type="object" attrs="{'invisible':[('state','in',['draft','cancel'])]}" class="oe_highlight" />
 
-					<button name="action_to_tax_replacement" string="Replace Tax" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','cancel','done','paid'])]}" type="object"  class="oe_highlight" />
+					<button name="action_to_tax_replacement" string="Replace Tax" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','submited','cancel','done','paid','open'])]}" type="object"  class="oe_highlight" />
 					
 				</xpath>
 				<xpath expr="//field[@name='user_id']" position="replace">
@@ -104,11 +104,7 @@
 					</field>
 				</xpath>
 				<xpath expr="//field[@name='date_due']" position="after">
-					
-					
 					    <field name="tax_invoice_origin_id" attrs="{'invisible':[('tax_invoice_origin_id','=',False)]}" />
-					
-					
 				</xpath>
 				
 			</field>
@@ -123,12 +119,6 @@
 				<field name="number" position="before">
 					<field name="kwitansi" />
 				</field>
-				 <xpath expr="filter[@string='Proforma']" position="after">
-                     <filter string="Submited" domain="[('state', '=', 'submited')]" />
-                </xpath>
-                 <xpath expr="filter[@string='Submited']" position="after">
-                     <filter string="Proforma" domain="[('state', '=', 'proforma2')]" />
-                </xpath>
 			</field>
 		</record>
 
@@ -155,7 +145,7 @@
 							<field name="uos_id" groups="product.group_uom"
 								on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)"/>
 							<field name="price_unit"/>
-							<field name="amount_discount" />
+							<field name="amount_discount" groups="base.group_user" />
 							<field name="discount" groups="sale.group_discount_per_so_line"/>
 							<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}"
 								domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
