@@ -935,7 +935,6 @@ class delivery_note(osv.osv):
 				'active_ids':val.prepare_id.picking_id.id,
 			}
 		}
-
 		# print res
 
 	def package_validate(self, cr, uid, ids, context=None):
