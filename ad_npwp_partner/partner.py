@@ -53,7 +53,7 @@ class partner(osv.osv):
 					if vals['npwp']=='11111111111111111111':
 						vals['npwp']=='11111111111111111111'
 					else:
-						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])	
+						cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp']),('is_company','=',True)])
 						if cek:
 							raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
 				
@@ -63,7 +63,7 @@ class partner(osv.osv):
 						if vals['npwp']=='11111111111111111111':
 							vals['npwp']=='11111111111111111111'
 						else:
-							cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp'])])
+							cek=self.pool.get('res.partner').search(cr,uid,[('npwp', '=' ,vals['npwp']),('is_company','=',True)])
 							if cek:
 								raise osv.except_osv(('Perhatian..!!'), ('No NPWP Unique ..'))
 							
