@@ -1319,7 +1319,7 @@ class stock_return_picking(osv.osv_memory):
 
 		record_idx = context and context.get('active_id', False) or False
 
-		if context.get('active_model') == 'stock.picking':
+		if context.get('active_model') == 'stock.picking' or 'stock.picking.in':
 			record_id = context and context.get('active_id', False)
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
@@ -1359,7 +1359,7 @@ class stock_return_picking(osv.osv_memory):
 		# record_id = context and context.get('active_id', False)
 		record_idx = context and context.get('active_id', False)
 
-		if context.get('active_model') == 'stock.picking':
+		if context.get('active_model') == 'stock.picking' or 'stock.picking.in':
 			record_id = context and context.get('active_id', False)
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
@@ -1420,7 +1420,7 @@ class stock_return_picking(osv.osv_memory):
 			context = {} 
 		record_idx = context and context.get('active_id', False) or False
 
-		if context.get('active_model') == 'stock.picking':
+		if context.get('active_model') == 'stock.picking' or 'stock.picking.in':
 			record_id = context and context.get('active_id', False) or False
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
