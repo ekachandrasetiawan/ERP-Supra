@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="saleorder_create_pb" model="ir.ui.view">
+			<field name="name">sale.order.inherit</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_order_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//button[@name='action_cancel']" position="after">
+					<button name="action_create_pb" states="progress,manual" string="Create PB" type="object"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="wizard_create_pb_form" model="ir.ui.view">
+			<field name="name">Wizard Create PB</field>
+			<field name="model">wizard.create.pb</field>
+			<field name="arch" type="xml">
+				<form string="Create PB" version="7.0">
+					<group>
+						<field name="so_id" readonly="True" />
+					</group>
+					<field name="lines">
+						<tree editable="bottom" string="Product Moves">
+							<field name="so_line_id" invisible="1" />
+							<field name="product_id" readonly="True" />
+							<field name="description" readonly="True" />
+							<field name="qty" readonly="True" />
+							<field name="uom" readonly="True" />
+							<!-- <field name="unit_price" readonly="True" />
+							<field name="discount_amount" readonly="True" />
+							<field name="discount_percent" readonly="True" />
+							<field name="subtotal" readonly="True" /> -->
+						</tree>
+					</field>
+					<group>
+						<field name="note" />
+					</group>
+					<footer>
+                        <button name="request_create_pb" string="Submit" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+				</form>
+			</field>
+		</record>
+	</data>
+</openerp>
+

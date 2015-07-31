@@ -120,6 +120,7 @@ class Detail_PB(osv.osv):
         'keterangan':fields.text('Keterangan'),
         'detail_pb_id':fields.many2one('pembelian.barang', 'Referensi PB', required=True, ondelete='cascade'),
         'item': fields.many2many('set.po', 'pre_item_rel', 'permintaan_id', 'item_id', 'item'),
+        'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
     	'state': fields.selection([
             ('draft', 'Draft'),
             ('onproses', 'Confirm'),
