@@ -47,9 +47,19 @@ class hr_employee(osv.osv):
 	def check_employee_ids_on_machine(self,cr,uid,ids,context={}):
 		res = {}
 
-		res['available'] = list(self.search(cr,uid,[('att_pin','in',ids)]))
-		res['not_available'] = [eid for eid in ids if eid not in res['available']]
-		# print res
+		# res['available'] = list(self.search(cr,uid,[('att_pin','in',ids)]))
+		# res['not_available'] = [eid for eid in ids if eid not in res['available']]
+		print "IDS",ids
+		# print 'ressssssss',self.search(cr,uid,[('att_pin','in',ids)])
+		res['available'] = []
+		res['not_available'] = []
+		for id in ids:
+			searchPin = self.search(cr,uid,[('att_pin','=',id)])
+			if searchPin:
+				res['available'].append(id)
+			else:
+				res['not_available'].append(id)
+		print "---------------",res
 		return res
 
 
@@ -180,6 +190,21 @@ class hr_attendance_machine(osv.osv):
 				att_log_obj.creates(cr,uid,log_to_insert,context=context)
 		
 		return True
+	def openprint_min_max(self,cr,uid,ids,context={}):
+		res = False
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"attendance/index"
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.out',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo
+			},
+		}
+		return res
 
 
 
@@ -476,6 +501,7 @@ class hr_attendance_base_calendar_log(osv.osv):
 			CREATE OR REPLACE VIEW hr_attendance_base_calendar_log AS ( 
 				SELECT
 				row_number() over() as id,
+				CONCAT(e_series.i_year, '/', e_series.i_month) as ym_g,
 				e_series.*,
 				min_max.hh_min_log::INTEGER,
 				min_max.mm_min_log::INTEGER,
@@ -501,7 +527,7 @@ class hr_attendance_base_calendar_log(osv.osv):
 					SELECT i::DATE FROM generate_series('2015-06-01',NOW(), '1 day'::INTERVAL) AS i
 				) AS i_series
 				LEFT JOIN hr_employee ON hr_employee.attendance_type_id=1
-				JOIN hr_department ON hr_employee.department_id = hr_department.id
+				LEFT JOIN hr_department ON hr_employee.department_id = hr_department.id
 				
 			) AS e_series
 			LEFT JOIN 
@@ -514,6 +540,7 @@ class hr_attendance_base_calendar_log(osv.osv):
 	_description = "HR Attendance Base Calendar Log"
 	_auto = False
 	_columns = {
+		'ym_g': fields.char('Group Year Month'),
 		'i': fields.date('Date'),
 		'i_year': fields.integer('Year'),
 		'i_month': fields.integer('Month'),

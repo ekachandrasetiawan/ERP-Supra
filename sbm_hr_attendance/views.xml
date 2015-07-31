@@ -115,6 +115,7 @@
 				<form string="Machine" version="7.0">
 					<header>
 						<button name="stream_data_http" type="object" string="Stream Data" />
+						<button name="openprint_min_max" type="object" string="Attendance History (Min Max)" />
 					</header>
 					<sheet>
 						<group col="4">
@@ -347,9 +348,9 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 
-			<field name="limit">9999999</field>
+			<field name="limit">80</field>
 
-			<field name="context">{'search_default_group_year_n_month':1}</field>
+			<field name="context">{'search_default_group_year_n_month':1,'group_by_no_leaf':1}</field>
 		</record>
 		
 
@@ -365,6 +366,8 @@
 
 			<field name="arch" type="xml">
 				<tree string="Attendance Base Calendar Log">
+					
+					<field name="ym_g" invisible="1" />
 					<field name="employee_id" />
 					<field name="dept_name" />
 					<field name="i_day" />
@@ -418,7 +421,7 @@
 					<group expand="1" string="Group By...">
 						<filter icon="terp-personal" name="group_employee" string="By Employee" domain="[]" context="{'group_by':'employee_id'}"/>
 						<filter icon="terp-personal" name="group_dept" string="Department." domain="[]" context="{'group_by':'dept_name'}"/>
-						<filter icon="terp-personal" name="group_year_n_month" string="Years and Months" domain="[]" context="{'group_by':['i_year','month_name']}"/>
+						<filter icon="terp-personal" name="group_year_n_month" string="Years and Months" domain="[]" context="{'group_by':'ym_g'}"/>
 						<filter icon="terp-personal" name="group_day" string="Day" domain="[]" context="{'group_by':'i_day'}"/>
 					</group>
 					<newline/>
@@ -432,7 +435,8 @@
 			<field name="res_model">hr.attendance.base.calendar.log</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="limit">9999999</field>
+			<field name="limit">80</field>
+			<field name="context">{'search_default_group_year_n_month':1}</field>
 		</record>
 		
 

@@ -25,7 +25,7 @@
     'demo_xml': [],
     'installable': True,
     'active': False,
-    'js': ['static/src/js/resource.js'],
+    'js': ['static/src/js/resource.js','static/src/js/openprint.js'],
     'qweb': ['static/src/xml/resource.xml'], 
     # 'js':['static/src/js/account_invoice.js'],
 }
