@@ -45,7 +45,7 @@ class acount_invoice(osv.osv):
 		# res = {}
 		res = False
 		for d in self.browse(cr,uid,ids,context=context):
-			if d.faktur_pajak_no != '000.000-00.00000000':
+			if d.faktur_pajak_no != '000.000-00.00000000' and d.faktur_pajak_no != '0000000000000000':
 				num = d.faktur_pajak_no.split('.')
 				fp = num[2]
 				# search same number
@@ -62,6 +62,8 @@ class acount_invoice(osv.osv):
 				res=  True
 				if res:
 					self.write(cr,uid,d.id,{'state':'submited'},context=context)
+			else:
+				raise osv.except_osv(_('Error'),_('Cek nomor Faktur Pajak!'))
 
 		
 		
