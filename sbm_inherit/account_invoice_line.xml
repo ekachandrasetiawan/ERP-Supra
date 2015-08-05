@@ -118,6 +118,8 @@
 			<field name="arch" type="xml">
 				<field name="number" position="before">
 					<field name="kwitansi" />
+					<field name="faktur_pajak_no"/>
+					<field name="reference"/>
 				</field>
 			</field>
 		</record>
