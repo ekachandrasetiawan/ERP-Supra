@@ -31,6 +31,7 @@
 				</field>
 				<field name="discount" position="replace">
 					<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}"/>
+					<field name="amount_discount" groups="base.group_user" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" />
 				</field>
 				<field name="invoice_line_tax_id" position="replace">
 					<field name="invoice_line_tax_id" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]" widget="many2many_tags"/>
@@ -97,6 +98,7 @@
 							<field name="uos_id" groups="product.group_uom" on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)"/>
 							<field name="price_unit"/>
 							<field name="discount" groups="sale.group_discount_per_so_line"/>
+							<field name="amount_discount" groups="base.group_user" />
 							<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
 							<field name="price_subtotal"/>
 						</tree>
