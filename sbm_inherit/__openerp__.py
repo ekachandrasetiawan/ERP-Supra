@@ -1,5 +1,5 @@
 {
-    "name": "Inheritance Of SBM Modules",
+    "name": "Inheritance Of SBM Module",
     "version": "1.0",
     "depends": [
         "purchase",
