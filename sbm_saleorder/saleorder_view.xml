@@ -8,6 +8,7 @@
 			<field name="arch" type="xml">
 				<xpath expr="//button[@name='action_cancel']" position="after">
 					<button name="action_create_pb" states="progress,manual" string="Create PB" type="object"/>
+					<button name="action_create_pb_subcount" states="progress,manual" string="Create PB Subcount" type="object"/>
 				</xpath>
 			</field>
 		</record>
@@ -21,7 +22,7 @@
 						<field name="so_id" readonly="True" />
 					</group>
 					<field name="lines">
-						<tree editable="bottom" string="Product Moves">
+						<tree editable="bottom" string="Purchase Requsition">
 							<field name="so_line_id" invisible="1" />
 							<field name="product_id" readonly="True" />
 							<field name="description" readonly="True" />
@@ -38,6 +39,38 @@
 					</group>
 					<footer>
                         <button name="request_create_pb" string="Submit" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+				</form>
+			</field>
+		</record>
+
+
+		<!-- Create PB Subcount -->
+		<record id="wizard_create_pb_subcount_form" model="ir.ui.view">
+			<field name="name">Wizard Create PB Subcount</field>
+			<field name="model">wizard.create.pb.subcount</field>
+			<field name="arch" type="xml">
+				<form string="Create PB" version="7.0">
+					<group>
+						<field name="so_id" readonly="True" />
+					</group>
+					<field name="lines">
+						<tree editable="bottom" string="Purchase Requsition">
+							<field name="so_line_id" invisible="1" />
+							<field name="product_id" readonly="False"/>
+							<field name="description" readonly="True" />
+							<field name="qty" readonly="True" />
+							<field name="uom" readonly="True" />
+							<field name="request" readonly="False" />
+						</tree>
+					</field>
+					<group>
+						<field name="note" />
+					</group>
+					<footer>
+                        <button name="request_create_pb_subcount" string="Submit" type="object" class="oe_highlight"/>
                         or
                         <button string="Cancel" class="oe_link" special="cancel"/>
                     </footer>

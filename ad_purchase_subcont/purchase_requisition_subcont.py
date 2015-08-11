@@ -127,6 +127,7 @@ class purchase_requisition_subcont_line(osv.osv):
         'company_id': fields.related('requisition_id','company_id',type='many2one',relation='res.company',string='Company', store=True, readonly=True),
         'wo_id':fields.many2one('perintah.kerja','No SPK'),
         'product_send_ids' : fields.one2many('purchase.requisition.subcont.line.to.send','line_id','Product To Send'),
+        'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
         'state_line': fields.selection([('draft','Draft'),('ready','Ready To Process'),('onproses','On Proses'),('po','Purchase Order'),('done','Done')],
             'Status', track_visibility='onchange', required=True, readonly=True),
     }
