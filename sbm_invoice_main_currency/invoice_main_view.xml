@@ -56,7 +56,21 @@
 						<xpath expr="//form/header/button[@name='invoice_open']" position="replace">
 							<button name="invoice_open" string="Validate This is" class="oe_highlight" groups="sbm_inherit.group_customer_invoice_validator" attrs="{'invisible':[('state','not in','proforma2')]}"/>
 						</xpath>
+					<xpath expr="//field[@name='amount_untaxed']" position="before">
+						<field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+					</xpath>
 			   </field>
 			 </record>
+
+			 <record id="customer_invoice_line_form" model="ir.ui.view">
+				<field name="name">account.invoice.line.form</field>
+				<field name="model">account.invoice.line</field>
+				<field name="inherit_id" ref="account.view_invoice_line_form" />
+				<field name="arch" type="xml">
+					<field name="discount" position="replace">
+						<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" on_change="replace_discount(discount)"/>
+					</field>
+				</field>
+			</record>
 	</data>
 </openerp>

@@ -30,7 +30,7 @@
 					<field name="price_unit" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}"/>
 				</field>
 				<field name="discount" position="replace">
-					<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}"/>
+					<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" on_change="replace_discount(quantity,price_unit,discount)"/>
 					<field name="amount_discount" groups="base.group_user" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" />
 				</field>
 				<field name="invoice_line_tax_id" position="replace">
