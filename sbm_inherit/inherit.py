@@ -83,8 +83,6 @@ class PurchaseOrder(osv.osv):
 		}
 	def _get_total_discount(self, cr, uid, ids, name, arg, context=None):
 		dis = {}
-		
-
 		discount=0
 		totaldiscount=0
 		
@@ -613,7 +611,8 @@ class account_invoice(osv.osv):
 	_name='account.invoice'
 	_inherit='account.invoice'
 	_columns={
-		'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
+		# 'total_discount':fields.function(_amount_all_main,string='Total Discount',required=False,store=False),
+		# 'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
 		'payment_for':fields.selection([('dp','DP'),('completion','Completion')],string="Payment For",required=False),
 		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
 		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),

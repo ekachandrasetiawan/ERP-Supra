@@ -46,8 +46,8 @@
 				<xpath expr="//form/header/button[@name='action_cancel_draft']"  position="replace">
 					<button name="action_cancel_draft" states="cancel,proforma2" string="Reset to Draft" type="object" groups="sbm_inherit.group_customer_invoice_administrator,sbm_inherit.group_customer_invoice_set_to_draft"/>
 				</xpath>
-				<xpath expr="//form/header/button[@name='invoice_open']" position="replace">
-				</xpath>
+				<!-- <xpath expr="//form/header/button[@name='invoice_open']" position="replace">
+				</xpath> -->
 				<xpath expr="//form/header/button[@name='invoice_open']" position="replace">
 					<button name="invoice_open" string="Validate This" class="oe_highlight" groups="sbm_inherit.group_customer_invoice_validator" attrs="{'invisible':[('state','not in','proforma2')]}"/>
 				</xpath>
@@ -97,7 +97,7 @@
 							<field name="quantity"/>
 							<field name="uos_id" groups="product.group_uom" on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)"/>
 							<field name="price_unit"/>
-							<field name="discount" groups="sale.group_discount_per_so_line"/>
+							<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" on_change="replace_discount(quantity,price_unit,discount)"/>
 							<field name="amount_discount" groups="base.group_user" />
 							<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
 							<field name="price_subtotal"/>
@@ -150,10 +150,10 @@
 								on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)"/>
 							<field name="price_unit"/>
 							<field name="amount_discount" groups="base.group_user" />
-							<field name="discount" groups="sale.group_discount_per_so_line"/>
-							<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}"
-								domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
-							<!-- <field name="price_subtotal2"/> -->
+							<field name="discount" position="replace">
+								<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" on_change="replace_discount(quantity,price_unit,discount)"/>
+							</field>
+							<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
 							<field name="price_subtotal"/>
 						</tree>
 					</field>
@@ -164,10 +164,10 @@
 					<field name="comment"/>
 				</xpath>
 				
-				<xpath expr="//field[@name='amount_untaxed']" position="before">
+				<!-- <xpath expr="//field[@name='amount_untaxed']" position="before"> -->
 					<!-- <field name="amount_bruto" widget="monetary" options="{'currency_field': 'currency_id'}"/> -->
-					<field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-				</xpath>
+					<!-- <field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/> -->
+				<!-- </xpath> -->
 				<!-- <field name="amount_untaxed" position="after">
 					<field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 				</field> -->

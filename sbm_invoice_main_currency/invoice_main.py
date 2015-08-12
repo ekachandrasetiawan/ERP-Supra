@@ -10,19 +10,21 @@ from datetime import datetime, timedelta
 
 class account_invoice(osv.osv):
 	def _amount_all_main(self, cr, uid, ids, name, args, context=None):
+		
 		res = {}
 		for invoice in self.browse(cr, uid, ids, context=context):
 			res[invoice.id] = {
 				'amount_untaxed_main': 0.0,
 				'amount_tax_main': 0.0,
 				'amount_total_main': 0.0,
-				'total_discount': 0.0
+				'total_discount': 0.0,
+				'total_discount_main': 0.0
 			}
-			
-			for line in invoice.invoice_line:
-				res[invoice.id]['total_discount'] += round(line.amount_discount)
 
 			if invoice.pajak==0.0:
+				for line in invoice.invoice_line:
+					res[invoice.id]['total_discount'] += round(line.amount_discount)
+					res[invoice.id]['total_discount_main'] += round(line.amount_discount)
 				for line in invoice.invoice_line:
 					res[invoice.id]['amount_untaxed_main'] += round(line.price_subtotal)
 				for line in invoice.tax_line:
@@ -30,34 +32,15 @@ class account_invoice(osv.osv):
 				res[invoice.id]['amount_total_main'] = res[invoice.id]['amount_tax_main'] + res[invoice.id]['amount_untaxed_main']
 			else: 
 				for line in invoice.invoice_line:
+					res[invoice.id]['total_discount'] += round(line.amount_discount)
+					res[invoice.id]['total_discount_main'] += round(line.amount_discount*invoice.pajak)
+				for line in invoice.invoice_line:
 					res[invoice.id]['amount_untaxed_main'] += round(line.price_subtotal*invoice.pajak)
 				for line in invoice.tax_line:
 					res[invoice.id]['amount_tax_main'] += round(line.amount*invoice.pajak)
 				res[invoice.id]['amount_total_main'] = res[invoice.id]['amount_tax_main'] + res[invoice.id]['amount_untaxed_main']
 
-			# print '==================CEK TOTAL DIS',res[invoice.id]['total_discount']
-
 		return res
-
-
-	# def _get_total_discount(self,cr,uid,ids,name,arg,context=None):
-		
-	# 	# invoices = self.pool.get('account.invoice')
-	# 	# # line = self.pool.get('account.invoice.line').search(cr, uid, [('account_id', '=', acc_discount_id)])
-	# 	# res = {}
-	# 	# discount=0
-	# 	# total_discount=0 
-	# 	# amount_untaxed=0
-	# 	# for invoice in self.browse(cr, uid, ids, context=context):
-	# 	# 	for line in invoice.invoice_line:
-	# 	# 		total_discount= total_discount+line.amount_discount
-
-	# 	# # res['total_discount']=total_discount
-
-	# 	# print '=============TOTAL DISCOUNT====',total_discount
-
-	# 	# return res
-
 
 	_inherit = "account.invoice"
 	_columns = {
@@ -72,6 +55,7 @@ class account_invoice(osv.osv):
 				store=True,
 				multi='all'),
 			'total_discount': fields.function(_amount_all_main, string='Total Discount', store=True, multi='all'),
+			'total_discount_main': fields.function(_amount_all_main, string='Total Discount IDR', store=True, multi='all'),
 	}
 
 	def write(self,cr,uid,ids,vals,context={}):
@@ -83,18 +67,23 @@ class account_invoice(osv.osv):
 				if pajak==0.0:
 					for line in invoice.invoice_line:
 						unit_price_main = round(line.price_unit)
-						sub_total_main = round(line.price_unit*line.quantity)
+						amount_discount_main = round(line.amount_discount)
+						sub_total_main = round(line.price_unit*line.quantity)-amount_discount_main
+						
 						# Update Invoice Line
 						line_obj.write(cr, uid, [line.id], {'unit_price_main': unit_price_main})
 						line_obj.write(cr, uid, [line.id], {'sub_total_main': unit_price_main})
+						line_obj.write(cr, uid, [line.id], {'amount_discount_main': amount_discount_main})
 				else:
 					for line in invoice.invoice_line:
 						unit_price_main = round(line.price_unit*pajak)
-						sub_total_main = round((line.price_unit*line.quantity)*pajak)
-
+						amount_discount_main = round(line.amount_discount*pajak)
+						sub_total_main = round((line.price_unit*line.quantity)*pajak)-amount_discount_main
+						
 						# Update Line Invoice dikali dengan Rate Tax
 						line_obj.write(cr, uid, [line.id], {'unit_price_main': unit_price_main})
 						line_obj.write(cr, uid, [line.id], {'sub_total_main': sub_total_main})
+						line_obj.write(cr, uid, [line.id], {'amount_discount_main': amount_discount_main})
 
 					for linetax in invoice.tax_line:
 						base_main = round(linetax.base*pajak)
@@ -103,6 +92,7 @@ class account_invoice(osv.osv):
 						# Update Line tax Invoice dikali dengan Rate
 						line_tax.write(cr, uid, [linetax.id], {'base_main': base_main})
 						line_tax.write(cr, uid, [linetax.id], {'tax_main': tax_main})
+
 		return super(account_invoice, self).write(cr, uid, ids, vals, context=context)
 		
 account_invoice()
@@ -141,15 +131,14 @@ class account_invoice_line(osv.osv):
 
 	_columns = {
 		'discount':fields.float('Discount (%)',required=False),
+		'amount_discount_main':fields.float('Amount Discount',required=False),
 		'unit_price_main': fields.float('Unit Price Main'),
 		'sub_total_main': fields.float('Sub Total Main'),
 	}
 
 	def replace_discount(self,cr,uid,ids,qty,price, disc):
 		discount = ((qty*price)*disc)/100
-		return {'value':{ 
-						'amount_discount':discount,
-						} }
+		return {'value':{ 'amount_discount':discount} }
 
 
 account_invoice_line()
