@@ -519,6 +519,7 @@ stock_picking_out()
 class sale_order_line(osv.osv):
 	
 	_inherit = 'sale.order.line'
+
 	_columns = {
 		'product_onhand': fields.float('On Hand', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),
 		'product_future': fields.float('Available', digits_compute= dp.get_precision('Product UoS'), readonly=True, states={'draft': [('readonly', False)]}),

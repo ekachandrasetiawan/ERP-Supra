@@ -13,6 +13,11 @@
                 <xpath expr="//tree[@string='Sales Order Lines']/field[@name='discount']" position="after">
                 	<field name="discount_nominal"/>
                 </xpath>
+
+                <field name="discount" position="replace">
+                	     <field name="discount" groups="sale.group_discount_per_so_line" 
+                	     on_change="replace_discount(product_uom_qty,price_unit,discount)"/>
+                </field>
             </field>
         </record>
         

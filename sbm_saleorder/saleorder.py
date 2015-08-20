@@ -9,7 +9,7 @@ from osv import osv, fields
 
 
 class SaleOrder(osv.osv):
-	
+
 	def action_create_pb(self,cr,uid,ids,context=None):
 		if context is None:
 			context = {}
@@ -31,8 +31,8 @@ class SaleOrder(osv.osv):
 			'context': context,
 			'nodestroy': True,
 		}
-	_inherit = 'sale.order'
 
+	_inherit = 'sale.order'
 
 	def action_create_pb_subcount(self,cr,uid,ids,context=None):
 		if context is None:
@@ -61,7 +61,6 @@ class SaleOrder(osv.osv):
 SaleOrder()
 
 class WizardCreatePB(osv.osv_memory):
-
 	def default_get(self, cr, uid, fields, context=None):
 		if context is None: context = {}
 		so_ids = context.get('active_ids', [])
@@ -88,7 +87,6 @@ class WizardCreatePB(osv.osv_memory):
 			'uom'				: line.product_uom.id,
 			'qty'				: line.product_uom_qty,
 		}
-		
 		return so_item
 
 	def request_create_pb(self,cr,uid,ids,context=None):
@@ -96,7 +94,7 @@ class WizardCreatePB(osv.osv_memory):
 		sale_order = self.pool.get("sale.order")
 		pembelian_barang = self.pool.get('pembelian.barang')
 		detail_pb = self.pool.get('detail.pb')
-
+		
 		sale=val.so_id
 		
 		if sale.due_date:
@@ -298,3 +296,4 @@ class WizardCreatePBLineSubcount(osv.osv_memory):
 
 
 WizardCreatePBLine()
+
