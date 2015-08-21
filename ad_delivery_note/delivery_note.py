@@ -1320,9 +1320,7 @@ class stock_return_picking(osv.osv_memory):
 
 		record_idx = context and context.get('active_id', False) or False
 
-		if context.get('active_model') == 'stock.picking':
-			record_id = context and context.get('active_id', False)
-		elif context.get('active_model') =='stock.picking.in':
+		if context.get('active_model') == 'stock.picking' or context.get('active_model') =='stock.picking.in':
 			record_id = context and context.get('active_id', False)
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
@@ -1355,7 +1353,6 @@ class stock_return_picking(osv.osv_memory):
 		 @param context: A standard dictionary
 		 @return: New arch of view with new columns.
 		"""
-		print '================EKA CHANDRA SETIAWAN==========',context.get('active_model')
 
 
 		if context is None:
@@ -1364,9 +1361,7 @@ class stock_return_picking(osv.osv_memory):
 		# record_id = context and context.get('active_id', False)
 		record_idx = context and context.get('active_id', False)
 
-		if context.get('active_model') == 'stock.picking':
-			record_id = context and context.get('active_id', False)
-		elif context.get('active_model') == 'stock.picking.in':
+		if context.get('active_model') == 'stock.picking' or context.get('active_model') == 'stock.picking.in':
 			record_id = context and context.get('active_id', False)
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
