@@ -1046,7 +1046,7 @@ class delivery_note(osv.osv):
 		return False
 
 	def do_partial(self, cr, uid, ids, context=None):
-		print '===================================EKA CHANDRA======'
+		
 		val = self.browse(cr, uid, ids)[0]
 		assert len([val.refund_id.id]) == 1, 'Partial picking processing may only be done one at a time.'
 		stock_picking = self.pool.get('stock.picking')
@@ -1320,7 +1320,9 @@ class stock_return_picking(osv.osv_memory):
 
 		record_idx = context and context.get('active_id', False) or False
 
-		if context.get('active_model') == 'stock.picking' or 'stock.picking.in':
+		if context.get('active_model') == 'stock.picking':
+			record_id = context and context.get('active_id', False)
+		elif context.get('active_model') =='stock.picking.in':
 			record_id = context and context.get('active_id', False)
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
@@ -1353,14 +1355,18 @@ class stock_return_picking(osv.osv_memory):
 		 @param context: A standard dictionary
 		 @return: New arch of view with new columns.
 		"""
-		
+		print '================EKA CHANDRA SETIAWAN==========',context.get('active_model')
+
+
 		if context is None:
 			context = {}
 		res = super(stock_return_picking, self).view_init(cr, uid, fields_list, context=context)
 		# record_id = context and context.get('active_id', False)
 		record_idx = context and context.get('active_id', False)
 
-		if context.get('active_model') == 'stock.picking' or 'stock.picking.in':
+		if context.get('active_model') == 'stock.picking':
+			record_id = context and context.get('active_id', False)
+		elif context.get('active_model') == 'stock.picking.in':
 			record_id = context and context.get('active_id', False)
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
