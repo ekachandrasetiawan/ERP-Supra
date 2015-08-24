@@ -103,6 +103,8 @@
                         <button name="print_perintah" type="object" states="approve,done" string="Print" icon="gtk-print"/>
 	                    <button name="%(print_continue_spk)d" type="action" states="approve,done" string="Print Continuous" icon="gtk-print"/>
 	                    <button name="work_cancel" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
+	                     <button name="btn_cancel" type="object" states="draft" string="Cancel"  icon="terp-stock_effects-object-colorize" confirm="Are you sure to ancel Work Order"/>
+	                     
 	           			<button name="work_confirm" type="object" states="draft" string="Approve" icon="gtk-apply"/>
                         <button name="work_validate" type="object" states="approve" string="Validate" groups="stock.group_stock_manager" icon="gtk-apply"/>
 	           			<field name="state" widget="statusbar" statusbar_visible="draft,approve,done" statusbar_colors='{"draft":"red","approve":"blue"}'/>
