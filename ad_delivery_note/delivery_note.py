@@ -397,24 +397,23 @@ class stock_picking(osv.osv):
 						  delivery moves with product_id, product_qty, uom
 		@return: Dictionary of values
 		"""
-		active_id=context.get('active_id')
-		cekpicking = self.pool.get('stock.picking').browse(cr, uid, active_id, context=context)
-
-		# update Delivery Note State Refunded
-		x = cekpicking.name
-		name_seq=x[-6:]
-
-		# Cek apakah Note ID ada dan Picking Name Return atau tidak
-		if cekpicking.note_id.id ==False:
-			print '================CEK CEK ====='
-		else:
-			print '======================OKOKOKOKOKOKOKOK=================='
-			self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
-
-
 		if context is None:
 			context = {}
 		else:
+			active_id=context.get('active_id')
+			cekpicking = self.pool.get('stock.picking').browse(cr, uid, active_id, context=context)
+
+			# update Delivery Note State Refunded
+			x = cekpicking.name
+			name_seq=x[-6:]
+
+			# Cek apakah Note ID ada dan Picking Name Return atau tidak
+			if cekpicking.note_id.id ==False:
+				print '================CEK CEK ====='
+			else:
+				self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
+
+
 			context = dict(context)
 		res = {}
 		move_obj = self.pool.get('stock.move')
