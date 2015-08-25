@@ -117,9 +117,12 @@ class sale_order_line(osv.osv):
 		for line in self.browse(cr, uid, ids, context=context):
 			if (line.order_id.pricelist_id.currency_id.id==user.company_id.currency_id.id):
 				# Jika IDR maka di Rounding
-				price = round(line.price_unit - line.discount_nominal)
+				nilai1=(line.price_unit*line.product_uom_qty)-line.discount_nominal
+
+				price = round(nilai1/line.product_uom_qty)
 			else:
-				price = line.price_unit - line.discount_nominal
+				nilai1=(line.price_unit*line.product_uom_qty)-line.discount_nominal
+				price = (nilai1/line.product_uom_qty)
 
 			taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
 			
@@ -135,8 +138,9 @@ class sale_order_line(osv.osv):
  
 
 	def replace_discount(self,cr,uid,ids,qty,price, disc):
-		discount = ((qty*price)*disc)/100
-		return {'value':{ 'discount_nominal':discount} }
+		subtotal = qty*price
+		nilai = (subtotal*disc)/100
+		return {'value':{ 'discount_nominal':nilai} }
 
 		
 sale_order_line()
