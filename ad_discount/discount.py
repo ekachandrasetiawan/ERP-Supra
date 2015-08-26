@@ -99,95 +99,42 @@ class sale_order(osv.osv):
 sale_order()
 
 
-class account_tax(osv.osv):
+class res_currency(osv.osv):
 
-	_inherit = 'account.tax'
+	_inherit = "res.currency"
 
-	def compute_all(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, force_excluded=False):
+	def round(self, cr, uid, currency, amount):
+		"""Return ``amount`` rounded  according to ``currency``'s
+		   rounding rules.
+
+		   :param browse_record currency: currency for which we are rounding
+		   :param float amount: the amount to round
+		   :return: rounded float
 		"""
-		:param force_excluded: boolean used to say that we don't want to consider the value of field price_include of
-			tax. It's used in encoding by line where you don't matter if you encoded a tax with that boolean to True or
-			False
-		RETURN: {
-				'total': 0.0,                # Total without taxes
-				'total_included: 0.0,        # Total with taxes
-				'taxes': []                  # List of taxes, see compute for the format
-			}
-		"""
-		# By default, for each tax, tax amount will first be computed
-		# and rounded at the 'Account' decimal precision for each
-		# PO/SO/invoice line and then these rounded amounts will be
-		# summed, leading to the total amount for that tax. But, if the
-		# company has tax_calculation_rounding_method = round_globally,
-		# we still follow the same method, but we use a much larger
-		# precision when we round the tax amount for each line (we use
-		# the 'Account' decimal precision + 5), and that way it's like
-		# rounding after the sum of the tax amounts of each line
-		precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
-		tax_compute_precision = precision
-		if taxes and taxes[0].company_id.tax_calculation_rounding_method == 'round_globally':
-			tax_compute_precision += 5
-		totalin = totalex = float_round(price_unit * quantity, precision)
-		# totalin = totalex = round(price_unit * quantity)
-		tin = []
-		tex = []
-		for tax in taxes:
-			if not tax.price_include or force_excluded:
-				tex.append(tax)
-			else:
-				tin.append(tax)
-		tin = self.compute_inv(cr, uid, tin, price_unit, quantity, product=product, partner=partner, precision=tax_compute_precision)
-		for r in tin:
-			totalex -= r.get('amount', 0.0)
-		totlex_qty = 0.0
-		try:
-			totlex_qty = totalex/quantity
-		except:
-			pass
-		tex = self._compute(cr, uid, tex, totlex_qty, quantity, product=product, partner=partner, precision=tax_compute_precision)
-		for r in tex:
-			totalin += r.get('amount', 0.0)
-		return {
-			'total': totalex,
-			'total_included': totalin,
-			'taxes': tin + tex
-		}
-		return super( account_tax, self)._invoice_line_hook( cr, uid, move_line,invoice_line_id )
+		res = super(res_currency, self).round(cr,uid,currency,amount)
+		print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<+++++++++++++++++++++++++++++++++++",res
 
-account_tax()
-	   
+		user_obj = self.pool.get('res.users')
+		currency_obj = self.pool.get('res.currency')
+		user = user_obj.browse(cr, uid, uid, {})
+
+		if (currency.id==user.company_id.currency_id.id):
+			res = round(amount)
+		print "-------------------------------------------+++++++++++++++++++++++++++++++++++",res
+		return res
+
+
+
+res_currency()
+
+		
 class sale_order_line(osv.osv):
 	_inherit = "sale.order.line"
 
 	def _amount_line(self, cr, uid, ids, field_name, arg, context=None):
-		
-		tax_obj = self.pool.get('account.tax')
-		cur_obj = self.pool.get('res.currency')
-		
-		user_obj = self.pool.get('res.users')
-		currency_obj = self.pool.get('res.currency')
-		user = user_obj.browse(cr, uid, uid, context=context)
 
-		res = {}
-		if context is None:
-			context = {}
-		for line in self.browse(cr, uid, ids, context=context):
-			# if (line.order_id.pricelist_id.currency_id.id==user.company_id.currency_id.id):
-			# 	# Jika IDR maka di Rounding
-			# 	# price=(line.price_unit*line.product_uom_qty)-line.discount_nominal
-			# 	price = line.price_unit
-			# 	# price = round(nilai1/line.product_uom_qty)
-			# else:
-			price = line.price_unit
-
-			taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
-			
-			
-			cur = line.order_id.pricelist_id.currency_id
-			if (line.order_id.pricelist_id.currency_id.id==user.company_id.currency_id.id):
-				res[line.id] = cur_obj.round(cr, uid, cur, round(taxes['total']))
-			else:
-				res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
+		res = super(sale_order_line, self)._amount_line(cr,uid,ids, field_name, arg, context=None)
+		
 		return res
 
 
