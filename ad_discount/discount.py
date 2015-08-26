@@ -118,8 +118,10 @@ class sale_order_line(osv.osv):
 			if (line.order_id.pricelist_id.currency_id.id==user.company_id.currency_id.id):
 				# Jika IDR maka di Rounding
 				nilai1=(line.price_unit*line.product_uom_qty)-line.discount_nominal
+				price1 = nilai1/line.product_uom_qty
 
-				price = round(nilai1/line.product_uom_qty)
+				price =round(price*line.product_uom_qty)
+				
 			else:
 				nilai1=(line.price_unit*line.product_uom_qty)-line.discount_nominal
 				price = (nilai1/line.product_uom_qty)
