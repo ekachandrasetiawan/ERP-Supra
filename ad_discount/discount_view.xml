@@ -18,12 +18,14 @@
                 	     <field name="discount" groups="sale.group_discount_per_so_line" 
                 	     on_change="replace_discount(product_uom_qty,price_unit,discount)"/>
                 </field>
+                 <field name="price_unit" position="replace">
+                	     <field name="price_unit"
+                	     on_change="on_change_price_unit(price_unit)"/>
+                </field>
             </field>
         </record>
-        
 	</data>
 </openerp>
-
 
 <!--
 

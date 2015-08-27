@@ -146,7 +146,7 @@ class sale_order_line(osv.osv):
 			taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
 			cur = line.order_id.pricelist_id.currency_id
 			if (line.order_id.pricelist_id.currency_id.id==user.company_id.currency_id.id):
-				res[line.id] = cur_obj.round(cr, uid, cur, round(taxes['total']-line.discount_nominal))
+				res[line.id] = cur_obj.round(cr, uid, cur, taxes['total']- line.discount_nominal)
 			else:
 				res[line.id] = cur_obj.round(cr, uid, cur, taxes['total']-line.discount_nominal)
 				
@@ -163,6 +163,10 @@ class sale_order_line(osv.osv):
 		subtotal = qty*price
 		nilai = (subtotal*disc)/100
 		return {'value':{ 'discount_nominal':nilai} }
+
+	def on_change_price_unit(self,cr,uid,ids,price):
+
+		return {'value':{ 'discount_nominal':0, 'discount':0,} }
 
 		
 sale_order_line()
