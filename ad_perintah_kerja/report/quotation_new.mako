@@ -279,7 +279,8 @@ table.main tr td { padding: 5px;}
 					<td width="15%" class="alignCenter alignTop">${line.product_uom.name}</td>
 					<td width="40%" class="alignTop">${line.name}</td>
 					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit),digits=2)}</td>
-					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit*line.product_uom_qty),digits=2)}</td>
+					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_subtotal),digits=2)}</td>
+					<!-- <td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit*line.product_uom_qty),digits=2)}</td> -->
 				</tr>
 				
 				<% i+=1 %>
@@ -299,7 +300,7 @@ table.main tr td { padding: 5px;}
 				<tr width="100%">
 					<td colspan="4" rowspan="4" width="70%" style="border:0px solid #000;"></td>
 					<td width="15%">Gross Value</td>
-					<td width="15%" class="alignRight">${formatLang(float(untax_amount),digits=2)}</td>
+					<td width="15%" class="alignRight">${formatLang(float(o.amount_untaxed),digits=2)}</td>
 				</tr>
 				<tr width="100%">
 					<td width="15%">Disc</td>
