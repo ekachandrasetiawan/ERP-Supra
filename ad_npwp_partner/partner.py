@@ -2,17 +2,21 @@ from osv import osv, fields
 from tools.translate import _
 
 class partner(osv.osv):
-	_inherit = 'res.partner'
+	_inherit = ["res.partner","mail.thread"]
+	_name = "res.partner"
 	_columns = {
-			'npwp' : fields.char('No. NPWP', size=20, required=False, help='Misal 01.540.674.7.431-000'),
-			'blok':fields.char('Blok'),
-			'nomor':fields.char('Nomor'),
-			'rt':fields.char('RT',size=3),
-			'rw':fields.char('RW',size=3),
-			'kelurahan':fields.char('Kelurahan'),
-			'kecamatan':fields.char('Kecamatan'),
-			'kabupaten':fields.char('Kabupaten'),
-			'propinsi':fields.char('Propinsi'),
+			'npwp' : fields.char('No. NPWP', size=20, required=False, help='Misal 01.540.674.7.431-000',track_visibility='onchange'),
+			'name' : fields.char('Name',track_visibility='onchange'),
+			'blok':fields.char('Blok',track_visibility='onchange'),
+			'nomor':fields.char('Nomor',track_visibility='onchange'),
+			'rt':fields.char('RT',size=3,track_visibility='onchange'),
+			'rw':fields.char('RW',size=3,track_visibility='onchange'),
+			'kelurahan':fields.char('Kelurahan',track_visibility='onchange'),
+			'kecamatan':fields.char('Kecamatan',track_visibility='onchange'),
+			'kabupaten':fields.char('Kabupaten',track_visibility='onchange'),
+			'propinsi':fields.char('Propinsi',track_visibility='onchange'),
+			'street':fields.char('street',track_visibility='onchange'),
+			'street2':fields.char('street',track_visibility='onchange'),
 		}
 
 	def onchange_format_npwp(self, cr, uid, ids, npwp):
