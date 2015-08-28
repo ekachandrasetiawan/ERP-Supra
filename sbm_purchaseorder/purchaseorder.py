@@ -126,10 +126,47 @@ class Purchase_Order_Sbm(osv.osv):
 				for line in po.order_line:
 					if line.line_pb_subcont_id:
 						self.pool.get('purchase.requisition.subcont.line').write(cr,uid,[line.line_pb_subcont_id.id],{'state_line':'po'})
+			
+
+
+		# self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
 		
-		self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
 		return super(Purchase_Order_Sbm,self).wkf_approve_order(cr,uid,ids,context=context)
 	
+	def _create_pickings(self, cr, uid, order, order_lines, picking_id=False, context=None):
+
+		res = super(Purchase_Order_Sbm,self)._create_pickings(cr,uid,order, order_lines, picking_id=False,context=context)
+
+		return res
+
+	def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, context=None):
+		
+		if order_line.part_number == False:
+			nameproduct = order_line.name or ''
+		else:
+			nameproduct = order_line.name + ' ' + order_line.part_number or ''
+
+		return {
+			'name': nameproduct,
+			'product_id': order_line.product_id.id,
+			'product_qty': order_line.product_qty,
+			'product_uos_qty': order_line.product_qty,
+			'product_uom': order_line.product_uom.id,
+			'product_uos': order_line.product_uom.id,
+			'date': self.date_to_datetime(cr, uid, order.date_order, context),
+			'date_expected': self.date_to_datetime(cr, uid, order_line.date_planned, context),
+			'location_id': order.partner_id.property_stock_supplier.id,
+			'location_dest_id': order.location_id.id,
+			'picking_id': picking_id,
+			'partner_id': order.dest_address_id.id or order.partner_id.id,
+			'move_dest_id': order_line.move_dest_id.id,
+			'state': 'draft',
+			'type':'in',
+			'purchase_line_id': order_line.id,
+			'company_id': order.company_id.id,
+			'price_unit': order_line.price_unit
+		}
+		
 	def action_cancel(self, cr, uid, ids, context=None):
 		wf_service = netsvc.LocalService("workflow")
 		for purchase in self.browse(cr, uid, ids, context=context):
