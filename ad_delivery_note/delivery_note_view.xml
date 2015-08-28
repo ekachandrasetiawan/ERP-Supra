@@ -22,7 +22,8 @@
         rml="ad_delivery_note/report/internal_blank.rml"
         auto="False" menu="False"/>
 
-		<record model="ir.ui.view" id="view_inherit_sale_order">
+
+    	<record model="ir.ui.view" id="view_inherit_sale_order">
 			<field name="name">sale.order.inherit</field>
 			<field name="model">sale.order</field>
 			<field name="inherit_id" ref="sale.view_order_form" />
@@ -104,9 +105,12 @@
                     <button name="print_dn_out" type="object" states="done" string="Print DN" icon="gtk-dnd-multiple"/>
                     <button name="print_pack_list" type="object" states="done" string="Print Pack List" icon="gtk-dnd-multiple"/>
 
-                    <!-- <button name="return_product" type="object" states="done" string="Return Products"/> -->
-
                     <button name="action_process" states="torefund" string="Confirm &amp; Transfer" groups="stock.group_stock_user" type="object" class="oe_highlight"/>
+
+
+                    <button name="cancel_dn_all" type="object" states="done" string="Cancel Delivery Note" icon="terp-stock_effects-object-colorize"/>
+
+                    <!-- <button name="cancel_dn_all" type="object" states="done" string="Cancel Delivery Note" icon="terp-stock_effects-object-colorize" confirm="Are you sure to Cancel Delivery Note"/> -->
 
 		            <button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done" type="action" groups="base.group_user"/>
 
@@ -331,7 +335,7 @@
                 <tree colors="grey:scrapped == True" string="Stock Moves">
                     <field name="no"/>
                     <field name="product_id"/>
-                     <field name="desc" />
+                    <field name="desc" />
                     <field name="product_qty" on_change="onchange_quantity(product_id, product_qty, product_uom, product_uos)"/>
                     <field name="product_uom" string="Unit of Measure" groups="product.group_uom"/>
                     <field name="prodlot_id" groups="stock.group_production_lot"/>
@@ -437,117 +441,24 @@
             <field name="view_mode">tree,form</field>
             <field name="domain">[('type','=','internal')]</field>
             <field name="view_id" ref="view_picking_form_internal"/>
-        </record>
-       
- 
+        </record>   
+
+
         <menuitem name="Delivery Note" parent="base.menu_sales" id="sale_delivery_note" action="action_delivery_note_form"/>
  
 		<menuitem name="Product Moves" parent="base.menu_sales" id="sale_minta_barang" action="action_permintaan_barang"/>
 
 
-<!--
-										<notebook colspan="4">
-										<page string="Product">
-							                <button name="refresh" type="object" string="Refresh"/>
-				                            <field colspan="4" name="product_lines" nolabel="1" widget="one2many_list">
-				                                <tree string="" editable="top">
-				                                    <field name="no"/>
-									                <field name="name"/>
-									                <field name="product_id"/>
-									                <field name="product_qty"/>
-									                <field name="product_uom"/>
-				                                </tree>
-		                            		</field>
-	                            		</page>
-										<page string="Note Lines">
-											<field colspan="4" name="catatan_line" nolabel="1" widget="one2many_list">
-				                                <tree string="" editable="top">
-				                                    <field colspan="4" name="name"/>
-									                <field name="product_id"/>
-									                <field name="product_qty"/>
-									                <field name="product_uom"/>
-									                <field name="product_packaging"/>
-				                                </tree>
-				                            </field>
-				                        </page>
-				                	</notebook>
-
-				
-
-        <record id="view_picking_form_internal" model="ir.ui.view">
-            <field name="name">stock.picking.form.request</field>
-            <field name="model">stock.picking.request</field>
-            <field name="inherit_id" ref="stock.view_picking_form"/>
+        <record id="stock_partial_picking_form" model="ir.ui.view">
+            <field name="name">stock.partial.picking.form</field>
+            <field name="model">stock.partial.picking</field>
+            <field name="inherit_id" ref="stock.stock_partial_picking_form"/>
             <field name="arch" type="xml">
-				 <xpath expr="//field[@name='partner_id']" position="replace">
-                	<field name="partner_id" invisible="True" on_change="onchange_partner_in(partner_id)"/>
-                 </xpath>
-                 <xpath expr="//field[@name='backorder_id']" position="replace">
-                 	<field name="backorder_id" invisible="True" readonly="1" attrs="{'invisible': [('backorder_id','=',False)]}"/>
-                 </xpath>
-                 <xpath expr="//field[@name='invoice_state']" position="replace">
-                 	<field name="invoice_state" invisible="True" string="Invoice Control" groups="account.group_account_invoice" attrs="{'invisible':[('invoice_state', '=', 'none')]}"/>
-                 </xpath>
-                 <xpath expr="//field[@name='stock_journal_id']" position="replace">
-                 	<field name="stock_journal_id" invisible="True" widget="selection" groups="account.group_account_user"/>
-                 </xpath>
-                 <xpath expr="//field[@name='min_date']" position="replace">
-                 	<field name="min_date" string="Delivery Date"/>
-                 </xpath>
-                 <xpath expr="//field[@name='origin']" position="replace">
-                 	<field name="origin" required="True" placeholder="PB/VALE/14/01/xxx" class="oe_inline"/>
-            	</xpath>
-			</field>
-        </record>
-        
-		<record model="ir.ui.view" id="view_inherit_picking_out_form_dn">
-			<field name="name">stock.picking.out.inherit.form</field>
-			<field name="model">stock.picking</field>
-			<field name="type">form</field>
-			<field name="inherit_id" ref="stock.view_picking_out_form" />
-			<field name="arch" type="xml">
-				<field name="origin" position="replace">
-                	<field name="delivery_note" />
-					<field name="delivery_datetime" />
-                </field>
-			</field>
-		</record>
-
-    	<record model="ir.ui.view" id="view_inherit_sale_search_note">
-            <field name="name">sale.order.note</field>
-            <field name="model">sale.order</field>
-            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
-            <field name="type">search</field>
-            <field name="arch" type="xml">
-                <field name="partner_id" position="after">
-					<field name="delivery_note" />
-					<field name="delivery_datetime" />
+                <field name="product_id" position="after">
+                    <field name="product_name"/>
                 </field>
             </field>
         </record>
-
-
-    	<record model="ir.ui.view" id="view_inherit_stock_list_select_dn">
-            <field name="name">stock.inherit.list.select</field>
-            <field name="model">stock.picking</field>
-            <field name="inherit_id" ref="stock.view_picking_out_search"/>
-            <field name="type">search</field>
-            <field name="arch" type="xml">
-                <field name="name" position="after">
-					<field name="delivery_note" />
-					<field name="delivery_datetime" />
-                </field>
-            </field>
-        </record>		
-
-    	      
-
-
-	</data>
-</openerp>
-
-
--->
 
 	</data>
 </openerp>

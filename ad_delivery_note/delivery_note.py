@@ -1255,6 +1255,23 @@ class delivery_note(osv.osv):
 	
 		# return {'type': 'ir.actions.act_window_close'}
 
+
+	def cancel_dn_all(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+
+		dn_obj = self.pool.get('delivery.note')
+		dn_line_obj = self.pool.get('delivery.note.line')
+		picking_obj = self.pool.get('stock.picking')
+		move_obj = self.pool.get('stock.move')
+		op_obj = self.pool.get('order.preparation')
+		op_line_obj = self.pool.get('order.preparation.line')
+		
+		print '==============',val.prepare_id.sale_id.id
+
+
+		return True
+
+
 delivery_note()
  
 
@@ -1864,3 +1881,47 @@ class stock_invoice_onshipping(osv.osv_memory):
 		return res
 
 stock_invoice_onshipping()
+
+
+class stock_partial_picking_line(osv.osv):
+
+	_inherit = "stock.partial.picking.line"
+	_columns = {
+		'product_name':fields.text('Product Name',required=False),
+	}
+
+
+stock_partial_picking_line()
+
+
+class stock_picking_in(osv.osv):
+
+	_inherit = 'stock.picking.in'
+
+	def action_process(self, cr, uid, ids, context=None):
+		res = super(stock_picking_in, self).action_process(cr, uid, ids, context)
+
+		return res
+	
+stock_picking_in()
+
+
+class stock_partial_picking(osv.osv_memory):
+	
+	_inherit = "stock.partial.picking"
+
+	def _partial_move_for(self, cr, uid, move):
+
+		partial_move = {
+			'product_id' : move.product_id.id,
+			'product_name':move.name,
+			'quantity' : move.product_qty if move.state == 'assigned' or move.picking_id.type == 'in' else 0,
+			'product_uom' : move.product_uom.id,
+			'prodlot_id' : move.prodlot_id.id,
+			'move_id' : move.id,
+			'location_id' : move.location_id.id,
+			'location_dest_id' : move.location_dest_id.id,
+		}
+		if move.picking_id.type == 'in' and move.product_id.cost_method == 'average':
+			partial_move.update(update_cost=True, **self._product_cost_for_average_update(cr, uid, move))
+		return partial_move
