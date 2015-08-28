@@ -5,20 +5,20 @@ from datetime import date, timedelta, datetime
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 
-class product_product(osv.osv):
-	_inherit = "product.product"
-	_columns = {
-		'default_code' : fields.char('Part Number', size=64, select=True, required=True),
-	}
+# class product_product(osv.osv):
+# 	_inherit = "product.product"
+# 	# _columns = {
+# 	# 	'default_code' : fields.char('Part Number', size=64, select=True, required=True),
+# 	# }
 	
-	_sql_constraints = [
-		('default_code_unique', 'unique (default_code)', 'The Part Number must be unique !'),
+# 	_sql_constraints = [
+# 		('default_code_unique', 'unique (default_code)', 'The Part Number must be unique !'),
 
-		('name_template_unique', 'unique (name_template)', 'The Part Name must be unique !')
-	]
+# 		('name_template_unique', 'unique (name_template)', 'The Part Name must be unique !')
+# 	]
 	
 		
-product_product()
+# product_product()
 
 
 class res_users(osv.osv):

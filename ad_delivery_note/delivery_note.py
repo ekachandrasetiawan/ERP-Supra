@@ -841,13 +841,28 @@ class sale_order_line(osv.osv):
 
 
 class product_product(osv.osv):
-	_inherit = "product.product"
+	_inherit = ["product.product","mail.thread"]
+	_name = "product.product"
 	_columns = {
 		'batch_code':fields.char('Batch No', size=64),
 		'expired_date' : fields.date('Expired Date'),
 		'partner_code':fields.char('Partner Code', size=64),
 		'partner_desc' : fields.char('Partner Description', size=254),
+		'default_code' : fields.char('Part Number', size=64, select=True,track_visibility='onchange'),
+		'categ_id': fields.many2one('product.category','Category', required=True,track_visibility='onchange'),
+		'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', size=128, store=True, select=True,track_visibility='onchange'),
 	}
+	_track = {
+		'name_template':{
+
+		},
+	}
+
+	_sql_constraints = [
+		('default_code_unique', 'unique (default_code)', 'The Part Number must be unique !'),
+
+		('name_template_unique', 'unique (name_template)', 'The Part Name must be unique !')
+	]
 	
 product_product()
 
