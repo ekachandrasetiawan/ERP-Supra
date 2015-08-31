@@ -839,24 +839,36 @@ class sale_order_line(osv.osv):
 		
 		return {'value': result, 'domain': domain, 'warning': warning}
 
+class product_template(osv.osv):
+	_inherit = ["product.template","mail.thread"]
+	_name = "product.template"
+	_columns = {
+		'categ_id': fields.many2one('product.category','Category', required=True,track_visibility='onchange'),
+	}
+
+
+product_template()
 
 class product_product(osv.osv):
 	_inherit = ["product.product","mail.thread"]
 	_name = "product.product"
 	_columns = {
+		'create_date': fields.datetime('Create Date'),
 		'batch_code':fields.char('Batch No', size=64),
 		'expired_date' : fields.date('Expired Date'),
 		'partner_code':fields.char('Partner Code', size=64),
 		'partner_desc' : fields.char('Partner Description', size=254),
 		'default_code' : fields.char('Part Number', size=64, select=True,track_visibility='onchange'),
-		'categ_id': fields.many2one('product.category','Category', required=True,track_visibility='onchange'),
+		# 'categ_id': fields.many2one('product.category','Category', required=True,track_visibility='onchange'),
 		'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', size=128, store=True, select=True,track_visibility='onchange'),
 	}
 	_track = {
 		'name_template':{
-
+			
 		},
 	}
+
+	_order = "create_date desc"
 
 	_sql_constraints = [
 		('default_code_unique', 'unique (default_code)', 'The Part Number must be unique !'),
@@ -957,6 +969,7 @@ class delivery_note(osv.osv):
 		'terms':fields.text('Terms & Condition'),
 		'attn':fields.many2one('res.partner',string="Attention"),
 		'refund_id':fields.many2one('stock.picking',string="Refund No", domain=[('type','=', 'in')], readonly=True),
+		# 'delivery_note_line_return_ids':fields.many2many('delivery.note.line.return','delivery_note_return_product','delivery_note_id','delivery_note_return_id'),
 	}
 	_defaults = {
 		'name': '/',
@@ -1301,11 +1314,11 @@ class delivery_note_line(osv.osv):
 		'product_uom': fields.many2one('product.uom', 'UoM'),
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
+		# 'delivery_note_line_return_ids':fields.many2many('delivery.note.line.return','delivery_note_line_return_product','delivery_note_line_id','delivery_note_line_return_id'),
 
 	}
 		 
 delivery_note_line()
-
 
 class packing_list_line(osv.osv):
 	_name = "packing.list.line"
@@ -1940,3 +1953,17 @@ class stock_partial_picking(osv.osv_memory):
 		if move.picking_id.type == 'in' and move.product_id.cost_method == 'average':
 			partial_move.update(update_cost=True, **self._product_cost_for_average_update(cr, uid, move))
 		return partial_move
+
+# class delivery_note_line_return(osv.osv):
+# 	_name = 'delivery.note.line.return'	
+# 	_columns = {
+# 		'delivery_note_id':fields.many2many('delivery.note','delivery_note_return_product','delivery_note_return_id','delivery_note_id'),
+# 		'delivery_note_line_id':fields.many2many('delivery.note.line','delivery_note_line_return_product','delivery_note_line_return_id','delivery_note_line_id'),
+# 		'stock_picking_id':fields.many2many('stock.picking','stock_picking_return_product','stock_picking_id','stock_picking_id'),
+# 	}
+
+# delivery_note_line_return()
+
+
+# 'stock_picking_ids':fields.many2many('stock.picking','delivery_note_line_return_product','delivery_note_line_id','delivery_note_line_return_id'),
+# 'delivery_note_line_return_ids':fields.many2many('delivery.note.line.return','delivery_note_line_return_product','delivery_note_line_id','delivery_note_line_return_id'),
