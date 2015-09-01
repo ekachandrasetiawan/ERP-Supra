@@ -103,6 +103,8 @@ class stock_picking(osv.osv):
 			* Transferred: has been processed, can't be modified or cancelled anymore\n
 			* Cancelled: has been cancelled, can't be confirmed anymore"""
 		),
+		'stock_picking_ids':fields.many2many('stock.picking','delivery_note_line_return_product','stock_picking_id','stock_picking_reutrn_id'),
+		'refund_id':fields.many2many('stock.picking','delivery_note_move','delivery_note_id','delivery_note_return_id'),
 	}
 	_defaults={
 		'isset_set':False,
@@ -859,7 +861,6 @@ class product_product(osv.osv):
 		'partner_code':fields.char('Partner Code', size=64),
 		'partner_desc' : fields.char('Partner Description', size=254),
 		'default_code' : fields.char('Part Number', size=64, select=True,track_visibility='onchange'),
-		# 'categ_id': fields.many2one('product.category','Category', required=True,track_visibility='onchange'),
 		'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', size=128, store=True, select=True,track_visibility='onchange'),
 	}
 	_track = {
@@ -934,6 +935,39 @@ class delivery_note(osv.osv):
 				'uid':uid
 			},
 		}
+
+
+	def _sel_func(self, cr, uid, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		pick_id=val.prepare_id.picking_id.id
+		retursn_history = {}
+		
+		return_history = self.pool.get('stock.picking').get_return_history(cr, uid, pick_id, context)
+		print '==========EKA CHANDRA SETIAWAN==================',return_history
+
+		return return_history
+
+	def _get_refund(self, cr, uid, ids, name, arg, context=None):		
+		res = {}
+		val = self.browse(cr, uid, ids, context={})[0]
+		pick_id=val.prepare_id.picking_id.id
+		retursn_history = {}
+		
+		return_history = self.get_return_history(cr, uid, pick_id, context)
+		print '==========EKA CHANDRA SETIAWAN==================',return_history
+		# picking_id=[]
+		# a = ''
+		# picking = self.pool.get('stock.picking').search(cr, uid, [('note_id', '=', ids), ('type', '=', 'in')])
+		# datas = self.pool.get('stock.picking').browse(cr, uid, picking, context=context)
+
+		# for record in datas:
+		# 	picking_id.append(record.id)
+		# for data in self.browse(cr, uid, ids, context=context):
+		# 	res[data.id] = picking_id
+		
+		return res
+
+
 	def print_pack_list(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
@@ -969,11 +1003,15 @@ class delivery_note(osv.osv):
 		'terms':fields.text('Terms & Condition'),
 		'attn':fields.many2one('res.partner',string="Attention"),
 		'refund_id':fields.many2one('stock.picking',string="Refund No", domain=[('type','=', 'in')], readonly=True),
-		# 'delivery_note_line_return_ids':fields.many2many('delivery.note.line.return','delivery_note_return_product','delivery_note_id','delivery_note_return_id'),
+		'refund_ids':fields.many2many('stock.picking','delivery_note_move','delivery_note_id','delivery_note_return_id'),
+		'refund_many': fields.function(
+			_get_refund,string="Refund Many",store=False, type="many2one",relation="stock.picking"
+		),
 	}
 	_defaults = {
 		'name': '/',
-		'state': 'draft', 
+		'state': 'draft',
+		'poc':_sel_func,
 	}
 	# to add mail thread in footer
 	_inherit = ['mail.thread']
@@ -1294,11 +1332,41 @@ class delivery_note(osv.osv):
 		op_obj = self.pool.get('order.preparation')
 		op_line_obj = self.pool.get('order.preparation.line')
 		
-		print '==============',val.prepare_id.sale_id.id
-
-
 		return True
 
+	def delivery_note_line(self, cr, uid, ids, context=None):
+		return_history = {}
+
+		return_history = self.get_return_history(cr, uid, ids, context)
+
+		return return_history
+
+	def get_return_history(self, cr, uid, pick_id, context=None):
+		""" 
+		 Get  return_history.
+		 @param self: The object pointer.
+		 @param cr: A database cursor
+		 @param uid: ID of the user currently logged in
+		 @param pick_id: Picking id
+		 @param context: A standard dictionary
+		 @return: A dictionary which of values.
+		"""
+		print '================================cek pick id====',pick_id
+		pick_obj = self.pool.get('stock.picking')
+		pick = pick_obj.browse(cr, uid, pick_id, context=context)
+		return_history = {}
+		for m  in pick.move_lines:
+			if m.state == 'done':
+				return_history[m.id] = 0
+				for rec in m.move_history_ids2:
+					# only take into account 'product return' moves, ignoring any other
+					# kind of upstream moves, such as internal procurements, etc.
+					# a valid return move will be the exact opposite of ours:
+					#     (src location, dest location) <=> (dest location, src location))
+					if rec.location_dest_id.id == m.location_id.id \
+						and rec.location_id.id == m.location_dest_id.id:
+						return_history[m.id] += (rec.product_qty * rec.product_uom.factor)
+		return return_history
 
 delivery_note()
  
@@ -1314,8 +1382,6 @@ class delivery_note_line(osv.osv):
 		'product_uom': fields.many2one('product.uom', 'UoM'),
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
-		# 'delivery_note_line_return_ids':fields.many2many('delivery.note.line.return','delivery_note_line_return_product','delivery_note_line_id','delivery_note_line_return_id'),
-
 	}
 		 
 delivery_note_line()
@@ -1577,7 +1643,6 @@ class stock_return_picking(osv.osv_memory):
 			for m  in pick.move_lines:
 				if m.state == 'done' and m.product_qty * m.product_uom.factor > return_history.get(m.id, 0):
 					valid_lines += 1
-			
 			if not valid_lines:
 				raise osv.except_osv(_('Warning!'), _("No products to return (only lines in Done state and not fully returned yet can be returned)!"))
 		return res
@@ -1954,16 +2019,14 @@ class stock_partial_picking(osv.osv_memory):
 			partial_move.update(update_cost=True, **self._product_cost_for_average_update(cr, uid, move))
 		return partial_move
 
-# class delivery_note_line_return(osv.osv):
-# 	_name = 'delivery.note.line.return'	
-# 	_columns = {
-# 		'delivery_note_id':fields.many2many('delivery.note','delivery_note_return_product','delivery_note_return_id','delivery_note_id'),
-# 		'delivery_note_line_id':fields.many2many('delivery.note.line','delivery_note_line_return_product','delivery_note_line_return_id','delivery_note_line_id'),
-# 		'stock_picking_id':fields.many2many('stock.picking','stock_picking_return_product','stock_picking_id','stock_picking_id'),
-# 	}
+class delivery_note_line_return(osv.osv):
 
-# delivery_note_line_return()
+	_name = 'delivery.note.line.return'	
+	_columns = {
+		'delivery_note_id': fields.many2one('delivery.note','Delivery Note'),
+		'delivery_note_line_id': fields.many2one('delivery.note.line','Delivery Note Line'),
+		'stock_picking_id': fields.many2one('stock.picking','Stock Picking'),
+		'stock_move_id': fields.many2one('stock.move','Stock Move'),
+	}
 
-
-# 'stock_picking_ids':fields.many2many('stock.picking','delivery_note_line_return_product','delivery_note_line_id','delivery_note_line_return_id'),
-# 'delivery_note_line_return_ids':fields.many2many('delivery.note.line.return','delivery_note_line_return_product','delivery_note_line_id','delivery_note_line_return_id'),
+delivery_note_line_return()
