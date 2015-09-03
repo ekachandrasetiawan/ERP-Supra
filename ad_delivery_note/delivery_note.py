@@ -406,12 +406,12 @@ class stock_picking(osv.osv):
 			# update Delivery Note State Refunded
 			x = cekpicking.name
 			name_seq=x[-6:]
-
 			# Cek apakah Note ID ada dan Picking Name Return atau tidak
 			if cekpicking.note_id.id ==False:
 				print '================CEK CEK ====='
 			else:
 				self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
+				# self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
 
 
 			context = dict(context)
@@ -947,13 +947,6 @@ class delivery_note(osv.osv):
 			},
 		}
 
-	def _cek_refund(self, cr, uid, context=None):
-		print "\n\nget function call Default" 
-		print '==========================EKA CHANDRA SETIAWAN==================='
-		res = 'Pooja'
-		return res
-
-
 	_name = "delivery.note"
 
 	_columns = {
@@ -974,13 +967,12 @@ class delivery_note(osv.osv):
 		'terms':fields.text('Terms & Condition'),
 		'attn':fields.many2one('res.partner',string="Attention"),
 		'refund_id':fields.many2one('stock.picking',string="Refund No", domain=[('type','=', 'in')], readonly=True),
-		'note_return_ids': fields.many2many('stock.picking','delivery_note_line_return','delivery_note_id',string="Note Return",readonly=True),
-		'cek_refund': fields.function(_cek_refund, type='char', string='Cek Refund'),
+		'note_return_ids': fields.many2many('stock.picking','delivery_note_return','delivery_note_id',string="Note Return",readonly=True),
+		'note_return_ids_proses': fields.many2many('stock.picking','delivery_note_return','delivery_note_id',string="Note Return",readonly=True),
 	}
 	_defaults = {
 		'name': '/',
 		'state': 'draft', 
-		'cek_refund': _cek_refund, 
 	}
 	# to add mail thread in footer
 	_inherit = ['mail.thread']
@@ -1689,6 +1681,7 @@ class stock_return_picking(osv.osv_memory):
 								'date':date_cur,
 								'invoice_state': data['invoice_state'],
 								})
+
 		else:
 			new_picking = pick_obj.copy(cr, uid, pick.id, {
 								'name': _('%s-%s-return') % (new_pick_name, pick.name),
@@ -1699,6 +1692,8 @@ class stock_return_picking(osv.osv_memory):
 								'note_id':val.id,
 								'invoice_state': data['invoice_state'],
 								})
+			# dn.write(cr,uid,val.id,{'note_return_ids':[(0,0,{'delivery_note_id':val.id,'picking_id':new_picking})]})
+			dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
 
 		dn_return_rel = []
 		val_id = data['product_return_moves']
