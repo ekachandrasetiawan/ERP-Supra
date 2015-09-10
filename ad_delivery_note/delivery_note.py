@@ -401,6 +401,22 @@ class stock_picking(osv.osv):
 		if context is None:
 			context = {}
 		else:
+			# chandra function for return picking
+			active_id=context.get('active_id')
+			cekpicking = self.pool.get('stock.picking').browse(cr, uid, active_id, context=context)
+
+			# update Delivery Note State Refunded
+			x = cekpicking.name
+			name_seq=x[-6:]
+
+			# Cek apakah Note ID ada dan Picking Name Return atau tidak
+			if cekpicking.note_id.id ==False:
+				print '================CEK CEK ====='
+			else:
+				self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
+			# chandra function for return picking
+
+			
 			context = dict(context)
 		res = {}
 		move_obj = self.pool.get('stock.move')
@@ -1878,6 +1894,15 @@ class stock_invoice_onshipping(osv.osv_memory):
 
 stock_invoice_onshipping()
 
+class stock_partial_picking(osv.osv_memory):
+	
+	_inherit = "stock.partial.picking"
+
+	def _partial_move_for(self, cr, uid, move,context={}):
+		res = super(stock_partial_picking,self)._partial_move_for(cr,uid,move)
+		res['product_name'] = move.name
+		# print res,"====+++++"
+		return res
 
 class stock_partial_picking_line(osv.osv):
 
