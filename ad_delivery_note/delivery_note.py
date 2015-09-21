@@ -859,6 +859,7 @@ class product_product(osv.osv):
 		'partner_code':fields.char('Partner Code', size=64),
 		'partner_desc' : fields.char('Partner Description', size=254),
 		'default_code' : fields.char('Part Number', size=64, select=True,track_visibility='onchange'),
+		'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the product without removing it.", track_visibility='onchange'),
 		# 'categ_id': fields.many2one('product.category','Category', required=True,track_visibility='onchange'),
 		'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', size=128, store=True, select=True,track_visibility='onchange'),
 	}
