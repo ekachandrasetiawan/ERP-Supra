@@ -389,7 +389,8 @@ class stock_picking(osv.osv):
 		return self.write(cr,uid,ids,{'state':'draft'})
 
 
-
+	# @override fixing bug delivered picking problem
+	# stock_picking
 	def do_partial(self, cr, uid, ids, partial_datas, context=None):
 		""" Makes partial picking and moves done.
 		@param partial_datas : Dictionary containing details of partial picking
@@ -400,20 +401,22 @@ class stock_picking(osv.osv):
 		if context is None:
 			context = {}
 		else:
+			# chandra function for return picking
 			active_id=context.get('active_id')
 			cekpicking = self.pool.get('stock.picking').browse(cr, uid, active_id, context=context)
 
 			# update Delivery Note State Refunded
 			x = cekpicking.name
 			name_seq=x[-6:]
+
 			# Cek apakah Note ID ada dan Picking Name Return atau tidak
 			if cekpicking.note_id.id ==False:
 				print '================CEK CEK ====='
 			else:
 				self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
-				# self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
+			# chandra function for return picking
 
-
+			
 			context = dict(context)
 		res = {}
 		move_obj = self.pool.get('stock.move')
@@ -526,7 +529,6 @@ class stock_picking(osv.osv):
 				if prodlot_ids.get(move.id):
 					defaults.update({'prodlot_id': prodlot_ids[move.id]})
 				move_obj.write(cr, uid, [move.id], defaults)
-
 			for move in too_many:
 				product_qty = move_product_qty[move.id]
 				defaults = {
@@ -539,21 +541,18 @@ class stock_picking(osv.osv):
 					defaults.update(prodlot_id=prodlot_id)
 				if new_picking:
 					defaults.update(picking_id=new_picking)
-
-				print "AAAAAAAAAAAAAAAAAAAAAAA",move.id
-				print "defaults",defaults
 				move_obj.write(cr, uid, [move.id], defaults)
 
-
 			# At first we confirm the new picking (if necessary)
+			# new_picking indicates that shipment is partial
 			if new_picking:
 				wf_service.trg_validate(uid, 'stock.picking', new_picking, 'button_confirm', cr)
 				# Then we finish the good picking
-				self.write(cr, uid, [pick.id], {'backorder_id': new_picking})
+				self.write(cr, uid, [pick.id], {'backorder_id': new_picking}) # write new partial object set backorder_id = new_picking
 				self.action_move(cr, uid, [new_picking], context=context)
 				wf_service.trg_validate(uid, 'stock.picking', new_picking, 'button_done', cr)
 				wf_service.trg_write(uid, 'stock.picking', pick.id, cr)
-				delivered_pack_id = pick.id
+				delivered_pack_id = new_picking
 				back_order_name = self.browse(cr, uid, delivered_pack_id, context=context).name
 				self.message_post(cr, uid, new_picking, body=_("Back order <em>%s</em> has been <b>created</b>.") % (back_order_name), context=context)
 			else:
@@ -564,9 +563,9 @@ class stock_picking(osv.osv):
 
 			delivered_pack = self.browse(cr, uid, delivered_pack_id, context=context)
 			res[pick.id] = {'delivered_picking': delivered_pack.id or False}
-
+			# print res,"RESSS Overidddddddddddeeeeeeee====="
+			# raise osv.except_osv(_('Error'),_('ERROR'))
 		return res
-
 
 
 stock_picking()
@@ -1225,62 +1224,6 @@ class delivery_note(osv.osv):
 			
 		return False
 
-	def do_partial(self, cr, uid, ids, context=None):
-		val = self.browse(cr, uid, ids)[0]
-		assert len([val.refund_id.id]) == 1, 'Partial picking processing may only be done one at a time.'
-		stock_picking = self.pool.get('stock.picking')
-		stock_move = self.pool.get('stock.move')
-		uom_obj = self.pool.get('product.uom')
-		partial = self.browse(cr, uid, [val.refund_id.id][0], context=context)
-		partial_data = {
-			'delivery_date' : partial.date
-		}
-		picking_type = partial.picking_id.type
-		for wizard_line in partial.move_ids:
-			line_uom = wizard_line.product_uom
-			move_id = wizard_line.move_id.id
-
-			if wizard_line.quantity < 0:
-				raise osv.except_osv(_('Warning!'), _('Please provide proper Quantity.'))
-
-			qty_in_line_uom = uom_obj._compute_qty(cr, uid, line_uom.id, wizard_line.quantity, line_uom.id)
-			if line_uom.factor and line_uom.factor <> 0:
-				if float_compare(qty_in_line_uom, wizard_line.quantity, precision_rounding=line_uom.rounding) != 0:
-					raise osv.except_osv(_('Warning!'), _('The unit of measure rounding does not allow you to ship "%s %s", only rounding of "%s %s" is accepted by the Unit of Measure.') % (wizard_line.quantity, line_uom.name, line_uom.rounding, line_uom.name))
-			if move_id:
-				initial_uom = wizard_line.move_id.product_uom
-
-				qty_in_initial_uom = uom_obj._compute_qty(cr, uid, line_uom.id, wizard_line.quantity, initial_uom.id)
-				without_rounding_qty = (wizard_line.quantity / line_uom.factor) * initial_uom.factor
-				if float_compare(qty_in_initial_uom, without_rounding_qty, precision_rounding=initial_uom.rounding) != 0:
-					raise osv.except_osv(_('Warning!'), _('The rounding of the initial uom does not allow you to ship "%s %s", as it would let a quantity of "%s %s" to ship and only rounding of "%s %s" is accepted by the uom.') % (wizard_line.quantity, line_uom.name, wizard_line.move_id.product_qty - without_rounding_qty, initial_uom.name, initial_uom.rounding, initial_uom.name))
-			else:
-				seq_obj_name =  'stock.picking.' + picking_type
-				move_id = stock_move.create(cr,uid,{'name' : self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
-													'product_id': wizard_line.product_id.id,
-													'product_qty': wizard_line.quantity,
-													'product_uom': wizard_line.product_uom.id,
-													'prodlot_id': wizard_line.prodlot_id.id,
-													'location_id' : wizard_line.location_id.id,
-													'location_dest_id' : wizard_line.location_dest_id.id,
-													'picking_id': partial.picking_id.id
-													},context=context)
-				stock_move.action_confirm(cr, uid, [move_id], context)
-			partial_data['move%s' % (move_id)] = {
-				'product_id': wizard_line.product_id.id,
-				'product_qty': wizard_line.quantity,
-				'product_uom': wizard_line.product_uom.id,
-				'prodlot_id': wizard_line.prodlot_id.id,
-			}
-			if (picking_type == 'in') and (wizard_line.product_id.cost_method == 'average'):
-				partial_data['move%s' % (wizard_line.move_id.id)].update(product_price=wizard_line.cost,
-																		product_currency=wizard_line.currency.id)
-
-		stock_picking.do_partial(cr, uid, [partial.picking_id.id], partial_data, context=context)
-	
-		# return {'type': 'ir.actions.act_window_close'}
-
-
 	def cancel_dn_all(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 
@@ -1295,7 +1238,6 @@ class delivery_note(osv.osv):
 
 
 		return True
-
 
 delivery_note()
  
@@ -1952,6 +1894,15 @@ class stock_invoice_onshipping(osv.osv_memory):
 
 stock_invoice_onshipping()
 
+class stock_partial_picking(osv.osv_memory):
+	
+	_inherit = "stock.partial.picking"
+
+	def _partial_move_for(self, cr, uid, move,context={}):
+		res = super(stock_partial_picking,self)._partial_move_for(cr,uid,move)
+		res['product_name'] = move.name
+		# print res,"====+++++"
+		return res
 
 class stock_partial_picking_line(osv.osv):
 
@@ -1974,27 +1925,6 @@ class stock_picking_in(osv.osv):
 		return res
 	
 stock_picking_in()
-
-
-class stock_partial_picking(osv.osv_memory):
-	
-	_inherit = "stock.partial.picking"
-
-	def _partial_move_for(self, cr, uid, move):
-
-		partial_move = {
-			'product_id' : move.product_id.id,
-			'product_name':move.name,
-			'quantity' : move.product_qty if move.state == 'assigned' or move.picking_id.type == 'in' else 0,
-			'product_uom' : move.product_uom.id,
-			'prodlot_id' : move.prodlot_id.id,
-			'move_id' : move.id,
-			'location_id' : move.location_id.id,
-			'location_dest_id' : move.location_dest_id.id,
-		}
-		if move.picking_id.type == 'in' and move.product_id.cost_method == 'average':
-			partial_move.update(update_cost=True, **self._product_cost_for_average_update(cr, uid, move))
-		return partial_move
 
 
 class delivery_note_line_return(osv.osv):
