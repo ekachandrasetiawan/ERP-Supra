@@ -54,7 +54,7 @@ class perintah_kerja(osv.osv):
 			person = self.pool.get('res.users').browse(cr, uid, uid)
 			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 			# usa = 'SPC'
-			usa = str(self.pool.get('sale.order').browse(cr, uid, vals['sale_id']).user_id.initial)
+			usa = str(self.pool.get('pr').browse(cr, uid, vals['pr_id']).salesman_id.initial)
 			val = self.pool.get('ir.sequence').get(cr, uid, 'perintah.kerja').split('/')
 			use = str(person.initial)
 			vals['creator'] = person.id
