@@ -53,12 +53,12 @@ class perintah_kerja(osv.osv):
 		if vals['special']==True:
 			person = self.pool.get('res.users').browse(cr, uid, uid)
 			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-			usa = 'SPC'
+			# usa = 'SPC'
+			usa = str(self.pool.get('sale.order').browse(cr, uid, vals['sale_id']).user_id.initial)
 			val = self.pool.get('ir.sequence').get(cr, uid, 'perintah.kerja').split('/')
 			use = str(person.initial)
 			vals['creator'] = person.id
-			vals['name'] = val[-1]+'A/SBM-ADM/SPC-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-			# vals['name'] = val[-1]+'A/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+			vals['name'] = val[-1]+'A/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
 			return super(perintah_kerja, self).create(cr, uid, vals, context=context)            
 		else:
 			person = self.pool.get('res.users').browse(cr, uid, uid)
@@ -67,8 +67,7 @@ class perintah_kerja(osv.osv):
 			val = self.pool.get('ir.sequence').get(cr, uid, 'perintah.kerja').split('/')
 			use = str(person.initial)
 			vals['creator'] = person.id
-			vals['name'] = val[-1]+'A/SBM-ADM/SPC-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-			# vals['name'] = val[-1]+'A/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+			vals['name'] = val[-1]+'A/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
 			return super(perintah_kerja, self).create(cr, uid, vals, context=context)    
 		
 		# oldd
