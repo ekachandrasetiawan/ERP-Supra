@@ -11,26 +11,63 @@ class Pembelian_Barang(osv.osv):
 		'tanggal':fields.date('Date', required=True),
 		'duedate':fields.date('Due Date',required=True),
 		'employee_id': fields.many2one('hr.employee', "Employee", required=True),
-        'department_id':fields.many2one('hr.department','Department'),
-        'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),
-        'detail_pb_ids': fields.one2many('detail.pb', 'detail_pb_id', 'Detail PB',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
-        'ref_pb':fields.char('Ref No',required=True, select=True),
-        'notes': fields.text('Terms and Conditions'),
-    	'state': fields.selection([
-            ('draft', 'Draft'),
-            ('confirm', 'Check'),
-            ('confirm2', 'Confirm'),
-            ('purchase','Purchase'),
-            ('done', 'Done'),
-            ('edit','Edit PB'),
-            ],
-            'Status'),
-    }
+		'department_id':fields.many2one('hr.department','Department'),
+		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),
+		'detail_pb_ids': fields.one2many('detail.pb', 'detail_pb_id', 'Detail PB',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'ref_pb':fields.char('Ref No',required=True, select=True),
+		'notes': fields.text('Terms and Conditions'),
+		'cancel_reason':fields.text('Cancel Reason'),
+		'state': fields.selection([
+			('draft', 'Draft'),
+			('confirm', 'Check'),
+			('confirm2', 'Confirm'),
+			('purchase','Purchase'),
+			('done', 'Done'),
+			('cancel', 'Cancel'),
+			('edit','Edit PB'),
+			],
+			'Status'),
+	}
+	_inherit = ['mail.thread']
 	_defaults = {
 		'name': '/',
 		'tanggal':time.strftime('%Y-%m-%d'),
 		'state': 'draft'
 	}
+	_track = {
+		'state':{
+			'sbm_purchase.pb_confirmed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm',
+			'sbm_purchase.pb_checked': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm2',
+			'sbm_purchase.pb_canceled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
+			'sbm_purchase.pb_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+		},
+	}
+
+	def action_cancel_item(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_purchase', 'wizard_pr_cancel_form')
+
+		# print "<<<<<<<<<<<<<<<<<<<<",view_id
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_pr_cancel_form',
+			'res_model': 'pembelian.barang',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
 
 	def setDeuDate(self, cr, uid, ids, tanggal):
 		setDueDateValue = datetime.strptime(tanggal, "%Y-%m-%d") + timedelta(days=4)
@@ -45,15 +82,18 @@ class Pembelian_Barang(osv.osv):
 			return {'value':{'duedate':duedate}}
 		
 	def create(self, cr, uid, vals, context=None):
-		vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang')
+		# vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang')
 		return super(Pembelian_Barang, self).create(cr, uid, vals, context=context)
+
+
 	def setDept(self,cr,uid,ids,pid):
 		employee_id = self.pool.get('hr.employee').browse(cr,uid,pid) 
 		dept_id = employee_id.department_id.id
 		return {'value':{ 'department_id':dept_id} }
 	
 	def submit(self,cr,uid,ids,context=None):
-		return self.write(cr,uid,ids,{'state':'confirm'})
+		no = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang')
+		return self.write(cr,uid,ids,{'state':'confirm','name':no})
 
 	def edit(self,cr,uid,ids,context=None):
 		return self.write(cr,uid,ids,{'state':'edit'})
@@ -96,62 +136,142 @@ class Pembelian_Barang(osv.osv):
 		datas['form'] = self.read(cr, uid, ids)[0]
 		
 		return {
-            'type': 'ir.actions.report.xml',
-            'report_name': 'print.pb',
-            'report_type': 'webkit',
-            'datas': datas,
-            }
+			'type': 'ir.actions.report.xml',
+			'report_name': 'print.pb',
+			'report_type': 'webkit',
+			'datas': datas,
+			}
 
 Pembelian_Barang()
 
+
+class ClassName(osv.osv):
+	
+	def action_cancel_item(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_purchase', 'wizard_pr_cancel_form')
+
+		# print "<<<<<<<<<<<<<<<<<<<<",view_id
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_pr_cancel_form',
+			'res_model': 'wizard.pr.cancel.item',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
+	_inherit = 'pembelian.barang'
+
+
+
+class WizardPRCancelItem(osv.osv_memory):
+	
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: context = {}
+		pb_ids = context.get('active_ids', [])
+		# print '====================',pb_ids
+		active_model = context.get('active_model')
+		res = super(WizardPRCancelItem, self).default_get(cr, uid, fields, context=context)
+		if not pb_ids or len(pb_ids) != 1:
+			# Partial Picking Processing may only be done for one picking at a time
+			return res
+		pb_id, = pb_ids
+		if pb_id:
+			res.update(pb_id=pb_id)
+			pb = self.pool.get('pembelian.barang').browse(cr, uid, pb_id, context=context)
+			# linesData = []
+			# linesData += [self._load_po_line(cr, uid, l) for l in po.order_line if l.state not in ('done','cancel')]
+			# res.update(lines=linesData)
+		print res,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
+		return res
+
+
+	def request_cancel(self,cr,uid,ids,context=None):
+		print "CALLING request_cancel_item method"
+		data = self.browse(cr,uid,ids,context)[0]
+
+		lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
+		dp = self.pool.get('detail.pb').browse(cr, uid, lines)
+		for x in dp:
+			self.pool.get('detail.pb').write(cr,uid,x.id,{'state':'cancel'})
+			
+		return self.pool.get('pembelian.barang').write(cr,uid,data.pb_id.id,{'cancel_reason':data.cancel_reason,'state':'cancel'})
+
+
+	_name="wizard.pr.cancel.item"
+	_description="Wizard Cancel Item On PR"
+	_columns = {
+		'pb_id':fields.many2one('pembelian.barang',string="Purchase Requisition",required=True),
+		'cancel_reason':fields.text('Cancel Reason',required=True,help="Reason why item(s) want to be cancel"),
+	}
+
+	_rec_name="pb_id"
+
+
+WizardPRCancelItem()
+
+
 class Detail_PB(osv.osv):
-    _name = 'detail.pb'
-    _columns = {
-        'name':fields.many2one('product.product','Product'),
-        'variants':fields.many2one('product.variants','variants'),
-        'part_no':fields.char('Part No'),
-        'jumlah_diminta':fields.float('Qty'),
-        'qty_available':fields.float('Qty Available'),
-        'satuan':fields.many2one('product.uom','Product UOM'),
-        'stok':fields.integer('Stock'),
-        'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),
-        'harga':fields.float('Unit Price'),
-        'subtotal':fields.float('Sub Total'),
-        'keterangan':fields.text('Keterangan'),
-        'detail_pb_id':fields.many2one('pembelian.barang', 'Referensi PB', required=True, ondelete='cascade'),
-        'item': fields.many2many('set.po', 'pre_item_rel', 'permintaan_id', 'item_id', 'item'),
-        'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
-    	'state': fields.selection([
-            ('draft', 'Draft'),
-            ('onproses', 'Confirm'),
-            ('proses','Proses'),
-            ('done', 'Done'),
-            ],
-            'Status',readonly=True, select=True),
-    }
+	_name = 'detail.pb'
+	_columns = {
+		'name':fields.many2one('product.product','Product'),
+		'variants':fields.many2one('product.variants','variants'),
+		'part_no':fields.char('Part No'),
+		'jumlah_diminta':fields.float('Qty'),
+		'qty_available':fields.float('Qty Available'),
+		'satuan':fields.many2one('product.uom','Product UOM'),
+		'stok':fields.integer('Stock'),
+		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),
+		'harga':fields.float('Unit Price'),
+		'subtotal':fields.float('Sub Total'),
+		'keterangan':fields.text('Keterangan'),
+		'detail_pb_id':fields.many2one('pembelian.barang', 'Referensi PB', required=True, ondelete='cascade'),
+		'item': fields.many2many('set.po', 'pre_item_rel', 'permintaan_id', 'item_id', 'item'),
+		'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
+		'state': fields.selection([
+			('draft', 'Draft'),
+			('onproses', 'Confirm'),
+			('proses','Proses'),
+			('done', 'Done'),
+			('cancel', 'Cancel'),
+			],
+			'Status',readonly=True, select=True),
+	}
 
-    _defaults = {'state': 'draft'}
+	_defaults = {'state': 'draft'}
 
 
-    def onchange_product_new(self, cr, uid, ids, name, satuan, context=None):
-    	if name:
-    		product_id =self.pool.get('product.product').browse(cr,uid,name)
-    		if product_id.categ_id.id == 105:
-    			uom=satuan
-    		else:
-    			uom=product_id.uom_id.id
-    	else:
-    		uom=1
-    	return {'value':{'satuan':uom}}
+	def onchange_product_new(self, cr, uid, ids, name, satuan, context=None):
+		if name:
+			product_id =self.pool.get('product.product').browse(cr,uid,name)
+			if product_id.categ_id.id == 105:
+				uom=satuan
+			else:
+				uom=product_id.uom_id.id
+		else:
+			uom=1
+		return {'value':{'satuan':uom}}
 
-    def setvariants(self,cr,uid,ids, pid):
-    	if pid:
-	    	cek=self.pool.get('product.variants').search(cr,uid,[('product_id', '=' ,pid)])
-	    	hasil=self.pool.get('product.variants').browse(cr,uid,cek)
-	    	products=self.pool.get('product.product').browse(cr,uid,pid)
-	    	pn = products.default_code
-	    	product =[x.id for x in hasil]
-	    	return {'domain': {'variants': [('id','in',tuple(product))]},'value':{'part_no':pn,'stok':products.qty_available,'satuan':products.uom_id.id}}
+	def setvariants(self,cr,uid,ids, pid):
+		if pid:
+			cek=self.pool.get('product.variants').search(cr,uid,[('product_id', '=' ,pid)])
+			hasil=self.pool.get('product.variants').browse(cr,uid,cek)
+			products=self.pool.get('product.product').browse(cr,uid,pid)
+			pn = products.default_code
+			product =[x.id for x in hasil]
+			return {'domain': {'variants': [('id','in',tuple(product))]},'value':{'part_no':pn,'stok':products.qty_available,'satuan':products.uom_id.id}}
 
 	def productvar(self,cr,uid,ids,idp):
 		print '========================',idp
@@ -162,8 +282,8 @@ class Detail_PB(osv.osv):
 						'satuan':hasil.uom_id.id,
 						} }
 
-    def jmlQty(self,cr,uid,ids, qty):
-    	return {'value':{ 
+	def jmlQty(self,cr,uid,ids, qty):
+		return {'value':{ 
 						'qty_available':qty} }
 
 Detail_PB()
@@ -202,14 +322,14 @@ class Set_PO(osv.osv):
 										'name':int(time.time()),
 										'date_order': time.strftime("%Y-%m-%d"),
 										'duedate':time.strftime("%Y-%m-%d"),
-                                        'partner_id': val.name.id,
-                                        'jenis': 'loc',
-                                        'pricelist_id': val.pricelist_id.id,
-                                        'location_id': 12,
-                                        'origin':detailpb,
-                                        'type_permintaan':'1',
-                                        'term_of_payment':val.name.term_payment
-                                       })
+										'partner_id': val.name.id,
+										'jenis': 'loc',
+										'pricelist_id': val.pricelist_id.id,
+										'location_id': 12,
+										'origin':detailpb,
+										'type_permintaan':'1',
+										'term_of_payment':val.name.term_payment
+									   })
 		noline=1
 		for line in val.permintaan:
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.name.supplier_taxes_id))
@@ -219,19 +339,19 @@ class Set_PO(osv.osv):
 										 'no':noline,
 										 'date_planned': time.strftime("%Y-%m-%d"),
 										 'order_id': sid,
-                                         #'pb_id': products[line]['name'],
-                                         # 'pb_id': line.detail_pb_id.id,
-                                         'product_id': line.name.id,
-                                         'variants':line.variants.id,
-                                         'name':line.name.name,
-                                         'part_number':line.name.default_code,
-                                         'line_pb_general_id': line.id,
-                                         'product_qty': line.qty_available,
-                                         'product_uom': line.satuan.id,
-                                         'price_unit': line.harga,
-                                         'note_line':'-',
-                                         'taxes_id': [(6,0,taxes_ids)],
-                                         })
+										 #'pb_id': products[line]['name'],
+										 # 'pb_id': line.detail_pb_id.id,
+										 'product_id': line.name.id,
+										 'variants':line.variants.id,
+										 'name':line.name.name,
+										 'part_number':line.name.default_code,
+										 'line_pb_general_id': line.id,
+										 'product_qty': line.qty_available,
+										 'product_uom': line.satuan.id,
+										 'price_unit': line.harga,
+										 'note_line':'-',
+										 'taxes_id': [(6,0,taxes_ids)],
+										 })
 			noline=noline+1
 			print '===================TEST NO====================',noline
 

@@ -1,8 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
- <report id="reportpb" string="Report" model="pembelian.barang" name="print.pb"
+		 <report id="reportpb" string="Report" model="pembelian.barang" name="print.pb"
         rml="addons/sbm_purchase/report/report_pb.rml" auto="False" menu="True"/>
+
+
+        <record model="ir.module.category" id="module_category_purchase_requisition">
+            <field name="name">Purchase Requisitioin</field>
+        </record>
+		
+		<record model="res.groups" id="group_pr_request_purchase_staff">
+			<field name="category_id" ref="module_category_purchase_requisition"/>
+			<field name="name">Purchase Requisitioin Purhcase Staff</field>
+		</record>
+
+		<record model="res.groups" id="group_pr_request_dept_chief">
+			<field name="category_id" ref="module_category_purchase_requisition"/>
+			<field name="name">Purchase Requisitioin Dept Chief</field>
+		</record>
+
+
+		<record model="res.groups" id="group_pr_request_dept_manager">
+			<field name="category_id" ref="module_category_purchase_requisition"/>
+			<field name="name">Purchase Requisitioin Dept Manager</field>
+		</record>
+
+
+		<record id="pb_draft" model="mail.message.subtype">
+			<field name="name">Document as Draft</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">pembelian.barang</field>
+		</record>
+
+		<record id="pb_confirmed" model="mail.message.subtype">
+			<field name="name">Purchase Requisition Confirmed</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">pembelian.barang</field>
+		</record>
+
+		<record id="pb_checked" model="mail.message.subtype">
+			<field name="name">Purchase Requisition Checked</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">pembelian.barang</field>
+		</record>
+
+		<record id="pb_canceled" model="mail.message.subtype">
+			<field name="name">Purchase Requisition Canceled</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">pembelian.barang</field>
+		</record>
+
+
     	<record id="view_pb_tree" model="ir.ui.view">
             <field name="name">pembelian.barang.tree</field>
             <field name="model">pembelian.barang</field>
@@ -19,6 +67,7 @@
                 </tree>
             </field>
         </record>
+
         <record id="view_pb_form" model="ir.ui.view">
             <field name="name">pembelian.barang</field>
             <field name="model">pembelian.barang</field>
@@ -32,6 +81,8 @@
             		<button name="confirm2" states="confirm2" string="Approve" type="object" class="oe_highlight"/>
             		<button name="confirm3" states="edit" string="Update" type="object" class="oe_highlight"/>
             		<button name="edit" states="purchase" string="Edit PB" type="object" class="oe_highlight"/>
+
+            		<button name="action_cancel_item" states="confirm,confirm2" string="Cancel Purchase Requisition" type="object"/>
             		<button name="%(reportpb)d" states="purchase" string="Print" type="action" class="oe_highlight"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm,confirm2,purchase,done"/>
                 </header>
@@ -57,24 +108,53 @@
 			                            <field name="qty_available" on_change="jmlQty(jumlah_diminta)"/>
 			                            <field name="satuan" on_change="onchange_product_new(name, satuan)"/>
 			                            <field name="stok"/>
-						    <field name="keterangan"/>
+						   				 <field name="keterangan"/>
 			                            <field name="state"/>
 			                        </tree>
 			                    </field>
 			                </page>
+			                <page string="Cancel Reason">
+								<group>
+									<field name="cancel_reason" invisible="0"/>
+								</group>
+							</page>
+
 			            </notebook>
 			            <div class="oe_clear"/>
                             <field name="notes" class="oe_inline" placeholder="Terms and conditions..."/>
-		            </sheet><!-- 
-		         <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="message_ids" widget="mail_thread"/>
-                  </div>
- -->
+		            </sheet>
+			    		<div class="oe_chatter">
+							<field name="message_follower_ids" widget="mail_followers"/>
+							<field name="message_ids" widget="mail_thread"/>
+						</div>
             	</form>
             </field>
          </record>
 		
+
+		<record id="wizard_pr_cancel_form" model="ir.ui.view">
+			<field name="name">Wizard Cancel Purchase Requisition</field>
+			<field name="model">wizard.pr.cancel.item</field>
+			<field name="arch" type="xml">
+				<form string="Cancel Purchase Requisition" version="7.0">
+					<group>
+						<field name="pb_id" readonly="True" />
+					</group>
+
+					<group>
+						<field name="cancel_reason" />
+					</group>
+					<footer>
+                        <button name="request_cancel" string="Submit" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+				</form>
+			</field>
+		</record>
+
+
+
 		<!-- Search -->
 		<record id="pembelian_barang_search" model="ir.ui.view">
 			<field name="name">pembelian.barang.search</field>
