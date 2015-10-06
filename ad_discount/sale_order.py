@@ -10,6 +10,7 @@ from openerp import netsvc
 
 class sale_order(osv.osv):
     def _amount_line_tax(self, cr, uid, line, context=None):
+        print '=====================TESTING 1=================='
         val = 0.0
         disc = 0.0
         price = 0.0
@@ -27,6 +28,7 @@ class sale_order(osv.osv):
         return val
     
     def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+        print '=====================TESTING 2=================='
         cur_obj = self.pool.get('res.currency')
         res = {}
         for order in self.browse(cr, uid, ids, context=context):
@@ -40,12 +42,14 @@ class sale_order(osv.osv):
             for line in order.order_line:
                 val1 += line.price_subtotal
                 val += self._amount_line_tax(cr, uid, line, context=context)
+
             res[order.id]['amount_tax'] = cur_obj.round(cr, uid, cur, val)
             res[order.id]['amount_untaxed'] = cur_obj.round(cr, uid, cur, val1)
             res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] + res[order.id]['amount_tax']
         return res
     
     def _get_order(self, cr, uid, ids, context=None):
+        print '=====================TESTING 3=================='
         result = {}
         for line in self.pool.get('sale.order.line').browse(cr, uid, ids, context=context):
             result[line.order_id.id] = True

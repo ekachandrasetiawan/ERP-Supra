@@ -64,6 +64,16 @@ class sale_order(osv.osv):
 				for line in order.order_line:
 					val1 += round(line.price_subtotal)
 					val += round(self._amount_line_tax(cr, uid, line, context=context))
+
+				pajak =round((val1*10)/100)
+
+				if pajak==val:
+					val=val
+				else:
+					val=pajak
+				# print '===1=====================',val1
+				# print '===2=====================',val
+				# print '===3=====================',pajak
 			else:
 				for line in order.order_line:
 					val1 += line.price_subtotal
