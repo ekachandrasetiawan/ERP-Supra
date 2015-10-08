@@ -560,8 +560,6 @@ class account_invoice(osv.osv):
 		invoices = self.pool.get('account.invoice')
 		# line = self.pool.get('account.invoice.line').search(cr, uid, [('account_id', '=', acc_discount_id)])
 		
-
-		
 		res = {}
 
 		discount=0
@@ -632,7 +630,7 @@ class account_invoice(osv.osv):
 	_inherit='account.invoice'
 	_columns={
 		# 'total_discount':fields.function(_amount_all_main,string='Total Discount',required=False,store=False),
-		# 'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
+		'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
 		'payment_for':fields.selection([('dp','DP'),('completion','Completion')],string="Payment For",required=False),
 		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
 		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
@@ -1101,13 +1099,17 @@ class stock_picking(osv.osv):
 	_inherit = "stock.picking"
 	_name = "stock.picking"
 	def do_partial(self, cr, uid, ids, partial_datas, context=None):
+		# print partial_datas
+		# raise osv.except_osv(('Error !!!'), ('Can\'t Update Squence'))
 		pick = self.browse(cr,uid,ids)
 		# print pick[0].name;
 		if pick[0].name==False:
 			# GENERATE NUMBER
 			self.generateSeq(cr,uid,ids,context)
 		
-		return super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
+		res = super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
+		print res,"++++++++++++++++++++++++++++++++======================================="
+		return res
 	def generateSeq(self,cr,uid,ids,context=None):
 		pick = self.browse(cr,uid,ids)
 
@@ -2408,6 +2410,7 @@ class sale_advance_payment_inv(osv.osv_memory):
 				'origin': sale.name,
 				'account_id': res['account_id'],
 				'price_unit': inv_amount,
+				'quantity': wizard.qtty or 1.0,
 				'quantity': wizard.qtty or 1.0,
 				'discount': False,
 				'uos_id': res.get('uos_id', False),
