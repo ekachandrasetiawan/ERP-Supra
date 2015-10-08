@@ -1,21 +1,22 @@
 import time
 from datetime import date, timedelta, datetime
 import netsvc
+from tools.translate import _
 from osv import osv, fields
 
 class Pembelian_Barang(osv.osv):
 	_name = 'pembelian.barang'
 	_columns = {
-		'name':fields.char('No.PB',required=True),
-		'spk_no':fields.char('SPK No / PO No'),
-		'tanggal':fields.date('Date', required=True),
-		'duedate':fields.date('Due Date',required=True),
-		'employee_id': fields.many2one('hr.employee', "Employee", required=True),
-		'department_id':fields.many2one('hr.department','Department'),
-		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),
-		'detail_pb_ids': fields.one2many('detail.pb', 'detail_pb_id', 'Detail PB',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
-		'ref_pb':fields.char('Ref No',required=True, select=True),
-		'notes': fields.text('Terms and Conditions'),
+		'name':fields.char('No.PB',required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'spk_no':fields.char('SPK No / PO No',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]},track_visibility='onchange'),
+		'tanggal':fields.date('Date', required=True,readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'duedate':fields.date('Due Date',required=True,readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'employee_id': fields.many2one('hr.employee', "Employee",required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'department_id':fields.many2one('hr.department','Department',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)],readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'detail_pb_ids': fields.one2many('detail.pb', 'detail_pb_id', 'Detail PB',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]},track_visibility='onchange'),
+		'ref_pb':fields.char('Ref No',required=True, select=True,readonly=True,states={'draft':[('readonly',False)],'edit':[('readonly',False)]},track_visibility='onchange'),
+		'notes': fields.text('Terms and Conditions',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'cancel_reason':fields.text('Cancel Reason'),
 		'state': fields.selection([
 			('draft', 'Draft'),
@@ -29,11 +30,7 @@ class Pembelian_Barang(osv.osv):
 			'Status'),
 	}
 	_inherit = ['mail.thread']
-	_defaults = {
-		'name': '/',
-		'tanggal':time.strftime('%Y-%m-%d'),
-		'state': 'draft'
-	}
+
 	_track = {
 		'state':{
 			'sbm_purchase.pb_confirmed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirm',
@@ -42,6 +39,30 @@ class Pembelian_Barang(osv.osv):
 			'sbm_purchase.pb_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
 		},
 	}
+
+
+	def _employee_get(obj, cr, uid, context=None):
+		if context is None:
+			context = {}
+
+		cek=obj.pool.get('hr.employee').search(cr,uid,[('user_id', '=' ,uid)])
+		hasil=obj.pool.get('hr.employee').browse(cr,uid,cek)
+
+		if hasil:
+			ids = obj.pool.get('hr.employee').search(cr, uid, [('user_id', '=', uid)], context=context)
+			if ids:
+				return ids[0]
+		else:
+			return uid
+			
+
+	_defaults = {
+		'name': '/',
+		'tanggal':time.strftime('%Y-%m-%d'),
+		'employee_id': _employee_get,
+		'state': 'draft'
+	}
+	
 
 	def action_cancel_item(self,cr,uid,ids,context=None):
 		if context is None:
@@ -90,6 +111,7 @@ class Pembelian_Barang(osv.osv):
 		employee_id = self.pool.get('hr.employee').browse(cr,uid,pid) 
 		dept_id = employee_id.department_id.id
 		return {'value':{ 'department_id':dept_id} }
+
 	
 	def submit(self,cr,uid,ids,context=None):
 		no = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang')
@@ -226,13 +248,13 @@ WizardPRCancelItem()
 class Detail_PB(osv.osv):
 	_name = 'detail.pb'
 	_columns = {
-		'name':fields.many2one('product.product','Product'),
-		'variants':fields.many2one('product.variants','variants'),
-		'part_no':fields.char('Part No'),
-		'jumlah_diminta':fields.float('Qty'),
-		'qty_available':fields.float('Qty Available'),
-		'satuan':fields.many2one('product.uom','Product UOM'),
-		'stok':fields.integer('Stock'),
+		'name':fields.many2one('product.product','Product',track_visibility='onchange'),
+		'variants':fields.many2one('product.variants','variants',track_visibility='onchange'),
+		'part_no':fields.char('Part No',track_visibility='onchange'),
+		'jumlah_diminta':fields.float('Qty',track_visibility='onchange'),
+		'qty_available':fields.float('Qty Available',track_visibility='onchange'),
+		'satuan':fields.many2one('product.uom','Product UOM',track_visibility='onchange'),
+		'stok':fields.integer('Stock',track_visibility='onchange'),
 		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),
 		'harga':fields.float('Unit Price'),
 		'subtotal':fields.float('Sub Total'),
