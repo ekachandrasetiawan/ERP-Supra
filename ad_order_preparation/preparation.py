@@ -192,8 +192,14 @@ class order_preparation(osv.osv):
          
     def preparation_confirm(self, cr, uid, ids, context=None):
         val = self.browse(cr, uid, ids)[0]
+        notActiveProducts = []
         for x in val.prepare_lines:
             product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+
+            # if product is not active then register in list
+            if not product.active:
+                notActiveProducts.append(product.default_code)
+
             if product.not_stock == False:
                  # print '=========================',product.qty_available
                 mm = ' ' + product.default_code + ' '
@@ -204,6 +210,14 @@ class order_preparation(osv.osv):
                     raise openerp.exceptions.Warning(msg)
                     return False
 
+
+        if len(notActiveProducts) > 0:
+            m_p_error = ""
+            for pNon in notActiveProducts:
+                m_p_error+=pNon+",\r\n"
+            m_p_error+="\r\n is non active product, please activate product first."
+
+            raise osv.except_osv(_('Error!'),_(m_p_error))
         self.write(cr, uid, ids, {'state': 'approve'})
         # self.write(cr, uid, ids, {'state': 'draft'})
         return True
