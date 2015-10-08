@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<!-- Start View Tree Order Requisition delivery-->
+		<record id="view_order_requisition_delivery_tree" model="ir.ui.view">
+			<field name="name">order.requisition.delivery.tree</field>
+			<field name="model">order.requisition.delivery</field>
+			<field name="type">tree</field>
+			<field name="priority">2</field>
+			<field name="arch" type="xml">
+				<tree string="Order Requisition Delivery">
+					<field name="name"/>
+					<field name="date"/>
+					<field name="source_location"/>
+					<field name="destination_location_id"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		<!-- Start View Form Order Requisition delivery-->
+		<record id="view_order_requisition_delivery_form" model="ir.ui.view">
+			<field name="name">order.requisition.delivery.form</field>
+			<field name="model">order.requisition.delivery</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Order Requisition Delivery" version="7.0">
+					<header>
+						<button name="def_confirmed" states="draft" string="Confirmed" type="object" icon="gtk-apply"/>
+						<button name="def_approved" states="confirmed" string="Approved" type="object"  icon="gtk-apply"/>
+						<button name="def_validate" states="approved" string="Validate" type="object"  icon="gtk-apply"/>
+						<button name="def_draft" states="confirmed,approved" string="Set to Draft" type="object" icon="gtk-jump-to"/>
+						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,done"/>
+					</header>
+					<sheet>
+						<separator string="Order Requisition Delivery"/>
+						<group col="4" colspan="4">
+							<field name="name" colspan="4"/>
+							<field name="pr_names"/>
+							<field name="date"/>
+							<field name="source_location" colspan="4"/>
+							<field name="destination_location_id" colspan="4"/>
+							<field name="picking_id"/>
+						</group>
+						<notebook colspan="4">
+							<page string="Product Lines">
+								<field name="lines" nolabel="1" colspan="4">
+									 <tree string="Product Detail">
+									 	<field name="name" on_change="onchange_product(name)"/>
+										<field name="po_line_id" on_change="onchange_po_line(po_line_id)"/>
+										<field name="po_id"/>
+										<field name="purchase_requisition_line_id" invisible="1"/>
+										<field name="desc"/>
+										<field name="qty_delivery" on_change="onchange_delivery(qty_delivery,received_items_po)"/>
+										<field name="qty" on_change="onchange_po_line(po_line_id)"/>
+										<field name="received_items_po" on_change="onchange_po_line(po_line_id)"/>
+										<field name="uom_id" on_change="onchange_po_line(po_line_id)"/>
+										<field name="state"/>
+									</tree>
+								</field>
+							</page>
+							<page string="Approved">
+								<group>
+									<field name="approved_by"/>
+									<field name="received_by"/>
+								</group>
+							</page>
+						</notebook>
+							<div class="oe_clear"/>
+							<field name="notes" class="oe_inline" placeholder="Notes..."/>
+					</sheet>
+					<div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers"/>
+						<field name="message_ids" widget="mail_thread"/>
+					</div>
+				</form>
+			</field>
+		</record>
+
+		
+		<!-- Log History Button -->
+		<record id="ord_pack_confirm" model="mail.message.subtype">
+			<field name="name">Order Requisition Delivery Confirmed</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.requisition.delivery</field>
+		</record>
+		<record id="ord_pack_approved" model="mail.message.subtype">
+			<field name="name">Order Requisition Delivery Approved</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.requisition.delivery</field>
+		</record>
+		<record id="ord_pack_done" model="mail.message.subtype">
+			<field name="name">Order Requisition Delivery Done</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.requisition.delivery</field>
+		</record>
+		<record id="ord_pack_draft" model="mail.message.subtype">
+			<field name="name">Order Requisition Delivery Set to Draft</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.requisition.delivery</field>
+		</record>
+
+		<!-- Deafult Search -->
+		<record id="master_order_requisition_delivery_search" model="ir.ui.view">
+			<field name="name">order.requisition.delivery.search</field>
+			<field name="model">order.requisition.delivery</field>
+			<field name="arch" type="xml">
+				<search string="Search Requisition">
+					<field name="name"/>
+				</search>
+			</field>
+		</record>
+
+		<!-- Start Membuat Seq No -->
+		<record id="seq_ord_new" model="ir.sequence.type">
+			<field name="name">Order Requisition Delivery</field>
+			<field name="code">order.requisition.delivery</field>
+		</record>
+		<record id="seq_new" model="ir.sequence">
+			<field name="name">Order Requisition Delivery</field>
+			<field name="code">order.requisition.delivery</field>
+			<field name="prefix">SP/%(y)s/%(month)s/</field>
+			<field name="padding">5</field>
+		</record>
+
+		<!-- Action Menu -->
+		<record model="ir.actions.act_window" id="master_order_requisition_delivery_action">
+			<field name="name">Order Requisition Delivery</field>
+			<field name="res_model">order.requisition.delivery</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>			
+		</record>
+
+		<!-- Inherit Menu -->
+		<menuitem name="Order Requisition Delivery" parent="purchase.menu_procurement_management" id="order_requisition_delivery" action="master_order_requisition_delivery_action"/>
+
+		<!-- Regular Requistion -->
+		 <record id="view_pembelian_barang_form" model="ir.ui.view">
+		   <field name="name">pembelian.barang.form</field>
+		   <field name="model">pembelian.barang</field>
+		   <field name="type">form</field>
+		   <field name="inherit_id" ref="sbm_purchase.view_pb_form"/>
+		   <field name="arch" type="xml">
+		   		<field name="ref_pb" position="after"> 
+		   			<field name="source_location_request_id"/>
+		   			<field name="destination_location_request_id"/>
+		   		</field>
+		   		<xpath expr="//field[@name='stok']" position="after">
+		   			<field name="processed_items"/>
+		   			<field name="delivery_items"/>
+		   		</xpath>
+		   </field>
+		 </record>
+		 
+	</data>
+</openerp>

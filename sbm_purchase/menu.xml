@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+
+
+
+		<menuitem id="purchase_requistion" name="Purchase Requisition" parent="menu_purchase_root_new" sequence="2" groups="group_pr_request_dept_chief,group_pr_request_purchase_staff,group_pr_request_dept_manager"/>
+
+		<menuitem action="master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion" sequence="1" groups="group_pr_request_dept_chief,group_pr_request_purchase_staff,group_pr_request_dept_manager"/>
+
+
+		<menuitem name="Product Variants" parent="purchase.menu_procurement_management" id="product_variants" action="master_product_variants_action"/>
+
+
+	</data>
+</openerp>
