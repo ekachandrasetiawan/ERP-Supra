@@ -107,7 +107,7 @@
 					<field name="delivery_date"/>
 				</field>
 				<xpath expr="//button[@name='action_button_confirm']" position="replace">
-					<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager"/>
+					<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager,base.group_sale_salesman_all_leads"/>
 		    	</xpath>
 		    	<xpath expr="//page[@string='Other Information']" position="after">
 		    		<page string="Order Packaging">

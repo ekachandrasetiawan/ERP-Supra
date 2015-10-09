@@ -120,7 +120,7 @@
 
 		            <button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done,refunded,torefund" type="action" groups="base.group_user"/>
 
-                    <button name="%(stock.action_stock_invoice_onshipping)d" string="Create Invoice/Refund" states="refunde" type="action" class="oe_highlight" groups="base.group_user"/>
+                    <button name="%(stock.action_stock_invoice_onshipping)d" string="Create Invoice/Refund" states="refunded" type="action" class="oe_highlight" groups="base.group_user"/>
 
                     <button name="package_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize"/>
            			<button name="package_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>

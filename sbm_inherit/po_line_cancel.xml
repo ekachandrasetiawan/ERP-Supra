@@ -170,7 +170,7 @@
 				</xpath>
 
 				<field name="product_uom" position="replace">
-					 <field name="product_uom" on_change="onchange_product_new(product_id,product_uom)"/>
+					 <field name="product_uom" />
 				</field>
 			</field>
 		</record>
