@@ -252,16 +252,5 @@
 		</record>
 		<!-- <menuitem action="wizard_rent_list_action" id="wizard_po_rent" name="Wizard Rent Order" parent="purchase_rent_menu"/> -->
 
-
-
-
-
-
-
-
-
-
-
-
 	</data>
 </openerp>

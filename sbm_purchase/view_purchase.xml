@@ -5,32 +5,6 @@
         rml="addons/sbm_purchase/report/report_pb.rml" auto="False" menu="True"/>
 
 
-<!--         <record model="ir.module.category" id="base.module_category_purchase_management">
-            <field name="name">Purchases</field>
-        </record> -->
-
-        <record model="ir.module.category" id="module_category_jobdesc_position">
-            <field name="name">Job Desc and Position</field>
-        </record>
-
-
-		<record model="res.groups" id="group_pr_request_purchase_staff">
-			<field name="category_id" ref="module_category_jobdesc_position"/>
-			<field name="name">Purhcase Staff</field>
-		</record>
-
-		<record model="res.groups" id="group_pr_request_dept_chief">
-			<field name="category_id" ref="module_category_jobdesc_position"/>
-			<field name="name">Dept Chief</field>
-		</record>
-
-
-		<record model="res.groups" id="group_pr_request_dept_manager">
-			<field name="category_id" ref="module_category_jobdesc_position"/>
-			<field name="name">Dept Manager</field>
-		</record>
-
-
 		<record id="pb_draft" model="mail.message.subtype">
 			<field name="name">Document as Draft</field>
 			<field name="default" eval="False"/>
@@ -67,6 +41,7 @@
                 	<field name="ref_pb"/>
 	                <field name="tanggal"/>
 	                <field name="duedate"/>
+	                <field name="employee_id"/>
 	                <field name="department_id"/>
 	                <field name="state"/>
                 </tree>
@@ -118,7 +93,7 @@
 			                        </tree>
 			                    </field>
 			                </page>
-			                <page string="Cancel Reason">
+			                <page string="Other Info">
 								<group>
 									<field name="cancel_reason" invisible="0"/>
 								</group>
@@ -159,18 +134,7 @@
 
 
 
-		<!-- Search -->
-		<record id="pembelian_barang_search" model="ir.ui.view">
-			<field name="name">pembelian.barang.search</field>
-			<field name="model">pembelian.barang</field>
-			<field name="arch" type="xml">
-				<search string="Search Requisition">
-					<field name="name"/>
-					<field name="ref_pb"/>
-				</search>
-			</field>
-		</record>
-		<!-- END OF SEARCH -->
+		
     	<record model="ir.actions.act_window" id="master_pb_list_action">
 			<field name="name">Regular Requisition</field>
 			<field name="res_model">pembelian.barang</field>
@@ -186,8 +150,7 @@
 		<record id="seq_set_pb_new" model="ir.sequence">
 			<field name="name">Regular Requisition</field>
 			<field name="code">pembelian.barang</field>
-			<!--<field name="prefix">PB/%(y)s/%(month)s/</field>-->
-			<field name="suffix">/PB/SBM/%(y)s/%(month)s</field>
+			<field name="suffix">/</field>
 			<field name="padding">5</field>
 		</record>
 
@@ -252,7 +215,6 @@
 			            </group>
 		            	<notebook colspan="4">
 					    	<page string="Product Detail ">
-					    		<!--<button name="search_pb" string="Search Product" type="object"/>-->
 			                    <field name="permintaan" nolabel="1" colspan="4" string="Detail Permintaan Barang">
 			                    	<tree string="Detail Barang" editable="bottom">
 			                          	<field name="detail_pb_id"/>
@@ -283,29 +245,6 @@
             <field name="view_id" ref="view_set_po_form"/>
         </record>
 
-<!--        <record id="view_search_pb" model="ir.ui.view">
-        	<field name="name">search.pb.form</field>
-            <field name="model">search.pb</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-            	<form string="Search Product" version="7.0">
-            	   <footer>
-		            <button name="create_po" string="Create PO" type="object" class="oe_highlight" icon="gtk-apply"/>
-		            </footer>
-            	</form>
-            </field>
-        </record>
-
-        <record model="ir.actions.act_window" id="search_action">
-            <field name="name">Search Product Permintaan Barang</field>
-            <field name="res_model">search.pb</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-            <field name="view_id" ref="view_search_pb"/>
-        </record>
- -->
 		<record id="view_list_barang_tree" model="ir.ui.view">
             <field name="name">detail.pb.tree</field>
             <field name="model">detail.pb</field>
@@ -390,7 +329,6 @@
                 </form>
             </field>
         </record>
-
 
 		<record model="ir.actions.act_window" id="master_product_variants_action">
 			<field name="name">Product Variants</field>
