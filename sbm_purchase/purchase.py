@@ -18,6 +18,9 @@ class Pembelian_Barang(osv.osv):
 		'ref_pb':fields.char('Ref No',required=True, select=True,readonly=True,states={'draft':[('readonly',False)],'edit':[('readonly',False)]},track_visibility='onchange'),
 		'notes': fields.text('Terms and Conditions',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'cancel_reason':fields.text('Cancel Reason'),
+		'product_id': fields.related('detail_pb_ids','name', type='many2one', relation='product.product', string='Product'),
+		'source_location_request_id': fields.many2one('stock.location', "Source Location", readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('confirm', 'Check'),
@@ -60,17 +63,17 @@ class Pembelian_Barang(osv.osv):
 		'name': '/',
 		'tanggal':time.strftime('%Y-%m-%d'),
 		'employee_id': _employee_get,
-		'state': 'draft'
+		'state': 'draft',
+		'source_location_request_id': 12,
 	}
-	
+
+	_order = 'id DESC'
 
 	def action_cancel_item(self,cr,uid,ids,context=None):
 		if context is None:
 			context = {}
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_purchase', 'wizard_pr_cancel_form')
-
-		# print "<<<<<<<<<<<<<<<<<<<<",view_id
 
 		context.update({
 			'active_model': self._name,
@@ -108,13 +111,15 @@ class Pembelian_Barang(osv.osv):
 
 
 	def setDept(self,cr,uid,ids,pid):
-		employee_id = self.pool.get('hr.employee').browse(cr,uid,pid) 
+		employee_id = self.pool.get('hr.employee').browse(cr,uid,pid)
 		dept_id = employee_id.department_id.id
 		return {'value':{ 'department_id':dept_id} }
 
 	
 	def submit(self,cr,uid,ids,context=None):
-		no = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang')
+		val = self.browse(cr, uid, ids)[0]
+		code = val.destination_location_request_id.code
+		no = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang') + 'PB/SBM/' + code + '/' + time.strftime('%y') + '/' + time.strftime('%m')
 		return self.write(cr,uid,ids,{'state':'confirm','name':no})
 
 	def edit(self,cr,uid,ids,context=None):
@@ -246,6 +251,30 @@ WizardPRCancelItem()
 
 
 class Detail_PB(osv.osv):
+
+	def _get_delivery_items(self,cr,uid,ids,field_name,args,context={}):		
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			# move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id)])
+			hasil= 0
+			# for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
+			# 	hasil += data.received_items
+			res[item.id] = hasil
+		return res
+
+	def _get_processed_items(self,cr,uid,ids,field_name,args,context={}):	
+
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id)])
+			hasil= 0
+			for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
+				# hasil += data.received_items
+				hasil += data.product_qty
+			res[item.id] = hasil
+		return res
+
+
 	_name = 'detail.pb'
 	_columns = {
 		'name':fields.many2one('product.product','Product',track_visibility='onchange'),
@@ -262,6 +291,8 @@ class Detail_PB(osv.osv):
 		'detail_pb_id':fields.many2one('pembelian.barang', 'Referensi PB', required=True, ondelete='cascade'),
 		'item': fields.many2many('set.po', 'pre_item_rel', 'permintaan_id', 'item_id', 'item'),
 		'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
+		'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",store=False),
+		'processed_items': fields.function(_get_processed_items,string="Processed Items",type="float",store=False),
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('onproses', 'Confirm'),
@@ -296,7 +327,6 @@ class Detail_PB(osv.osv):
 			return {'domain': {'variants': [('id','in',tuple(product))]},'value':{'part_no':pn,'stok':products.qty_available,'satuan':products.uom_id.id}}
 
 	def productvar(self,cr,uid,ids,idp):
-		print '========================',idp
 		hasil=self.pool.get('product.variants').browse(cr,uid,idp)
 		return {'value':{ 
 						'part_no':hasil.default_code,

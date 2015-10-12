@@ -37,6 +37,8 @@
 
 			<menuitem action="rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisition" parent="purchase_requistion_menu" sequence="3" groups="sbm_purchase.group_pr_request_dept_chief,sbm_purchase.group_pr_request_purchase_staff,sbm_purchase.group_pr_request_dept_manager"/>
 		
+
+		  <menuitem id="menu_purchase_order_subcont_pro_mgt" sequence="10" parent="purchase_requistion_menu" action="ad_purchase_subcont.action_purchase_order_subcont" groups="sbm_purchase.group_pr_request_dept_chief,sbm_purchase.group_pr_request_purchase_staff,sbm_purchase.group_pr_request_dept_manager,purchase.group_purchase_manager,purchase.group_purchase_user"/>
 		
 	
 
