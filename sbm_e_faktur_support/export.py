@@ -73,8 +73,11 @@ class acount_invoice(osv.osv):
 			context = {}
 		try:
 			ids = context['active_ids']
+			print 'active_ids===============',ids
 		except:
 			ids = ids
+
+			# print 'IDSSSSSSSSSSSSSSSS=========================+++++++',ids
 
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
