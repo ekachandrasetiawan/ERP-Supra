@@ -630,7 +630,7 @@ class account_invoice(osv.osv):
 	_inherit='account.invoice'
 	_columns={
 		# 'total_discount':fields.function(_amount_all_main,string='Total Discount',required=False,store=False),
-		'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
+		# 'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
 		'payment_for':fields.selection([('dp','DP'),('completion','Completion')],string="Payment For",required=False),
 		'print_all_taxes_line':fields.boolean(string="Print All Taxes Item ?",required=False),
 		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
@@ -640,6 +640,23 @@ class account_invoice(osv.osv):
 	_defaults={
 		'print_all_taxes_line':True,
 	}
+
+	def action_cancel(self,cr,uid,ids,context={}):
+		ir_model_data_group = self.pool.get('ir.model.data').search(cr,uid,[('model','=','res.groups'),('name','=','group_customer_invoice_administrator'),('module','=','sbm_inherit')],context=context)
+		if ir_model_data_group:
+			data = self.pool.get('ir.model.data').browse(cr,uid,ir_model_data_group[0],context=context)
+			
+			res_id = data.res_id
+			# check if user in group customer invoice administrator ?
+			# only customer invoice administrator can cancel the invoice
+			group = self.pool.get('res.groups').search(cr,uid,[('id','=',res_id),('users','in',uid)])
+			# print "Grouppppp",group
+			if group:
+				return super(account_invoice,self).action_cancel(cr,uid,ids,context)
+			else:
+				raise osv.except_osv(_('Error!'),_('Your\'re not Authorized to Canceling Invoice!'))
+			
+		return False
 
 	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
 		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
