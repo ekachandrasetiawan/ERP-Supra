@@ -372,6 +372,9 @@ class PurchaseOrderFullInvoice(osv.osv):
 
 # FOR FINANCE DISCOUNT AMOUNT
 class account_invoice_line(osv.osv):
+	def replace_discount(self,cr,uid,ids,qty,price, disc):
+		discount = ((qty*price)*disc)/100
+		return {'value':{ 'amount_discount':discount} }
 	def _amount_line(self, cr, uid, ids, prop, unknow_none, unknow_dict):
 		# print 'OVERIDEDDDDDD==================================>>>>>>>>'
 		# TEST AJA lagi
@@ -2427,7 +2430,6 @@ class sale_advance_payment_inv(osv.osv_memory):
 				'origin': sale.name,
 				'account_id': res['account_id'],
 				'price_unit': inv_amount,
-				'quantity': wizard.qtty or 1.0,
 				'quantity': wizard.qtty or 1.0,
 				'discount': False,
 				'uos_id': res.get('uos_id', False),
