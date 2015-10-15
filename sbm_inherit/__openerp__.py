@@ -33,6 +33,7 @@
         "menu.xml",
         "sales_man_target.xml",
         "sale_order.xml",
+        "setting.xml",
         # "report/faktur.xml"
         # "purchase_order.xml",
     ],
