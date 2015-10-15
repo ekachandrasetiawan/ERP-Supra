@@ -69,6 +69,8 @@ class Pembelian_Barang(osv.osv):
 
 	_order = 'id DESC'
 
+
+
 	def action_cancel_item(self,cr,uid,ids,context=None):
 		if context is None:
 			context = {}

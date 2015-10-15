@@ -1,7 +1,7 @@
 {
     "name": "Purchase Subcont",
     "version": "1.0",
-    "depends": ["base","stock","purchase",'mrp','account_voucher','sbm_purchase_rent'],
+    "depends": ["base","stock","purchase",'mrp','account_voucher'],
     "author": "ADSOFT",
     "category": "Complex",
     "description": """ To Manage Purchase Requitiotion, Purchase Order, Delivery Order, and Incoming Shipment

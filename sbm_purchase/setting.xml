@@ -8,22 +8,16 @@
             <field name="name">Job Desc and Position</field>
         </record>
 
-		<record model="res.groups" id="group_pr_request_purchase_staff">
-			<field name="category_id" ref="module_category_jobdesc_position"/>
-			<field name="name">Purhcase Staff</field>
-		</record>
-
-		<record model="res.groups" id="group_pr_request_dept_chief">
+		<record model="res.groups" id="group_jobdesc_position_dept_chief">
 			<field name="category_id" ref="module_category_jobdesc_position"/>
 			<field name="name">Dept Chief</field>
 		</record>
 
 
-		<record model="res.groups" id="group_pr_request_dept_manager">
+		<record model="res.groups" id="group_jobdesc_position_dept_manager">
 			<field name="category_id" ref="module_category_jobdesc_position"/>
 			<field name="name">Dept Manager</field>
 		</record>
-
 
 
 		<!-- Membuat Rules By XML -->
@@ -36,7 +30,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('group_pr_request_dept_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('group_jobdesc_position_dept_chief'))]"/>
 	    </record>
 
 
@@ -48,7 +42,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('group_pr_request_dept_manager'))]"/>
+	        <field name="groups" eval="[(4, ref('group_jobdesc_position_dept_manager'))]"/>
 	    </record>
 
 
@@ -62,6 +56,40 @@
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+
+
+		<!-- Setting Access Rigth -->
+	     <record model="ir.model.access" id="ir_access_pr_regular">
+	        <field name="name">Access Purchase Requisition Regular</field>
+	        <field name="model_id" ref="model_pembelian_barang"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+		<record model="ir.model.access" id="ir_access_detail_pb">
+	        <field name="name">Access Detail PB</field>
+	        <field name="model_id" ref="model_detail_pb"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+
+	    <record model="ir.model.access" id="ir_access_rent_requisition_detail">
+	        <field name="name">Access Rent Requisition Detail</field>
+	        <field name="model_id" ref="sbm_purchase_rent.model_rent_requisition_detail"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
 	    </record>
 
     </data>

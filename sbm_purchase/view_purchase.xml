@@ -55,18 +55,25 @@
             <field name="arch" type="xml">
             	<form string="Regular Requisition New" version="7.0">
             	<header>
-            		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_pr_request_dept_chief"/>
+            		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief"/>
             		<button name="setdraft" states="confirm,confirm2" string="Set to Draft" type="object"  icon="gtk-jump-to"/>
-            		<button name="confirm" states="confirm" string="Approve" type="object"   icon="gtk-apply" groups="sbm_purchase.group_pr_request_dept_manager"/>
+            		<button name="confirm" states="confirm" string="Approve" type="object"   icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager"/>
             		<button name="confirm2" states="confirm2" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"  icon="gtk-apply"/>
             		<button name="confirm3" states="edit" string="Update" type="object" />
             		<button name="edit" states="purchase" string="Edit PB" type="object" />
 
-            		<button name="action_cancel_item" states="confirm" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_pr_request_purchase_staff,sbm_purchase.group_pr_request_dept_chief" icon="terp-stock_effects-object-colorize"/>
+            		<button name="action_cancel_item" states="confirm" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="terp-stock_effects-object-colorize"/>
             		<button name="%(reportpb)d" states="purchase" string="Print" type="action" class="oe_highlight"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm,confirm2,purchase,done"/>
                 </header>
             		<sheet>
+
+	        		<div class="oe_right oe_button_box" name="import_buttons">
+	        			<button name="%(action_view_purchase_order_line_from_sale_order_lines)d"
+                        string="Import Sale Order Line" type="action" states="draft" />
+	                </div>
+
+
 		            <separator string="Regular Requisition"/>
 						<group col="4" colspan="4">
 		            	 	<field name="name" colspan="4"/>
@@ -79,6 +86,7 @@
 			            </group>
 			             <notebook colspan="4">
 					    	<page string="Product Detail">
+					    		
 			                    <field name="detail_pb_ids" nolabel="1" colspan="4">
 			                        <tree string="Product Detail" editable="buttom">
 			                          	<field name="name" on_change="setvariants(name)"/>

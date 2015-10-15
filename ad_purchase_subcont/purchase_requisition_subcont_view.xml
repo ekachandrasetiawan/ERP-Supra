@@ -253,11 +253,20 @@
         </field>
     </record>
 
-    <menuitem
+
+    <record id="subcont_requisition_action" model="ir.actions.act_window">
+            <field name="name">Subcont Requisition</field>
+            <field name="res_model">purchase.requisition.subcont</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+    </record>
+
+
+<!--     <menuitem
         id="menu_purchase_requisition_subcont_pro_mgt"
         sequence="10"
         parent="sbm_purchase_rent.purchase_requistion_menu"
-        action="action_purchase_requisition_subcont"/>
+        action="action_purchase_requisition_subcont"/> -->
 	
   	</data>
 </openerp>

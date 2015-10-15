@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    	
+
+
+		<!-- Membuat Rules By XML -->
+		
+        <record model="ir.rule" id="ir_purcahse_rent_requisition_chief_rule">
+	        <field name="name">Purchase Rent Requisiton Chief</field>
+	        <field name="model_id" ref="model_rent_requisition"/>
+	        <field name="domain_force">[('employee_id.user_id','=',user.id)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_jobdesc_position_dept_chief'))]"/>
+	    </record>
+
+
+	    <record model="ir.rule" id="ir_purcahse_requisition_manager_rule">
+	        <field name="name">Purchase Rent Requisiton Manager</field>
+	        <field name="model_id" ref="model_rent_requisition"/>
+	        <field name="domain_force">[('department_id','in', [e.department_id.id for e in user.employee_ids])]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_jobdesc_position_dept_manager'))]"/>
+	    </record>
+
+
+
+	    <record model="ir.rule" id="ir_purcahse_requisition_all_rule">
+	        <field name="name">All Rent Purchase Requisition</field>
+	        <field name="model_id" ref="model_rent_requisition"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+
+
+
+    </data>
+</openerp>
