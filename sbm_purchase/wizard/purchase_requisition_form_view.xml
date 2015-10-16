@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_purchase_order_line_from_order_lines" model="ir.ui.view">
+            <field name="name">sale.order.line.from.requisition.lines.form</field>
+            <field name="model">sale.order.line.from.requisition.lines</field>
+            <field name="arch" type="xml">
+                <form string="Import Product" version="7.0">
+                    <separator string="Product Sale Order Line" />
+                        <!-- <field height="300" width="700" name="line_idx" widget="many2many" domain="[('state','=','confirmed')]" /> -->
+                        <field height="300" width="700" name="line_ids" domain="[('state','=','confirmed')]" context="{'tree_view_ref':'sbm_saleorder.view_sale_order_line_custom'}"/>
+                    <footer>
+                        <button string="Ok" name="populate_order_lines" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+               </form>
+            </field>
+        </record>
+
+        <record id="action_view_purchase_order_line_from_sale_order_lines" model="ir.actions.act_window">
+            <field name="name">Import Product</field>
+            <field name="res_model">sale.order.line.from.requisition.lines</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_purchase_order_line_from_order_lines"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</openerp>

@@ -55,10 +55,18 @@ class SaleOrder(osv.osv):
 			'context': context,
 			'nodestroy': True,
 		}
-	_inherit = 'sale.order'
 
 
 SaleOrder()
+
+
+
+class SaleOrderLine(osv.osv):
+	
+	_inherit = 'sale.order.line'
+	
+
+SaleOrderLine()
 
 class WizardCreatePB(osv.osv_memory):
 	def default_get(self, cr, uid, fields, context=None):

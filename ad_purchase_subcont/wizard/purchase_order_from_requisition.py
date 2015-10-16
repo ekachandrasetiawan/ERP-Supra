@@ -21,6 +21,8 @@ class purchase_order_line_from_requisition_lines(osv.osv_memory):
         spk=context.get('spk_list')[0][2]
         po_id=context.get('po_id')
         
+
+        print '======================',po_id
         if not po_id:
             return {'type': 'ir.actions.act_window_close'}
         
