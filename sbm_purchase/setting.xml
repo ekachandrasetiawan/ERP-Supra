@@ -92,5 +92,29 @@
 	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
 	    </record>
 
+
+	    <record model="ir.model.access" id="ir_access_sale_order_line_chief">
+	        <field name="name">Access Sale Order Line Chief</field>
+	        <field name="model_id" ref="sale.model_sale_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+
+
+	    <record model="ir.model.access" id="ir_access_purchase_order_line_chief">
+	        <field name="name">Access Purchase Order Line Chief</field>
+	        <field name="model_id" ref="purchase.model_purchase_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+
     </data>
 </openerp>
