@@ -28,10 +28,6 @@
 							<field name="description" readonly="True" />
 							<field name="qty" readonly="True" />
 							<field name="uom" readonly="True" />
-							<!-- <field name="unit_price" readonly="True" />
-							<field name="discount_amount" readonly="True" />
-							<field name="discount_percent" readonly="True" />
-							<field name="subtotal" readonly="True" /> -->
 						</tree>
 					</field>
 					<group>
@@ -77,23 +73,6 @@
 				</form>
 			</field>
 		</record>
-
-
-		<record id="view_sale_order_line_custom" model="ir.ui.view">
-            <field name="name">sale.order.line.tree</field>
-            <field name="model">sale.order.line</field>
-            <field name="type">tree</field>
-            <field name="priority">2</field>
-            <field name="arch" type="xml">
-                <tree string="Sale Order Line">
-                	<field name="product_id"/>
-                	<field name="name"/>
-                	<field name="product_uos_qty"/>
-                	<field name="product_uom"/>
-                	<field name="state"/>
-                </tree>
-            </field>
-        </record>
 
 	</data>
 </openerp>
