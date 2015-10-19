@@ -6,7 +6,7 @@
     "category": "Purchase Suprabakti",
     "description": """Modul ini digunakan untuk Menggolah Data Purchase Order""",
     "init_xml": [],
-    'update_xml': ["view_purchaseorder.xml"],
+    'update_xml': ["view_purchaseorder.xml","setting.xml","menu.xml"],
     'demo_xml': [],
     'installable': True,
     'active': False,
