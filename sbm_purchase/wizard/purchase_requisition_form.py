@@ -36,6 +36,7 @@ class sale_order_line_from_requisition_lines(osv.osv_memory):
 				'qty_available':line.product_uom_qty,
 				'satuan':line.product_uom.id,
 				'detail_pb_id':pb_id,
+				'sale_line_ids':line.id,
 			},context=context)
 
 
