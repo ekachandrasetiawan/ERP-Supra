@@ -2,6 +2,7 @@ import time
 import netsvc
 import openerp.exceptions
 import decimal_precision as dp
+import re
 from tools.translate import _
 from osv import fields, osv
 from datetime import datetime, timedelta
@@ -198,7 +199,10 @@ class order_preparation(osv.osv):
 
             # if product is not active then register in list
             if not product.active:
-                notActiveProducts.append(product.default_code)
+                # if product not in "service" category
+                if not re.match(r'service',product.categ_id.name,re.M|re.I):
+                    notActiveProducts.append(product.default_code)
+                
 
             if product.not_stock == False:
                  # print '=========================',product.qty_available
