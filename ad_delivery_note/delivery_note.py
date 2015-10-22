@@ -1515,12 +1515,33 @@ class stock_return_picking_memory(osv.osv_memory):
 
 	_columns = {
 		'product_id' : fields.many2one('product.product', string="Product", required=True),
-		'quantity' : fields.float("Quantity", digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
+		'quantity' : fields.float("Permintaan Return", digits_compute=dp.get_precision('Product Unit of Measure'), required=True),
+		'sisa' : fields.float("Proses Return", digits_compute=dp.get_precision('Product Unit of Measure'), required=False, readonly=True),
 		'wizard_id' : fields.many2one('stock.return.picking', string="Wizard"),
 		'move_id' : fields.many2one('stock.move', "Move"),
 		'prodlot_id': fields.related('move_id', 'prodlot_id', type='many2one', relation='stock.production.lot', string='Serial Number', readonly=True),
-
 	}
+
+	def cekQty(self,cr,uid,ids,minta,sisa):
+		if minta>sisa:
+			res = {
+				'value':{
+					'quantity':sisa,
+				},
+				'warning':{
+					'title':'Qty Not Valid',
+					'message':'Qty not Enough!'
+				}
+			}
+		else:
+			res = {
+				'value':{
+					'quantity':minta,
+				},
+			}
+		return res
+
+
 
 stock_return_picking_memory()
 
@@ -1544,7 +1565,7 @@ class stock_return_picking(osv.osv_memory):
 		 @param context: A standard dictionary
 		 @return: A dictionary with default values for all field in ``fields``
 		"""
-	   
+	   	
 		result1 = []
 		if context is None:
 			context = {}
@@ -1570,7 +1591,7 @@ class stock_return_picking(osv.osv_memory):
 			for line in pick.move_lines:
 				qty = line.product_qty - return_history.get(line.id, 0)
 				if qty > 0:
-					result1.append({'product_id': line.product_id.id, 'quantity': qty,'move_id':line.id, 'prodlot_id': line.prodlot_id and line.prodlot_id.id or False})
+					result1.append({'product_id': line.product_id.id, 'sisa':qty, 'quantity': qty,'move_id':line.id, 'prodlot_id': line.prodlot_id and line.prodlot_id.id or False})
 
 			if 'product_return_moves' in fields:
 				res.update({'product_return_moves': result1})
@@ -1681,8 +1702,7 @@ class stock_return_picking(osv.osv_memory):
 		set_invoice_state_to_none = True
 		returned_lines = 0
 		
-#        Create new picking for returned products
-		
+		#Create new picking for returned products
 		seq_obj_name = 'stock.picking'
 		new_type = 'internal'
 		if pick.type =='out':
@@ -1702,7 +1722,6 @@ class stock_return_picking(osv.osv_memory):
 								'date':date_cur,
 								'invoice_state': data['invoice_state'],
 								})
-
 		else:
 			new_picking = pick_obj.copy(cr, uid, pick.id, {
 								'name': _('%s-%s-return') % (new_pick_name, pick.name),
@@ -1738,12 +1757,18 @@ class stock_return_picking(osv.osv_memory):
 
 
 			# Cek Barang yang sisa & yang di input
-			return_history = self.get_return_history(cr, uid, record_id, context)       
+			return_history = self.get_return_history(cr, uid, pick.id, context)
+			
 			for line in pick.move_lines:
 				qty = line.product_qty - return_history.get(line.id, 0)
+			# 	print '=========== YANG PERNAH DIBUAT RO============',qty
+
+			# print '==============YANG DIMINTA RO==========',data_get.quantity
 
 			if data_get.quantity > qty:
 				raise osv.except_osv(_('Warning !'), _("Product Qty Tidak Mencukupi"))
+			# else:
+			# 	raise osv.except_osv(_('Warning !'), _("cek AJA"))
 					
 			new_qty = data_get.quantity
 			move = move_obj.browse(cr, uid, mov_id, context=context)
