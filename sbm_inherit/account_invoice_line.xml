@@ -70,11 +70,13 @@
 					<field name="user_id" on_change="getGroupByUser(user_id)" attrs="{'readonly':[('state','not in',['draft','proforma2'])]}" />
 					<field name="group_id" />
 					<field name="approver"/>
+					<field name="tax_invoice_origin_id" />
 				</xpath>
 				<xpath expr="//page[@string='Payments']" position="after">
 					<page string="Settings">
 						<group>
 							<field name="payment_for" />
+							<field name="dp_percentage" />
 							<field name="print_all_taxes_line" />
 							<field name="faktur_address" />
 						</group>
