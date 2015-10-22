@@ -17,6 +17,9 @@
     # 'data':[
     #     'data/religion.xml'
     # ],
+    'data':[
+        'security/ir.model.access.csv'
+    ],
     'update_xml': [
         "stock_picking.xml",
         "po.xml",

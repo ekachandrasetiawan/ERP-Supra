@@ -372,6 +372,9 @@ class PurchaseOrderFullInvoice(osv.osv):
 
 # FOR FINANCE DISCOUNT AMOUNT
 class account_invoice_line(osv.osv):
+	def replace_discount(self,cr,uid,ids,qty,price, disc):
+		discount = ((qty*price)*disc)/100
+		return {'value':{ 'amount_discount':discount} }
 	def _amount_line(self, cr, uid, ids, prop, unknow_none, unknow_dict):
 		# print 'OVERIDEDDDDDD==================================>>>>>>>>'
 		# TEST AJA lagi
@@ -603,9 +606,9 @@ class account_invoice(osv.osv):
 			# raise osv.except_osv(_('Error!'),_('Tes'))
 			# self.write(cr,uid,newid,{'faktur_pajak_no':fp_no})
 			# canceling old invoice
-			self.write(cr,uid,[inv.id],{'state':'cancel','tax_invoice_origin_id':inv.id})
+			self.write(cr,uid,[inv.id],{'state':'cancel'})
 			# new faktur  number
-			self.write(cr,uid,newid,{'faktur_pajak_no':fp_no})
+			self.write(cr,uid,newid,{'faktur_pajak_no':fp_no,'tax_invoice_origin_id':inv.id})
 
 		mod_obj = self.pool.get('ir.model.data')
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
@@ -636,9 +639,11 @@ class account_invoice(osv.osv):
 		'faktur_address':fields.many2one('res.partner',string="Faktur Address",required=False),
 		'group_id':fields.many2one('group.sales',required=True,string="Sale Group",domain=[('is_main_group','=',True)]),
 		'tax_invoice_origin_id': fields.many2one('account.invoice',string="Invoice Origin",required=False, ondelete='RESTRICT',onupdate='RESTRICT'),
+		'dp_percentage': fields.float(string='DP/Termin Percentage',required=False),
 	}
 	_defaults={
 		'print_all_taxes_line':True,
+		'dp_percentage':0,
 	}
 
 	def action_cancel(self,cr,uid,ids,context={}):
@@ -2427,7 +2432,6 @@ class sale_advance_payment_inv(osv.osv_memory):
 				'origin': sale.name,
 				'account_id': res['account_id'],
 				'price_unit': inv_amount,
-				'quantity': wizard.qtty or 1.0,
 				'quantity': wizard.qtty or 1.0,
 				'discount': False,
 				'uos_id': res.get('uos_id', False),

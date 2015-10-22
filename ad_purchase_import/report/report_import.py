@@ -74,7 +74,7 @@ class ReportStatus(report_sxw.rml_parse):
         res=[]
         i=1
         for x in order_line:
-                res.append({'no':i,'product_id':x.product_id, 'name':x.name,'part_no':x.part_number,'qty':x.product_qty,'satuan':x.product_uom,'harga':x.price_unit,'total':x.price_unit*x.product_qty})
+                res.append({'no':i,'product_id':x.product_id, 'name':x.name,'part_no':x.part_number,'qty':x.product_qty,'satuan':x.product_uom,'harga':x.price_unit,'total':x.price_unit*x.product_qty,'price_subtotal':x.price_subtotal})
                 i+=1
         return res
 
