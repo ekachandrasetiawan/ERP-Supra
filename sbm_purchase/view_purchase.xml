@@ -63,7 +63,7 @@
             		<button name="edit" states="purchase" string="Edit PB" type="object" />
 
             		<button name="action_cancel_item" states="confirm" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="terp-stock_effects-object-colorize"/>
-            		<button name="%(reportpb)d" states="purchase" string="Print" type="action" class="oe_highlight"/>
+            		<button name="%(reportpb)d" states="purchase" string="Print Purchase Requisition" type="action" icon="gtk-print"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm,confirm2,purchase,done"/>
                 </header>
             		<sheet>

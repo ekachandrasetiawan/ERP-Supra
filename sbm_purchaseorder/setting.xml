@@ -42,6 +42,28 @@
 	    </record>
 
 
+	    <!-- Access Rights Product Product-->
+		<record model="ir.model.access" id="ir_access_product_product_purchase_chief">
+	        <field name="name">Access Product Product Purchase Chief</field>
+	        <field name="model_id" ref="product.model_product_product"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_purchase_chief"/>
+	    </record>
+
+	  <!-- Access Rights Super Notes-->
+		<record model="ir.model.access" id="ir_access_super_notes_purchase_chief">
+	        <field name="name">Access Super Notes Purchase Chief</field>
+	        <field name="model_id" ref="sbm_inherit.model_super_notes"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_purchase_chief"/>
+	    </record>
+
 	   <!-- Access Rights Purchase Order-->
 
 	    <record model="ir.model.access" id="ir_access_purchase_order_finance_staff">
@@ -87,6 +109,17 @@
 	        <field name="perm_create" eval="True"/>
 	        <field name="group_id" eval="group_purchase_chief"/>
 	    </record>
+
+	    <record model="ir.model.access" id="ir_access_purchase_order_petty_finance_staff">
+	        <field name="name">Access Purchase Order Petty Finance Staff</field>
+	        <field name="model_id" ref="model_purchase_order_petty"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_finance_staff"/>
+	    </record>
+
 
 	    <record model="ir.model.access" id="ir_access_purchase_order_petty_purchase_user">
 	        <field name="name">Access Purchase Order Petty Purchase User</field>
@@ -259,6 +292,33 @@
 	        <field name="perm_create" eval="False"/>
 	        <field name="group_id" eval="group_finance_staff"/>
 	    </record>
+
+	<!-- Account Journal -->
+	
+		<record model="ir.model.access" id="ir_access_account_journal_finance_staff">
+	        <field name="name">Access Account Jornal Finance Staff</field>
+	        <field name="model_id" ref="account.model_account_journal"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_finance_staff"/>
+	    </record>
+
+
+	<!-- purchase order line cancel -->
+	
+		<record model="ir.model.access" id="ir_access_purchase_order_line_cancel_finance_staff">
+	        <field name="name">Access purchase Order Line Cancel Finance Staff</field>
+	        <field name="model_id" ref="sbm_inherit.model_purchase_order_line_cancel"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_finance_staff"/>
+	    </record>
+
+	    purchase.order.line.cancel
     </data>
 </openerp>
 
