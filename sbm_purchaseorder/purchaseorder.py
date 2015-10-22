@@ -6,8 +6,6 @@ from osv import osv, fields
 
 class Purchase_Order_Sbm(osv.osv):
 	_inherit = 'purchase.order'
-
-
 	# CONTOH FIELD FUNCTION
 	def _getStateAlert(self, cr, uid, ids, fields, arg, context):
 		x={}
@@ -38,6 +36,9 @@ class Purchase_Order_Sbm(osv.osv):
 		'type_permintaan':fields.selection([('1','umum'),('2','rental'),('3','Sub Count')],'Type Permintaan',required=True,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]},),
 		'detail_po_ids': fields.many2many('detail.pb','wizard_pb_rel','detail_pb_id','wizard_id','List Permintaan Barang'),
 		'print_line':fields.integer('Line Print'),
+		'shipment_to_product':fields.many2one('stock.location','Stock Location'),
+		'submit_no':fields.char('Submit No'),
+		'jenis': fields.selection([('loc', 'Local Regular'),('loc-petty', 'Local Regular Petty'), ('impj', 'Import J'), ('imps', 'Import S')], 'Type', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True),
 		'stateAlert': fields.function(
 			_getStateAlert,
 			string="Due Date Month",type="char"
@@ -126,11 +127,6 @@ class Purchase_Order_Sbm(osv.osv):
 				for line in po.order_line:
 					if line.line_pb_subcont_id:
 						self.pool.get('purchase.requisition.subcont.line').write(cr,uid,[line.line_pb_subcont_id.id],{'state_line':'po'})
-			
-
-
-		# self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
-		
 		return super(Purchase_Order_Sbm,self).wkf_approve_order(cr,uid,ids,context=context)
 	
 	def _create_pickings(self, cr, uid, order, order_lines, picking_id=False, context=None):
@@ -222,6 +218,23 @@ class Purchase_Order_Sbm(osv.osv):
 
 Purchase_Order_Sbm()
 
+
+class purchase_order_patty(osv.osv):
+    _name = "purchase.order.petty"
+    _inherit = "purchase.order"
+    _table = "purchase_order"
+    _description = "Purchase Order Petty"
+
+    _columns = {
+    		'jenis':fields.selection([('loc','Local Regular'),('loc-petty','Local Regular Petty'),('impj','Import J'),('imps','Import S')],'Jenis'),
+    }
+
+
+purchase_order_patty()
+
+
+
+
 class purchase_order_line_detail(osv.osv):
 	
 	def _get_received(self,cr,uid,ids,field_name,args,context={}):		
@@ -311,4 +324,4 @@ class purchase_order_line_detail(osv.osv):
 		return {'value':{'product_uom':uom}}
 
 		
-purchase_order_line_detail()
+purchase_order_line_detail() 

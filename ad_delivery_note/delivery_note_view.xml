@@ -472,5 +472,18 @@
             </field>
         </record>
 
+        <record id="return_view_stock_return_picking_form" model="ir.ui.view">
+            <field name="name">stock.return.picking.memory.form</field>
+            <field name="model">stock.return.picking.memory</field>
+            <field name="inherit_id" ref="stock.stock_return_memory_tree_in"/>
+            <field name="arch" type="xml">
+                <field name="quantity" position="before">
+                    <field name="sisa"/>
+                </field>
+                <field name="quantity" position="replace">
+                    <field name="quantity" on_change="cekQty(quantity,sisa)"/>
+                </field>
+            </field>
+        </record>
 	</data>
 </openerp>

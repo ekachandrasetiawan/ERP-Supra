@@ -2,7 +2,6 @@
 <openerp>
      <data>
           <report auto="False" id="printpo" menu="True" model="purchase.order" name="report.purchase.order" rml="addons/sbm_purchaseorder/report/report_purchaseorder.rml" string="Report"/>
-          <!-- <report auto="False" id="printpo" menu="True" model="purchase.order" name="report.purchase.order" rml="addons/sbm_purchaseorder/report/report_order_local.rml" string="Report"/> -->
           <record id="view_po_form_set" model="ir.ui.view">
                <field name="name">purchase.order.form</field>
                <field name="model">purchase.order</field>
@@ -18,8 +17,31 @@
                          <button class="oe_highlight" name="%(printpo)d" states="approved,draft" string="Print Purchase Order" type="action"/>
                     </button>
 
+                    <button name="action_cancel_draft" position="replace">
+                        <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_purchaseorder.group_purchase_chief"/>
+                    </button>
 
-                       
+                    <button name="purchase_cancel" position="replace">
+                        <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" groups="purchase.group_purchase_manager,sbm_purchaseorder.group_purchase_chief"/>
+                    </button>
+                    
+                    <button name="action_cancel" position="replace">
+                        <button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" groups="purchase.group_purchase_manager,sbm_purchaseorder.group_purchase_chief"/>
+                    </button>
+                   
+                    <button name="purchase_confirm" position="replace">
+                      <button name="purchase_confirm" states="draft" string="Confirm Order" groups="purchase.group_purchase_user,sbm_purchaseorder.group_purchase_chief"/>
+                    </button> 
+                    
+                    <button name="view_picking" position="replace">
+                        <button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" class="oe_highlight" groups="stock.group_stock_user"/>
+                    </button>
+
+                    <!-- 
+                    <xpath expr="/form/header/button[@string='Full Invoice']" position="replace" >
+                      <button name="action_invoice_create" string="Full Invoice" type="object" states="approved" class="oe_highlight" groups="base.group_user"/>
+                    </xpath> -->
+
                     <field name="name" position="replace">
                          <field name="name"/>
                     </field>
@@ -48,6 +70,9 @@
                          <field name="received_items"/>
                     </field>
 
+                    <field name="minimum_planned_date" position="after">
+                         <field name="shipment_to_product"/>
+                    </field>
                     <field name="date_planned" position="before">
                          <field name="part_number"/>
                     </field>
@@ -61,11 +86,17 @@
                     <field name="product_uom" position="replace">
                          <field name="product_uom" on_change="onchange_product_new(product_id, product_uom)"/>
                     </field>
-                    
                     <xpath expr="//page[@string='Purchase Order']" position="after">
                           <page string="Print Line">
                               <group>
                                    <field name='print_line'/>
+                              </group>
+                         </page>
+                    </xpath>
+                    <xpath expr="//page[@string='Purchase Order']" position="after">
+                          <page string="Submit No">
+                              <group>
+                                   <field name='submit_no' readonly="1"/>
                               </group>
                          </page>
                     </xpath>
@@ -88,5 +119,17 @@
                     </field>
                </field>
           </record>
+
+          <record model="ir.actions.act_window" id="action_purchase_order_petty_form">
+             <field name="name">Purchase Order Petty</field>
+             <field name="type">ir.actions.act_window</field>
+             <field name="inherit_id" ref="purchase.purchase_order_form"/>
+             <field name="res_model">purchase.order</field>
+             <field name="domain">[('jenis','=','loc-petty')]</field>
+             <field name="view_type">form</field>
+             <field name="view_mode">tree,form</field>
+         </record>
+
+
      </data>
 </openerp>
