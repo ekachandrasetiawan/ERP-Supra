@@ -1,14 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
+	
 	<data>
+		<!-- OVERRIDE ACTION CUSTOMER MENU IN SALES/SALES -->
+		<record id="base.action_partner_form" model="ir.actions.act_window">
+			<field name="name">Customers</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">res.partner</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">kanban,tree,form</field>
+			<field name="context">{"search_default_customer":1,'search_default_type_company':1}</field>
+			<field name="search_view_id" ref="base.view_res_partner_filter"/>
+			<field name="help" type="html">
+			  <p class="oe_view_nocontent_create">
+				Click to add a contact in your address book.
+			  </p><p>
+				OpenERP helps you easily track all activities related to
+				a customer; discussions, history of business opportunities,
+				documents, etc.
+			  </p>
+			</field>
+		</record>
 		<record model="ir.rule" id="ir_rule_customer_creator">
-	        <field name="name">Customer Creator Rules</field>
-	        <field name="model_id" ref="base.model_res_partner"/>
-	        <field name="perm_read" eval="True"/>
-	        <field name="perm_write" eval="False"/>
-	        <field name="perm_unlink" eval="False"/>
-	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, 61)]"/>
-	    </record>
+			<field name="name">Customer Creator Rules</field>
+			<field name="model_id" ref="base.model_res_partner"/>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="False"/>
+			<field name="perm_unlink" eval="False"/>
+			<field name="perm_create" eval="True"/>
+			<field name="groups" eval="[(4, 61)]"/>
+		</record>
+
+
+
+		<record model="ir.rule" id="ir_rule_see_only_so_in_group">
+			<field name="name">Sale Order See Only SO in Own User Group</field>
+			<field name="model_id" ref="model_sale_order"/>
+			<field name="domain_force">['|',('user_id','=',[x.name.id for x in user.kelompok_id.users_line]), ('user_id','=',False)]</field>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="True"/>
+			<field name="perm_unlink" eval="True"/>
+			<field name="perm_create" eval="True"/>
+		</record>
+
+		<record model="res.groups" id="group_sales_admin_regional">
+			<field name="category_id" ref="base.module_category_sales_management"/>
+			<field name="name">Admin Support Regional</field>
+			<field name="rule_groups" eval="[(6,0,[ref('ir_rule_see_only_so_in_group'),ref('ir_rule_customer_creator')])]" />
+			
+	   </record>
 	</data>
 </openerp>
