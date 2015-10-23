@@ -264,11 +264,10 @@ class Detail_PB(osv.osv):
 			res[item.id] = hasil
 		return res
 
-	def _get_processed_items(self,cr,uid,ids,field_name,args,context={}):	
-
+	def _get_processed_items(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
-			move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id)])
+			move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id),('state', 'in' ,['confirmed','done'])])
 			hasil= 0
 			for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
 				# hasil += data.received_items
@@ -276,6 +275,31 @@ class Detail_PB(osv.osv):
 			res[item.id] = hasil
 		return res
 
+	def _get_qty_available(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		print "Callllleeedd",ids
+		for item in self.browse(cr,uid,ids,context=context):
+			print '=========================',item
+			move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id),('state', 'in' ,['confirmed','done'])])
+			hasil= 0
+			for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
+				hasil += data.product_qty
+			print item.id,"================+++++++++++"
+			nilai =item.jumlah_diminta-hasil
+
+			res[item.id] = nilai
+			if item.state=="proses":
+				if nilai <> 0:
+					self.write(cr,uid,ids,{'state':'onproses'})
+		return res
+
+	def _get_cek_po_line(self, cr, uid, ids, context=None):
+		result = {}
+		print '===================EKA CHANDRA SETIAWAN=================='
+		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
+			result[line.line_pb_general_id.id] = True
+		print "Resultsssssssssssssssssssssss ===>",result.keys()
+		return result.keys()
 
 	_name = 'detail.pb'
 	_columns = {
@@ -283,7 +307,7 @@ class Detail_PB(osv.osv):
 		'variants':fields.many2one('product.variants','variants',track_visibility='onchange'),
 		'part_no':fields.char('Part No',track_visibility='onchange'),
 		'jumlah_diminta':fields.float('Qty',track_visibility='onchange'),
-		'qty_available':fields.float('Qty Available',track_visibility='onchange'),
+		# 'qty_available':fields.float('Qty Available',track_visibility='onchange'),
 		'satuan':fields.many2one('product.uom','Product UOM',track_visibility='onchange'),
 		'stok':fields.integer('Stock',track_visibility='onchange'),
 		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),
@@ -293,6 +317,11 @@ class Detail_PB(osv.osv):
 		'detail_pb_id':fields.many2one('pembelian.barang', 'Referensi PB', required=True, ondelete='cascade'),
 		'item': fields.many2many('set.po', 'pre_item_rel', 'permintaan_id', 'item_id', 'item'),
 		'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
+		'qty_available': fields.function(_get_qty_available,string="Qty Available",type="float", track_visibility='always',
+			store={
+				'purchase.order.line': (_get_cek_po_line, ['state'], 20),
+			}),
+
 		'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",store=False),
 		'processed_items': fields.function(_get_processed_items,string="Processed Items",type="float",store=False),
 		'state': fields.selection([
@@ -306,6 +335,26 @@ class Detail_PB(osv.osv):
 	}
 
 	_defaults = {'state': 'draft'}
+
+
+	def cekproduct(self,cr,uid,ids,qty_available,jumlah_diminta):
+		if jumlah_diminta>qty_available:
+			res = {
+				'value':{
+					'quantity':qty_available,
+				},
+				'warning':{
+					'title':'Qty Not Valid',
+					'message':'Qty not Enough!'
+				}
+			}
+		else:
+			res = {
+				'value':{
+					'quantity':jumlah_diminta,
+				},
+			}
+		return res
 
 
 	def onchange_product_new(self, cr, uid, ids, name, satuan, context=None):
@@ -367,6 +416,8 @@ class Set_PO(osv.osv):
 		obj_purchase = self.pool.get("purchase.order")
 		obj_purchase_line = self.pool.get('purchase.order.line')
 		obj_detail_order_line=self.pool.get('detail.order.line')
+		obj_wizard_detail=self.pool.get('wizard.detail.pb');
+
 		pb = [line.detail_pb_id.name for line in val.permintaan]
 		detailpb = ''
 		for x in set(pb):
@@ -389,6 +440,7 @@ class Set_PO(osv.osv):
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.name.supplier_taxes_id))
 			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+			print "Callling PO Line Create----------------------"
 			obj_purchase_line.create(cr, uid, {
 										 'no':noline,
 										 'date_planned': time.strftime("%Y-%m-%d"),
@@ -439,13 +491,35 @@ class Wizard_Detail_PB(osv.osv):
 		'name':fields.many2one('pembelian.barang','No PB', domain=[('state','=','purchase')]),
 		'product':fields.many2one('product.product','Product'),
 		'variants':fields.many2one('product.variants','variants'),
-		'qty':fields.integer('Qty'),
+		'jumlah_diminta':fields.integer('Qty'),
+		'qty_available':fields.integer('Qty Available'),
 		'price_unit':fields.integer('Price Unit', required=True),
 		'id_product_detail':fields.integer('id'),
 		'detail_pb_id':fields.many2one('set.po', 'Detail PO', required=True, ondelete='cascade'),
 		# 'detail_pb_ids': fields.many2many('detail.pb', 'detail_set_pb', 'Detail Permintaan Barang'),
 	}
 	
+
+	def cekproduct(self,cr,uid,ids,qty_available,jumlah_diminta):
+		if jumlah_diminta>qty_available:
+			res = {
+				'value':{
+					'quantity':qty_available,
+				},
+				'warning':{
+					'title':'Qty Not Valid',
+					'message':'Qty not Enough!'
+				}
+			}
+		else:
+			res = {
+				'value':{
+					'quantity':jumlah_diminta,
+				},
+			}
+		return res
+
+
 	def setProduct(self,cr,uid,ids, pid):
 		pb_id = self.pool.get('pembelian.barang').browse(cr,uid, pid)
 		cek=self.pool.get('detail.pb').search(cr,uid,[('detail_pb_id', '=' ,pb_id.id),('state', '=' ,'onproses')])

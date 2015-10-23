@@ -83,6 +83,8 @@
 			                <field name="tanggal" on_change="setDeuDate(tanggal)"/>
 			                <field name="duedate" on_change="setTanggal(tanggal,duedate)"/>
 			                <field name="ref_pb"/>
+			                <field name="source_location_request_id"/>
+		   					<field name="destination_location_request_id"/>
 			            </group>
 			             <notebook colspan="4">
 					    	<page string="Product Detail">
@@ -96,7 +98,9 @@
 			                            <field name="qty_available" on_change="jmlQty(jumlah_diminta)"/>
 			                            <field name="satuan" on_change="onchange_product_new(name, satuan)"/>
 			                            <field name="stok"/>
-						   				 <field name="keterangan"/>
+			                            <field name="processed_items"/>
+		   								<field name="delivery_items"/>
+						   				<field name="keterangan"/>
 			                            <field name="state"/>
 			                        </tree>
 			                    </field>
@@ -188,13 +192,13 @@
 			            </group>
 		            	<notebook colspan="4">
 					    	<page string="Product Detail ">
-					    		<!--<button name="search_pb" string="Search Product" type="object"/>-->
 			                    <field name="permintaan" nolabel="1" colspan="4" string="Detail Permintaan Barang">
 			                    	<tree string="Detail Barang" editable="bottom">
 			                          	<field name="detail_pb_id"/>
 			                          	<field name="name" string="Product Name"/>
 			                          	<field name="variants" string="Variants"/>
-			                          	<field name="qty_available" string="Qty"/>
+			                          	<field name="qty_available" string="Qty Available" readonly="1"/>
+			                          	<field name="jumlah_diminta" string="Qty" on_change="cekproduct(qty_available,jumlah_diminta)"/>
 			                          	<field name="satuan" string="UOM"/>
 			                          	<field name="harga" string="Price"/>
 			                        </tree>
@@ -208,7 +212,7 @@
             	</form>
             </field>
          </record>
-
+<!-- 
          <record id="view_set_po_form2" model="ir.ui.view">
             <field name="name">set.po.form2</field>
             <field name="model">set.po</field>
@@ -241,7 +245,7 @@
 		            </footer>
             	</form>
             </field>
-         </record>
+         </record> -->
 
 		<record model="ir.actions.act_window" id="master_wizard_list_action">
             <field name="name">Regular Requisition Process</field>

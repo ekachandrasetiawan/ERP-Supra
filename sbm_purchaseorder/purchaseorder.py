@@ -171,7 +171,6 @@ class Purchase_Order_Sbm(osv.osv):
 			for val in order_line:
 				# ================== Update Detail PB menjadi Confirm ===================
 				self.pool.get('detail.pb').write(cr, uid, [val.detail_pb_id], {'state':'onproses'})
-				
 				# ================== Cek Qty Detail PB =================================
 				Qty_PB=self.pool.get('detail.pb').search(cr,uid,[('id', '=' ,val.detail_pb_id)])
 				QtyDetail = self.pool.get('detail.pb').browse(cr,uid, Qty_PB[0])

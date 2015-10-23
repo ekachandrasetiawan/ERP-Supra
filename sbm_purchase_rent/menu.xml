@@ -8,7 +8,7 @@
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
-            <field name="view_id" ref="sbm_purchase.view_set_po_form2"/>
+            <field name="view_id" ref="sbm_purchase.view_set_po_form"/>
         </record>
 
         <menuitem id="purchase.menu_procurement_management_inventory" name="Incoming Products"
