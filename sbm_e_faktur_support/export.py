@@ -58,16 +58,20 @@ class acount_invoice(osv.osv):
 					errSame = [str(bs.id) for bs in browseAllSame]
 					print "==============================",errSame
 					raise osv.except_osv(_('Error'),_('Nomor Faktur Pajak Sudah dipakai, tidak bisa menggunakan nomor faktur lebih dari 1 kali, Jika Nomor tersebut diganti silahkan cancel terlebih dahulu invoice yang lama\r\n.'+',\r\n'.join(errSame)))
-
-				res=  True
-				if res:
-					self.write(cr,uid,d.id,{'state':'submited'},context=context)
+					res =  False
+				else:
+					res = True
+				
 			else:
 				if(d.faktur_pajak_no != '000.000-00.00000000'):
 					raise osv.except_osv(_('Error'),_('Cek nomor Faktur Pajak!'))
+					res=  False
+				else:
+					res=  True
 
-		
-		
+
+		if res:
+			self.write(cr,uid,d.id,{'state':'submited'},context=context)
 		return True
 	def efak_invoices_export(self,cr,uid,ids,context={}):
 		if context is None:
