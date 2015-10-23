@@ -63,7 +63,8 @@ class acount_invoice(osv.osv):
 				if res:
 					self.write(cr,uid,d.id,{'state':'submited'},context=context)
 			else:
-				raise osv.except_osv(_('Error'),_('Cek nomor Faktur Pajak!'))
+				if(d.faktur_pajak_no != '000.000-00.00000000'):
+					raise osv.except_osv(_('Error'),_('Cek nomor Faktur Pajak!'))
 
 		
 		
