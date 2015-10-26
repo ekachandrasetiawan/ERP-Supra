@@ -113,9 +113,8 @@ class Purchase_Order_Sbm(osv.osv):
 						detail_pb_cek=self.pool.get('detail.pb').search(cr,uid,[('id', '=' ,z.line_pb_general_id.id)])
 						
 						valdetailpb = self.pool.get('detail.pb').browse(cr,uid,detail_pb_cek[0])
-						self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'qty_available': valdetailpb.jumlah_diminta-z.product_qty})
-
-						if valdetailpb.jumlah_diminta-z.product_qty == 0:
+						#  Cek Qty Available Detail PB, Jika hasil nya 0 maka update state Detail PB
+						if valdetailpb.qty_available == 0:
 							self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'state':'proses'})
 			elif po.type_permintaan == '2':
 				# loop each order line
@@ -127,6 +126,7 @@ class Purchase_Order_Sbm(osv.osv):
 				for line in po.order_line:
 					if line.line_pb_subcont_id:
 						self.pool.get('purchase.requisition.subcont.line').write(cr,uid,[line.line_pb_subcont_id.id],{'state_line':'po'})
+
 		return super(Purchase_Order_Sbm,self).wkf_approve_order(cr,uid,ids,context=context)
 	
 	def _create_pickings(self, cr, uid, order, order_lines, picking_id=False, context=None):
@@ -164,6 +164,7 @@ class Purchase_Order_Sbm(osv.osv):
 		}
 		
 	def action_cancel(self, cr, uid, ids, context=None):
+
 		wf_service = netsvc.LocalService("workflow")
 		for purchase in self.browse(cr, uid, ids, context=context):
 			cek=self.pool.get('detail.order.line').search(cr,uid,[('order_line_id', '=' ,ids)])
@@ -190,12 +191,19 @@ class Purchase_Order_Sbm(osv.osv):
 						_('You must first cancel all receptions related to this purchase order.'))
 				if inv:
 					wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
-					
-				#self.write(cr,uid,ids,{'state':'approved'})
 				self.write(cr,uid,ids,{'state':'cancel'})
 				
 			for (id, name) in self.name_get(cr, uid, ids):
 				wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_cancel', cr)
+
+
+		# Cancel Purchase Order Line
+		po_line=self.pool.get('purchase.order.line').search(cr,uid,[('order_id', '=' ,ids)])
+		order_line =self.pool.get('purchase.order.line').browse(cr,uid,po_line)
+		for x in order_line:
+			self.pool.get('purchase.order.line').write(cr, uid, [x.id], {'state':'cancel'})
+
+
 		return True
 	
 	def setdraft(self,cr,uid,ids,context=None):

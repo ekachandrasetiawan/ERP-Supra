@@ -276,15 +276,13 @@ class Detail_PB(osv.osv):
 		return res
 
 	def _get_qty_available(self,cr,uid,ids,field_name,args,context={}):
+		print '==================++CEKKKK============================================='
 		res = {}
-		print "Callllleeedd",ids
 		for item in self.browse(cr,uid,ids,context=context):
-			print '=========================',item
 			move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id),('state', 'in' ,['confirmed','done'])])
 			hasil= 0
 			for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
 				hasil += data.product_qty
-			print item.id,"================+++++++++++"
 			nilai =item.jumlah_diminta-hasil
 
 			res[item.id] = nilai
@@ -295,11 +293,17 @@ class Detail_PB(osv.osv):
 
 	def _get_cek_po_line(self, cr, uid, ids, context=None):
 		result = {}
-		print '===================EKA CHANDRA SETIAWAN=================='
 		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
 			result[line.line_pb_general_id.id] = True
-		print "Resultsssssssssssssssssssssss ===>",result.keys()
 		return result.keys()
+
+	def _get_cek_detail_pb(self, cr, uid, ids, context=None):
+		print '====================+CEK DETAIL==='
+		result = {}
+		for line in self.pool.get('detail.pb').browse(cr, uid, ids, context=context):
+			result[line.id] = True
+		return result.keys()
+
 
 	_name = 'detail.pb'
 	_columns = {
@@ -317,8 +321,9 @@ class Detail_PB(osv.osv):
 		'detail_pb_id':fields.many2one('pembelian.barang', 'Referensi PB', required=True, ondelete='cascade'),
 		'item': fields.many2many('set.po', 'pre_item_rel', 'permintaan_id', 'item_id', 'item'),
 		'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
-		'qty_available': fields.function(_get_qty_available,string="Qty Available",type="float", track_visibility='always',
+		'qty_available': fields.function(_get_qty_available,string="Qty Available",type="float", readonly=False, track_visibility='always',
 			store={
+				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
 				'purchase.order.line': (_get_cek_po_line, ['state'], 20),
 			}),
 
