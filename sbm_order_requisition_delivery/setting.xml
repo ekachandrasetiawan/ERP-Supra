@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    	
+    	<!-- Setting Access Rigths -->
+
+    	<!-- Order Requisition Delivery  -->
+	    <record model="ir.model.access" id="ir_access_order_requisition_delivery_purchase_staff">
+	        <field name="name">Access Order Requisition Delivery Purchase Staff</field>
+	        <field name="model_id" ref="model_order_requisition_delivery"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_order_requisition_delivery_purchase_chief">
+	        <field name="name">Access Order Requisition Delivery Purchase Chief</field>
+	        <field name="model_id" ref="model_order_requisition_delivery"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_order_requisition_delivery_purchase_manager">
+	        <field name="name">Access Order Requisition Delivery Purchase Manager</field>
+	        <field name="model_id" ref="model_order_requisition_delivery"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+
+
+    	<!-- Order Requisition Delivery  Line-->
+	    <record model="ir.model.access" id="ir_access_order_requisition_delivery_line_purchase_staff">
+	        <field name="name">Access Order Requisition Delivery Line Purchase Staff</field>
+	        <field name="model_id" ref="model_order_requisition_delivery_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_order_requisition_delivery_line_purchase_chief">
+	        <field name="name">Access Order Requisition Delivery Line Purchase Chief</field>
+	        <field name="model_id" ref="model_order_requisition_delivery_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_order_requisition_delivery_line_purchase_manager">
+	        <field name="name">Access Order Requisition Delivery Line Purchase Manager</field>
+	        <field name="model_id" ref="model_order_requisition_delivery_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+    </data>
+</openerp>
