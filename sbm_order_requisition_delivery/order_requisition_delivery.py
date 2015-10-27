@@ -23,23 +23,25 @@ class order_requisition_delivery(osv.osv):
 
 	_name = 'order.requisition.delivery'
 	_columns = {
-		'name':fields.char('Refference',required=True, readonly=False),
+		'name':fields.char('Refference',required=True, readonly=False,size=64),
 		'source_location': fields.many2one('stock.location', "Source Location", required=True),
 		'destination_location_id': fields.many2one('stock.location', "Destination Location", required=True),
-		'date':fields.datetime('Date',required=True),
+		'date':fields.date('Date',required=True),
 		'pr_names': fields.function(_get_pr_names,string="PR Names",type="char",store=False, readonly=False),
 		'notes':fields.text('Date',required=False),
 		'lines': fields.one2many('order.requisition.delivery.line', 'order_requisition_delivery_id', 'Lines',readonly=False),
 		'state': fields.selection([
 			('draft', 'Draft'),
-			('confirmed', 'Confirmed'),
-			('approved', 'Approved'),
-			('done','Done'),
+			('confirmed', 'Wait For Approve'),
+			('approved', 'Ready To Transfer'),
+			('done','Received'),
 			],
 			'State'),
 		'picking_id': fields.many2one('stock.picking', "Stock Picking", required=False, readonly=True),
-		'approved_by':fields.many2one('res.users',string="Approved By",ondelete="CASCADE",onupdate='CASCADE'),
-		'received_by':fields.many2one('res.users',string="Received By",ondelete="CASCADE",onupdate='CASCADE'),
+		'prepare_by':fields.many2one('res.users',string="Prepare",ondelete="CASCADE",onupdate='CASCADE'),
+		'confirmed_by':fields.many2one('res.users',string="Confirmed",ondelete="CASCADE",onupdate='CASCADE'),
+		'approved_by':fields.many2one('res.users',string="Approved",ondelete="CASCADE",onupdate='CASCADE'),
+		'received_by':fields.many2one('res.users',string="Received",ondelete="CASCADE",onupdate='CASCADE'),
 	}
 	_inherit = ['mail.thread']
 	_track = {
@@ -125,22 +127,22 @@ class order_requisition_delivery_line(osv.osv):
 			res[item.id] = hasil
 		return res
 
-
 	_name = 'order.requisition.delivery.line'
 	_columns = {
 		'name': fields.many2one('product.product', "Product", required=True, select=True),
 		'order_requisition_delivery_id':fields.many2one('order.requisition.delivery', 'Order Requisition Delivery', required=True, ondelete='cascade',change_default=True),
-		'po_line_id':fields.many2one('purchase.order.line', 'Purchase Order Line', required=True, ondelete='cascade',change_default=True,select=True),
-		'purchase_requisition_id':fields.many2one('pembelian.barang', 'Purchase Requisition', required=False, ondelete='cascade',select=True),
-		'purchase_requisition_line_id':fields.many2one('detail.pb', 'Purchase Requisition Line', required=False, ondelete='cascade',select=True),
-		'po_id':fields.many2one('purchase.order',string='No Purcahse Order'),
+		'purchase_requisition_id':fields.many2one('pembelian.barang', 'PB No', required=False, ondelete='cascade',select=True,domain=[('state','=','purchase')]),
+		'purchase_requisition_line_id': fields.many2one('detail.pb', 'Detail PB',required=False, ondelete='cascade',select=True),
+		'product_id': fields.related('purchase_requisition_line_id','name', type='many2one', relation='product.product', string='Product'),
 		'desc':fields.text('Description', required=False),
 		'move_id':fields.many2one('stock.move', 'Stock Move', required=False, ondelete='cascade'),
-		'qty_delivery':fields.float('Qty Items Delivery', required=False,readonly=False),
-		'qty':fields.float('Qty Items PO', required=False,readonly=False),
+		'qty_delivery':fields.float('Qty To Send', required=False,readonly=False),
+		'qty':fields.float('Qty Items', required=False,readonly=False),
 		'received_items_po': fields.float(string="Received Items", readonly=False),	
 		'uom_id':fields.many2one('product.uom', 'UOM', required=False),
 		'qty_available': fields.function(_get_qty_available,string="Qty Available",type="float",store=False),
+		'picked_po':fields.one2many('order.requisition.delivery.line.po','order_requisition_delivery_line_id','Picking PO'),
+		'notes':fields.text('Notes'),
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('confirmed', 'Confirmed'),
@@ -152,6 +154,26 @@ class order_requisition_delivery_line(osv.osv):
 	_defaults = {
 		'state': 'draft',
 	}
+
+	def cek_detail_pb(self, cr, uid, ids, purchase_requisition_id, context=None):
+		cek=self.pool.get('detail.pb').search(cr,uid,[('detail_pb_id', '=' ,purchase_requisition_id),('state', '=', 'proses')])
+		hasil=self.pool.get('detail.pb').browse(cr,uid,cek)
+
+		print '================',hasil
+		if hasil:
+			for x in hasil:
+				print '================',x.processed_items
+				product = [x.id]
+			res = {'domain': {'product_id': [('id','in',tuple(product))]}}
+		else:
+			res = {
+					'warning':{
+						'title':'Informasi',
+						'message':'Items PB Belum ada yang di terima'
+					}
+				}
+
+		return res
 
 	def onchange_product(self, cr, uid, ids, productID, context=None):
 		cek=self.pool.get('purchase.order.line').search(cr,uid,[('product_id', '=' ,productID),('state', '=', 'confirmed')])
@@ -201,11 +223,18 @@ class OrderRequisitionDeliveryLinePo(osv.osv):
 	_name  = 'order.requisition.delivery.line.po'
 	_columns = {
 			'order_requisition_delivery_line_id':fields.many2one('order.requisition.delivery.line', 'Order Requisition Delivery Line', required=True),
-			'po_id':fields.many2one('purchase.order', 'Purchase Order', required=True),
+			'po_id':fields.many2one('purchase.order', 'PO No', required=True),
 			'po_line_id':fields.many2one('purchase.order.line','Purchase Order Line', required=True),
-			'po_line_product_id':fields.related('po_line_id', 'product_id', type='many2one', store=False),
-			'po_line_description':fields.related('po_line_id', 'name', type='text', store=False),
-			'po_line_qty':fields.related('po_line_id', 'product_qty', store=False, type='float'),
-			'po_line_received_items':fields.related('po_line_id','received_items', store=False, type='float'),
-			'po_line_available_to_pick': fields.related('po_line_id', 'avaialble_to_pick', store=False,type='float')
+			'po_line_product_id': fields.related('po_line_id','product_id', type='many2one', relation='product.product', string='Product'),
+			'po_line_description':fields.related('po_line_id', 'name', type='text', store=False, string='Desc'),
+			'po_line_qty':fields.related('po_line_id', 'product_qty', store=False, type='float',string='Qty PO'),
+			'po_line_received_items':fields.related('po_line_id','received_items', store=False, type='float',string='Received'),
+			'po_line_available_to_pick': fields.related('po_line_id', 'avaialble_to_pick', store=False,type='float', string='Available'),
+			'qty':fields.float('Qty',required=True),
+			'uom_id':fields.many2one('product.uom', 'UOM', required=True),
 	}
+
+OrderRequisitionDeliveryLinePo()
+
+
+

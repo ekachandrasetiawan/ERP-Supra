@@ -33,36 +33,77 @@
 						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,done"/>
 					</header>
 					<sheet>
-						<separator string="Order Requisition Delivery"/>
-						<group col="4" colspan="4">
-							<field name="name" colspan="4"/>
-							<field name="pr_names"/>
+						<div class="oe_title">
+                        <h1>
+                            <label string="Order Delivery "/>
+                            <separator string=""/>
+                            <field name="name" class="oe_inline" colspan="4"/>
+                        </h1>
+                    </div>
+					<group>
+                        <group>
+                            <field name="source_location"/>
 							<field name="date"/>
-							<field name="source_location" colspan="4"/>
-							<field name="destination_location_id" colspan="4"/>
-							<field name="picking_id"/>
-						</group>
+                        </group>
+                        <group>
+							<field name="destination_location_id"/>
+                        </group>
+                    </group>
+
+
 						<notebook colspan="4">
-							<page string="Product Lines">
-								<field name="lines" nolabel="1" colspan="4">
-									 <tree string="Product Detail">
-									 	<field name="name" on_change="onchange_product(name)"/>
-										<field name="po_line_id" on_change="onchange_po_line(po_line_id)"/>
-										<field name="po_id"/>
-										<field name="purchase_requisition_line_id" invisible="1"/>
-										<field name="desc"/>
-										<field name="qty_delivery" on_change="onchange_delivery(qty_delivery,received_items_po)"/>
-										<field name="qty" on_change="onchange_po_line(po_line_id)"/>
-										<field name="received_items_po" on_change="onchange_po_line(po_line_id)"/>
-										<field name="uom_id" on_change="onchange_po_line(po_line_id)"/>
-										<field name="state"/>
-									</tree>
-								</field>
-							</page>
-							<page string="Approved">
+							<page string="Items">
+                            <field colspan="4" name="lines" nolabel="1" widget="one2many_list">
+                                <form>
+                                	<group>
+                                		<field name="purchase_requisition_id" on_change="cek_detail_pb(purchase_requisition_id)"/>
+                                		<field name="product_id"/>
+	                                  	<field name="desc"/>
+                                	</group>
+                                  	<group>
+	                                  	<field name="qty_available"/>
+	                               		<field name="qty_delivery"/>
+	                               		<field name="uom_id"/>
+	                               	</group>
+                                    <field name="picked_po" colspan="4" nolabel="1" widget="one2many_list">
+                                        <tree string="Items" editable="buttom">
+                                        	<field name="po_id"/>
+                                        	<field name="po_line_id"/>
+                                        	<field name="po_line_product_id"/>
+                                        	<field name="po_line_description"/>
+                                        	<field name="po_line_qty"/>
+                                        	<field name="po_line_received_items"/>
+                                        	<field name="po_line_available_to_pick"/>
+                                        	<field name="qty"/>
+                                        	<field name="uom_id"/>
+                                        </tree>        
+                                    </field>
+                                </form>
+
+                                <tree string="">
+                              		<field name="purchase_requisition_id"/>
+								 	<field name="product_id"/>
+								 	<field name="desc"/>
+								 	<field name="qty"/>
+								 	<field name="uom_id"/>
+								 	<field name="notes"/>
+                                </tree>
+                            </field>
+                        </page>
+
+
+							<page string="Other">
 								<group>
-									<field name="approved_by"/>
-									<field name="received_by"/>
+									<field name="pr_names"/>
+									<field name="picking_id"/>
+								</group>
+							</page>
+							<page string="History">
+								<group>
+									<field name="prepare_by" readonly="1" colspan="1"/>
+		                            <field name="approved_by" readonly="1" colspan="1"/>
+									<field name="confirmed_by" readonly="1" colspan="1"/>
+									<field name="received_by" readonly="1" colspan="1"/>
 								</group>
 							</page>
 						</notebook>
@@ -131,26 +172,5 @@
 			<field name="view_mode">tree,form</field>			
 		</record>
 
-		<!-- Inherit Menu -->
-		<menuitem name="Order Requisition Delivery" parent="purchase.menu_procurement_management" id="order_requisition_delivery" action="master_order_requisition_delivery_action"/>
-
-		<!-- Regular Requistion -->
-<!-- 		 <record id="view_pembelian_barang_form" model="ir.ui.view">
-		   <field name="name">pembelian.barang.form</field>
-		   <field name="model">pembelian.barang</field>
-		   <field name="type">form</field>
-		   <field name="inherit_id" ref="sbm_purchase.view_pb_form"/>
-		   <field name="arch" type="xml">
-		   		<field name="ref_pb" position="after"> 
-		   			<field name="source_location_request_id"/>
-		   			<field name="destination_location_request_id"/>
-		   		</field>
-		   		<xpath expr="//field[@name='stok']" position="after">
-		   			<field name="processed_items"/>
-		   			<field name="delivery_items"/>
-		   		</xpath>
-		   </field>
-		 </record>
-		  -->
 	</data>
 </openerp>
