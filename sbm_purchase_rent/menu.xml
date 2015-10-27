@@ -34,6 +34,7 @@
 			
 		<menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
 		
+		
 			<menuitem action="sbm_purchase.master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
 
 			<menuitem action="rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisition" parent="purchase_requistion_menu" sequence="3" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>

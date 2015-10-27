@@ -568,7 +568,8 @@
         <td> <para style="terp_default_Bold_18">Tanggal.</para></td>
         <td> <para style="terp_default_Bold_18"> [[ time.strftime('%d/%m/%Y', time.strptime(o.tanggal,'%Y-%m-%d')) ]]</para></td>
         <td> <para style="terp_default_Bold_18">Proyek</para></td>
-        <td> <para style="terp_default_Bold_18"> [[ o.customer ]] </para></td>
+        <td> <para style="terp_default_Bold_18">  </para></td>
+        <!-- <td> <para style="terp_default_Bold_18"> [[ o.customer ]] </para></td> -->
     </tr>
     </blockTable>
     <blockTable colWidths="80.0,130.0,80.0,80.0,100.0,75.0" style="Table001">

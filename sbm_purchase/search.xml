@@ -24,5 +24,36 @@
         </record> 
 
 
+        <record id="master_list_barang_action_search" model="ir.ui.view">
+            <field name="name">detail.pb.select</field>
+            <field name="model">detail.pb</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+                <search string="Detail Purhcase Requisition">
+                    <group>
+                        <!-- Group By  -->
+                        <filter icon="terp-stock_effects-object-colorize" name="detail_pb_id" string="Group By PB" domain="[]" context="{'group_by':'detail_pb_id'}"/>
+                        
+                        <filter icon="terp-stock_effects-object-colorize" name="state" string="Group By State" domain="[]" context="{'group_by':'state'}"/>
+
+                        <!-- Search By  -->
+                        <field name="detail_pb_id" string="No Purhcase Requisition" filter_domain="[('detail_pb_id','ilike',self)]"/>
+
+                        <field name="name" string="Product" filter_domain="[('name','ilike',self)]"/>
+
+                        <field name="variants" string="Variants" filter_domain="[('variants','ilike',self)]"/>
+
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="master_list_barang_action_search_pb">
+            <field name="name">Detail PB</field>
+            <field name="res_model">detail.pb</field>
+            <field name="search_view_id" ref="master_list_barang_action_search" />
+        </record>
+
+
     </data>
 </openerp>

@@ -18,15 +18,18 @@ class ReportPB(report_sxw.rml_parse):
         i=1
         # customer= ''
         for x in detail_pb_ids:
+
             if x.variants.id==False:
                 name = x.name.name
             else:
                 name = x.variants.name
 
+            so_name = False
             if x.sale_line_ids.id:
                 so_name = x.sale_line_ids.order_id.name
-            else:
-                so_name = False
+                
+            
+
             arrLine.update({'no':i,'name':name,'satuan':x.satuan,'part_no':x.part_no,'jumlah_diminta':x.jumlah_diminta,'stok':x.stok,'keterangan':x.keterangan,'so_name':so_name})
             res.append(arrLine)
             arrLine={}
