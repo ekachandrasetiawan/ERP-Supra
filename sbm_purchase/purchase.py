@@ -276,7 +276,6 @@ class Detail_PB(osv.osv):
 		return res
 
 	def _get_qty_available(self,cr,uid,ids,field_name,args,context={}):
-		print '==================++CEKKKK============================================='
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
 			move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id),('state', 'in' ,['confirmed','done'])])
@@ -298,7 +297,6 @@ class Detail_PB(osv.osv):
 		return result.keys()
 
 	def _get_cek_detail_pb(self, cr, uid, ids, context=None):
-		print '====================+CEK DETAIL==='
 		result = {}
 		for line in self.pool.get('detail.pb').browse(cr, uid, ids, context=context):
 			result[line.id] = True
@@ -311,7 +309,6 @@ class Detail_PB(osv.osv):
 		'variants':fields.many2one('product.variants','variants',track_visibility='onchange'),
 		'part_no':fields.char('Part No',track_visibility='onchange'),
 		'jumlah_diminta':fields.float('Qty',track_visibility='onchange'),
-		# 'qty_available':fields.float('Qty Available',track_visibility='onchange'),
 		'satuan':fields.many2one('product.uom','Product UOM',track_visibility='onchange'),
 		'stok':fields.integer('Stock',track_visibility='onchange'),
 		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True)]),

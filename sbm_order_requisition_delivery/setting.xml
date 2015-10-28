@@ -64,5 +64,182 @@
 	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
 	    </record>
 
+
+    	<!-- Product Variants-->
+	    <record model="ir.model.access" id="ir_access_product_variants_purchase_staff">
+	        <field name="name">Access Product Variants Purchase Staff</field>
+	        <field name="model_id" ref="sbm_purchase.model_product_variants"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_product_variants_purchase_chief">
+	        <field name="name">Access Product Variants Purchase Chief</field>
+	        <field name="model_id" ref="sbm_purchase.model_product_variants"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_product_variants_purchase_manager">
+	        <field name="name">Access Product Variants Purchase Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_product_variants"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+
+    	<!-- Detail PB-->
+	    <record model="ir.model.access" id="ir_access_detail_pb_purchase_staff">
+	        <field name="name">Access Detail PB Purchase Staff</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_detail_pb_purchase_chief">
+	        <field name="name">Access Detail PB Purchase Chief</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_detail_pb_purchase_manager">
+	        <field name="name">Access Detail PB Purchase Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+		<!-- MRP BOM-->
+	    <record model="ir.model.access" id="ir_access_mrp_bom_purchase_staff">
+	        <field name="name">Access MRP BOM Purchase Staff</field>
+	        <field name="model_id" ref="mrp.model_mrp_bom"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_mrp_bom_purchase_chief">
+	        <field name="name">Access MRP BOM Purchase Chief</field>
+	        <field name="model_id" ref="mrp.model_mrp_bom"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_mrp_bom_purchase_manager">
+	        <field name="name">Access MRP BOM Purchase Manager</field>
+	        <field name="model_id" ref="mrp.model_mrp_bom"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+	    <!-- Detail Order Line-->
+	    <record model="ir.model.access" id="ir_access_detail_order_line_purchase_staff">
+	        <field name="name">Access Detail Order Line Purchase Staff</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_detail_order_line_purchase_chief">
+	        <field name="name">Access Detail Order Line Purchase Chief</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_detail_order_line_purchase_manager">
+	        <field name="name">Access Detail Order Line Purchase Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+	    <!-- Stock Partial Picking Line-->
+	    <record model="ir.model.access" id="ir_access_stock_partial_picking_line_purchase_staff">
+	        <field name="name">Access Stock Partial Picking Line Purchase Staff</field>
+	        <field name="model_id" ref="stock.model_stock_partial_picking_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_stock_partial_picking_line_purchase_chief">
+	        <field name="name">Access Stock Partial Picking Line Purchase Chief</field>
+	        <field name="model_id" ref="stock.model_stock_partial_picking_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_stock_partial_picking_line_purchase_manager">
+	        <field name="name">Access Stock Partial Picking Line Purchase Manager</field>
+	        <field name="model_id" ref="stock.model_stock_partial_picking_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+
+	    <!-- Order Requisition Delivery Line PO-->
+	    <record model="ir.model.access" id="ir_access_order_requisition_delivery_line_po_purchase_staff">
+	        <field name="name">Access Order Requisition Delivery Line PO Purchase Staff</field>
+	        <field name="model_id" ref="model_order_requisition_delivery_line_po"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_order_requisition_delivery_line_po_purchase_chief">
+	        <field name="name">Access Order Requisition Delivery Line PO Purchase Chief</field>
+	        <field name="model_id" ref="model_order_requisition_delivery_line_po"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_order_requisition_delivery_line_po_purchase_manager">
+	        <field name="name">Access Order Requisition Delivery Line PO Purchase Manager</field>
+	        <field name="model_id" ref="model_order_requisition_delivery_line_po"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
     </data>
 </openerp>

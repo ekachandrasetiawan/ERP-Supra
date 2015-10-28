@@ -117,7 +117,7 @@ order_requisition_delivery()
 
 class order_requisition_delivery_line(osv.osv):
 
-	def _get_qty_available(self,cr,uid,ids,field_name,args,context={}):		
+	def _get_qty_available(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
 			move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id)])
@@ -133,7 +133,7 @@ class order_requisition_delivery_line(osv.osv):
 		'order_requisition_delivery_id':fields.many2one('order.requisition.delivery', 'Order Requisition Delivery', required=True, ondelete='cascade',change_default=True),
 		'purchase_requisition_id':fields.many2one('pembelian.barang', 'PB No', required=False, ondelete='cascade',select=True,domain=[('state','=','purchase')]),
 		'purchase_requisition_line_id': fields.many2one('detail.pb', 'Detail PB',required=False, ondelete='cascade',select=True),
-		'product_id': fields.related('purchase_requisition_line_id','name', type='many2one', relation='product.product', string='Product'),
+		'product_id': fields.related('purchase_requisition_line_id','name', type='many2one', relation='product.product', string='Item PB'),
 		'desc':fields.text('Description', required=False),
 		'move_id':fields.many2one('stock.move', 'Stock Move', required=False, ondelete='cascade'),
 		'qty_delivery':fields.float('Qty To Send', required=False,readonly=False),
@@ -155,15 +155,55 @@ class order_requisition_delivery_line(osv.osv):
 		'state': 'draft',
 	}
 
-	def cek_detail_pb(self, cr, uid, ids, purchase_requisition_id, context=None):
-		cek=self.pool.get('detail.pb').search(cr,uid,[('detail_pb_id', '=' ,purchase_requisition_id),('state', '=', 'proses')])
-		hasil=self.pool.get('detail.pb').browse(cr,uid,cek)
 
-		print '================',hasil
+	def cek_qty_delivery(self, cr, uid, ids, qty_available,qty_delivery, product_id,context=None):
+		res = {}; line = []
+		if qty_delivery > qty_available:
+			warning = {"title": ("Warning"), "message": ("Product Item Delivery Tidak Mencukupi")}
+			return {
+					'warning': warning, 
+					'value': 
+						{
+							'qty_delivery': 0
+						}
+				}
+		else:
+			cek=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,product_id)])
+			data=self.pool.get('purchase.order.line').browse(cr,uid,cek)
+			cek_available = qty_delivery
+			for x in data:
+				if x.qty_available_to_pick == cek_available:
+					qty = qty_delivery
+					cek_available -= qty_delivery
+				elif x.qty_available_to_pick < cek_available:
+					qty = x.qty_available_to_pick
+					cek_available -= x.qty_available_to_pick
+				elif x.qty_available_to_pick > cek_available:
+					qty = cek_available
+					cek_available -= cek_available
+				else:
+					qty =0
+				line.append({
+					'po_id': x.order_id.id,
+					'po_line_product_id':x.product_id.id,
+					'po_line_description':x.name,
+					'po_line_qty':x.product_qty,
+					'po_line_received_items':x.received_items,
+					'po_line_available_to_pick':x.qty_available_to_pick,
+					'qty':qty,
+					'uom_id':x.product_uom.id
+				})
+
+			res['picked_po'] = line
+
+			return  {'value': res}
+
+	def cek_detail_pb(self, cr, uid, ids, purchase_requisition_id, context=None):
+		cek=self.pool.get('detail.pb').search(cr,uid,[('detail_pb_id', '=' ,purchase_requisition_id)])
+		hasil=self.pool.get('detail.pb').browse(cr,uid,cek)
 		if hasil:
-			for x in hasil:
-				print '================',x.processed_items
-				product = [x.id]
+			# Cek Detail PB yang Prosesd Item lebih dari 0 (Sudah di Proses di PO)
+			product =[x.id for x in hasil if x.processed_items > 0]
 			res = {'domain': {'product_id': [('id','in',tuple(product))]}}
 		else:
 			res = {
@@ -172,8 +212,35 @@ class order_requisition_delivery_line(osv.osv):
 						'message':'Items PB Belum ada yang di terima'
 					}
 				}
-
 		return res
+
+	def cek_item_pb(self, cr, uid, ids, product_id, context=None):
+		if product_id :
+			res = {}; line = []
+			item_pb=self.pool.get('detail.pb').search(cr,uid,[('id','=',product_id)])
+			item=self.pool.get('detail.pb').browse(cr,uid,item_pb)[0]
+			cek=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,product_id)])
+			data=self.pool.get('purchase.order.line').browse(cr,uid,cek)
+			qty_available = 0
+			for x in data:
+				line.append({
+					'po_id': x.order_id.id,
+					'po_line_product_id':x.product_id.id,
+					'po_line_description':x.name,
+					'po_line_qty':x.product_qty,
+					'po_line_received_items':x.received_items,
+					'po_line_available_to_pick':x.qty_available_to_pick,
+					'qty':x.received_items-x.supplied_items,
+					'uom_id':x.product_uom.id
+				})
+				qty_available += x.received_items
+
+			res['picked_po'] = line
+			res['desc'] = item.name.name
+			res['uom_id']=item.satuan.id
+			res['qty_delivery']=0
+			res['qty_available']=qty_available
+		return  {'value': res}
 
 	def onchange_product(self, cr, uid, ids, productID, context=None):
 		cek=self.pool.get('purchase.order.line').search(cr,uid,[('product_id', '=' ,productID),('state', '=', 'confirmed')])
@@ -195,7 +262,6 @@ class order_requisition_delivery_line(osv.osv):
 		nilai= 0
 		for x in hasil:
 			nilai += x.qty_delivery
-
 		return {
 				'value':{
 						'po_id':data.order_id.id,
@@ -224,7 +290,7 @@ class OrderRequisitionDeliveryLinePo(osv.osv):
 	_columns = {
 			'order_requisition_delivery_line_id':fields.many2one('order.requisition.delivery.line', 'Order Requisition Delivery Line', required=True),
 			'po_id':fields.many2one('purchase.order', 'PO No', required=True),
-			'po_line_id':fields.many2one('purchase.order.line','Purchase Order Line', required=True),
+			'po_line_id':fields.many2one('purchase.order.line','Purchase Order Line', required=False),
 			'po_line_product_id': fields.related('po_line_id','product_id', type='many2one', relation='product.product', string='Product'),
 			'po_line_description':fields.related('po_line_id', 'name', type='text', store=False, string='Desc'),
 			'po_line_qty':fields.related('po_line_id', 'product_qty', store=False, type='float',string='Qty PO'),
@@ -233,6 +299,13 @@ class OrderRequisitionDeliveryLinePo(osv.osv):
 			'qty':fields.float('Qty',required=True),
 			'uom_id':fields.many2one('product.uom', 'UOM', required=True),
 	}
+
+	def cek_qty(self, cr, uid, ids, qty1,qty2, context=None):
+		if qty2 > qty1:
+			warning = {"title": ("Warning"), "message": ("Qty Tidak Mencukupi")}
+			return {'warning': warning, 'value': {'qty': 0}}
+		else:
+			return False
 
 OrderRequisitionDeliveryLinePo()
 
