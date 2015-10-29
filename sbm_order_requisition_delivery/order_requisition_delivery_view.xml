@@ -49,27 +49,26 @@
 							<field name="destination_location_id"/>
                         </group>
                     </group>
-
-
 						<notebook colspan="4">
 							<page string="Items">
                             <field colspan="4" name="lines" nolabel="1" widget="one2many_list">
                                 <form>
                                 	<group>
                                 		<field name="purchase_requisition_id" on_change="cek_detail_pb(purchase_requisition_id)"/>
+                                		<field name="purchase_requisition_line_id" readonly="0" invisible="1"/>
                                 		<field name="product_id" on_change="cek_item_pb(product_id)"/>
-	                                  	<field name="desc" readonly="1"/>
+	                                  	<field name="desc" readonly="0" on_change="cek_item_pb(product_id)"/>
                                 	</group>
                                   	<group>
 	                                  	<field name="qty_available"/>
 	                               		<field name="qty_delivery" on_change="cek_qty_delivery(qty_available,qty_delivery,product_id)"/>
-	                               		<field name="uom_id" readonly="1"/>
+	                               		<field name="uom_id" on_change="cek_item_pb(product_id)"/>
+	                               		<field name="notes"/>
 	                               	</group>
                                     <field name="picked_po" colspan="4" nolabel="1" widget="one2many_list">
                                         <tree string="Items" editable="buttom">
                                         	<field name="po_id" readonly="1"/>
-                                        	<field name="po_line_id" invisible="1"/>
-                                        	<field name="po_line_product_id" readonly="1"/>
+                                        	<field name="po_line_id"/>
                                         	<field name="po_line_description" readonly="1"/>
                                         	<field name="po_line_qty" readonly="1"/>
                                         	<field name="po_line_received_items" readonly="1"/>

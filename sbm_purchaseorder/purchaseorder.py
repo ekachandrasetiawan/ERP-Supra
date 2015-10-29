@@ -257,10 +257,10 @@ class purchase_order_line_detail(osv.osv):
 	def _get_supplied_items(self,cr,uid,ids,field_name,args,context={}):		
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
-		# 	move=self.pool.get('stock.move').search(cr,uid,[('purchase_line_id', '=' ,item.id), ('state', '=', 'done')])
+			move=self.pool.get('order.requisition.delivery.line.po').search(cr,uid,[('po_line_id', '=' ,item.id)])
 			hasil= 0
-			# for data in  self.pool.get('stock.move').browse(cr,uid,move):
-			# 	hasil += data.product_qty
+			for data in  self.pool.get('order.requisition.delivery.line.po').browse(cr,uid,move):
+				hasil += data.qty
 			res[item.id] = hasil
 		return res
 

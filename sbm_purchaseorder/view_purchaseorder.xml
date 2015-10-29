@@ -63,6 +63,7 @@
                     <field name="price_subtotal" position="after">
                          <field name="note_line" />
                          <field name="received_items"/>
+                         <field name="supplied_items"/>
                     </field>
 
                     <field name="minimum_planned_date" position="after">

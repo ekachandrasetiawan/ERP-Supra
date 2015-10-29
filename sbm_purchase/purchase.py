@@ -257,10 +257,10 @@ class Detail_PB(osv.osv):
 	def _get_delivery_items(self,cr,uid,ids,field_name,args,context={}):		
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
-			# move=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id)])
+			move=self.pool.get('order.requisition.delivery.line').search(cr,uid,[('purchase_requisition_line_id', '=' ,item.id),('state', '=' ,'done')])
 			hasil= 0
-			# for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
-			# 	hasil += data.received_items
+			for data in  self.pool.get('order.requisition.delivery.line').browse(cr,uid,move):
+				hasil += data.qty_delivery
 			res[item.id] = hasil
 		return res
 

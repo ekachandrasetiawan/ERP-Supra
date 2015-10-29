@@ -218,8 +218,8 @@
 	        <field name="model_id" ref="model_order_requisition_delivery_line_po"/>
 	        <field name="perm_read" eval="True"/>
 	        <field name="perm_write" eval="True"/>
-	        <field name="perm_unlink" eval="True"/>
-	        <field name="perm_create" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
 	    </record>
 	    <record model="ir.model.access" id="ir_access_order_requisition_delivery_line_po_purchase_chief">
@@ -227,8 +227,8 @@
 	        <field name="model_id" ref="model_order_requisition_delivery_line_po"/>
 	        <field name="perm_read" eval="True"/>
 	        <field name="perm_write" eval="True"/>
-	        <field name="perm_unlink" eval="True"/>
-	        <field name="perm_create" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_order_requisition_delivery_line_po_purchase_manager">
@@ -236,8 +236,8 @@
 	        <field name="model_id" ref="model_order_requisition_delivery_line_po"/>
 	        <field name="perm_read" eval="True"/>
 	        <field name="perm_write" eval="True"/>
-	        <field name="perm_unlink" eval="True"/>
-	        <field name="perm_create" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
 	    </record>
 
