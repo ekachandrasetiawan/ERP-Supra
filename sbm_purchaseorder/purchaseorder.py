@@ -114,7 +114,8 @@ class Purchase_Order_Sbm(osv.osv):
 						
 						valdetailpb = self.pool.get('detail.pb').browse(cr,uid,detail_pb_cek[0])
 						#  Cek Qty Available Detail PB, Jika hasil nya 0 maka update state Detail PB
-						if valdetailpb.qty_available == 0:
+						print '=====================',valdetailpb.qty_available
+						if valdetailpb.qty_available == 0.0:
 							self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'state':'proses'})
 			elif po.type_permintaan == '2':
 				# loop each order line

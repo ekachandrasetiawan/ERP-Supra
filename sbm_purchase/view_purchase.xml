@@ -58,7 +58,7 @@
             		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief"/>
             		<button name="setdraft" states="confirm,confirm2" string="Set to Draft" type="object"  icon="gtk-jump-to"/>
             		<button name="confirm" states="confirm" string="Approve" type="object"   icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager"/>
-            		<button name="confirm2" states="confirm2" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"  icon="gtk-apply"/>
+            		<button name="confirm2" states="confirm2,confirm" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"  icon="gtk-apply"/>
             		<button name="confirm3" states="edit" string="Update" type="object" />
             		<button name="edit" states="purchase" string="Edit PB" type="object" />
 
@@ -88,14 +88,13 @@
 			            </group>
 			             <notebook colspan="4">
 					    	<page string="Product Detail">
-					    		
 			                    <field name="detail_pb_ids" nolabel="1" colspan="4">
 			                        <tree string="Product Detail" editable="buttom">
 			                          	<field name="name" on_change="setvariants(name)"/>
 			                          	<field name="variants"/>
 			                            <field name="part_no"/>
 			                            <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
-			                            <field name="qty_available" on_change="jmlQty(jumlah_diminta)"/>
+			                            <field name="qty_available"/>
 			                            <field name="satuan" on_change="onchange_product_new(name, satuan)"/>
 			                            <field name="stok"/>
 			                            <field name="processed_items"/>

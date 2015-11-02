@@ -99,8 +99,7 @@ class order_requisition_delivery(osv.osv):
 									'origin':val.name,
 									'state':'done'
 									})
-			
-			for line in val.lines:	
+			for line in val.lines:
 				move_id = stock_move.create(cr,uid,
 					{
 					'name' : self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
@@ -114,7 +113,6 @@ class order_requisition_delivery(osv.osv):
 					},context=context)
 
 				self.pool.get('order.requisition.delivery.line').write(cr, uid, line.id, {'state':'done'}, context=context)
-
 			self.pool.get('order.requisition.delivery').write(cr, uid, ids, {'state':'done'}, context=context)
 
 			return self.write(cr,uid,ids,{'state':'done','picking_id':picking,'received_by':uid})
@@ -246,6 +244,7 @@ class order_requisition_delivery_line(osv.osv):
 	def cek_detail_pb(self, cr, uid, ids, purchase_requisition_id, context=None):
 		cek=self.pool.get('detail.pb').search(cr,uid,[('detail_pb_id', '=' ,purchase_requisition_id)])
 		hasil=self.pool.get('detail.pb').browse(cr,uid,cek)
+
 		if hasil:
 			# Cek Detail PB yang Prosesd Item lebih dari 0 (Sudah di Proses di PO)
 			product =[x.id for x in hasil if x.processed_items > 0]
@@ -260,6 +259,7 @@ class order_requisition_delivery_line(osv.osv):
 		return res
 
 	def cek_item_pb(self, cr, uid, ids, product_id, context=None):
+		print '=====',product_id
 		if product_id :
 			res = {}; line = []
 			item_pb=self.pool.get('detail.pb').search(cr,uid,[('id','=',product_id)])
@@ -281,6 +281,7 @@ class order_requisition_delivery_line(osv.osv):
 						'uom_id':x.product_uom.id
 					})
 					qty_available += x.qty_available_to_pick
+
 
 			res['picked_po'] = line
 			res['desc'] = item.name.name

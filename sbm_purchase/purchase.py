@@ -5,6 +5,22 @@ from tools.translate import _
 from osv import osv, fields
 
 class Pembelian_Barang(osv.osv):
+	
+	STATES = [
+		('draft', 'Draft'),
+		('confirm', 'Check'),
+		('confirm2', 'Confirm'),
+		('purchase','Purchase'),
+		('done', 'Done'),
+		('cancel', 'Cancel'),
+		('edit','Edit PB')
+	]
+
+		# GET STATE CONSTANT
+	def getStates(self,cr,uid,context={}):
+		return self.STATES
+
+
 	_name = 'pembelian.barang'
 	_columns = {
 		'name':fields.char('No.PB',required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
@@ -21,16 +37,7 @@ class Pembelian_Barang(osv.osv):
 		'product_id': fields.related('detail_pb_ids','name', type='many2one', relation='product.product', string='Product'),
 		'source_location_request_id': fields.many2one('stock.location', "Source Location", readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
-		'state': fields.selection([
-			('draft', 'Draft'),
-			('confirm', 'Check'),
-			('confirm2', 'Confirm'),
-			('purchase','Purchase'),
-			('done', 'Done'),
-			('cancel', 'Cancel'),
-			('edit','Edit PB'),
-			],
-			'Status'),
+		'state': fields.selection(STATES,string="State"),
 	}
 	_inherit = ['mail.thread']
 
@@ -253,16 +260,14 @@ WizardPRCancelItem()
 
 
 class Detail_PB(osv.osv):
+	STATES = [
+		('draft', 'Draft'),
+		('onproses', 'Confirm'),
+		('proses','Proses'),
+		('done', 'Done'),
+		('cancel', 'Cancel')
+	]
 
-	def _get_delivery_items(self,cr,uid,ids,field_name,args,context={}):		
-		res = {}
-		for item in self.browse(cr,uid,ids,context=context):
-			move=self.pool.get('order.requisition.delivery.line').search(cr,uid,[('purchase_requisition_line_id', '=' ,item.id),('state', '=' ,'done')])
-			hasil= 0
-			for data in  self.pool.get('order.requisition.delivery.line').browse(cr,uid,move):
-				hasil += data.qty_delivery
-			res[item.id] = hasil
-		return res
 
 	def _get_processed_items(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
@@ -303,6 +308,66 @@ class Detail_PB(osv.osv):
 		return result.keys()
 
 
+	def _get_delivery_items(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('order.requisition.delivery.line').search(cr,uid,[('purchase_requisition_line_id', '=' ,item.id),('state', '=' ,'done')])
+			hasil= 0
+			for data in  self.pool.get('order.requisition.delivery.line').browse(cr,uid,move):
+				hasil += data.qty_delivery
+			res[item.id] = hasil
+		return res
+
+	def _get_cek_delivery_item(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('order.requisition.delivery.line').browse(cr, uid, ids, context=context):
+			result[line.purchase_requisition_line_id.id] = True
+		return result.keys()
+
+
+
+
+	# FOR STATE FIELD
+	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for data in self.browse(cr,uid,ids,context):
+			
+			move=self.pool.get('order.requisition.delivery.line').search(cr,uid,[('purchase_requisition_line_id', '=' ,data.id),('state', '=' ,'done')])
+			hasil= 0
+			for x in  self.pool.get('order.requisition.delivery.line').browse(cr,uid,move):
+				hasil += x.qty_delivery
+
+
+			po_line=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,data.id),('state', 'in' ,['confirmed','done'])])
+			Available= 0
+			nilai =0
+			for y in  self.pool.get('purchase.order.line').browse(cr,uid,po_line):
+				Available += y.product_qty
+
+			nilai =data.jumlah_diminta-Available
+
+			if data.jumlah_diminta==hasil:
+				res[data.id] = "done"
+			elif nilai == 0.0:
+				res[data.id] = "proses"
+			elif nilai > 0:
+				res[data.id] = "onproses"
+		return res
+
+
+	def _get_cek_state_detail_pb(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('order.requisition.delivery.line').browse(cr, uid, ids, context=context):
+			result[line.purchase_requisition_line_id.id] = True
+		return result.keys()
+
+
+	def _get_cek_state_po_line(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
+			result[line.line_pb_general_id.id] = True
+		return result.keys()
+
 	_name = 'detail.pb'
 	_columns = {
 		'name':fields.many2one('product.product','Product',track_visibility='onchange'),
@@ -323,17 +388,27 @@ class Detail_PB(osv.osv):
 				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
 				'purchase.order.line': (_get_cek_po_line, ['state'], 20),
 			}),
-
-		'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",store=False),
+		# 'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",store=False),
+		'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",
+			store={
+				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
+				'order.requisition.delivery.line':(_get_cek_delivery_item,['state'],20),
+			}),
 		'processed_items': fields.function(_get_processed_items,string="Processed Items",type="float",store=False),
-		'state': fields.selection([
-			('draft', 'Draft'),
-			('onproses', 'Confirm'),
-			('proses','Proses'),
-			('done', 'Done'),
-			('cancel', 'Cancel'),
-			],
-			'Status',readonly=True, select=True),
+		'state':fields.function(_getParentState,method=True,string="State",type="selection",selection=STATES,
+			store={
+				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
+				'order.requisition.delivery.line': (_get_cek_state_detail_pb, ['state'], 20),
+				'purchase.order.line': (_get_cek_state_po_line, ['state'], 20),
+			}),
+		# 'state': fields.selection([
+		# 	('draft', 'Draft'),
+		# 	('onproses', 'Confirm'),
+		# 	('proses','Proses'),
+		# 	('done', 'Done'),
+		# 	('cancel', 'Cancel'),
+		# 	],
+		# 	'Status',readonly=True, select=True),
 	}
 
 	_defaults = {'state': 'draft'}
@@ -406,7 +481,7 @@ class Set_PO(osv.osv):
 	_columns ={
 		'name':fields.many2one('res.partner','Supplier',required=True, domain=[('supplier','=',True),('is_company', '=', True)]),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True, domain=[('type','=','purchase')]),
-		'permintaan': fields.many2many('detail.pb', 'pre_item_rel', 'item_id', 'permintaan_id', 'Detail Permintaan',domain=[('state','=','onproses')]),
+		'permintaan': fields.many2many('detail.pb', 'pre_item_rel', 'item_id', 'permintaan_id', 'Detail Permintaan',domain=[('state','=','onproses'),('qty_available','>',0)]),
 	}
 	
 	def create_po(self,cr,uid,ids,fiscal_position_id=False,context=None):
