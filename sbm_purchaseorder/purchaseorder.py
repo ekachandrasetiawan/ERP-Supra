@@ -267,10 +267,10 @@ class purchase_order_line_detail(osv.osv):
 	def _get_qty_available_to_pick(self,cr,uid,ids,field_name,args,context={}):		
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
-			move=self.pool.get('stock.move').search(cr,uid,[('purchase_line_id', '=' ,item.id), ('state', '=', 'done')])
+			move=self.pool.get('purchase.order.line').search(cr,uid,[('id', '=' ,item.id)])
 			hasil= 0
-			for data in  self.pool.get('stock.move').browse(cr,uid,move):
-				hasil += data.product_qty
+			for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
+				hasil += data.received_items-data.supplied_items
 			res[item.id] = hasil
 		return res
 		

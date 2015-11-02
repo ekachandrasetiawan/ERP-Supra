@@ -268,18 +268,19 @@ class order_requisition_delivery_line(osv.osv):
 			data=self.pool.get('purchase.order.line').browse(cr,uid,cek)
 			qty_available = 0
 			for x in data:
-				line.append({
-					'po_id': x.order_id.id,
-					'po_line_id':x.id,
-					'po_line_product_id':x.product_id.id,
-					'po_line_description':x.name,
-					'po_line_qty':x.product_qty,
-					'po_line_received_items':x.received_items,
-					'po_line_available_to_pick':x.qty_available_to_pick,
-					'qty':0,
-					'uom_id':x.product_uom.id
-				})
-				qty_available += x.received_items
+				if x.qty_available_to_pick > 0:
+					line.append({
+						'po_id': x.order_id.id,
+						'po_line_id':x.id,
+						'po_line_product_id':x.product_id.id,
+						'po_line_description':x.name,
+						'po_line_qty':x.product_qty,
+						'po_line_received_items':x.received_items,
+						'po_line_available_to_pick':x.qty_available_to_pick,
+						'qty':0,
+						'uom_id':x.product_uom.id
+					})
+					qty_available += x.qty_available_to_pick
 
 			res['picked_po'] = line
 			res['desc'] = item.name.name
@@ -335,7 +336,7 @@ order_requisition_delivery_line()
 class OrderRequisitionDeliveryLinePo(osv.osv):
 	_name  = 'order.requisition.delivery.line.po'
 	_columns = {
-			'order_requisition_delivery_line_id':fields.many2one('order.requisition.delivery.line', 'Order Requisition Delivery Line', required=False),
+			'order_requisition_delivery_line_id':fields.many2one('order.requisition.delivery.line', 'Order Requisition Delivery Line', required=False,ondelete="CASCADE",onupdate='CASCADE'),
 			'po_id':fields.many2one('purchase.order', 'PO No', required=False),
 			'po_line_id':fields.many2one('purchase.order.line','Product Item', required=False),
 			'po_line_product_id': fields.related('po_line_id','product_id', type='many2one', relation='product.product', string='Product'),

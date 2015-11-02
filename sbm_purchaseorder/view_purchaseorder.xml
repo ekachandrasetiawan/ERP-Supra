@@ -64,6 +64,7 @@
                          <field name="note_line" />
                          <field name="received_items"/>
                          <field name="supplied_items"/>
+                         <field name="qty_available_to_pick"/>
                     </field>
 
                     <field name="minimum_planned_date" position="after">
