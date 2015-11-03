@@ -16,9 +16,36 @@ class Pembelian_Barang(osv.osv):
 		('edit','Edit PB')
 	]
 
-		# GET STATE CONSTANT
-	def getStates(self,cr,uid,context={}):
-		return self.STATES
+	# FOR STATE FIELD
+	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for data in self.browse(cr,uid,ids,context):
+			line = [x.id for x in data.detail_pb_ids]
+			state_done =[y.id for y in data.detail_pb_ids if y.state =="done"]
+
+			if line  == state_done :
+				res[data.id] = "done"
+			elif data.state=="draft":
+				res[data.id] = "confirm"
+			elif data.state=="confirm":
+				res[data.id] = "confirm2"
+			elif data.state=="confirm2":
+				res[data.id] = "purchase"
+		return res
+
+
+	def _get_cek_state_detail_pb(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('detail.pb').browse(cr, uid, ids, context=context):
+			result[line.detail_pb_id.id] = True
+		return result.keys()
+
+
+	def _get_cek_state_delivery_line(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('order.requisition.delivery.line').browse(cr, uid, ids, context=context):
+			result[line.purchase_requisition_line_id.detail_pb_id.id] = True
+		return result.keys()
 
 
 	_name = 'pembelian.barang'
@@ -37,7 +64,13 @@ class Pembelian_Barang(osv.osv):
 		'product_id': fields.related('detail_pb_ids','name', type='many2one', relation='product.product', string='Product'),
 		'source_location_request_id': fields.many2one('stock.location', "Source Location", readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
-		'state': fields.selection(STATES,string="State"),
+		# 'state': fields.selection(STATES,string="State"),
+		'state':fields.function(_getParentState,method=True,string="State",type="selection",selection=STATES,
+			store={
+				'pembelian.barang': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
+				'detail.pb': (_get_cek_state_detail_pb, ['state'], 20),
+				'order.requisition.delivery.line': (_get_cek_state_delivery_line, ['state'], 20),
+			}),
 	}
 	_inherit = ['mail.thread']
 
@@ -268,7 +301,6 @@ class Detail_PB(osv.osv):
 		('cancel', 'Cancel')
 	]
 
-
 	def _get_processed_items(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
@@ -337,20 +369,20 @@ class Detail_PB(osv.osv):
 			for x in  self.pool.get('order.requisition.delivery.line').browse(cr,uid,move):
 				hasil += x.qty_delivery
 
-
 			po_line=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,data.id),('state', 'in' ,['confirmed','done'])])
 			Available= 0
 			nilai =0
 			for y in  self.pool.get('purchase.order.line').browse(cr,uid,po_line):
 				Available += y.product_qty
-
 			nilai =data.jumlah_diminta-Available
 
-			if data.jumlah_diminta==hasil:
+			if data.state == "draft":
+				res[data.id] = "draft"
+			elif data.jumlah_diminta==hasil and data.state=="proses":
 				res[data.id] = "done"
-			elif nilai == 0.0:
+			elif nilai == 0.0 and data.state=="onproses":
 				res[data.id] = "proses"
-			elif nilai > 0:
+			elif nilai > 0 and data.state=="onproses":
 				res[data.id] = "onproses"
 		return res
 
@@ -388,7 +420,6 @@ class Detail_PB(osv.osv):
 				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
 				'purchase.order.line': (_get_cek_po_line, ['state'], 20),
 			}),
-		# 'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",store=False),
 		'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",
 			store={
 				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
@@ -401,14 +432,6 @@ class Detail_PB(osv.osv):
 				'order.requisition.delivery.line': (_get_cek_state_detail_pb, ['state'], 20),
 				'purchase.order.line': (_get_cek_state_po_line, ['state'], 20),
 			}),
-		# 'state': fields.selection([
-		# 	('draft', 'Draft'),
-		# 	('onproses', 'Confirm'),
-		# 	('proses','Proses'),
-		# 	('done', 'Done'),
-		# 	('cancel', 'Cancel'),
-		# 	],
-		# 	'Status',readonly=True, select=True),
 	}
 
 	_defaults = {'state': 'draft'}
@@ -481,9 +504,13 @@ class Set_PO(osv.osv):
 	_columns ={
 		'name':fields.many2one('res.partner','Supplier',required=True, domain=[('supplier','=',True),('is_company', '=', True)]),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True, domain=[('type','=','purchase')]),
+		'order_type':fields.selection([('1','Normal Order'),('2','Petty Order')],'Order Type',required=True),
 		'permintaan': fields.many2many('detail.pb', 'pre_item_rel', 'item_id', 'permintaan_id', 'Detail Permintaan',domain=[('state','=','onproses'),('qty_available','>',0)]),
 	}
 	
+	_defaults = {
+		'order_type': 1,
+	}
 	def create_po(self,cr,uid,ids,fiscal_position_id=False,context=None):
 		val = self.browse(cr, uid, ids)[0]
 		# Perhitangan Pajak
@@ -495,17 +522,27 @@ class Set_PO(osv.osv):
 		obj_detail_order_line=self.pool.get('detail.order.line')
 		obj_wizard_detail=self.pool.get('wizard.detail.pb');
 
+
 		pb = [line.detail_pb_id.name for line in val.permintaan]
 		detailpb = ''
 		for x in set(pb):
 			detailpb += x[:5] + ', '
 
+		
+		if val.order_type == 1 :
+			jenis = 'loc'
+			seq =int(time.time())
+		else:
+			jenis = 'loc-petty'
+			seq = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.petty')
+
+		print '==================order Type======',seq
 		sid = obj_purchase.create(cr, uid, {
-										'name':int(time.time()),
+										'name':seq,
 										'date_order': time.strftime("%Y-%m-%d"),
 										'duedate':time.strftime("%Y-%m-%d"),
 										'partner_id': val.name.id,
-										'jenis': 'loc',
+										'jenis': jenis,
 										'pricelist_id': val.pricelist_id.id,
 										'location_id': 12,
 										'origin':detailpb,

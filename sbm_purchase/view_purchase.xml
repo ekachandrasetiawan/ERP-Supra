@@ -174,6 +174,7 @@
                 <tree string="Data Rekap PB">
 	                <field name="name"/>
 		            <field name="pricelist_id"/>
+		            <field name="order_type"/>
                 </tree>
             </field>
         </record>
@@ -188,6 +189,7 @@
 						<group col="4" colspan="4">
 		            	 	<field name="name" />
 		            	 	<field name="pricelist_id"/>
+		            	 	<field name="order_type"/>
 			            </group>
 		            	<notebook colspan="4">
 					    	<page string="Product Detail ">

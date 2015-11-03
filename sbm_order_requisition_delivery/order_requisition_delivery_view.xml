@@ -55,14 +55,14 @@
                                 <form>
                                 	<group>
                                 		<field name="purchase_requisition_id" on_change="cek_detail_pb(purchase_requisition_id)"/>
-                                		<field name="purchase_requisition_line_id" readonly="0" invisible="0" on_change="cek_item_pb(product_id)"/>
-                                		<field name="product_id" on_change="cek_item_pb(product_id)"/>
-	                                  	<field name="desc" readonly="0" on_change="cek_item_pb(product_id)"/>
+                                		<field name="purchase_requisition_line_id" readonly="0" invisible="1" on_change="cek_item_pb(product_id,purchase_requisition_id)"/>
+                                		<field name="product_id" on_change="cek_item_pb(product_id,purchase_requisition_id)"/>
+	                                  	<field name="desc" readonly="0" on_change="cek_item_pb(product_id,purchase_requisition_id)"/>
                                 	</group>
                                   	<group>
 	                                  	<field name="qty_available"/>
-	                               		<field name="qty_delivery" on_change="cek_qty_delivery(qty_available,qty_delivery,product_id)"/>
-	                               		<field name="uom_id" on_change="cek_item_pb(product_id)"/>
+	                               		<field name="qty_delivery" on_change="cek_qty_delivery(qty_available,qty_delivery,purchase_requisition_line_id)"/>
+	                               		<field name="uom_id" on_change="cek_item_pb(product_id,purchase_requisition_id)"/>
 	                               		<field name="notes"/>
 	                               	</group>
                                     <field name="picked_po" colspan="4" nolabel="1" widget="one2many_list">

@@ -103,7 +103,7 @@ class order_requisition_delivery(osv.osv):
 				move_id = stock_move.create(cr,uid,
 					{
 					'name' : self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
-					'product_id': line.purchase_requisition_line_id.id,
+					'product_id': line.product_id.id,
 					'product_qty': line.qty_delivery,
 					'product_uom': line.uom_id.id,
 					'location_id' : val.source_location.id,
@@ -247,7 +247,7 @@ class order_requisition_delivery_line(osv.osv):
 
 		if hasil:
 			# Cek Detail PB yang Prosesd Item lebih dari 0 (Sudah di Proses di PO)
-			product =[x.id for x in hasil if x.processed_items > 0]
+			product =[x.name.id for x in hasil if x.jumlah_diminta <> x.delivery_items]
 			res = {'domain': {'product_id': [('id','in',tuple(product))]}}
 		else:
 			res = {
@@ -258,13 +258,14 @@ class order_requisition_delivery_line(osv.osv):
 				}
 		return res
 
-	def cek_item_pb(self, cr, uid, ids, product_id, context=None):
+	def cek_item_pb(self, cr, uid, ids, product_id,purchase_requisition_id, context=None):
 		print '=====',product_id
 		if product_id :
 			res = {}; line = []
-			item_pb=self.pool.get('detail.pb').search(cr,uid,[('id','=',product_id)])
+			# item_pb=self.pool.get('detail.pb').search(cr,uid,[('id','=',product_id)])
+			item_pb=self.pool.get('detail.pb').search(cr,uid,[('name','=',product_id),('detail_pb_id','=',purchase_requisition_id)])
 			item=self.pool.get('detail.pb').browse(cr,uid,item_pb)[0]
-			cek=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,product_id)])
+			cek=self.pool.get('purchase.order.line').search(cr,uid,[('line_pb_general_id', '=' ,item.id)])
 			data=self.pool.get('purchase.order.line').browse(cr,uid,cek)
 			qty_available = 0
 			for x in data:
