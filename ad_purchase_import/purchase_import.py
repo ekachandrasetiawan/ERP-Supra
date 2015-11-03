@@ -18,23 +18,23 @@ class purchase_order(osv.osv):
 
     _order = 'id DESC'
     
-    def create(self, cr, uid, vals, context=None):
-        try:
+    # def create(self, cr, uid, vals, context=None):
+    #     try:
 
-            if vals['jenis'] == 'impj':
-                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
-            elif vals['jenis'] == 'imps':
-                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
-            else:
-                vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order') or '/'
+    #         if vals['jenis'] == 'impj':
+    #             vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
+    #         elif vals['jenis'] == 'imps':
+    #             vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
+    #         else:
+    #             vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order') or '/'
             
-        except:
-            vals['jenis'] = 'loc'
-            vals['type_permintaan'] = '1'
-            vals['duedate'] = '10/19/2015'
-            vals['term_of_payment'] = ' '
-        order =  super(purchase_order, self).create(cr, uid, vals, context=context)
-        return order
+    #     except:
+    #         vals['jenis'] = 'loc'
+    #         vals['type_permintaan'] = '1'
+    #         vals['duedate'] = '10/19/2015'
+    #         vals['term_of_payment'] = ' '
+    #     order =  super(purchase_order, self).create(cr, uid, vals, context=context)
+    #     return order
 
     _defaults ={
         'total_price':'TOTAL PRICE CIF JAKARTA',

@@ -534,9 +534,8 @@ class Set_PO(osv.osv):
 			seq =int(time.time())
 		else:
 			jenis = 'loc-petty'
-			seq = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.petty')
-
-		print '==================order Type======',seq
+			seq =int(time.time())
+			
 		sid = obj_purchase.create(cr, uid, {
 										'name':seq,
 										'date_order': time.strftime("%Y-%m-%d"),

@@ -15,8 +15,6 @@ class Purchase_Order_Sbm(osv.osv):
 		# print "**************************************************",type(now)
 		# todayIs = datetime.datetime.strptime(, "%Y-%m-%d")
 
-		
-
 		for record in self.browse(cr, uid, ids):
 			if record.duedate :
 				a = datetime.datetime.strptime(record.duedate, "%Y-%m-%d")
@@ -48,13 +46,16 @@ class Purchase_Order_Sbm(osv.osv):
 	_defaults ={
 		'location_id':12,
 		'print_line':10,
-		'name':int(time.time()),
-		# 'duedate' : time.strftime('%Y-%m-%d')
 	}
 	
 	def create(self, cr, uid, vals, context=None):
-		order =  super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
-		return order
+		
+		if vals['jenis'] == 'loc-petty':
+			vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.petty')
+		else:
+			vals['name']=int(time.time())
+
+		return super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
 
 	def print_po_out(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)

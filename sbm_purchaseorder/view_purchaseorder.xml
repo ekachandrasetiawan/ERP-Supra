@@ -173,5 +173,18 @@
          </record>
 
 
+            <!-- Start Membuat Seq No -->
+        <record id="seq_pop_new" model="ir.sequence.type">
+          <field name="name">Purchase Order Petty</field>
+          <field name="code">purchase.order.petty</field>
+        </record>
+        <record id="seq_new" model="ir.sequence">
+          <field name="name">Purchase Order Petty</field>
+          <field name="code">purchase.order.petty</field>
+          <field name="prefix">POP/%(y)s/%(month)s/</field>
+          <field name="padding">5</field>
+        </record>
+
+
      </data>
 </openerp>
