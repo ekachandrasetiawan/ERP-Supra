@@ -361,3 +361,21 @@ OrderRequisitionDeliveryLinePo()
 
 
 
+class stock_move(osv.osv):
+	
+	_inherit = 'stock.move'
+	_columns = {
+	        'purchase_line_id': fields.many2one('purchase.order.line','Purchase Order Line', ondelete='set null', select=True,readonly=True),
+			'regular_pb_line_id': fields.related('purchase_line_id','line_pb_general_id', type='many2one', relation='detail.pb', string='Regular PB ID'),
+			'regular_pb_id': fields.related('regular_pb_line_id','detail_pb_id', type='many2one', relation='pembelian.barang', string='Regular PB No'),
+			'regular_pb_no': fields.related('regular_pb_id','name', type='char', string='Regular PB No'),
+			'regular_pb_request_by': fields.related('regular_pb_id','employee_id', type='many2one', relation='hr.employee', string='Request By'),
+			'regular_pb_department_requested': fields.related('regular_pb_id','department_id', type='many2one', relation='hr.department', string='Department Request By'),
+			'regular_pb_destination_request': fields.related('regular_pb_id','destination_location_request_id', type='many2one', relation='stock.location', string='Destination Request'),
+			'regular_pb_due_date': fields.related('regular_pb_id','duedate', type='date', string='Due Date'),
+
+	}
+
+
+
+stock_move()

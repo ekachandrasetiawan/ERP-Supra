@@ -1,7 +1,7 @@
 {
     "name": "Order Requisition Delivery",
     "version": "1.0", 
-    "depends": ["base","purchase","hr","product","sbm_purchase","sbm_purchaseorder"],
+    "depends": ["base","purchase","hr","product","sbm_purchase","sbm_purchaseorder","stock"],
     "author": "Supra Bakti Mandiri",
     "category": "Order Requisition Delivery",
     "description":"""
