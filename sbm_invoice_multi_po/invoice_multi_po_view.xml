@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_purchase_order_group" model="ir.ui.view">
+            <field name="name">Invoice Multi PO</field>
+            <field name="model">invoice.multi.po</field>
+            <field name="arch" type="xml">
+               <form string="Membuat Invoice Dari Beberapa Purchase Orders" version="7.0">
+                    <group>
+                        <separator string="Apakah Anda Ingin Membuat Invoice Dari Beberapa Purhcase Order?"/>
+                        
+		<label string="
+Notes: &#10; &#10;
+* Tools Ini di gunakan untuk Membuat Invoice dari beberapa Purchase Order &#10;
+* Hanya Berlaku untuk Purchase Order Petty &#10;
+" colspan="4"/>
+
+
+                    </group>
+                    
+                    <footer>
+                        <button name="merge_orders_invoice" string="Merge orders" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <act_window name="Make Full Invoice on Selected PO"
+            context="{'search_default_draft': 1, 'search_default_approved': False}"
+            res_model="invoice.multi.po"
+            src_model="purchase.order"
+            view_mode="form"
+            target="new"
+            multi="True"
+            key2="client_action_multi"
+            id="action_create_invoice_multi_po"/>
+
+    </data>
+</openerp>
+
