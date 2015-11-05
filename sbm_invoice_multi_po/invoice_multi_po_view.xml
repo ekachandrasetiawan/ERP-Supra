@@ -8,16 +8,12 @@
                <form string="Membuat Invoice Dari Beberapa Purchase Orders" version="7.0">
                     <group>
                         <separator string="Apakah Anda Ingin Membuat Invoice Dari Beberapa Purhcase Order?"/>
-                        
-		<label string="
-Notes: &#10; &#10;
-* Tools Ini di gunakan untuk Membuat Invoice dari beberapa Purchase Order &#10;
-* Hanya Berlaku untuk Purchase Order Petty &#10;
-" colspan="4"/>
-
-
+                        <label string="
+                        Notes: &#10; &#10;
+                        * Tools Ini di gunakan untuk Membuat Invoice dari beberapa Purchase Order &#10;
+                        * Hanya Berlaku untuk Purchase Order Petty &#10;
+                        " colspan="4"/>
                     </group>
-                    
                     <footer>
                         <button name="merge_orders_invoice" string="Merge orders" type="object" class="oe_highlight"/>
                         or
@@ -37,6 +33,7 @@ Notes: &#10; &#10;
             key2="client_action_multi"
             id="action_create_invoice_multi_po"/>
 
+        
     </data>
 </openerp>
 

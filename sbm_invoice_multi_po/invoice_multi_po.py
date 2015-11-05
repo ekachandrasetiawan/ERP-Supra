@@ -22,19 +22,51 @@ class invoice_multi_po(osv.osv_memory):
 			
 			if context.get('active_model','') == 'purchase.order' and len(context['active_ids']) > 1:
 				partner = []
+				pricelist = []
 				for x in context['active_ids']:
 					data =self.pool.get('purchase.order').browse(cr,uid,x)
-					partner+=[data.partner_id.id]
 
-				cek  = []
+					partner+=[data.partner_id.id]
+					pricelist+=[data.pricelist_id.id]
+
+				cekpartner  = []
 				for val in partner:
 					if val == partner[0]:
-						cek += [val]
+						cekpartner += [val]
 
-				if len(context['active_ids']) <> len(cek):
+				cekpricelist  = []
+				for val_pricelist in pricelist:
+					if val_pricelist == pricelist[0]:
+						cekpricelist += [val_pricelist]
+
+				# Cek Partner Harus Sama
+				if len(context['active_ids']) <> len(cekpartner):
 					raise osv.except_osv(_('Warning!'),
-					_('Invoice tidak dapat dibuat untuk beberapa supplier'))	
-			
+					_('Invoice tidak dapat dibuat untuk beberapa supplier'))
+				
+				# Cek Pricelist Harus Sama
+				if len(context['active_ids']) <> len(cekpricelist):
+					raise osv.except_osv(_('Warning!'),
+					_('Invoice tidak dapat dibuat untuk beberapa Pricelist'))
+				
+				# Cek Validasi PO Apakah sudah memiliki Invoice
+				for z in context['active_ids']:
+					cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [x])
+					invoice = map(lambda x: x[0], cr.fetchall())
+
+					inv =self.pool.get('purchase.order').browse(cr,uid,z)
+					data_invoice =self.pool.get('account.invoice').browse(cr,uid,invoice)
+
+					no_kwitansi = ''
+					for c in data_invoice:
+						no_kwitansi += c.kwitansi + ', '
+
+					if invoice:
+						raise osv.except_osv(_('Warning!'),
+						_('Purchase Order ' + inv.name + ' Sudah Memiliki Invoice ' + no_kwitansi))		
+
+					
+
 		return super(invoice_multi_po, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar,submenu=False)
 	
 	def merge_orders_invoice(self, cr, uid, ids, context=None):
@@ -136,3 +168,57 @@ class invoice_multi_po(osv.osv_memory):
 		return action
 
 invoice_multi_po()
+
+
+class purchase_order(osv.osv):
+	_inherit = 'purchase.order'
+
+	def action_invoice_create(self, cr, uid, ids, context=None):
+		cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", ids)
+		invoice = map(lambda x: x[0], cr.fetchall())
+
+		data_invoice =self.pool.get('account.invoice').browse(cr,uid,invoice)
+		no_kwitansi = ''
+		for c in data_invoice:
+			if c.kwitansi:
+				no_kwitansi += c.kwitansi + ', '
+
+		if invoice:
+			raise osv.except_osv(_('Warning!'),
+			_('Purchase Order Sudah Memiliki Invoice ' + no_kwitansi))
+
+		return super(purchase_order,self).action_invoice_create(cr,uid,ids,context=context)
+
+class purchase_partial_invoice(osv.osv_memory):
+	_inherit = "purchase.partial.invoice"
+	
+
+	def create_invoices(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+
+		purchase_ids = context.get('active_ids', [])
+		# Cek Total di PO 
+		po =self.pool.get('purchase.order').browse(cr,uid,purchase_ids)[0]
+		total_po = po.amount_total
+
+		# Akumulasi Nilai Yang diminta dengan yang sudah di buat Invoice
+		cek_total = (total_po * val.amount) / 100
+
+		cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", purchase_ids)
+		invoice = map(lambda x: x[0], cr.fetchall())
+
+		if invoice:		
+			total_invoice = 0
+			for x in invoice:
+				inv =self.pool.get('account.invoice').browse(cr,uid,x)
+				total_invoice += inv.amount_total
+
+			akumulasi_total = total_invoice + cek_total
+			if total_invoice == total_po:
+				raise osv.except_osv(_('Warning!'),
+				_('Purchase Order Sudah Tidak Bisa Dibuat Invoice'))
+			elif akumulasi_total > total_po:
+				raise osv.except_osv(_('Warning!'),
+				_('Nilai Persentase yang Anda Input Terlalu Besar, Total Invoice Sudah Melebih Nilai PO '))
+
+		return super(purchase_partial_invoice,self).create_invoices(cr,uid,ids,context=context)
