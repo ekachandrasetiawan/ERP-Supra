@@ -250,7 +250,7 @@ class order_preparation(osv.osv):
             res['partner_id'] = obj_sale.partner_id.id
             res['duedate'] = obj_sale.delivery_date
             res['partner_shipping_id'] = obj_sale.partner_shipping_id.id
-            
+            print res
             return  {'value': res}
     
     def picking_change(self, cr, uid, ids, pick):

@@ -1220,7 +1220,7 @@ class delivery_note(osv.osv):
 							'prodlot_id': mad.prodlot_id.id}
 
 						# self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
-					print "CALLLLLLLLLLLLLLL",partial_data
+					# print "CALLLLLLLLLLLLLLL",partial_data
 					iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
 					
 					id_done = iddo.items()
@@ -1311,6 +1311,7 @@ class delivery_note(osv.osv):
 
 
 	def cancel_dn_all(self, cr, uid, ids, context=None):
+		wf_service = netsvc.LocalService("workflow")
 		val = self.browse(cr, uid, ids)[0]
 
 		dn_obj = self.pool.get('delivery.note')
@@ -1339,25 +1340,26 @@ class delivery_note(osv.osv):
 
 
 			for move in dn.prepare_id.picking_id.move_lines:
-				delete_move = False
+				cancel_move = False
 				if picking_id_to:
 					browsePick = picking_obj.browse(cr,uid,picking_id_to,context=context)
 					# if picking must be move into draft/assigned partialed moves
 
 					# but we need to check if order_line id is exist on next picking then we must merge move
-					find_same_move = move_obj.search(cr,uid,[('sale_line_id','=',move.sale_line_id.id),('state','not in',['cancel','done'])])
+					find_same_move = move_obj.search(cr,uid,[('product_id','=',move.product_id.id),('sale_line_id','=',move.sale_line_id.id),('state','not in',['cancel','done'])])
+					print find_same_move,"FIND SAME MOVE"
 					if len(find_same_move) == 1:
 						same_move_obj = move_obj.browse(cr,uid,find_same_move[0],context=context)
 						merge_qty = same_move_obj.product_qty + move.product_qty
 
 
 						move_obj.write(cr,uid,find_same_move,{'product_qty':merge_qty})
-						delete_move = True
+						cancel_move = True
 					elif len(find_same_move) > 1:
 						
 						raise osv.except_osv(_('Error!'),_('Move who have same order line and not shipped yet is more than 1, cant handle by system, please contact your system adminsitrator!'))
 
-					if delete_move:
+					if cancel_move:
 						move_obj.write(cr,uid,move.id,{'state':'cancel','cancel_notes':'This move automatic moved into '+','.join(pickNames)},context=context)
 						# move_obj.delete(cr,uid,move.id,context=context)
 					else:
@@ -1370,11 +1372,17 @@ class delivery_note(osv.osv):
 			if picking_id_to:
 				# picking will cancel, in this condition picking will be not have any move lines because move lines already moved into draft/assigned/confirmed partial next picking
 				picking_obj.write(cr,uid,dn.prepare_id.picking_id.id,{'state':'cancel'})
+
 			else:
 				# in this condition picking will be set as confirmed cause it not have any partial be ready to execute
 				picking_obj.write(cr,uid,dn.prepare_id.picking_id.id,{'state':'confirmed'})
+			
+			wf_service.trg_delete(uid, 'stock.picking.basic', dn.prepare_id.picking_id.id, cr)
+			wf_service.trg_create(uid, 'stock.picking.basic', dn.prepare_id.picking_id.id, cr)
 
-			op_obj.write(cr,uid,dn.prepare_id.id,{'state':'cancel'})
+
+
+			op_obj.write(cr,uid,dn.prepare_id.id,{'state':'cancel','picking_id':False})
 
 			dn_obj.write(cr,uid,dn.id,{'state':'cancel'})
 
@@ -1632,7 +1640,7 @@ class stock_return_picking(osv.osv_memory):
 		 @param context: A standard dictionary
 		 @return: A dictionary with default values for all field in ``fields``
 		"""
-	   	
+		
 		result1 = []
 		if context is None:
 			context = {}

@@ -485,5 +485,12 @@
                 </field>
             </field>
         </record>
+
+
+        <record id="trans_done_cancel" model="workflow.transition">
+            <field name="act_from" ref="stock.act_done"/>
+            <field name="act_to" ref="stock.act_cancel"/>
+            <field name="signal">button_cancel</field>
+        </record>
 	</data>
 </openerp>
