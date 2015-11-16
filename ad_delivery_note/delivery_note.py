@@ -137,12 +137,12 @@ class stock_picking(osv.osv):
 					'picking_id':moveData['picking_id'] or False,
 
 				})
-				print move_set_id,'-------------------rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr'
+				
 				moveSet.append(move_set_id)
 				for component in product.bom_ids[0].bom_lines:
 					res = [0,False]
 					bla = {}
-					# print component.product_id.name
+					
 					bla['product_id']       = component.product_id.id
 					bla['product_qty']      = component.product_qty * pQty
 					bla['product_uom']      = component.product_uom.id
@@ -156,37 +156,28 @@ class stock_picking(osv.osv):
 					bla['partner_id']		= moveData['partner_id']
 					bla['product_uos']		= component.product_uom.id
 					bla['product_uos_qty']	= component.product_qty * pQty
-					# print bla
-					# print '=========================='
+					
 					res.append(bla)
-					# print '==========================',res
+					
 					getMoves2.append(res)
 				# getMoves.remove(move)
 				# getMoves.remove()
 				
 			else:
 				getMoves2.append(move)
-		# print getMoves
+		
 
 		vals['move_lines'] = getMoves2
 
 		# return False
 		stock_p_id = super(stock_picking, self).create(cr, uid, vals, context)
-		# print moveSet
+		
 		if stock_p_id:
 			for move_set_line in moveSet:
 				self.pool.get('move.set.data').write(cr,uid,move_set_line,{'picking_id':stock_p_id})
-				# print stock_p_id,'=============='
+				
 		return stock_p_id
 		self.cleanSetProductMove(cr,uid,stock_p_id,context)
-
-	def write(self,cr,uid,ids,vals,context=None):
-		# print "CALLEDD"
-		# print "CALLED WRITE",ids
-		res = super(stock_picking,self).write(cr,uid,ids,vals,context)
-		# self.cleanSetProductMove(cr,uid,ids,context)
-		# print vals,"---INI",context
-		return res
 		
 
 	def cleanSetProductMove(self,cr,uid,ids,context=None):
@@ -219,7 +210,7 @@ class stock_picking(osv.osv):
 						'picking_id':move.picking_id.id,
 						
 					}
-					# print moveSetData
+					
 					move_set_id = self.pool.get('move.set.data').create(cr,uid,moveSetData)
 					# add move id to list for delete in last
 					setsIds.append(move.id)
@@ -251,16 +242,12 @@ class stock_picking(osv.osv):
 					else:
 						raise osv.except_osv(_('Error!'), _('Please Define Bill Of Material Data First For ',move.product_id.name))
 			# delete move where product is has BOM
-			# print setsIds
+			
 			self.pool.get('stock.move').unlink(cr,uid,setsIds,context)
 
 
 
 	def create(self, cr, uid, vals, context=None):
-		# print "VALSSSSS",vals
-		# print "CONTEXT",context
-
-
 
 		getMoves  = vals.get('move_lines')
 		# print "GET MOVESSSSSS======================",getMoves
@@ -409,13 +396,10 @@ class stock_picking(osv.osv):
 			name_seq=x[-6:]
 
 			# Cek apakah Note ID ada dan Picking Name Return atau tidak
-			if cekpicking.note_id.id ==False:
-				print '================CEK CEK ====='
-			else:
+			if cekpicking.note_id.id:
 				self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
+				
 			# chandra function for return picking
-
-			
 			context = dict(context)
 		res = {}
 		move_obj = self.pool.get('stock.move')
@@ -455,13 +439,14 @@ class stock_picking(osv.osv):
 				partial_qty[move.id] = uom_obj._compute_qty(cr, uid, product_uoms[move.id], product_qty, move.product_uom.id)
 
 				#_logger.error("Checkk============================> %s", partial_qty)
-
+				
 				if move.product_qty == partial_qty[move.id]:
 					complete.append(move)
 				elif move.product_qty > partial_qty[move.id]:
 					too_few.append(move)
 				else:
 					too_many.append(move)
+
 
 				#_logger.error('Too Few %s',too_few)
 				#_logger.error('Too Many %s',too_many)
@@ -519,19 +504,21 @@ class stock_picking(osv.osv):
 								'move_lines' : [],
 								'state':'draft',
 							})
+					print 'NEW PICKINg', new_picking
 				if product_qty != 0:
 					defaults = {
 							'product_qty' : product_qty,
 							'product_uos_qty': product_qty, #TODO: put correct uos_qty
 							'picking_id' : new_picking,
 							'state': 'assigned',
-							'move_dest_id': False,
+							'move_dest_id': move.move_dest_id.id or False,
 							'price_unit': move.price_unit,
 							'product_uom': product_uoms[move.id]
 					}
 					prodlot_id = prodlot_ids[move.id]
 					if prodlot_id:
 						defaults.update(prodlot_id=prodlot_id)
+					print "NEW MOVE OBJ COPY",defaults
 					move_obj.copy(cr, uid, move.id, defaults)
 				
 				move_obj.write(cr, uid, [move.id],
@@ -541,11 +528,13 @@ class stock_picking(osv.osv):
 							'prodlot_id': False,
 							'tracking_id': False,
 						})
+			
 
 			if new_picking:
 				move_obj.write(cr, uid, [c.id for c in complete], {'picking_id': new_picking})
+
 			for move in complete:
-				defaults = {'product_uom': product_uoms[move.id], 'product_qty': move_product_qty[move.id]}
+				defaults = {'product_uom': product_uoms[move.id], 'product_qty': move_product_qty[move.id],'move_dest_id':move.move_dest_id.id or False}
 				if prodlot_ids.get(move.id):
 					defaults.update({'prodlot_id': prodlot_ids[move.id]})
 				move_obj.write(cr, uid, [move.id], defaults)
@@ -554,7 +543,8 @@ class stock_picking(osv.osv):
 				defaults = {
 					'product_qty' : product_qty,
 					'product_uos_qty': product_qty, #TODO: put correct uos_qty
-					'product_uom': product_uoms[move.id]
+					'product_uom': product_uoms[move.id],
+					'move_dest_id': move.move_dest_id.id or False,
 				}
 				prodlot_id = prodlot_ids.get(move.id)
 				if prodlot_ids.get(move.id):
@@ -562,6 +552,9 @@ class stock_picking(osv.osv):
 				if new_picking:
 					defaults.update(picking_id=new_picking)
 				move_obj.write(cr, uid, [move.id], defaults)
+
+
+			# raise osv.except_osv(_("TEST"),_("TEST"))
 
 			# At first we confirm the new picking (if necessary)
 			# new_picking indicates that shipment is partial
@@ -583,9 +576,10 @@ class stock_picking(osv.osv):
 
 			delivered_pack = self.browse(cr, uid, delivered_pack_id, context=context)
 			res[pick.id] = {'delivered_picking': delivered_pack.id or False}
-			# print res,"RESSS Overidddddddddddeeeeeeee====="
+			
 			# raise osv.except_osv(_('Error'),_('ERROR'))
 		# #_logger.error("RESSSSSSSSS do_partial() = > %s",res)
+
 		return res
 
 
@@ -1055,9 +1049,9 @@ class delivery_note(osv.osv):
 	 
 	def create(self, cr, uid, vals, context=None):
 		# validate dn input
-		print vals
+		
 		prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
-		print "-----------------------------",prepareExists
+		
 		if prepareExists and vals['special']==False:
 			no = ""
 			for nt in self.browse(cr,uid,prepareExists,context):
@@ -1201,22 +1195,23 @@ class delivery_note(osv.osv):
 							mid = stock_move.search(cr, uid, [('picking_id', '=', val.prepare_id.picking_id.id), ('product_id', '=', b.product_id.id)])[0]
 							mad = stock_move.browse(cr, uid, mid)
 
-						if b.product_qty == mad.product_qty:
-							move_id = mid
-						else:
-							stock_move.write(cr,uid, [mid], {
-								'product_qty': mad.product_qty-b.product_qty}
-							)
-							move_id = stock_move.create(cr,uid, {
-											'name' : val.name,
-											'product_id': b.product_id.id,
-											'product_qty': b.product_qty,
-											'product_uom': b.product_uom.id,
-											'prodlot_id': mad.prodlot_id.id,
-											'location_id' : mad.location_id.id,
-											'location_dest_id' : mad.location_dest_id.id,
-											'picking_id': val.prepare_id.picking_id.id})
-							stock_move.action_confirm(cr, uid, [move_id], context)
+						move_id = mid
+						# if b.product_qty == mad.product_qty:
+						# 	move_id = mid
+						# else:
+						# 	stock_move.write(cr,uid, [mid], {
+						# 		'product_qty': mad.product_qty-b.product_qty}
+						# 	)
+						# 	move_id = stock_move.create(cr,uid, {
+						# 					'name' : val.name,
+						# 					'product_id': b.product_id.id,
+						# 					'product_qty': b.product_qty,
+						# 					'product_uom': b.product_uom.id,
+						# 					'prodlot_id': mad.prodlot_id.id,
+						# 					'location_id' : mad.location_id.id,
+						# 					'location_dest_id' : mad.location_dest_id.id,
+						# 					'picking_id': val.prepare_id.picking_id.id})
+						# 	stock_move.action_confirm(cr, uid, [move_id], context)
 							   
 						partial_data['move%s' % (move_id)] = {
 							'product_id': b.product_id.id,
@@ -1225,15 +1220,27 @@ class delivery_note(osv.osv):
 							'prodlot_id': mad.prodlot_id.id}
 
 						# self.pool.get().write(cr,uid,val.prepare_id,{'picking_id':})
+					print "CALLLLLLLLLLLLLLL",partial_data
 					iddo = stock_picking.do_partial(cr, uid, [val.prepare_id.picking_id.id], partial_data)
+					
 					id_done = iddo.items()
 					getMove = self.pool.get('stock.move').browse(cr,uid,move_id,context={})
 					prepare_obj = self.pool.get('order.preparation')
-					prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':getMove.picking_id.id})
+
+					# processed_picking_id = id_done[move_id]['delivered_picking']	
+
+					# prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':getMove.picking_id.id})
+					prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':id_done[0][1]['delivered_picking']})
+
 
 					stock_picking.write(cr,uid, [id_done[0][1]['delivered_picking']], {'note_id': val.id})
 
-					self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
+					# self.write(cr, uid, ids, {'state': 'done', 'picking_id': id_done[0][1]['delivered_picking']})
+					self.write(cr, uid, ids, {'state': 'done'})
+
+					print "OP PICKING TO BE",id_done[0][1]['delivered_picking']
+
+					# raise osv.except_osv(_("TEST"),_("TEST"))
 
 
 					return True
@@ -1247,6 +1254,7 @@ class delivery_note(osv.osv):
 		return False
 
 	def do_partial(self, cr, uid, ids, context=None):
+		print 'CALLLLLLLLLLLLLLL MOVE'
 		val = self.browse(cr, uid, ids)[0]
 		assert len([val.refund_id.id]) == 1, 'Partial picking processing may only be done one at a time.'
 		stock_picking = self.pool.get('stock.picking')
@@ -1296,7 +1304,7 @@ class delivery_note(osv.osv):
 			if (picking_type == 'in') and (wizard_line.product_id.cost_method == 'average'):
 				partial_data['move%s' % (wizard_line.move_id.id)].update(product_price=wizard_line.cost,
 																		product_currency=wizard_line.currency.id)
-
+		print "CALLLLLLLLLLLLLLL 2"
 		stock_picking.do_partial(cr, uid, [partial.picking_id.id], partial_data, context=context)
 	
 		# return {'type': 'ir.actions.act_window_close'}
@@ -1311,8 +1319,67 @@ class delivery_note(osv.osv):
 		move_obj = self.pool.get('stock.move')
 		op_obj = self.pool.get('order.preparation')
 		op_line_obj = self.pool.get('order.preparation.line')
+
+		sale_obj = self.pool.get('sale.order')
+
+
+		for dn in self.browse(cr,uid,ids,context=context):
+
+			# frst searc for order id
+			# find the picking not not finished yet
+			# if picking where not finished yet is exist then all move will be moved into last pick where not finished yet
+			pickings = self.pool.get('stock.picking').search(cr,uid,[('sale_id','=',dn.prepare_id.sale_id.id),('state','not in',['done','cancel'])],context=context)
+			picking_id_to = False
+			oldPick = picking_obj.browse(cr,uid,pickings,context=context)
+			pickNames = [p.name for p in oldPick]
+			if len(pickings) == 1:
+				picking_id_to = pickings[0]
+			elif len(pickings) > 1:
+				raise osv.except_osv(_('Error to cancel Picking'),_('Please Contact your system administrator, Some Picking document cant be canceling'))
+
+
+			for move in dn.prepare_id.picking_id.move_lines:
+				delete_move = False
+				if picking_id_to:
+					browsePick = picking_obj.browse(cr,uid,picking_id_to,context=context)
+					# if picking must be move into draft/assigned partialed moves
+
+					# but we need to check if order_line id is exist on next picking then we must merge move
+					find_same_move = move_obj.search(cr,uid,[('sale_line_id','=',move.sale_line_id.id),('state','not in',['cancel','done'])])
+					if len(find_same_move) == 1:
+						same_move_obj = move_obj.browse(cr,uid,find_same_move[0],context=context)
+						merge_qty = same_move_obj.product_qty + move.product_qty
+
+
+						move_obj.write(cr,uid,find_same_move,{'product_qty':merge_qty})
+						delete_move = True
+					elif len(find_same_move) > 1:
+						
+						raise osv.except_osv(_('Error!'),_('Move who have same order line and not shipped yet is more than 1, cant handle by system, please contact your system adminsitrator!'))
+
+					if delete_move:
+						move_obj.write(cr,uid,move.id,{'state':'cancel','cancel_notes':'This move automatic moved into '+','.join(pickNames)},context=context)
+						# move_obj.delete(cr,uid,move.id,context=context)
+					else:
+						if len(find_same_move) == 0:
+							# move will be state to confirmed
+							move_obj.write(cr,uid,move.id,{'picking_id':picking_id_to,'state':'confirmed'})
+				else:
+					move_obj.write(cr,uid,move.id,{'state':'confirmed'})
+
+			if picking_id_to:
+				# picking will cancel, in this condition picking will be not have any move lines because move lines already moved into draft/assigned/confirmed partial next picking
+				picking_obj.write(cr,uid,dn.prepare_id.picking_id.id,{'state':'cancel'})
+			else:
+				# in this condition picking will be set as confirmed cause it not have any partial be ready to execute
+				picking_obj.write(cr,uid,dn.prepare_id.picking_id.id,{'state':'confirmed'})
+
+			op_obj.write(cr,uid,dn.prepare_id.id,{'state':'cancel'})
+
+			dn_obj.write(cr,uid,dn.id,{'state':'cancel'})
+
 		
-		print '==============',val.prepare_id.sale_id.id
+		# print '==============',val.prepare_id.sale_id.id
 
 
 		return True
@@ -1845,7 +1912,7 @@ class stock_invoice_onshipping(osv.osv_memory):
 	def _get_journal_id(self, cr, uid, context=None):
 		if context is None:
 			context = {}
-		print context,"--------------"
+		# print context,"--------------"
 		model = context.get('active_model')
 		viewFromDn = False
 		
@@ -1981,8 +2048,6 @@ class stock_invoice_onshipping(osv.osv_memory):
 		else:
 			active_ids = context.get('active_ids',[])
 
-
-		print '======================ACTIVE ID================',context.get('active_id')
 		
 		active_picking = picking_pool.browse(cr, uid, context.get('active_id',False), context=context)
 		inv_type = picking_pool._get_invoice_type(active_picking)
@@ -2027,7 +2092,6 @@ class stock_partial_picking(osv.osv_memory):
 	_inherit = "stock.partial.picking"
 
 	def _partial_move_for(self, cr, uid, move):
-
 		partial_move = {
 			'product_id' : move.product_id.id,
 			'product_name':move.name,

@@ -91,7 +91,7 @@
                         <field name="partner_id" on_change="sale_change(sale_id)"/>
                         <field name="poc" on_change="sale_change(sale_id)"/>
                         <field name="partner_shipping_id" on_change="sale_change(sale_id)"/>
-                        <field name="picking_id" on_change="picking_change(picking_id)"/>
+                        <field name="picking_id" on_change="picking_change(picking_id)" required="True" domain="[('type','=','out'),('state','not in',['draft','cancel','done'])]"/>
                         <field name="duedate"/>
                     </group>
                     <!-- <button name="$(refresh)d" type="object" string="View Batch"/> -->
