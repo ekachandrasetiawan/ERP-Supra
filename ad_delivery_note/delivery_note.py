@@ -1641,6 +1641,7 @@ class stock_return_picking(osv.osv_memory):
 		 @return: A dictionary with default values for all field in ``fields``
 		"""
 		
+
 		result1 = []
 		if context is None:
 			context = {}
@@ -1681,10 +1682,14 @@ class stock_return_picking(osv.osv_memory):
 		 @param context: A standard dictionary
 		 @return: New arch of view with new columns.
 		"""
+
+
 		res ={}
 		if context is None:
 			context = {}
 		record_idx = context and context.get('active_id', False)
+
+
 		if context.get('active_model') == 'stock.picking' or context.get('active_model') == 'stock.picking.in' or context.get('active_model') == 'stock.picking.out':
 			record_id = context and context.get('active_id', False)
 		else:
@@ -1695,6 +1700,7 @@ class stock_return_picking(osv.osv_memory):
 				'active_ids': [val.prepare_id.picking_id.id],
 				'active_id': val.prepare_id.picking_id.id
 			})
+			print '=============',context.get('active_id', False)
 
 		res = super(stock_return_picking, self).view_init(cr, uid, fields_list, context=context)
 		return res
@@ -1735,6 +1741,7 @@ class stock_return_picking(osv.osv_memory):
 		 @param context: A standard dictionary
 		 @return: A dictionary which of fields with values.
 		"""
+
 
 		# prepare dn
 		dn = self.pool.get('delivery.note')
@@ -1834,14 +1841,16 @@ class stock_return_picking(osv.osv_memory):
 			# Cek Barang yang sisa & yang di input
 			return_history = self.get_return_history(cr, uid, pick.id, context)
 			
+			qty = 0
 			for line in pick.move_lines:
-				qty = line.product_qty - return_history.get(line.id, 0)
-			# 	print '=========== YANG PERNAH DIBUAT RO============',qty
+				qty += line.product_qty - return_history.get(line.id, 0)
+			
+			print '=========== YANG PERNAH DIBUAT RO============',qty
 
-			# print '==============YANG DIMINTA RO==========',data_get.quantity
-
-			if data_get.quantity > qty:
-				raise osv.except_osv(_('Warning !'), _("Product Qty Tidak Mencukupi"))
+			print '==============YANG DIMINTA RO==========',data_get.quantity
+			if context.get('active_model') == 'delivery.note':
+				if data_get.quantity > qty:
+					raise osv.except_osv(_('Warning !'), _("Product Qty Tidak Mencukupi"))
 			# else:
 			# 	raise osv.except_osv(_('Warning !'), _("cek AJA"))
 					
@@ -1871,10 +1880,11 @@ class stock_return_picking(osv.osv_memory):
 				tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
 				dn_return_rel.append(tpl)
 
-		dn_r = self.pool.get('delivery.note.line.return')
-		# write into dn line rel
-		for note_line_return in dn_return_rel:
-			dn_r.create(cr,uid,note_line_return)
+		if context.get('active_model') == 'delivery.note':
+			dn_r = self.pool.get('delivery.note.line.return')
+			# write into dn line rel
+			for note_line_return in dn_return_rel:
+				dn_r.create(cr,uid,note_line_return)
 
 		if not returned_lines:
 			raise osv.except_osv(_('Warning!'), _("Please specify at least one non-zero quantity."))
