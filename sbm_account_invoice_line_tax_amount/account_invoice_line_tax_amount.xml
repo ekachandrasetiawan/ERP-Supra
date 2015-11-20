@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="customer_invoice_line_form" model="ir.ui.view">
+			<field name="name">account.invoice.line.form</field>
+			<field name="model">account.invoice.line</field>
+			<field name="inherit_id" ref="account.view_invoice_line_form" />
+			<field name="arch" type="xml">
+				<!-- <xpath expr="//form/group" position="inside"> -->
+				<field name="name" position="after">
+					<field name="tax_amount_ids" widget="one2many_list">
+						<tree string="Tax Detail" editable="bottom" noadd="True">
+							<field name="name" />
+							<field name="base_amount" readonly="True" />
+							<field name="tax_amount" on_change="on_change_tax_amount(base_amount,tax_amount)" />
+							<!-- <field name="is_manual" invisible="True" /> -->
+							<field name="is_manual" invisible="0" />
+						</tree>
+					</field>
+				</field>
+				<!-- </xpath> -->
+			</field>
+		</record>
+
+		<record id="dp_tax_line" model="decimal.precision">
+			<field name="name">TaxLine</field>
+			<field name="digits">5</field>
+		</record>
+	</data>
+</openerp>
