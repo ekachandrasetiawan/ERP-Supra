@@ -5,10 +5,11 @@
 		"web",
 		"hr",
 		"account",
-		"product"
+		"product",
+		"sbm_account_invoice_line_tax_amount"
 	],
 	"author": "IT Dev Team @ Suprabakti Mandiri",
-	"category": "Human Resource",
+	"category": "Account",
 	"description": """
 		Untuk memenuhi kebutuhan integerasi dengan program E-Fakttur Direktorat Jendral Pajak
 		Isi : 

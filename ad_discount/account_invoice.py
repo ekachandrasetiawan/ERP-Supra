@@ -64,7 +64,7 @@ account_invoice()
 
 class account_invoice_line(osv.osv):
     def _amount_line(self, cr, uid, ids, prop, unknow_none, unknow_dict):
-        res = {}
+        res = super(account_invoice_line,self)._amount_line(cr,uid,ids,prop,unknow_none,unknow_dict)
         tax_obj = self.pool.get('account.tax')
         cur_obj = self.pool.get('res.currency')
         for line in self.browse(cr, uid, ids):
@@ -102,6 +102,7 @@ class account_invoice_tax(osv.osv):
     
     def compute(self, cr, uid, invoice_id, context=None):
         tax_grouped = {}
+        print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
         tax_obj = self.pool.get('account.tax')
         cur_obj = self.pool.get('res.currency')
         inv = self.pool.get('account.invoice').browse(cr, uid, invoice_id, context=context)

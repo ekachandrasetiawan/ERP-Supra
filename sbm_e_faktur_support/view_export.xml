@@ -7,7 +7,7 @@
 			<field name="inherit_id" ref="account.invoice_form" />
 			<field name="arch" type="xml">
 				<header position="inside">
-					<button name="efak_invoices_export" states="proforma,proforma2,open,paid" string="Export E-Faktur" type="object" groups="sbm_inherit.group_customer_invoice_administrator"/>
+					<button name="efak_invoices_export" states="draft,proforma,proforma2,open,paid" string="Export E-Faktur" type="object" groups="sbm_inherit.group_customer_invoice_administrator"/>
 
 					<button name="submit_to_validate" states="draft" string="Submit" type="object" groups="sbm_inherit.group_customer_invoice_admin_creator"/>
 
@@ -21,6 +21,26 @@
 				<field name="origin" position="replace" >
 					<field name="origin" required="1" groups="base.group_user"/>
 				</field>
+
+				<xpath expr="//page[@string='Other Info']/field[@name='tax_line']" position="replace"></xpath>
+				<!-- <field name="invoice_line" position="after"> -->
+				<xpath expr="//group[@class='oe_subtotal_footer oe_right']" position="after">
+					<div style="width: 50%%">
+						<field name="tax_line">
+							<tree string="Taxes" editable="bottom">
+								<field name="name"/>
+                                    <field name="account_id" groups="account.group_account_user"/>
+                                    <field name="base" on_change="base_change(base,parent.currency_id,parent.company_id,parent.date_invoice)" readonly="1"/>
+                                    <field name="amount" on_change="amount_change(amount,parent.currency_id,parent.company_id,parent.date_invoice)"/>
+                                    <field invisible="True" name="base_amount"/>
+                                    <field invisible="True" name="tax_amount"/>
+                                    <field name="factor_base" invisible="True"/>
+                                    <field name="factor_tax" invisible="True"/>
+							</tree>
+						</field>
+					</div>
+				</xpath>
+				<!-- </field> -->
 				
 			</field>
 		</record>
@@ -31,35 +51,29 @@
 			<field name="inherit_id" ref="sbm_inherit.invoice_customer_form" />
 			<field name="arch" type="xml">
 				<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" position="replace">
-					<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','submited'])]}" />
+					<button name="actionPrintCustInv" string="Print Invoice" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['open','done'])]}" />
 				</button>
 
 				<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" position="replace" >
-					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','submited'])]}"/>
+					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['open','done'])]}"/>
 				</button>
 				<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" position="replace">
-					<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['draft','submited'])]}" />
+					<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" attrs="{'invisible':[('state','in',['open','done'])]}" />
 				</button>
-				<xpath expr="//page[@string='Invoice Lines']/field[@name='invoice_line']" position="replace">
-					 <field name="invoice_line" nolabel="1" widget="one2many_list" context="{'type': type}" attrs="{'readonly':[('state','not in',['draft','proforma','proforma2','done'])]}">
-						<tree string="Invoice Lines">
-							<field name="sequence" widget="handle"/>
-							<field name="product_id" on_change="product_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" domain="[('sale_ok', '=', True)]"/>
-							<field name="name"/>
-							<field name="company_id" invisible="1"/>
-							<field name="state" invisible="1"/>
-							<field name="account_id" groups="account.group_account_user" domain="[('company_id', '=', parent.company_id), ('journal_id', '=', parent.journal_id), ('type', '=', 'other')]" on_change="onchange_account_id(product_id, parent.partner_id, parent.type, parent.fiscal_position,account_id)" states="draft,proforma,proforma2"/>
-							<field name="account_analytic_id" groups="analytic.group_analytic_accounting" domain="[('type','!=','view'), ('company_id', '=', parent.company_id)]"/>
-							<field name="quantity"/>
-							<field name="uos_id" groups="product.group_uom" on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)"/>
-							<field name="price_unit"/>
-							<field name="discount" groups="sale.group_discount_per_so_line"/>
-							<field name="amount_discount" groups="sale.group_discount_per_so_line"/>
-							<field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}" domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
-							<field name="price_subtotal"/>
-						</tree>
-						
-					</field>
+				<!-- <xpath expr="//page[@string='Invoice Lines']/field[@name='invoice_line']/tree[@string='Invoice Lines']/field[@name='price_unit']" position="after">
+				
+					
+				</xpath> -->
+
+				<xpath expr="//page[@string='Invoice Lines']/field[@name='invoice_line']/tree[@string='Invoice Lines']/field[@name='amount_discount']" position="after">
+					<field name="amount_bruto" />
+				</xpath>
+				<!-- <xpath expr="//page[@string='Invoice Lines']/field[@name='invoice_line']/tree[@string='Invoice Lines']/field[@name='price_subtotal']" position="after">
+					<field name="price_subtotal_netto" />
+				</xpath> -->
+
+				<xpath expr="//field[@name='amount_untaxed']" position="before">
+					<field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
 				</xpath>
 				
 			</field>

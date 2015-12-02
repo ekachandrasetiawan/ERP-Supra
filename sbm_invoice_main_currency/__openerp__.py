@@ -1,7 +1,7 @@
 {
-    "name": "Invoice Main Currecncy",
+    "name": "Invoice Main Currency",
     "version": "1.0", 
-    "depends": ["base","account","account_voucher", "ad_perintah_kerja"],
+    "depends": ["base","account","account_voucher", "ad_perintah_kerja","sbm_inherit",'sbm_account_invoice_line_tax_amount','sale'],
     "author": "Supra Bakti Mandiri",
     "category": "Invoice Main",
     "description":"""
