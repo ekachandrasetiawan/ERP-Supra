@@ -429,7 +429,7 @@ class account_invoice_line(osv.osv):
 			res['value']['amount_discount'] = self._get_count_amount_discount(amount_bruto,discount_p)
 		elif field_name == 'amount_discount':
 			change_amount_discount = self._change_amount_discount(amount_bruto,discount_p,discount_a)
-			res['value']['discount'] = change_amount_discount['discount']
+			res['value']['discount'] = 0.00
 			res['value']['price_subtotal'] = change_amount_discount['price_subtotal']
 		elif field_name=='price_subtotal':
 			res['value']['tax_amount'] = self._get_count_tax_amount(cr,uid,price_subtotal,taxes)

@@ -1572,9 +1572,9 @@ class InternalMove(osv.osv):
 	def _setBreaker(cr,uid,product):
 		# check if has phantom sets
 		if product.bom_ids:
+			print product.name," HAS BOM"
 			
 	def checkSet(self,cr,uid,product):
-		
 		res = False
 		if product.bom_ids:
 			bom = product.bom_ids[0]
