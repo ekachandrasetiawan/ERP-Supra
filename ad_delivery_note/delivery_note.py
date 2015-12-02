@@ -1086,6 +1086,11 @@ class delivery_note(osv.osv):
 		 
 	def package_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
+
+		if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
+			raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
+
+
 		for x in val.note_lines:
 			if x.product_qty <= 0:
 				raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
@@ -1131,6 +1136,8 @@ class delivery_note(osv.osv):
 	def return_product(self, cr, uid, ids, context=None):
 		res = {}
 		val = self.browse(cr, uid, ids)[0]
+		if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
+			raise osv.except_osv(_('Error'),_('Can\'t Processed Document, Please make sure Sale Order has been confirmed'))
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_stock_return_picking_form')
 		res = {
 			'name':'Return Shipment',
@@ -1155,7 +1162,9 @@ class delivery_note(osv.osv):
 
 	def package_validate(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-		print val.special
+		# print val.special
+		if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
+			raise osv.except_osv(_('Error'),_('Can\'t Validate document, Please make sure Sale Order has been confirmed'))
 		if val.special==False:
 			if val.prepare_id.picking_id.state == 'confirmed' or val.prepare_id.picking_id.state == 'assigned':
 				if val.prepare_id is None:
@@ -1165,7 +1174,7 @@ class delivery_note(osv.osv):
 					stock_picking = self.pool.get("stock.picking")
 
 					move = [x.product_id.id for x in val.prepare_id.picking_id.move_lines]
-					print "PREPARE ======= ",val.prepare_id
+					# print "PREPARE ======= ",val.prepare_id
 					# return False
 					line = [x.product_id.id for x in val.note_lines]
 					err = [x for x in line if x not in move]
@@ -1254,7 +1263,7 @@ class delivery_note(osv.osv):
 		return False
 
 	def do_partial(self, cr, uid, ids, context=None):
-		print 'CALLLLLLLLLLLLLLL MOVE'
+		# print 'CALLLLLLLLLLLLLLL MOVE'
 		val = self.browse(cr, uid, ids)[0]
 		assert len([val.refund_id.id]) == 1, 'Partial picking processing may only be done one at a time.'
 		stock_picking = self.pool.get('stock.picking')
@@ -1304,7 +1313,6 @@ class delivery_note(osv.osv):
 			if (picking_type == 'in') and (wizard_line.product_id.cost_method == 'average'):
 				partial_data['move%s' % (wizard_line.move_id.id)].update(product_price=wizard_line.cost,
 																		product_currency=wizard_line.currency.id)
-		print "CALLLLLLLLLLLLLLL 2"
 		stock_picking.do_partial(cr, uid, [partial.picking_id.id], partial_data, context=context)
 	
 		# return {'type': 'ir.actions.act_window_close'}
