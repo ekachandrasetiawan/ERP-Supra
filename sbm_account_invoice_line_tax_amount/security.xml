@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+	    <record model="ir.model.access" id="ir_model_access_invoice_line_tax_amount_admin_creator">
+	        <field name="name">Account Invoice Line Tax Amount Admin Creator</field>
+	        <field name="model_id" ref="model_account_invoice_line_tax_amount"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="ref('sbm_inherit.group_customer_invoice_admin_creator')" />
+	    </record>
+
+	    <record model="ir.model.access" id="ir_model_access_invoice_line_tax_amount_only_read">
+	        <field name="name">Account Invoice Line Tax Amount Only Read</field>
+	        <field name="model_id" ref="model_account_invoice_line_tax_amount"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="ref('sbm_inherit.group_customer_invoice_validator')" />
+	    </record>
+
+	    <record model="ir.model.access" id="ir_model_access_group_account_invoice_invoice_line_tax_amount_only_read">
+	        <field name="name">Account Invoice Line Tax Amount Only Read</field>
+	        <field name="model_id" ref="model_account_invoice_line_tax_amount"/>
+	        <field name="perm_read" eval="True" />
+	        <field name="perm_write" eval="False" />
+	        <field name="perm_unlink" eval="False" />
+	        <field name="perm_create" eval="False" />
+	        <field name="group_id" eval="ref('account.group_account_invoice')" />
+	    </record>
+
+	</data>
+</openerp>
