@@ -11,7 +11,7 @@ import openerp.addons.decimal_precision as dp
 class stock_picking(osv.osv):
 	def open_full_record(self, cr, uid, ids, context=None):
 		data= self.browse(cr, uid, ids, context=context)
-		# print "======================================",data[0].backorder_id
+		
 		return {
 			'type': 'ir.actions.act_window',
 			'view_type': 'form',
@@ -89,7 +89,7 @@ class PurchaseOrder(osv.osv):
 		orders= self.browse(cr, uid, ids, context=context)
 		for order in orders:
 			dis[order.id]=order.amount_bruto-order.amount_untaxed
-		# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<",dis
+		
 		return dis
 
 
@@ -203,7 +203,7 @@ SpecialDN()
 class PurchaseOrderFullInvoice(osv.osv):
 	_inherit='purchase.order'
 	# def action_invoice_create(self, cr, uid, ids, context=None):
-	# 	print "OVERRIDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+	
 	# 	return False
 
 	# def action_invoice_create(self, cr, uid, ids, context=None):
@@ -211,7 +211,6 @@ class PurchaseOrderFullInvoice(osv.osv):
 
 	# BUTTON FULL INVOICE APPEND disc_amount data
 	def _prepare_inv_line(self, cr, uid, account_id, order_line, context=None):
-		# print [(6, 0, [x.id for x in order_line.taxes_id])]
 		return {
 			'name': order_line.name,
 			'account_id': account_id,
@@ -279,7 +278,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 			allWithPPN = True
 			listInvPPN = {"vat":[],"nonVat":[]}
 			for po_line in order.order_line:
-				# print po_line.id,"<<<<<<<<<<<<<<<<<<<<<<<"
+				
 				if not po_line.taxes_id:
 					allWithPPN=False
 					listInvPPN["nonVat"].append(po_line.id)
@@ -292,14 +291,11 @@ class PurchaseOrderFullInvoice(osv.osv):
 				inv_lines.append(inv_line_id)
 
 				po_line.write({'invoice_lines': [(4, inv_line_id)]}, context=context)
-				# print ">>>>>>>>>>",inv_line_id,">>>>>>>>>>>>>>>>>>>>>>>>>",po_line.taxes_id
-
 			
-			# print listInvPPN
 			# START AUTOMATIC CONVERT DISCOUNT TO NOMINAL
 			acc_discount_id=271 #DISCOUNT PEMBELIAN
 			# IF ALL LINE WITH PPN THEN WE JUST ONLY CREATE 1 INVOICE LINE
-			# print order.total_discount,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+			
 			if order.total_discount != 0.0:
 
 				if allWithPPN:
@@ -324,17 +320,13 @@ class PurchaseOrderFullInvoice(osv.osv):
 						inv_lines.append(inv_line_discount_id)
 
 					for discountWithoutVAT in self.pool.get('purchase.order.line').browse(cr,uid,listInvPPN['nonVat']):
-						print discountWithoutVAT
+						
 						totalDiscount2['nonVat']+=(discountWithoutVAT.price_unit*discountWithoutVAT.product_qty)-discountWithoutVAT.price_subtotal
 
 					totalDiscount2['nonVat']= 0 - totalDiscount2['nonVat']
 					if totalDiscount2['nonVat'] != 0:
 						inv_line_discount_id = self._makeInvoiceLine(cr,uid,[],acc_discount_id,totalDiscount2['nonVat'])
 						inv_lines.append(inv_line_discount_id)
-
-				
-
-			# print "ADDDDD DISCOUNTTTTTTTTTTTTTT>>>>>>>>>>>>>>>>>",inv_line_discount_id
 
 			# get invoice data and create invoice
 			inv_data = {
@@ -353,7 +345,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 				'group_id':False
 			}
 			inv_id = inv_obj.create(cr, uid, inv_data, context=context)
-			print "INV ID ",inv_id			# compute the invoice
+			
 			inv_obj.button_compute(cr, uid, [inv_id], context=context, set_total=True)
 
 			# Link this new invoice to related purchase order
@@ -376,27 +368,29 @@ class account_invoice_line(osv.osv):
 		discount = ((qty*price)*disc)/100
 		return {'value':{ 'amount_discount':discount} }
 	def _amount_line(self, cr, uid, ids, prop, unknow_none, unknow_dict):
-		# print 'OVERIDEDDDDDD==================================>>>>>>>>'
+		
 		# TEST AJA lagi
 		res = {}
-		tax_obj = self.pool.get('account.tax')
-		cur_obj = self.pool.get('res.currency')
-		for line in self.browse(cr, uid, ids):
-			if line.discount!=0.0:
-				# print 'DISCOUNT %'
-				price = line.price_unit * (1-(line.discount or 0.0)/100.0)
-			elif line.amount_discount!=0.0:
-				# print "DISCOUNT AMOUNT"
-				price = line.price_unit - (line.amount_discount/line.quantity)
-			else:
-				price = line.price_unit
+		res = super(account_invoice_line,self)._amount_line(cr,uid,ids,prop,unknow_none,unknow_dict)
+		# tax_obj = self.pool.get('account.tax')
+		# cur_obj = self.pool.get('res.currency')
+		# for line in self.browse(cr, uid, ids):
+		# 	if line.discount!=0.0:
+		
+		# 		price = line.price_unit * (1-(line.discount or 0.0)/100.0)
+		# 	elif line.amount_discount!=0.0:
+		
+		# 		price = line.price_unit - (line.amount_discount/line.quantity)
+		# 	else:
+		# 		price = line.price_unit
 			
 			
-			taxes = tax_obj.compute_all(cr, uid, line.invoice_line_tax_id, price, line.quantity, product=line.product_id, partner=line.invoice_id.partner_id)
-			res[line.id] = taxes['total']
-			if line.invoice_id:
-				cur = line.invoice_id.currency_id
-				res[line.id] = cur_obj.round(cr, uid, cur, res[line.id])
+		# 	taxes = tax_obj.compute_all(cr, uid, line.invoice_line_tax_id, price, line.quantity, product=line.product_id, partner=line.invoice_id.partner_id)
+		# 	res[line.id] = taxes['total']
+		# 	if line.invoice_id:
+		# 		cur = line.invoice_id.currency_id
+		# 		res[line.id] = cur_obj.round(cr, uid, cur, res[line.id])
+		
 		return res
 
 
@@ -442,11 +436,7 @@ class wizard_suplier_first_payment(osv.osv_memory):
 
 	def check(self,cr,uid,values,context=None):
 		val = self.browse(cr, uid, values)[0]
-		# print val,"<<<<<<<<<<<<<<<<<<<<<<<<<VAL"
-		# print wVal
-		# print ids
 
-		# print 111111
 		acc_bs = self.pool.get('account.bank.statement')
 		acc_bs_line = self.pool.get('account.bank.statement.line')
 
@@ -478,8 +468,7 @@ class wizard_suplier_first_payment(osv.osv_memory):
 			'po_id' : val.po_id.id,
 			'statement_id':acc1
 		})
-		# print acc1,"*********************"
-		# print acc11,"********************"
+
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'view_bank_statement_form')
 		return {
 			'view_mode': 'form',
@@ -557,28 +546,6 @@ class account_invoice(osv.osv):
 		}
 
 
-	def _get_total_discount(self,cr,uid,ids,name,arg,context=None):
-		# get total discount from line
-		acc_discount_id=271
-		invoices = self.pool.get('account.invoice')
-		# line = self.pool.get('account.invoice.line').search(cr, uid, [('account_id', '=', acc_discount_id)])
-		
-		res = {}
-
-		discount=0
-		totaldiscount=0 
-		amount_untaxed=0
-		
-		invoices= self.browse(cr, uid, ids, context=context)
-		for inv in invoices:
-			res[inv.id]=0
-			for line in inv.invoice_line:
-				if line.account_id.id==acc_discount_id:
-					res[inv.id]+=line.price_subtotal
-
-		return res
-
-
 	def action_to_tax_replacement(self,cr,uid,ids,context={}):
 		res = False
 		invs = self.browse(cr,uid,ids,context=context)
@@ -588,22 +555,21 @@ class account_invoice(osv.osv):
 			# res = [(0,0,self._im_line_preparation(cr,uid,line)) for line in request.lines if (line.qty-line.processed_item_qty) > 0]
 			invoice_lines =  [(0, 0, self.pool.get('account.invoice.line').copy_data(cr,uid,line.id,{'invoice_id':False},context=context)) for line in inv.invoice_line]
 
-			# print invoice_lines,'----------------------'
+			
 
 			# newid = self.copy(cr,uid,inv.id,default=default,context=context)
 			# override copy new
 			copy_new = self.copy_data(cr, uid, inv.id, context=context, default={'invoice_line':invoice_lines,'picking_ids':picking_ids})
 			
 			newid = self.create(cr,uid,copy_new,context=context)
-			# print newid$, "NEWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+			
 			# raise osv.except_osv(_('Error!'),_('Tes'))
 			newids = [newid]
 			newInv = self.browse(cr,uid,newid,context=context)
-			print newInv,"NEW"
+			
 			fp_no = newInv.faktur_pajak_no[0:2]+'1.'+newInv.faktur_pajak_no[4:20]
 
-			print fp_no,"FP**************************"
-			# raise osv.except_osv(_('Error!'),_('Tes'))
+			
 			# self.write(cr,uid,newid,{'faktur_pajak_no':fp_no})
 			# canceling old invoice
 			self.write(cr,uid,[inv.id],{'state':'cancel'})
@@ -655,7 +621,7 @@ class account_invoice(osv.osv):
 			# check if user in group customer invoice administrator ?
 			# only customer invoice administrator can cancel the invoice
 			group = self.pool.get('res.groups').search(cr,uid,[('id','=',res_id),('users','in',uid)])
-			# print "Grouppppp",group
+			
 			if group:
 				return super(account_invoice,self).action_cancel(cr,uid,ids,context)
 			else:
@@ -695,19 +661,24 @@ class account_invoice(osv.osv):
 
 class account_invoice_tax(osv.osv):
 	def compute(self, cr, uid, invoice_id, context=None):
-		# print ">?>>>>>>>>>>>>>>>>>COMPUTEEEEE<<<<<<<<<<<<<<<<<<<<<<<<<<"
+		
+		# tax_grouped = super(account_invoice_tax,self).compute(cr,uid,invoice_id,context=context)
 		tax_grouped = {}
+		
 		tax_obj = self.pool.get('account.tax')
 		cur_obj = self.pool.get('res.currency')
 		inv = self.pool.get('account.invoice').browse(cr, uid, invoice_id, context=context)
 		cur = inv.currency_id
 		company_currency = self.pool['res.company'].browse(cr, uid, inv.company_id.id).currency_id.id
+		dec_precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
+
+
 		for line in inv.invoice_line:
 			if line.discount!=0.0:
-				# print 'DISCOUNT %'
+				
 				price = line.price_unit * (1-(line.discount or 0.0)/100.0)
 			elif line.amount_discount!=0.0:
-				# print "DISCOUNT AMOUNT"
+				
 				price = line.price_unit - (line.amount_discount/line.quantity)
 			else:
 				price = line.price_unit
@@ -718,20 +689,23 @@ class account_invoice_tax(osv.osv):
 				val['amount'] = tax['amount']
 				val['manual'] = False
 				val['sequence'] = tax['sequence']
-				val['base'] = cur_obj.round(cr, uid, cur, tax['price_unit'] * line['quantity'])
+				val['base'] = round(tax['price_unit'] * line['quantity'],dec_precision)
 
 				if inv.type in ('out_invoice','in_invoice'):
 					val['base_code_id'] = tax['base_code_id']
 					val['tax_code_id'] = tax['tax_code_id']
-					val['base_amount'] = cur_obj.compute(cr, uid, inv.currency_id.id, company_currency, val['base'] * tax['base_sign'], context={'date': inv.date_invoice or time.strftime('%Y-%m-%d')}, round=False)
-					val['tax_amount'] = cur_obj.compute(cr, uid, inv.currency_id.id, company_currency, val['amount'] * tax['tax_sign'], context={'date': inv.date_invoice or time.strftime('%Y-%m-%d')}, round=False)
+					
+					val['base_amount'] = round(val['base'] * tax['base_sign'],dec_precision)
+
+					
+					val['tax_amount'] = math.floor(val['amount'] * tax['tax_sign'])
 					val['account_id'] = tax['account_collected_id'] or line.account_id.id
 					val['account_analytic_id'] = tax['account_analytic_collected_id']
 				else:
 					val['base_code_id'] = tax['ref_base_code_id']
 					val['tax_code_id'] = tax['ref_tax_code_id']
-					val['base_amount'] = cur_obj.compute(cr, uid, inv.currency_id.id, company_currency, val['base'] * tax['ref_base_sign'], context={'date': inv.date_invoice or time.strftime('%Y-%m-%d')}, round=False)
-					val['tax_amount'] = cur_obj.compute(cr, uid, inv.currency_id.id, company_currency, val['amount'] * tax['ref_tax_sign'], context={'date': inv.date_invoice or time.strftime('%Y-%m-%d')}, round=False)
+					val['base_amount'] = round(val['base'] * tax['ref_base_sign'], dec_precision)
+					val['tax_amount'] = round(val['amount'] * tax['ref_tax_sign'],dec_precision)
 					val['account_id'] = tax['account_paid_id'] or line.account_id.id
 					val['account_analytic_id'] = tax['account_analytic_paid_id']
 
@@ -745,10 +719,10 @@ class account_invoice_tax(osv.osv):
 					tax_grouped[key]['tax_amount'] += val['tax_amount']
 
 		for t in tax_grouped.values():
-			t['base'] = cur_obj.round(cr, uid, cur, t['base'])
-			t['amount'] = cur_obj.round(cr, uid, cur, t['amount'])
-			t['base_amount'] = cur_obj.round(cr, uid, cur, t['base_amount'])
-			t['tax_amount'] = cur_obj.round(cr, uid, cur, t['tax_amount'])
+			t['base'] = round(t['base'],dec_precision)
+			t['amount'] = round(t['amount'],dec_precision)
+			t['base_amount'] = round(t['base_amount'],dec_precision)
+			t['tax_amount'] = round(t['tax_amount'],dec_precision)
 		return tax_grouped
 
 	_name='account.invoice.tax'
@@ -782,7 +756,7 @@ class SaleOrder(osv.osv):
 		return super(SaleOrder, self).action_button_confirm(cr, uid, ids, context)
 
 	def _prepare_invoice(self, cr, uid, order, lines, context=None):
-		# print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		
 		"""Prepare the dict of values to create the new invoice for a
 		   sales order. This method may be overridden to implement custom
 		   invoice generation (making sure to call super() to establish
@@ -793,6 +767,18 @@ class SaleOrder(osv.osv):
 								  attached to the invoice
 		   :return: dict of value to create() the invoice
 		"""
+
+		order_currency_id = order.pricelist_id.currency_id.id
+
+		user = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+
+		if order_currency_id != user.company_id.currency_id.id:
+			cr.execute('SELECT "rating" FROM "res_currency_rate" WHERE "currency_id" = %s ORDER BY "name" DESC limit 1',(order_currency_id,))
+			today_rate = cr.fetchone()[0]
+		else:
+			today_rate = 1.0
+
+
 		if context is None:
 			context = {}
 		journal_ids = self.pool.get('account.journal').search(cr, uid,
@@ -818,6 +804,8 @@ class SaleOrder(osv.osv):
 			'company_id': order.company_id.id,
 			'user_id': order.user_id and order.user_id.id or False,
 			'group_id':order.group_id.id or False,
+			'user_id': order.user_id.id,
+			'pajak': today_rate,
 		}
 		
 		# Care for deprecated _inv_get() hook - FIXME: to be removed after 6.1
@@ -871,10 +859,10 @@ class AccountBankStatement(osv.osv):
 		for account in accounts:
 			# dis[order.id]=order.amount_bruto-order.amount_untaxed
 			res[account.id] = 0
-			# print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>..'
+			
 			for line in account.line_ids:
 				res[account.id] += line.amount
-				# print "<<<<<<<<<<<<<",line.amount
+				
 		return res
 
 	_name = 'account.bank.statement'
@@ -1102,7 +1090,7 @@ class stock_move_split_lines_exist(osv.osv_memory):
 		if prodlot_id == False:
 			return False
 		else:
-			# print '=======================PROUDCT QTY=============',product_qty
+			
 			hasil=self.pool.get('stock.production.lot').browse(cr,uid,[prodlot_id])[0]
 
 			if product_qty > hasil.stock_available:
@@ -1121,16 +1109,13 @@ class stock_picking(osv.osv):
 	_inherit = "stock.picking"
 	_name = "stock.picking"
 	def do_partial(self, cr, uid, ids, partial_datas, context=None):
-		# print partial_datas
-		# raise osv.except_osv(('Error !!!'), ('Can\'t Update Squence'))
 		pick = self.browse(cr,uid,ids)
-		# print pick[0].name;
+		
 		if pick[0].name==False:
 			# GENERATE NUMBER
 			self.generateSeq(cr,uid,ids,context)
 		
 		res = super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
-		print res,"++++++++++++++++++++++++++++++++======================================="
 		return res
 	def generateSeq(self,cr,uid,ids,context=None):
 		pick = self.browse(cr,uid,ids)
@@ -1191,8 +1176,6 @@ class ClassName(osv.osv):
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_inherit', 'wizard_po_cancel_item_form')
 
-		# print "<<<<<<<<<<<<<<<<<<<<",view_id
-
 		context.update({
 			'active_model': self._name,
 			'active_ids': ids,
@@ -1214,7 +1197,7 @@ class ClassName(osv.osv):
 class WizardPOCancelItem(osv.osv_memory):
 
 	def default_get(self, cr, uid, fields, context=None):
-		# print "CALLLLEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+		
 		if context is None: context = {}
 		po_ids = context.get('active_ids', [])
 		active_model = context.get('active_model')
@@ -1229,7 +1212,7 @@ class WizardPOCancelItem(osv.osv_memory):
 			linesData = []
 			linesData += [self._load_po_line(cr, uid, l) for l in po.order_line if l.state not in ('done','cancel')]
 			res.update(lines=linesData)
-		print res,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
+		
 		return res
 
 	def _load_po_line(self, cr, uid, line):
@@ -1248,7 +1231,7 @@ class WizardPOCancelItem(osv.osv_memory):
 		return po_item
 
 	def request_cancel_item(self,cr,uid,ids,context=None):
-		print "CALLING request_cancel_item method"
+		
 		data = self.browse(cr,uid,ids,context)[0]
 
 		polc = self.pool.get('purchase.order.line.cancel')
@@ -1257,7 +1240,7 @@ class WizardPOCancelItem(osv.osv_memory):
 		po = data.po_id
 		inv_ids=[] #INVOICE WHERE STATE NOT DRAFT OR CANCEL
 		inv_ids+= [self.pool.get('account.invoice').browse(cr,uid,invoice.id,context) for invoice in po.invoice_ids if invoice.state not in ('draft','cancel')]
-		# print "INVOICESSS",inv_ids
+		
 		if len(po.order_line) == len(data.lines):
 			raise osv.except_osv(('Error !!!'),('Tidak diperbolehkan mencancel semua item..!!Silahkan mengcancel PO!'))
 		newIds = []
@@ -1281,8 +1264,6 @@ class WizardPOCancelItem(osv.osv_memory):
 			if check:
 				raise osv.except_osv(('Error !!!'),('TIdak bisa mencancel item "',str(line.product_id.name),'"..!!'))
 			newIds+=[polc.create(cr,uid,cancelItems,context)]
-			print newIds,"------------------------------------------"
-		# print "NEW IDS ",newIds
 
 		# redir
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_inherit', 'view_po_line_cancel_tree')
@@ -1341,11 +1322,11 @@ class PurchaseOrderLineCancel(osv.osv):
 		cancel_notes = ""
 		for cancelItem in self.browse(cr,uid,idsToConfirm,context):
 			line = self.pool.get('purchase.order.line').browse(cr,uid,cancelItem.po_line_id,context)
-			# print line.name
+			
 			lineToCancel+=[line.id]
 			poToUpdate+=[line.order_id]
 			cancelNotes = cancelItem.note
-		print lineToCancel
+		
 
 		# search stock move
 		moveObj = self.pool.get('stock.move')
@@ -1451,8 +1432,6 @@ class InternalMoveRequest(osv.osv):
 		# NUMBER FORMAT {code of source location}-{code of destination location}/{2 last year number}/{month in rome}/sequence number
 		data = self.browse(cr,uid,ids,context)[0]
 		prefix = self._validateStorage(data.source,data.destination)
-		print prefix
-
 
 
 		sequence=prefix+'/'+self.pool.get('ir.sequence').get(cr, uid, 'internal.move.request')
@@ -1468,7 +1447,6 @@ class InternalMoveRequest(osv.osv):
 
 	def confirmRequest(self,cr,uid,ids,context={}):
 		res = {}
-		print "*********************************Confirming Internal Move Request*********************************"
 		# newNumber = self._getNewNo(cr,uid,ids,context)
 		self._setNewNO(cr,uid,ids,context)
 		self._setState(cr,uid,ids,context,'confirmed')
@@ -1519,14 +1497,14 @@ class InternalMoveRequestLine(osv.osv):
 		product = self.pool.get('product.product').browse(cr,uid,product_id,{})
 		res = {'value':{'uom_id':product.uom_id.id}}
 		return res
+
 	# FOR STATE FIELD
 	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for data in self.browse(cr,uid,ids,context):
 			res[data.id] = data.internal_move_request_id.state
-			# print theId,"-----------------------------------------------------"
-		print res
 		return res
+
 	def _getStates(self,cr,uid,context={}):
 		im_r = self.pool.get('internal.move.request').getStates(cr,uid,context)
 		return im_r
@@ -1594,20 +1572,20 @@ class InternalMove(osv.osv):
 	def _setBreaker(cr,uid,product):
 		# check if has phantom sets
 		if product.bom_ids:
-			print product.name," HAS BOM"
+			
 	def checkSet(self,cr,uid,product):
-		# print product.bom_ids
+		
 		res = False
 		if product.bom_ids:
 			bom = product.bom_ids[0]
-			print product.name," HAS BOM"
+			
 			if bom.type=='phantom':
 				res = bom
 
 		return res
 
 	def _loadLines(self,cr,uid,request):
-		print "*********LOADING _loadLines() ***************"
+		
 		res = [(0,0,self._im_line_preparation(cr,uid,line)) for line in request.lines if (line.qty-line.processed_item_qty) > 0]
 
 		return res
@@ -1626,7 +1604,7 @@ class InternalMove(osv.osv):
 	# to load internal move line detail automatic by detecting product is has set phantom bom
 	def _loadLineDetail(self,cr,uid,line):
 
-		print "******************************CALLING _loadLineDetail******************************"
+		
 		mrp = self.checkSet(cr,uid,line.product_id)
 		res = []
 		if mrp:
@@ -1654,11 +1632,11 @@ class InternalMove(osv.osv):
 		return res
 
 	def load_request(self,cr,uid,ids,req_id,context={}):
-		print "**************************** CALLING Request Data ****************************"
+		
 		res = {'value':{}}
 		data = self.pool.get('internal.move.request').browse(cr,uid,req_id,context)
 		if data:
-			print "*******************************Data Exists*******************************",req_id
+			
 			res['value'] = {
 				'source':data.source.id,'destination':data.destination.id,'due_date_transfer':data.due_date,
 				'lines':self._loadLines(cr,uid,data),
@@ -1703,7 +1681,7 @@ class InternalMove(osv.osv):
 	# CHECK LINE PRODUCT IF DEFINED AS SET OR DEFINED AS BATCHES PRODUCT IT WILL BE HAVA ONE OR MORE detail_ids
 	def _checkLineForDetail(self,cr,uid,line_data,context={}):
 		res = False
-		print "CHECKED"
+		
 		if line_data.product_id.bom_ids and line_data.product_id.supply_method=="manufacture":
 			# if has bom
 			if line_data.detail_ids:
@@ -1755,7 +1733,7 @@ class InternalMove(osv.osv):
 		# loop each ids
 		for data in self.browse(cr,uid,ids,context):
 			getPrefixStorage = self._get_prefix_storage_code(cr,uid,data.id,context)
-			print "PREFIX STORAGE ",getPrefixStorage
+			
 			if data.source == data.destination:
 				res = False
 				raise osv.except_osv(_('Error !'),_('Source and Destination Location is Not Valid..!Please Check!'))
@@ -1783,13 +1761,13 @@ class InternalMove(osv.osv):
 				if line.detail_ids:
 					for detail in line.detail_ids:
 						move_detail = self._prepare_move(data,detail,picking_id)
-						# print "MOVE_DETAIL IS ----> ",detail.type
+						
 						# if line.product_id.track_outgoing:
 						if detail.type =='sets':
 							# if sets
 							if detail.product_id.track_outgoing:
 								# if set and has batches then must pick batch
-								print "MASUKKK"
+								
 								if not detail.stock_prod_lot_id:
 									res = False
 									raise osv.except_osv(('Error!!!'),_('Batch Must picked in '+str(detail.product_id.name)+'!'))
@@ -1812,15 +1790,10 @@ class InternalMove(osv.osv):
 								# self.pool.get('stock.move').unlink(cr,uid,move_line_id)
 								move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
 								line_to_delete = [move_line_id]
-								print 'VALIDDDDD',line_to_delete
-
-						print "MOVE_DETAIL",move_detail
 
 						if valid:
 							move_detail_id = self.pool.get('stock.move').create(cr,uid,move_detail,{})
 							self._update_im_line_stock_move(cr,uid,detail.id,move_detail_id,'line.detail',context)
-
-				# print "MOVE LINE =====>",move_line
 					
 				
 			if res:
@@ -1837,7 +1810,6 @@ class InternalMove(osv.osv):
 				data.internal_move_request_id.write({'state':'onprocess'})
 			if len(line_to_delete):
 				self.pool.get('stock.move').unlink(cr,uid,line_to_delete)
-				print 'LINE TO DELETE ',line_to_delete
 		# raise osv.except_osv(('Error !!!'), ('The Qty that Requested in Item is '))
 
 		return res
@@ -1862,7 +1834,7 @@ class InternalMove(osv.osv):
 			trsLoc = searchLoc[0]
 		else:
 			raise osv.except_osv(_('ERROR!!!'),_("Please Define Transition with \"TRS\" code and type is Transit"))
-		# print searchLoc,"==================================++++"
+		
 
 		for data in self.browse(cr,uid,ids,context):
 			for move in data.picking_id.move_lines:
@@ -1880,7 +1852,6 @@ class InternalMove(osv.osv):
 
 		for reqLine in data.internal_move_request_id.lines:
 
-			# print "=======================>",reqLine.processed_item_qty
 			if reqLine.processed_item_qty < reqLine.qty:
 				res = False
 
@@ -1931,7 +1902,7 @@ class InternalMove(osv.osv):
 			'picking_id':None,
 			'auto_validate':"False",
 		}
-		print "To Auto ======================= ",move_id,"=",au
+		
 		return self.pool.get('stock.move').write(cr,uid,move_id,au,context)
 
 	def _prepare_move(self,data,detail,picking_id=False,prodlot_id=None,move_dest_id=None):
@@ -2061,15 +2032,12 @@ class InternalMoveLine(osv.osv):
 		# im = self.pool.get('internal.move')
 
 		# im_data = im.browse(cr,uid,vals['internal_move_id'])[0]
-		# print im_data
+		
 
 		vals['name'] = 'IML-'+time.strftime('%y')+self.pool.get('ir.sequence').get(cr, uid, 'internal.move.line')
 		return super(InternalMoveLine,self).create(cr,uid,vals,context=context)
 	
-	# def write(self,cr,uid,ids,vals,context={}):
-	# 	print "CALLEDDD INTERNAL MODE LINE WRITE"
-	# 	raise osv.except_osv(('Error !!!'), ('Total Qty that your pick in '+line.product_id.name+' is not valid !Please Check Again..!'))
-	# 	return False
+	
 	def _get_available(self,cr,uid,ids,field_name,arg,context={}):
 		res = {}
 		for tid in self.browse(cr,uid,ids,context):
@@ -2083,8 +2051,6 @@ class InternalMoveLine(osv.osv):
 		res = {}
 		for data in self.browse(cr,uid,ids,context):
 			res[data.id] = data.internal_move_id.state
-			# print theId,"-----------------------------------------------------"
-		print res
 		return res
 	def _getStates(self,cr,uid,context={}):
 		im_r = self.pool.get('internal.move').getStates(cr,uid,context)
@@ -2284,14 +2250,13 @@ class InternalMoveLineDetail(osv.osv):
 							'product_id':[('id','in',bom_set)]
 						}
 					}
-					print res
+					
 		return res
 	def on_change_batch(self,cr,uid,ids,batch=None):
 		res = {}
 		if batch:
 			data = self.pool.get('stock.production.lot').browse(cr,uid,batch,{})
 
-			print "STOCK AVAILABLE ",data.stock_available
 			if data:
 				if data.exp_date:
 					if data.desc:
@@ -2357,7 +2322,7 @@ class SalesManTarget(osv.osv):
 		target_exists = self.pool.get('sales.man.target').search(cr, uid, [('user_id','=',vals['user_id']),('year','=',vals['year'])],context=context)
 
 		name = ""
-		print target_exists,"****************************"
+		
 		sales = self.pool.get('res.users').browse(cr,uid,vals['user_id'],{})
 		if target_exists:
 			raise osv.except_osv(('Warning !!!'), ('Target For Sales Man '+sales.name+' in '+vals['year']+' Already Set!'))
