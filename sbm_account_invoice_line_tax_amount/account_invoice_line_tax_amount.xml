@@ -9,7 +9,7 @@
 				<!-- <xpath expr="//form/group" position="inside"> -->
 				<field name="name" position="after">
 					<field name="tax_amount_ids" widget="one2many_list">
-						<tree string="Tax Detail" editable="bottom" noadd="True">
+						<tree string="Tax Detail" editable="bottom">
 							<field name="name" />
 							<field name="base_amount" readonly="True" />
 							<field name="tax_amount" on_change="on_change_tax_amount(base_amount,tax_amount)" />

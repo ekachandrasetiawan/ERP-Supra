@@ -5,43 +5,63 @@ from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
 class account_invoice_line_tax_amount(osv.osv):
+	
 	_name = 'account.invoice.line.tax.amount'
 	_description = 'Account Invoice Line Tax Amount'
 	_columns = {
-		'invoice_line_id':fields.many2one('account.invoice.line',string="Invoice Line",required=True),
+		'invoice_line_id':fields.many2one('account.invoice.line',string="Invoice Line",required=True,ondelete='CASCADE',onupdate='RESTRICT'),
 		'tax_id': fields.many2one('account.tax',string="Tax Applied",required=True),
-		'base_amount': fields.float(string="Base Line Tax Amount"),
-		'tax_amount': fields.float(string="Tax Amount",digits_compute=dp.get_precision('TaxLine')),
+		'base_amount': fields.float(string="Base Line Tax Amount",required=True),
+		'tax_amount': fields.float(string="Tax Amount",digits_compute=dp.get_precision('TaxLine'),required=True),
 		'name': fields.related('tax_id','name',string="Tax",type="char",store=False),
 		'is_manual': fields.boolean('Is Manual Fill'),
 	}
 
+	def _prepare_and_create(self,cr,uid,line_id,vals,context={}):
+		ailta = self.pool.get('account.invoice.line.tax.amount')
+
+		# raise osv.except_osv(_('Error'),_('Error!!!'))
+		print "call Ailta createeeeeeeee-----------------------",vals
+		return ailta.create(cr,uid,vals,context=context)
+
 	def write(self,cr,uid,ids,vals,context={}):
-		# print "WRITEEEEEEE ",vals
-
-
+		print "HAYOOOOO",vals
 		res = super(account_invoice_line_tax_amount,self).write(cr,uid,ids,vals,context=context)
 
 		manual = vals.get('is_manual',0)
+		inv_line = {
+			'tax_amount':0.0,
+		}
+		
+		# if manual:
+		# get account.invoice.tax.amount record
+		for tax_am in self.browse(cr,uid,ids,context=context):
+			# get base code
 
-		if manual:
-			# get account.invoice.tax.amount record
-			for tax_am in self.browse(cr,uid,ids,context=context):
-				# get base code
+			# get invoice.tax_line
+			# loop each tax_line find the same tax base_code_id
+			for tax_line in tax_am.invoice_line_id.invoice_id.tax_line:
+				tax_amount = self.pool.get('account.invoice').get_tax_amount_grouped(cr,uid,[tax_line.invoice_id.id],context=context)
+				if tax_line.base_code_id.id == tax_am.tax_id.base_code_id.id:
+					# if base code id in account invoice tax same with account invoice tax amount tax base code id
+					# then update and set is_manual on account.invoice.tax set to True
+					amount = tax_amount[tax_line.invoice_id.id]['tax_amount'][tax_am.tax_id.id]
+					
+					write_into = {'manual':True,'amount':amount}
+					
+					self.pool.get('account.invoice.tax').write(cr,uid,tax_line.id,write_into,context=context)
 
-				# get invoice.tax_line
-				# loop each tax_line find the same tax base_code_id
-				for tax_line in tax_am.invoice_line_id.invoice_id.tax_line:
-					tax_amount = self.pool.get('account.invoice').get_tax_amount_grouped(cr,uid,[tax_line.invoice_id.id],context=context)
-					if tax_line.base_code_id.id == tax_am.tax_id.base_code_id.id:
-						# if base code id in account invoice tax same with account invoice tax amount tax base code id
-						# then update and set is_manual on account.invoice.tax set to True
-						amount = tax_amount[tax_line.invoice_id.id]['tax_amount'][tax_am.tax_id.id]
-						# print amount
-						write_into = {'manual':True,'amount':amount}
-						# print write_into
-						self.pool.get('account.invoice.tax').write(cr,uid,tax_line.id,write_into,context=context)
 
+			for taxes_amount_line in tax_am.invoice_line_id.tax_amount_ids:
+				# write tax_amount invoice line ids
+				inv_line['tax_amount'] += taxes_amount_line['tax_amount']
+			
+			self.pool.get('account.invoice.line').write(cr,uid,tax_am.invoice_line_id.id,inv_line,context=context)
+
+			invL = self.pool.get('account.invoice.line').browse(cr,uid,tax_am.invoice_line_id.id,context=context)
+			
+			
+		
 		return res
 
 	def on_change_tax_amount(self,cr,uid,ids,base_amount,tax_amount):
@@ -51,14 +71,7 @@ class account_invoice_line_tax_amount(osv.osv):
 		for line_tax_amount in self.browse(cr,uid,ids,{}):
 			base_code_line_id = line_tax_amount.tax_id.base_code_id.id
 			
-			res['value'] = {'is_manual':True}
-
-			# get account.invoice.tax where invoice id is parrent of invoice line of invoice tax amount
-			# for tax_line in line_tax_amount.invoice_line_id.invoice.id.tax_line:
-			# 	if tax_line.base_code_id.id == base_code_line_id:
-			# 		# if same code
-			# 		# then set as manual to account invoice tax
-			# 		res['value'] {'is_manual':True}
+			res['value'] = {'is_manual':True,'invoice_line_id':{'tax_amount':0.00}}
 		return res
 
 class account_tax(osv.osv):
@@ -99,7 +112,7 @@ class account_tax(osv.osv):
 				amount = cur_price_unit * tax.amount
 
 				data['amount'] = round(amount,dec_precision_tax_line) # TAX / PAJAK
-				# print data['amount'],'++=+==============++==++==+=++=+=++=+==+==+==++========== ACCOUNT INVOICE LINE TAX AMOUNT'
+				
 
 
 			elif tax.type=='fixed':
@@ -121,7 +134,7 @@ class account_tax(osv.osv):
 			
 			
 			if tax.child_ids:
-				# print "Printed"
+				
 				if tax.child_depend:
 					latest = res.pop()
 				amount = amount2
@@ -144,7 +157,9 @@ class account_tax(osv.osv):
 			if tax.include_base_amount:
 				cur_price_unit+=amount2
 		return res
-	def _compute(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, precision=None, line_id=0):
+
+
+	def _compute(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, precision=None, line_id=0,context={}):
 		"""
 		Compute tax values for given PRICE_UNIT, QUANTITY and a buyer/seller ADDRESS_ID.
 
@@ -158,13 +173,13 @@ class account_tax(osv.osv):
 		ailta = self.pool.get('account.invoice.line.tax.amount')
 
 
-		# print "CALLING _compute FROM ACCOUNT INVOICE LINE TAX AMOUNT MODULE---------------"
+		
 		if not precision:
 			precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
-		# print price_unit,"HERESSSSSSSSSSSSSSSSSSSSSSSSSS"
+		
 		res = self._unit_compute(cr, uid, taxes, price_unit, product, partner, quantity)
 
-		# print res,"RES from +=======++++======="
+		
 
 		total = 0.0
 		for r in res:
@@ -174,13 +189,13 @@ class account_tax(osv.osv):
 				r['amount'] = round(r.get('amount', 0.0) * quantity, tax_line_precision)
 				total += r['amount']
 			
-
-			if line_id:
-				# line_id parameters is not an original parameter
+			
+			if 'button_reset_taxes' in context:
+				# if context button_reset_taxes exist on context dictionary than it means update triggered with button
+				
 				# so it can use for flag to sign that if compute_all call from this module will be sign line_id
 				# and if not define line_id it will not call this part anymore
 				# insert into account invoice line tax amount
-				
 				ailta_vals = {
 					'invoice_line_id': line_id,
 					'tax_id': r['id'],
@@ -188,18 +203,14 @@ class account_tax(osv.osv):
 					'tax_amount': r['amount'],
 				}
 
-				# print ait
-				ailta.create(cr,uid,ailta_vals,{})
-
-			# print r,"RRRRRRRRRRRRRRRRRRRR"
+				ailta_vals = self.pool.get('account.invoice.line.tax.amount')._prepare_and_create(cr,uid,line_id,ailta_vals,context=context)
 
 		return res
 
 
 
-	def compute_all(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, force_excluded=False,line_id=0):
-		# print line_id,"AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		# print "BBBBBBBBBBBBBBBB"
+	def compute_all(self, cr, uid, taxes, price_unit, quantity, product=None, partner=None, force_excluded=False,line_id=0,context={}):
+		
 		"""
 		:param force_excluded: boolean used to say that we don't want to consider the value of field price_include of
 			tax. It's used in encoding by line where you don't matter if you encoded a tax with that boolean to True or
@@ -223,11 +234,12 @@ class account_tax(osv.osv):
 		ailta = self.pool.get('account.invoice.line.tax.amount')
 		alita_vals = {}
 
-		if line_id:
-				# line_id parameters is not an original parameter
-				# so it can use for flag to sign that if compute_all call from this module will be sign line_id
-				# and if not define line_id it will not call this part anymore
-				cr.execute("DELETE FROM account_invoice_line_tax_amount WHERE invoice_line_id=%s",[int(line_id)])
+		if 'button_reset_taxes' in context:
+			
+			# line_id parameters is not an original parameter
+			# so it can use for flag to sign that if compute_all call from this module will be sign line_id
+			# and if not define line_id it will not call this part anymore
+			cr.execute("DELETE FROM account_invoice_line_tax_amount WHERE invoice_line_id=%s",[int(line_id)])
 				
 
 		precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
@@ -235,9 +247,6 @@ class account_tax(osv.osv):
 		if taxes and taxes[0].company_id.tax_calculation_rounding_method == 'round_globally':
 			tax_compute_precision += 5
 		totalin = totalex = round(price_unit * quantity, precision)
-		# print "TOTAL INNNNNNNNN--->",totalin
-		# print "TOTAL EXXXXXXXXX--->",totalex
-
 
 		# raise osv.except_osv(_('Error!'),_('Error'))
 		tin = []
@@ -257,8 +266,8 @@ class account_tax(osv.osv):
 		except:
 			pass
 
-		tex = self._compute(cr, uid, tex, totlex_qty, quantity, product=product, partner=partner, precision=tax_compute_precision, line_id=line_id)
-		# print tex,"TEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+		
+		tex = self._compute(cr, uid, tex, totlex_qty, quantity, product=product, partner=partner, precision=tax_compute_precision, line_id=line_id,context=context)
 
 		for r in tex:
 			
@@ -272,7 +281,6 @@ class account_tax(osv.osv):
 			'taxes': tin + tex
 		}
 
-		# print res,"************************************************************************aaaaaaaaaaaaaaaa"
 		# raise osv.except_osv(_('Error!'),_('Error'))
 		return res
 
@@ -283,7 +291,6 @@ class account_invoice_tax(osv.osv):
 	"""BASED ON SBM INHERIT"""
 
 	def compute(self, cr, uid, invoice_id, context=None):
-		# print "CALLLLL ACCOUNT INVOICE LINE TAX AMOUNT MODULE --------------------------------------------"
 		# tax_grouped = super(account_invoice_tax,self).compute(cr,uid,invoice_id,context=context)
 		tax_grouped = {}
 		
@@ -297,15 +304,15 @@ class account_invoice_tax(osv.osv):
 
 		for line in inv.invoice_line:
 			if line.discount!=0.0:
-				# print 'DISCOUNT %'
+				
 				price = line.price_unit * (1-(line.discount or 0.0)/100.0)
 			elif line.amount_discount!=0.0:
-				# print "DISCOUNT AMOUNT"
+				
 				price = line.price_unit - (line.amount_discount/line.quantity)
 			else:
 				price = line.price_unit
-			# print "----aAAAAaaaa"
-			for tax in tax_obj.compute_all(cr, uid, line.invoice_line_tax_id, price, line.quantity, line.product_id, inv.partner_id, line_id=line.id)['taxes']:
+			
+			for tax in tax_obj.compute_all(cr, uid, line.invoice_line_tax_id, price, line.quantity, line.product_id, inv.partner_id, line_id=line.id,context=context)['taxes']:
 				val={}
 				val['invoice_id'] = inv.id
 				val['name'] = tax['name']
@@ -376,25 +383,29 @@ class account_invoice(osv.osv):
 
 				res[ai.id] = {'tax_amount':tax_amount,'base_amount':base_amount}
 			
-		# print res,"GET TAX AMOUNT GROUPED___________________________________________________________"
+		
 		return res
 	def button_reset_taxes(self, cr, uid, ids, context=None):
+		
 		if context is None:
 			context = {}
 		ctx = context.copy()
 		ait_obj = self.pool.get('account.invoice.tax')
+		# Update the stored value (fields.function), so we write to trigger recompute
+		self.pool.get('account.invoice').write(cr, uid, ids, {'invoice_line':[]}, context=ctx)
+		print "AFTER CALLLLLLL---->"
 		for id in ids:
-			cr.execute("DELETE FROM account_invoice_tax WHERE invoice_id=%s AND manual is False", (id,))
+			cr.execute("DELETE FROM account_invoice_tax WHERE invoice_id=%s", (id,))
 			partner = self.browse(cr, uid, id, context=ctx).partner_id
 			if partner.lang:
 				ctx.update({'lang': partner.lang})
+				ctx['button_reset_taxes'] = True
 			for taxe in ait_obj.compute(cr, uid, id, context=ctx).values():
 				# crate account.invoice.tax data
-				# print "FINALLLLLYYYY ",taxe
+				
 				ait_obj.create(cr, uid, taxe)
 				# create account.invoice.line.tax.amount
-		# Update the stored value (fields.function), so we write to trigger recompute
-		self.pool.get('account.invoice').write(cr, uid, ids, {'invoice_line':[]}, context=ctx)
+		
 		return True
 
 	# def _get_analytic_lines(self, cr, uid, id, context=None):
@@ -408,7 +419,6 @@ class account_invoice(osv.osv):
 	# 		sign = 1
 	# 	else:
 	# 		sign = -1
-	# 	print "----------------------_get_analytic_lines--------------------------------"
 	# 	iml = self.pool.get('account.invoice.line').move_line_get(cr, uid, inv.id, context=context)
 
 	# 	for il in iml:
@@ -474,11 +484,7 @@ class account_invoice(osv.osv):
 				key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id, tax.account_analytic_id.id)
 				tax_key.append(key)
 				if tax.manual:
-					print "NOTTTTTTTTTTTTTTTT",key
 					continue
-				
-				print key,"------------------------<<<<<<<<"
-				
 				
 				if not key in compute_taxes:
 					raise osv.except_osv(_('Warning!'), _('Global taxes defined, but they are not in invoice lines !'))
@@ -487,15 +493,14 @@ class account_invoice(osv.osv):
 					raise osv.except_osv(_('Warning!'), _('Tax base different!\nClick on compute to update the tax base.'))
 
 			for key in compute_taxes:
-				print key,'__________________KEYYYYYY___________________________'
-				print tax_key,"Tax keyyyy"
+				
 				if not key in tax_key:
 					raise osv.except_osv(_('Warning!'), _('Taxes are missing!\nClick on compute button.'))
 		# return super(account_invoice,self).check_tax_lines(cr,uid,inv,compute_taxes,ait_obj)
 
 	def action_move_create(self, cr, uid, ids, context=None):
 		"""Creates invoice related analytics and financial move lines"""
-		# print "----------------------Creates invoice related analytics and financial move lines--------------------------------"
+		
 		ait_obj = self.pool.get('account.invoice.tax')
 		cur_obj = self.pool.get('res.currency')
 		period_obj = self.pool.get('account.period')
@@ -523,12 +528,12 @@ class account_invoice(osv.osv):
 			# create the analytical lines
 			# one move line per invoice line
 			iml = self._get_analytic_lines(cr, uid, inv.id, context=ctx)
-			# print "Check from action_move_create-________________________________"
+			
 			# check if taxes are all computed
 
 			compute_taxes = ait_obj.compute(cr, uid, inv.id, context=ctx)
 
-			# print compute_taxes,"COMPUTEDDDDDDDDDDDD____________________"
+			
 			self.check_tax_lines(cr, uid, inv, compute_taxes, ait_obj)
 
 			# I disabled the check_total feature
@@ -669,7 +674,7 @@ class account_invoice(osv.osv):
 
 			ctx.update(invoice=inv)
 			move_id = move_obj.create(cr, uid, move, context=ctx)
-			# print '================',move
+			
 			new_move_name = move_obj.browse(cr, uid, move_id, context=ctx).name
 			# make the invoice point to that move
 			self.write(cr, uid, [inv.id], {'move_id': move_id,'period_id':period_id, 'move_name':new_move_name}, context=ctx)
@@ -701,7 +706,6 @@ class account_invoice_line(osv.osv):
 	# 			continue
 	# 		res.append(mres)
 	# 		tax_code_found= False
-	# 		print "__________________________________move_line_get_________________________________________"
 	# 		for tax in tax_obj.compute_all(cr, uid, line.invoice_line_tax_id,
 	# 				(line.price_unit * (1.0 - (line['discount'] or 0.0) / 100.0)),
 	# 				line.quantity, line.product_id,
