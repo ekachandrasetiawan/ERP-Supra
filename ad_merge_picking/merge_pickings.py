@@ -86,6 +86,15 @@ class merge_pickings(osv.osv_memory):
 		if not journal_ids:
 			raise osv.except_osv(('Error !'), ('There is no sale/purchase journal defined for this company'))            
 
+
+		user = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+
+		if curency != user.company_id.currency_id.id:
+			cr.execute('SELECT "rating" FROM "res_currency_rate" WHERE "currency_id" = %s ORDER BY "name" DESC limit 1',(curency,))
+			today_rate = cr.fetchone()[0]
+		else:
+			today_rate = 1.0
+
 		invoice_id = pool_invoice.create(cr, uid, {
 			'name': namepick[:-2] if namepick else 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
 			# 'name': 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -99,7 +108,10 @@ class merge_pickings(osv.osv_memory):
 			'user_id': uid,
 			'origin':origin[:-2] if origin else False,
 			'currency_id': curency or False,
-			'picking_ids': [(6,0, picking_ids)]})
+			'picking_ids': [(6,0, picking_ids)],
+			'pajak': today_rate,
+		})
+
 						 
 		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
 			pool_picking.write(cr, uid, [picking.id], {'invoice_state': 'invoiced', 'invoice_id': invoice_id}) 
