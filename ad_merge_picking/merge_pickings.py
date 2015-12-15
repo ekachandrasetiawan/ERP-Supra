@@ -166,6 +166,14 @@ class merge_pickings(osv.osv_memory):
 								raise osv.except_osv(('Perhatian..!!'), ('No Delivery Note Tidak Ditemukan'))
 						# end for
 					else:
+						if picking.note_id:
+							if move_line.name:
+								name_inv_line = move_line.name
+							elif move_line.desc:
+								name_inv_line = move_line.desc
+							else:
+								name_inv_line = "["+move_line.product_id.default_code+"] "+move_line.product_id.name_template
+						
 						pool_invoice_line.create(
 							cr, uid, 
 							{
