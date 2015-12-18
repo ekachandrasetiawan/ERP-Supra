@@ -14,7 +14,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchase.group_jobdesc_position_dept_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_jobdesc_position_dept_chief'))]"/>
 	    </record>
 
 
@@ -26,7 +26,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchase.group_jobdesc_position_dept_manager'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_jobdesc_position_dept_manager'))]"/>
 	    </record>
 
 
