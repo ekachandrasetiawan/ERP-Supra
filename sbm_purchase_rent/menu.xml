@@ -19,7 +19,7 @@
 
 
 
-         <menuitem name="Purchases" id="base.menu_purchase_root" groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager" sequence="60"/>
+         <menuitem name="Purchases" id="base.menu_purchase_root" groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager" sequence="60"/>
 
         <menuitem id="purchase.menu_procurement_management" name="Purchase" parent="base.menu_purchase_root" sequence="1"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
@@ -32,15 +32,15 @@
 
 			<menuitem groups="base.group_user" action="wizard_rent_list_action" id="wizard_rent_order_menu" name="Create by Rent Requisition" parent="purchase_order_menu"/>
 			
-		<menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
+		<menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
 		
 		
-			<menuitem action="sbm_purchase.master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
+			<menuitem action="sbm_purchase.master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
 
-			<menuitem action="rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisition" parent="purchase_requistion_menu" sequence="3" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
+			<menuitem action="rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisition" parent="purchase_requistion_menu" sequence="3" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
 		
 
-		  <menuitem id="menu_purchase_requisition_subcont_pro_mgt" sequence="4" parent="purchase_requistion_menu" action="ad_purchase_subcont.action_purchase_requisition_subcont" name="Subcount Requisition" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
+		  <menuitem id="menu_purchase_requisition_subcont_pro_mgt" sequence="4" parent="purchase_requistion_menu" action="ad_purchase_subcont.action_purchase_requisition_subcont" name="Subcount Requisition" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
 		
 
 			

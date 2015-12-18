@@ -26,18 +26,18 @@
 
 	        <!-- Purchase Requisition -->
 
-	        <menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2" groups="sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager,sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
+	        <menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2" groups="group_jobdesc_position_dept_chief,group_jobdesc_position_dept_manager,sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
 		
-				<menuitem action="sbm_purchase.master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
+				<!-- <menuitem action="master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/> -->
 
 				<menuitem action="sbm_purchase_rent.rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisition" parent="purchase_requistion_menu" sequence="3" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
 			  <menuitem id="ad_purchase_subcont.menu_purchase_requisition_subcont_pro_mgt" sequence="4" parent="purchase_requistion_menu" action="ad_purchase_subcont.action_purchase_requisition_subcont" name="Subcount Requisition" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
 			<!-- Product Purchase Requisition -->
-	        <menuitem id="product_detail_purchase_requistion_menu" name="Product Detail" parent="base.menu_purchase_root" sequence="3" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user,sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
+	        <menuitem id="product_detail_purchase_requistion_menu" name="Product Detail" parent="base.menu_purchase_root" sequence="3" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user,group_jobdesc_position_dept_chief,group_jobdesc_position_dept_manager"/>
 
-			  <menuitem id="master_list_product_action" sequence="5" parent="product_detail_purchase_requistion_menu" action="sbm_purchase.master_list_barang_action" name="List Purchase Requisition" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user,sbm_purchase.group_jobdesc_position_dept_chief,sbm_purchase.group_jobdesc_position_dept_manager"/>
+			  <!-- <menuitem id="master_list_product_action" sequence="5" parent="product_detail_purchase_requistion_menu" action="master_list_barang_action" name="List Purchase Requisition" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user,group_jobdesc_position_dept_chief,group_jobdesc_position_dept_manager"/> -->
 
 	</data>
 

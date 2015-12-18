@@ -354,7 +354,563 @@
 	        <field name="group_id" eval="group_finance_staff"/>
 	    </record>
 
-	    purchase.order.line.cancel
+	    <!-- Membuat Group By XML -->
+
+    	<record model="ir.module.category" id="module_category_jobdesc_position">
+            <field name="name">Job Desc and Position</field>
+        </record>
+
+		<record model="res.groups" id="group_jobdesc_position_dept_chief">
+			<field name="category_id" ref="module_category_jobdesc_position"/>
+			<field name="name">Dept Chief</field>
+		</record>
+
+
+		<record model="res.groups" id="group_jobdesc_position_dept_manager">
+			<field name="category_id" ref="module_category_jobdesc_position"/>
+			<field name="name">Dept Manager</field>
+		</record>
+
+
+		<!-- Membuat Rules By XML -->
+
+        <record model="ir.rule" id="ir_purchase_requisition_chief_rule">
+	        <field name="name">Purchase Requisiton Chief</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="domain_force">[('employee_id.user_id','=',user.id)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('group_jobdesc_position_dept_chief'))]"/>
+	    </record>
+
+
+	    <record model="ir.rule" id="ir_purchase_requisition_manager_rule">
+	        <field name="name">Purchase Requisiton Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="domain_force">[('department_id','in', [e.department_id.id for e in user.employee_ids])]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('group_jobdesc_position_dept_manager'))]"/>
+	    </record>
+
+	    <record model="ir.rule" id="ir_purchase_requisition_all_rule">
+	        <field name="name">All Purchase Requisition</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+
+	    <record model="ir.rule" id="ir_detail_pb_chief_rule">
+	        <field name="name">Detail PB Chief</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="domain_force">[('detail_pb_id.employee_id.user_id','=',user.id)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('group_jobdesc_position_dept_chief'))]"/>
+	    </record>
+
+	    <record model="ir.rule" id="ir_detail_pb_manager_rule">
+	        <field name="name">Detail PB Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="domain_force">[('detail_pb_id.department_id','in', [e.department_id.id for e in user.employee_ids])]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('group_jobdesc_position_dept_manager'))]"/>
+	    </record>
+
+
+
+	    <record model="ir.rule" id="ir_detail_pb_all_rule_purchase_manager">
+	        <field name="name">All Detail PB</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+	   	<record model="ir.rule" id="ir_detail_pb_all_rule_purchase_user">
+	        <field name="name">All Detail PB</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+
+	    <record model="ir.rule" id="ir_detail_pb_all_rule_purchase_chief">
+	        <field name="name">All Detail PB</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+		<!-- Setting Access Rigth -->
+
+		<!-- Access Rights Purchase Requisition Regular Object Pembelian Barang-->
+	     <record model="ir.model.access" id="ir_access_pr_regular">
+	        <field name="name">Access Purchase Requisition Regular</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+		<record model="ir.model.access" id="ir_access_pr_regular_manager">
+	        <field name="name">Access Purchase Requisition Regular Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+	    <!-- Access Rights Purchase Requisition Regular Object Detail PB-->
+
+		<record model="ir.model.access" id="ir_access_detail_pb">
+	        <field name="name">Access Detail PB</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_detail_pb_manager">
+	        <field name="name">Access Detail PB Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_detail_pb"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+	   	<!-- Access Rights Rent Requisition Detail-->
+	    <record model="ir.model.access" id="ir_access_rent_requisition_detail">
+	        <field name="name">Access Rent Requisition Detail</field>
+	        <field name="model_id" ref="sbm_purchase_rent.model_rent_requisition_detail"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_rent_requisition_detail_manager">
+	        <field name="name">Access Rent Requisition Detail Manager</field>
+	        <field name="model_id" ref="sbm_purchase_rent.model_rent_requisition_detail"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+
+		<!-- Access Rights Sale Order-->
+		<record model="ir.model.access" id="ir_access_sale_order_chief">
+	        <field name="name">Access Sale Order Chief</field>
+	        <field name="model_id" ref="sale.model_sale_order"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_sale_order_manager">
+	        <field name="name">Access Sale Order Manager</field>
+	        <field name="model_id" ref="sale.model_sale_order"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+	    
+	    <record model="ir.model.access" id="ir_access_sale_order_purchase_staff">
+	        <field name="name">Access Sale Order Purchase Staff</field>
+	        <field name="model_id" ref="sale.model_sale_order"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	     <record model="ir.model.access" id="ir_access_sale_order_purchase_chief">
+	        <field name="name">Access Sale Order Purchase Chief</field>
+	        <field name="model_id" ref="sale.model_sale_order"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_sale_order_purchase_manager">
+	        <field name="name">Access Sale Order Purchase Manager</field>
+	        <field name="model_id" ref="sale.model_sale_order"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+
+	    <!-- Access Rights Sale Order Line-->
+
+	    <record model="ir.model.access" id="ir_access_sale_order_line_chief">
+	        <field name="name">Access Sale Order Line Chief</field>
+	        <field name="model_id" ref="sale.model_sale_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_sale_order_line_manager">
+	        <field name="name">Access Sale Order Line Manager</field>
+	        <field name="model_id" ref="sale.model_sale_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_sale_order_line_purchase_staff">
+	        <field name="name">Access Sale Order Line Purchase Staff</field>
+	        <field name="model_id" ref="sale.model_sale_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+	    </record>
+	     <record model="ir.model.access" id="ir_access_sale_order_line_purchase_chief">
+	        <field name="name">Access Sale Order Line Purchase Chief</field>
+	        <field name="model_id" ref="sale.model_sale_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_sale_order_line_purchase_manager">
+	        <field name="name">Access Sale Order Line Purchase Manager</field>
+	        <field name="model_id" ref="sale.model_sale_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+		<!-- Access Rights Purchase Order Line-->
+
+	    <record model="ir.model.access" id="ir_access_purchase_order_line_chief">
+	        <field name="name">Access Purchase Order Line Chief</field>
+	        <field name="model_id" ref="purchase.model_purchase_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	   	<record model="ir.model.access" id="ir_access_purchase_order_line_manager">
+	        <field name="name">Access Purchase Order Line Manager</field>
+	        <field name="model_id" ref="purchase.model_purchase_order_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+	    
+
+	    <!-- Access Rights Purchase requisition Subcount-->
+	    <record model="ir.model.access" id="ir_access_purchase_requisition_subcont_chief">
+	        <field name="name">Access Purchase Requisition Subcont Chief</field>
+	        <field name="model_id" ref="ad_purchase_subcont.model_purchase_requisition_subcont"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_purchase_requisition_subcont_manager">
+	        <field name="name">Access Purchase Requisition Subcont Manager</field>
+	        <field name="model_id" ref="ad_purchase_subcont.model_purchase_requisition_subcont"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+
+	    <!-- Access Rights Purchase requisition Subcount Line-->
+	    <record model="ir.model.access" id="ir_access_purchase_requisition_subcont_line_chief">
+	        <field name="name">Access Purchase Requisition Subcont Line Chief</field>
+	        <field name="model_id" ref="ad_purchase_subcont.model_purchase_requisition_subcont_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_purchase_requisition_subcont_line_manager">
+	        <field name="name">Access Purchase Requisition Subcont Line Manager</field>
+	        <field name="model_id" ref="ad_purchase_subcont.model_purchase_requisition_subcont_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+	    <!-- Access Rights Purchase requisition Subcount Send Line-->
+	    <record model="ir.model.access" id="ir_access_purchase_requisition_subcont_send_line_chief">
+	        <field name="name">Access Purchase Requisition Subcont Line Chief</field>
+	        <field name="model_id" ref="ad_purchase_subcont.model_purchase_requisition_subcont_send_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_purchase_requisition_subcont_send_line_manager">
+	        <field name="name">Access Purchase Requisition Subcont Line Manager</field>
+	        <field name="model_id" ref="ad_purchase_subcont.model_purchase_requisition_subcont_send_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+
+	    <!-- Access Rights Stock Move -->
+	    <record model="ir.model.access" id="ir_access_stock_move_chief">
+	        <field name="name">Access Stock Move Chief</field>
+	        <field name="model_id" ref="stock.model_stock_move"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_stock_move_manager">
+	        <field name="name">Access Stock Move Manager</field>
+	        <field name="model_id" ref="stock.model_stock_move"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+	    <!-- Access Rights Perintah Kerja -->
+	    <record model="ir.model.access" id="ir_access_perintah_kerja_chief">
+	        <field name="name">Access Perintah Kerja Chief</field>
+	        <field name="model_id" ref="ad_perintah_kerja.model_perintah_kerja"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_perintah_kerja_manager">
+	        <field name="name">Access Perintah Kerja Manager</field>
+	        <field name="model_id" ref="ad_perintah_kerja.model_perintah_kerja"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+
+	    <!-- Access Rights Product UOM -->
+	    <record model="ir.model.access" id="ir_access_product_uom_chief">
+	        <field name="name">Access Product UOM Chief</field>
+	        <field name="model_id" ref="product.model_product_uom"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_product_uom_manager">
+	        <field name="name">Access Product UOM Manager</field>
+	        <field name="model_id" ref="product.model_product_uom"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+	     <!-- Access Rights Product Product -->
+	    <record model="ir.model.access" id="ir_access_product_product_chief">
+	        <field name="name">Access Product Product Chief</field>
+	        <field name="model_id" ref="product.model_product_product"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+	    <record model="ir.model.access" id="ir_access_product_product_manager">
+	        <field name="name">Access Product Product Manager</field>
+	        <field name="model_id" ref="product.model_product_product"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+	    
+	    <!-- Access Rights Stock Picking -->
+	    <record model="ir.model.access" id="ir_access_stock_picking_dept_chief">
+	        <field name="name">Access Stock Picking Dept Chief</field>
+	        <field name="model_id" ref="stock.model_stock_picking"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+		<record model="ir.model.access" id="ir_access_stock_picking_dept_manager">
+	        <field name="name">Access Stock Picking Dept Manager</field>
+	        <field name="model_id" ref="stock.model_stock_picking"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+	    
+	    <!-- Access Rights Super Notes -->
+	    <record model="ir.model.access" id="ir_access_super_notes_dept_chief">
+	        <field name="name">Access Stock Picking Dept Chief</field>
+	        <field name="model_id" ref="sbm_inherit.model_super_notes"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+		<record model="ir.model.access" id="ir_access_super_notes_dept_manager">
+	        <field name="name">Access Stock Picking Dept Manager</field>
+	        <field name="model_id" ref="sbm_inherit.model_super_notes"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+	    <!-- Access Rights HR Department -->
+	    <record model="ir.model.access" id="ir_access_hr_department_dept_chief">
+	        <field name="name">Access HR Department Dept Chief</field>
+	        <field name="model_id" ref="hr.model_hr_department"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+		<record model="ir.model.access" id="ir_access_hr_department_dept_manager">
+	        <field name="name">Access HR Department Dept Manager</field>
+	        <field name="model_id" ref="hr.model_hr_department"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+
+	    <!-- Access Rights Stock Location -->
+	    <record model="ir.model.access" id="ir_access_stock_location_dept_chief">
+	        <field name="name">Access Stock Location Dept Chief</field>
+	        <field name="model_id" ref="stock.model_stock_location"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+		<record model="ir.model.access" id="ir_access_stock_location_dept_manager">
+	        <field name="name">Access Stock Location Dept Manager</field>
+	        <field name="model_id" ref="stock.model_stock_location"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
+
+
+	    <!-- Access Rights Product Variant -->
+	    <record model="ir.model.access" id="ir_access_product_variant_dept_chief">
+	        <field name="name">Access Product Variants Dept Chief</field>
+	        <field name="model_id" ref="sbm_purchase.model_product_variants"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_chief"/>
+	    </record>
+
+		<record model="ir.model.access" id="ir_access_product_variants_dept_manager">
+	        <field name="name">Access Stock Location Dept Manager</field>
+	        <field name="model_id" ref="sbm_purchase.model_product_variants"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_jobdesc_position_dept_manager"/>
+	    </record>
     </data>
 </openerp>
 
