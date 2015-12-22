@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+	
+		<record id="student_tree_view" model="ir.ui.view">
+			<field name="name">student.tree</field>
+			<field name="model">student</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Student">
+					<field name="name" />
+					<field name="umur" />
+					<field name="alamat" />
+								
+				</tree>
+			</field>
+		</record>
+
+		<record id="student_form_view" model="ir.ui.view">
+			<field name="name">student.form</field>
+			<field name="model">student</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="student" version="7.0">
+									<!-- membuat header -->
+					<header>
+						<!-- <field name="state" widget="statusbar" clickable='True'  /> -->
+					</header>
+
+					<sheet>
+						<group>
+							<field name="name" attrs="{'readonly':[('state','not in',['draft','approve'])]}" />
+							<field name="umur" attrs="{'readonly':[('state','not in',['draft','approve'])]}"/>
+							<field name="alamat" attrs="{'readonly':[('state','not in',['draft','approve'])]}"/>
+							<field name="state" />	
+						</group>
+					</sheet>
+					
+					<div class="oe_chatter">
+						<field name="message_follower_ids" widget="mail_followers"/>
+						<field name="message_ids" widget="mail_thread"/>
+					</div>			
+				
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_student">
+			<field name="name">Student</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">student</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<menuitem name="Student" icon="terp-project" id="Student_menu"/>
+		<menuitem name="Student Info" parent="Student_menu" id="Student_submenu"/>
+		<menuitem name='Student' id='Student_menu_info'  parent="Student_submenu" action='action_student'/>
+
+
+		
+	</data>
+	
+
+</openerp>

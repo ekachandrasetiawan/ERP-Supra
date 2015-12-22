@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id='customer_invoice_supra' model='ir.ui.view'>
+			<field name="name">customer.invoice.supra</field>
+			<field name='model'>account.invoice</field>
+			<field name='type'>form</field>
+			<field name='inherit_id' ref='ad_account_finance.customer_invoice_supra'/>
+			<field name='arch' type='xml'>
+				<field name='faktur_pajak_no' position='replace'>
+				</field>
+
+				<field name='kwitansi' position='replace'>
+				</field>
+			</field>
+		</record>
+
+		<!-- <record id='kwitansi2' model='ir.ui.view'>
+			<field name="name">kwitansi2</field>
+			<field name='model'>account.invoice</field>
+			<field name='type'>form</field>
+			<field name='inherit_id' ref='ad_account_finance.faktur_pajak_supplier_form'/>
+			<field name='arch' type='xml'>
+				<field name='kwitansi' position='replace'>
+				</field>
+			</field>
+		</record> -->
+
+
+		<record id='sbm_faktur_inherit' model='ir.ui.view'>
+			<field name="name">sbm.faktur.inherit</field>
+			<field name='model'>account.invoice</field>
+			<field name='type'>form</field>
+			<field name='inherit_id' ref='account.invoice_form'/>
+			<field name='arch' type='xml'>
+
+				
+				<field name="date_invoice" position="attributes">
+					<attribute name="on_change">onchange_date_invoice(date_invoice,is_tax_replacement,tax_no_2)</attribute>
+				</field>
+				<!-- <field name="kwitansi" position="attributes">
+					<attribute name="attrs">{'readonly':[('state','not in',['draft'])]}</attribute>
+				</field>
+ -->
+ 				<!-- <field name='kwitansi' position='replace'>
+				</field> -->
+				<field name='journal_id' position='after'>
+					<field name='tax_transaction_type' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,False)"/>
+					<field name='is_tax_replacement' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'is_tax_replacement')" readonly="True"/>
+					<field name='tax_no_1' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'tax_no_1')"/>
+					<field name='tax_year' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,False)"/>
+					<field name='tax_no_2' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,tax_no_2)"/>
+					
+					<field name='kwitansi' attrs="{'readonly':[('state','not in',['draft'])]}"/>
+					<field name="faktur_pajak_no" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_format_faktur(faktur_pajak_no)"/>
+				</field>
+
+<!-- 
+				<field name='faktur_pajak_no' position='replace'>
+				</field> -->
+
+
+
+			</field>
+		</record>
+
+
+	</data>
+</openerp>
