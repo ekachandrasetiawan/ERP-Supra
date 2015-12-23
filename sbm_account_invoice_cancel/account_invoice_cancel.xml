@@ -20,7 +20,7 @@
 			<field name='inherit_id' ref="account.invoice_form"/>
 			<field name='arch' type='xml'>
 				<header position='inside'>
-					<button name='%(action_account_invoice_cancel_form)d' type='action' string='Cancel Wizard' />
+					<button name='%(action_account_invoice_cancel_form)d' type='action' string='Cancel Wizard' states='draft,submit,proforma' />
 				</header>
 			</field>
 			

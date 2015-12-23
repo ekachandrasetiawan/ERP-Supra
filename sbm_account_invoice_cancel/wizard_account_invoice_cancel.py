@@ -24,7 +24,7 @@ class wizard_acount_invoice(osv.osv_memory):
 		print ids,"======================================",datas
 		
 		# udpate account_invoice set cancel_reason='', cancel_stage='' where account_invoice.id=id
-		self.pool.get('account.invoice').write(cr,uid,context['active_id'],{'cancel_reason':datas.cancel_reason,'cancel_stage':datas.cancel_stage.id},context=context)
+		self.pool.get('account.invoice').write(cr,uid,context['active_id'],{'cancel_reason':datas.cancel_reason,'cancel_stage':datas.cancel_stage.id,'state':'cancel'},context=context)
 		# print datas.cancel_reason
 
 

@@ -59,10 +59,10 @@
 					<button name="actionPrintFaktur" string="Print Faktur" type="object"  class="oe_highlight" />
 					<button name="actionPrintKwitansi" string="Print Kwitansi" type="object"  class="oe_highlight" />
 
-					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','cancel','done'])]}" type="object" class="oe_highlight" />
+					<!-- <button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','cancel','done'])]}" type="object" class="oe_highlight" />
 
 					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" type="object" attrs="{'invisible':[('state','in',['draft','cancel'])]}" class="oe_highlight" />
-
+ -->
 					<button name="action_to_tax_replacement" string="Replace Tax" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','submited','done','paid','open'])]}" type="object"  class="oe_highlight" groups="sbm_inherit.group_customer_invoice_admin_supervisor" />
 					
 				</xpath>
