@@ -73,7 +73,7 @@ class student(osv.osv):
 		isAllow = False
 		data_sekarang = self.browse(cr,uid,ids,context=context)[0]
 		print data_sekarang.state
-
+		print values,"<<<<<<<<<<<<<<<<<<<<<< vvvaaalll"
 		if values.get('state'):
 			 #variable untuk tanda apa boleh di update atau tidak
 			state_baru = values['state']

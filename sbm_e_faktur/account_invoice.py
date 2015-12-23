@@ -18,7 +18,8 @@ class acount_invoice(osv.osv):
 		'is_tax_replacement':fields.boolean('Is a Tax Replacement'),
 		'tax_no_1':fields.char('Tax No 1',size=3),
 		'tax_year':fields.char('Year',size=4),
-		'tax_no_2':fields.char('Tax No 2',size=8)
+		'tax_no_2':fields.char('Tax No 2',size=8),
+		# 'partner_id':fields.many2one('res.partner','Customer',domain=['|','|',('customer','=', True),('is_company','=','True'),('child_ids.type','=','Invoice')])
 	}
 
 	_defaults={
@@ -32,10 +33,11 @@ class acount_invoice(osv.osv):
 	def _set_tax_year(self,cr,uid,ids,context={}):
 		return False
 
-	def onchange_date_invoice(self,cr,uid,ids,date_invoice,is_tax_replacement,tax_no_2):
+	def onchange_date_invoice(self,cr,uid,ids,date_invoice,is_tax_replacement,tax_no_2,need_date=True):
 		res={}
 		print date_invoice
 		print is_tax_replacement
+		print need_date, "<<<<<<<<<<<<<<<<<<"
 		tax_no_2 = tax_no_2 or '00000000'
 		if date_invoice:
 			month_tax = str(date_invoice[5:-3])
@@ -65,11 +67,17 @@ class acount_invoice(osv.osv):
 				month_tax='XI'
 			elif month_tax=='12':
 				month_tax='XII'
-		print str(date_invoice[-2:])
-		res['value'] ={
+			print str(date_invoice[-2:])
+			res['value'] ={
 			'tax_year':str(date_invoice[:4]),
 			'kwitansi':tax_no_2+'/'+'SBM'+'/'+month_tax+'/'+str(date_invoice[:4])
-		}
+			}
+		else:
+			if need_date:
+				print "AAAAAAAAAAAAAAAAA"
+				raise osv.except_osv(_('Warning'),_('Select Invoice Date'))
+
+		
 		
 		return res
 	def onchange_format_faktur(self, cr, uid, ids, no):
@@ -125,7 +133,10 @@ class acount_invoice(osv.osv):
 		print tax_no_1,"no1"
 		print tax_year,"year"
 		print tax_no_2,"no2"
-		
+		if tax_transaction_type == False:
+			raise osv.except_osv(_('Warning'),_('Tax Transaction Type Tidak Boleh Kosong'))
+
+
 		if date_invoice:
 			month_tax = str(date_invoice[5:-3])
 			print month_tax
@@ -161,6 +172,19 @@ class acount_invoice(osv.osv):
 				'kwitansi':tax_no_2+'/'+'SBM'+'/'+month_tax+'/'+str(date_invoice[:4])
 				# 'kwitansi':tax_no_2
 			}
+
+			#mengecek tax no 1
+			tax_no_1 = re.sub(r'\D','',tax_no_1)
+			if len(tax_no_1) < 3:
+				
+				raise osv.except_osv(_('Warning'),_('Tax No 1 harus 3 karakter dan merupakan angka'))
+			tax_no_2 = re.sub(r'\D','',tax_no_2)
+			if len(tax_no_2) < 8:
+				
+				raise osv.except_osv(_('Warning'),_('Tax No 2 harus 8 karakter dan merupakan angka'))
+			
+
+			
 			tax_year = re.sub(r'\D','',tax_year)
 			if len(tax_year) < 4 or int(tax_year) > 2030 or int(tax_year) <1900:
 				
@@ -172,18 +196,40 @@ class acount_invoice(osv.osv):
 				
 		else:
 			tax_year = re.sub(r'\D','',tax_year)
+			if tax_year == "":
+				tax_year="0"
+				tax_year = re.sub(r'\D','',tax_year)
+			# mengecek tax year
 			if len(tax_year) < 4 or int(tax_year) > 2030 or int(tax_year) <1900 :
 				
 				res ['value'] ={
 				
-				'tax_year':time.strftime('%Y')
+				'tax_year':""
 				
 			}
+			#mengecek tax no 1
+			tax_no_1 = re.sub(r'\D','',tax_no_1)
+			if len(tax_no_1) < 3:
+				
+				raise osv.except_osv(_('Warning'),_('Tax No 1 harus 3 karakter dan merupakan angka'))
+
+			tax_no_2 = re.sub(r'\D','',tax_no_2)
+			if len(tax_no_2) < 8:
+				
+				raise osv.except_osv(_('Warning'),_('Tax No 2 harus 8 karakter dan merupakan angka'))
+			
 
 			if need_date:
-
+				# res ['value'] ={
+				
+				# 'tax_year':""
+				# }
 				print "AAAAAAAAAAAAAAAAA"
-				raise osv.except_osv(_('Warning'),_('Select Invoice Date'))
+				# raise osv.except_osv(_('Warning'),_('Select Invoice Date'))
+				res['warning'] ={
+					'title':'WARNING',
+					'message':'PLEASE SELECT INVOICE DATE BEFORE DOING THIS !!!'
+				}
 		print res
 		
 		return res
@@ -247,3 +293,5 @@ class account_invoice_line(osv.osv):
 
 		print res
 		return res
+
+
