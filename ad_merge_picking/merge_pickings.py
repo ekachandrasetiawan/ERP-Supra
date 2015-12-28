@@ -112,7 +112,8 @@ class merge_pickings(osv.osv_memory):
 			'pajak': today_rate,
 		})
 
-						 
+		batched_product = {}
+		batched_qty_total = {}			 
 		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
 			pool_picking.write(cr, uid, [picking.id], {'invoice_state': 'invoiced', 'invoice_id': invoice_id}) 
 			for move_line in picking.move_lines:
@@ -130,6 +131,44 @@ class merge_pickings(osv.osv_memory):
 				 
 				origin = picking.origin +':'+ (picking.name).strip()
 				#origin = (picking.delivery_note).strip() +';'+ (picking.name).strip()
+
+				if move_line.product_id.track_incoming or move_line.product_id.track_outgoing:
+					if not batched_product.get(move_line.sale_line_id.id):
+						batched_product.update({move_line.sale_line_id.id:{}})
+						
+
+					if not batched_qty_total.get(move_line.sale_line_id.id):
+						batched_qty_total[move_line.sale_line_id.id] = 0
+
+					batched_qty_total[move_line.sale_line_id.id] += move_line.product_qty
+
+					_logger.error('roductttttt -----------%s',move_line.product_id.name_template)
+
+					if not batched_product.get(move_line.sale_line_id.id):
+						_logger.error('no exist get----------------------------------------------------------- %s',move_line.sale_line_id.id)
+						batched_product.update({move_line.sale_line_id.id:{}})
+
+					batched_product[move_line.sale_line_id.id].update({
+						'name': "["+move_line.product_id.default_code+"] "+move_line.product_id.name_template,
+						'invoice_id': invoice_id,
+						'picking_id': picking.id,
+
+						'product_id':move_line.product_id.id,
+						'quantity':batched_qty_total[move_line.sale_line_id.id],
+
+						'origin': origin,
+						'uos_id': move_line.product_uos.id or move_line.product_uom.id,
+						'price_unit': price_unit,
+						'discount': discount,
+						'invoice_line_tax_id': [(6, 0, tax_ids)],
+						'account_analytic_id': pool_picking._get_account_analytic_invoice(cr, uid, picking, move_line),
+						'account_id': self.pool.get('account.fiscal.position').map_account(cr, uid, partner_obj.property_account_position, line_account_id),
+						'amount_discount':disc_amount
+
+					})
+
+					_logger.error('Batched Product to be %s',batched_product)
+					continue; #next loop for canceling creating invoice line
 				if picking.note_id:
 					# search op line id by move line ID
 					
@@ -178,7 +217,7 @@ class merge_pickings(osv.osv_memory):
 							cr, uid, 
 							{
 								# 'name': picking.origin +':'+ (picking.name).strip(), #move_line.name,
-								'name': move_line.name,
+								'name': name_inv_line,
 								'picking_id': picking.id,
 								'origin': origin,
 								'uos_id': move_line.product_uos.id or move_line.product_uom.id,
@@ -213,6 +252,11 @@ class merge_pickings(osv.osv_memory):
 							'amount_discount':disc_amount
 						}
 					)
+		if batched_product:
+			for batch in batched_product:
+				_logger.error('BATTTTTTTTTTTTTT >>>>>>>>>>>>>>>>>>>>>>>>>>>>%s',batch)
+				invline_id = pool_invoice_line.create(cr,uid,batched_product[batch])
+				
 		pool_invoice.button_compute(cr, uid, [invoice_id], context=context, set_total=False)           
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'account', "invoice_form")
 		if data.type == 'in':
