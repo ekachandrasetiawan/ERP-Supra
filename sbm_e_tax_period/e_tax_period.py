@@ -7,6 +7,23 @@ class account_invoice(osv.osv):
 	def _get_month(self,date,date_format='%Y-%m-%d'):
 		date_obj = datetime.strptime(date,date_format)
 		return date_obj.strftime('%m')
+	
+	def onchange_format_faktur(self, cr, uid, ids, no):
+		no = no.replace('.','').replace('-','')
+
+		try:
+			int(no)
+			if len(no) == 16:
+				value = list(no)
+				value.insert(3, '.')
+				value.insert(7, '-')
+				value.insert(10, '.')
+				result = "".join(value)
+				return {'value': {'faktur_pajak_no': result}}
+			else:
+				return {'warning': {"title": _("Perhatian"), "message": _("Nomor faktur pajak harus 16 digit")}, 'value': {'faktur_pajak_no': False}}
+		except:
+			return {'warning': {"title": _("Perhatian"), "message": _("Masukan 16 digit angka tanpa separator")}, 'value': {'faktur_pajak_no': False}}
 		
 
 	def onchange_date_invoice(self,cr,uid,ids,date):
@@ -21,10 +38,14 @@ class account_invoice(osv.osv):
 		'tax_period': fields.selection(PERIODS,string="Tax Period"),
 	}
 
-
+	"""
+	action_to_tax_replacement
+	@override from sbm_inherit.action_to_tax_replacement (account.invoice)
+	"""
 	def action_to_tax_replacement(self,cr,uid,ids,context={}):
 		res = False
 		invs = self.browse(cr,uid,ids,context=context)
+		order_obj = self.pool.get('sale.order')
 		newids = []
 		for inv in invs:
 			picking_ids = [(6,0, [pick.id]) for pick in inv.picking_ids]
@@ -32,6 +53,7 @@ class account_invoice(osv.osv):
 			invoice_lines =  [(0, 0, self.pool.get('account.invoice.line').copy_data(cr,uid,line.id,{'invoice_id':False},context=context)) for line in inv.invoice_line]
 
 			
+			# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<----",res_order
 
 			# newid = self.copy(cr,uid,inv.id,default=default,context=context)
 			# override copy new
@@ -51,6 +73,12 @@ class account_invoice(osv.osv):
 			self.write(cr,uid,[inv.id],{'state':'cancel'})
 			# new faktur  number
 			self.write(cr,uid,newid,{'faktur_pajak_no':fp_no,'tax_invoice_origin_id':inv.id,'tax_period':self._get_month(inv.date_invoice)})
+
+
+			res_order = order_obj.search(cr,uid,[('invoice_ids','in',[inv.id])])
+			if res_order:
+				order_obj.browse(cr,uid,res_order)
+			raise osv.except_osv(_('Error'),_('ERROR'))
 
 		mod_obj = self.pool.get('ir.model.data')
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
