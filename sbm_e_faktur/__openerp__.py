@@ -2,7 +2,7 @@
     "name": "Account Invoice Tax",
     "version": "1.0",
     "depends": [
-      
+        "sbm_e_tax_period",
         "account",
         'ad_account_finance',
         "web"
