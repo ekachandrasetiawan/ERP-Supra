@@ -27,7 +27,7 @@
 					<field name="uos_id" class="oe_inline" groups="product.group_uom" on_change="uos_id_change(product_id, uos_id, quantity, name, parent.type, parent.partner_id, parent.fiscal_position, price_unit, parent.currency_id, context, parent.company_id)" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" />
 				</field>
 				<field name="price_unit" position="replace">
-					<field name="price_unit" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}"/>
+					<field name="price_unit" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" />
 				</field>
 				<field name="discount" position="replace">
 					<field name="discount" attrs="{'readonly':[('state','in',['proforma','proforma2','open','done'])]}" on_change="replace_discount(quantity,price_unit,discount)"/>
@@ -63,7 +63,7 @@
 
 					<button name="actionInvoiceRefund" string="Invoice Refund" domain="[('type','=','out_refund')]" type="object" attrs="{'invisible':[('state','in',['draft','cancel'])]}" class="oe_highlight" />
 
-					<button name="action_to_tax_replacement" string="Replace Tax" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','submited','done','paid','open'])]}" type="object"  class="oe_highlight" groups="sbm_inherit.group_customer_invoice_admin_supervisor" />
+					<button name="action_to_tax_replacement" string="Replace Tax" domain="[('type','=','out_refund')]" attrs="{'invisible':[('state','in',['draft','submited','done','paid'])]}" type="object"  class="oe_highlight" groups="sbm_inherit.group_customer_invoice_admin_supervisor" />
 					
 				</xpath>
 				<xpath expr="//field[@name='user_id']" position="replace">
