@@ -140,6 +140,8 @@ class account_invoice(osv.osv):
         return True
 
     def onchange_format_faktur(self, cr, uid, ids, no):
+        print no
+        print "Len ->",len(no)
         try:
             int(no)
             if len(no) == 16:
