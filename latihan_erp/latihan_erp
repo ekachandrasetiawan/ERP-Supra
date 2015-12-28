@@ -1,0 +1,27 @@
+from datetime import datetime
+from stock import stock
+import math
+import time
+import webbrowser
+import netsvc
+import openerp.exceptions
+from osv import osv, fields
+from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
+
+class absensi(osv.osv):
+	_name = 'absensi'
+	_description = 'absensi'
+	_columns = {
+		'name':fields.char('Name',required=True),
+		'employee_id':fields.many2one('hr.employee','Employee',required=True,ondelete='cascade',onupdate='cascade'),
+		
+		'datetime':fields.date('Date',required=True),
+		
+		'state':fields.selection([('draft','Draft'),('approve','Approved'),('done','Done')],string="State"),
+		
+	}
+	_defaults={
+		'datetime':time.strftime('%Y-%m-%d'),
+		'state':'draft'
+	}

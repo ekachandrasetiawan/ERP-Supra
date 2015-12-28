@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+	
+		<record id="diary_tree_view" model="ir.ui.view">
+			<field name="name">diary.tree</field>
+			<field name="model">diary</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Internal Move absen">
+					<field name="judul" />
+					<field name="tanggal" />
+					<field name="catatan" />
+								
+				</tree>
+			</field>
+		</record>
+
+		<record id="diary_form_view" model="ir.ui.view">
+			<field name="name">diary.form</field>
+			<field name="model">diary</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Internal Move absen" version="7.0">
+									<!-- membuat header -->
+					<header>
+						<button name="diary_confirm" states="draft" string="Confirm" icon="gtk-apply"/>
+						<button name="diary_cancel" states="confirmed" string="Cancel" icon="gtk-cancel"/>
+						<button name="diary_validate" states="confirmed" string="Validate" icon="gtk-jump-to"/>
+					</header>
+
+					<sheet>
+						<group>
+							<field name="judul" />
+							<field name="tanggal" />
+							<field name="catatan" />
+							<!-- <field name="state" />	 -->
+						</group>
+					</sheet>				
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_diary">
+			<field name="name">Internal Move Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">diary</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<menuitem name='diary' id='diary_menu' action='action_diary'/>
+	</data>
+	
+
+</openerp>
