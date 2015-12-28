@@ -17,6 +17,23 @@
 			</field>
 		</record>
 
+
+			<record id='invoice_repund_replace' model='ir.ui.view'>
+			<field name="name">invoice.repund.replace</field>
+			<field name='model'>account.invoice</field>
+			<field name='type'>form</field>
+			<field name='inherit_id' ref='account.invoice_form'/>
+			<field name='arch' type='xml'>
+				<button name='actionInvoiceRefund' position='replace'>
+				</button>
+				<button name='actionInvoiceRefund' position='replace'>
+				</button>
+
+
+				
+			</field>
+		</record> -->
+
 		<!-- <record id='kwitansi2' model='ir.ui.view'>
 			<field name="name">kwitansi2</field>
 			<field name='model'>account.invoice</field>
