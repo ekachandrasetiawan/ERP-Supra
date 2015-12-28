@@ -170,8 +170,10 @@ class sale_order_line(osv.osv):
  
 
 	def replace_discount(self,cr,uid,ids,qty,price, disc):
+
 		subtotal = qty*price
-		nilai = (subtotal*disc)/100
+		nilai = (subtotal*disc)/100.00
+		print nilai,'------------------'
 		return {'value':{ 'discount_nominal':nilai} }
 
 	def on_change_price_unit(self,cr,uid,ids,price):
