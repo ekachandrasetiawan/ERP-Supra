@@ -33,9 +33,10 @@ class acount_invoice(osv.osv):
 	def _set_tax_year(self,cr,uid,ids,context={}):
 		return False
 
-	def onchange_date_invoice(self,cr,uid,ids,date_invoice,is_tax_replacement,tax_no_2,need_date=True):
+	def onchange_date_invoice(self,cr,uid,ids,date_invoice,is_tax_replacement='01',tax_no_2=False,need_date=True):
 		res={}
-		print date_invoice
+		print "++++++++++++++++++++++++++++++++++++++++++++++++====================================================="
+		print date_invoice,"---",uid,"----",ids
 		print is_tax_replacement
 		print need_date, "<<<<<<<<<<<<<<<<<<"
 		tax_no_2 = tax_no_2 or '00000000'
@@ -77,7 +78,7 @@ class acount_invoice(osv.osv):
 				print "AAAAAAAAAAAAAAAAA"
 				raise osv.except_osv(_('Warning'),_('Select Invoice Date'))
 		return res
-	
+
 	def onchange_format_faktur(self, cr, uid, ids, no):
 		# filter dulu no ,, buang selain string nomor
 		print no
