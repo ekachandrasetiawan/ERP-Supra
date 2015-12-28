@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="res.groups" id="group_force_so_to_draft">
+			<field name="category_id" ref="base.module_category_hidden"/>
+			<field name="name">Force Sale Order to Draft</field>
+		</record>
+
+		<record id="sale_order_force_draft_form" model="ir.ui.view">
+			<field name="name">sale.order.force.draft.form</field>
+			<field name="model">sale.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="sale.view_order_form" />
+			<field name="arch" type="xml">
+				<header position="inside">
+					<button type="object" name="action_force_to_draft" attrs="{'invisible':[('state','in',['draft','cancel'])]}" string="Foced to Draft" confirm="Are You Sure ?" groups="admin_force_draft.group_force_so_to_draft,base.group_no_one" />
+
+
+					<button type="object" name="action_force_back" attrs="{'invisible':[('state','not in',['draft'])]}" string="Foced to Draft" groups="admin_force_draft.group_force_so_to_draft,base.group_no_one" />
+				</header>
+			</field>
+		</record>
+	</data>
+</openerp>
