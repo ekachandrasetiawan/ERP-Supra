@@ -76,10 +76,8 @@ class acount_invoice(osv.osv):
 			if need_date:
 				print "AAAAAAAAAAAAAAAAA"
 				raise osv.except_osv(_('Warning'),_('Select Invoice Date'))
-
-		
-		
 		return res
+	
 	def onchange_format_faktur(self, cr, uid, ids, no):
 		# filter dulu no ,, buang selain string nomor
 		print no

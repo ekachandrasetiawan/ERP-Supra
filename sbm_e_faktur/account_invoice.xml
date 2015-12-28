@@ -38,7 +38,7 @@
 
 				<!-- actionInvoiceRefund -->
 				<field name="date_invoice" position="attributes">
-					<attribute name="on_change">onchange_date_invoice(date_invoice,is_tax_replacement,tax_no_2,date_invoice)</attribute>
+					<attribute name="on_change">onchange_date_invoice(date_invoice,is_tax_replacement,tax_no_2,'True')</attribute>
 					<attribute name="required">"True"</attribute>
 				</field>
 
@@ -54,7 +54,7 @@
 			<!-- 	<xpath expr="//button[@string='Print Kwitansi']" position="after">
 				<button name='actionInvoiceRefund' position='replace'>
 				</button> -->
-				</xpath>
+				<!-- </xpath> -->
 				<field name='journal_id' position='after'>
 					<field name='tax_transaction_type' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,False)"/>
 					<field name='is_tax_replacement' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'is_tax_replacement')" readonly="True"/>
