@@ -35,6 +35,7 @@ class sale_order(osv.osv):
 			data = self.pool.get('account.tax').compute_all(cr, uid, line.tax_id, harga, 1, line.product_id, line.order_id.partner_id)['taxes']
 		for c in data:
 			val += c.get('amount', 0.0)
+		print "**************************************************000000000000000000000000000000",val
 		return val
 
 	def _get_order(self, cr, uid, ids, context=None):
@@ -63,14 +64,17 @@ class sale_order(osv.osv):
 				# Rounding Tax dan Subtotal 
 				for line in order.order_line:
 					val1 += round(line.price_subtotal)
+
+					print "------------------------------------->>>>>>>>>>>>>>>>>>>>"
 					val += round(self._amount_line_tax(cr, uid, line, context=context))
 
 				pajak =round((val1*10)/100)
 
-				if pajak==val:
-					val=val
-				else:
-					val=pajak
+				# if pajak==val:
+				# 	val=val
+				# else:
+				# 	val=pajak
+				#issue
 				# print '===1=====================',val1
 				# print '===2=====================',val
 				# print '===3=====================',pajak
@@ -78,7 +82,7 @@ class sale_order(osv.osv):
 				for line in order.order_line:
 					val1 += line.price_subtotal
 					val += self._amount_line_tax(cr, uid, line, context=context)
-					
+			print val,"&&&&&&&&&&&&&&&&&",val1
 			res[order.id]['amount_tax'] = cur_obj.round(cr, uid, cur, val)
 			res[order.id]['amount_untaxed'] = cur_obj.round(cr, uid, cur, val1)
 			res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] + res[order.id]['amount_tax']
