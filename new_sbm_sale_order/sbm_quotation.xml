@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record model="res.groups" id="new_sales_supra">
+			<field name="name">New Sales Supra</field>
+			<field name="category_id" ref="base.module_category_sales_management"/>
+			<field name="menu_access" eval="[(6,0,[ref('sale.menu_sale_order'),ref('base.menu_base_partner')])]" />
+		</record>
+
+		<record model="res.groups" id="new_sales_admin">
+			<field name="name">New Sales Admin</field>
+			<field name="category_id" ref="base.module_category_sales_management"/>
+			<field name="menu_access" eval="[(6,0,[529,531,ref('sbm_inherit.mr_menu_sales'),ref('base.menu_sales'),ref('sale.menu_sale_order'),ref('base.menu_base_partner'),ref('product.menu_products'),ref('stock.menu_action_picking_tree4'),ref('sbm_inherit.mr_menu_ws'),ref('stock.menu_action_picking_tree'),ref('sbm_inherit.internal_move_req_sales_menu'),ref('ad_delivery_note.sale_minta_barang'),ref('sbm_inherit.speial_work_order_menu'),ref('sbm_inherit.speial_dn_menu'),ref('ad_perintah_kerja.sale_perintah_kerja'),ref('sbm_inherit.internal_move_sales_menu'),ref('ad_delivery_note.sale_delivery_note'),ref('base.menu_product')])]" />
+
+			<!-- <field name="menu_access" eval="[(6,0,[76])]"/> -->
+		</record>
+<!-- [ref('ir_ui_menu_id.id=529'), -->
+		<record model="res.groups" id="new_rmpsm">
+			<field name="name">New Sales RMPSM</field>
+			<field name="category_id" ref="base.module_category_sales_management"/>
+			
+		</record>
+
+		<record model="res.groups" id="new_direksi">
+			<field name="name">New Sales Direksi</field>
+			<field name="category_id" ref="base.module_category_sales_management"/>
+			
+		</record>
+
+		<!-- ref('base.menu_product'), -->
+		
+		<record model='ir.actions.act_window' id="wizard_win_quotation_form">
+			<field name="name">wizard.win.quotation.form</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">wizard.win.quotation</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="win_quotation_wizard"/>
+			<field name="target">new</field>
+		</record>
+
+		<record model='ir.actions.act_window' id="wizard_lost_quotation_form">
+			<field name="name">wizard.lost.quotation.form</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">wizard.lost.quotation</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="lost_quotation_wizard"/>
+			<field name="target">new</field>
+		</record>
+
+		<record model='ir.actions.act_window' id="wizard_revise_quotation_form">
+			<field name="name">wizard.revise.quotation.form</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">wizard.revise.quotation</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="revise_quotation_wizard"/>
+			<field name="target">new</field>
+		</record>
+
+		<record id="quotation_tree_view" model="ir.ui.view">
+			<field name="name">quotation.tree</field>
+			<field name="model">sale.order</field>
+			<field name="type">tree</field>
+			<!-- <field name="domain">[('quotation_state', '=', 'draft')]</field> -->
+			<field name="arch" type="xml">
+				<tree string="Quotation" >
+                   
+                    <field name="state" invisible="1"/>
+                    <field name="name" string="Quotation Number"/>
+                    <field name="date_order"/>
+                    <field name="partner_id"/>
+                    <field name="user_id"/>
+                    <field name="amount_total" sum="Total Tax Included"/>
+                    <field name="quotation_state"/>
+             
+                </tree>
+			</field>
+		</record>
+
+		<record id="quotation_form_view" model="ir.ui.view">
+			<field name="name">quotation.form</field>
+			<field name="model">sale.order</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="quotation" version="7.0">
+					<header>
+						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" />
+						<button name='%(wizard_win_quotation_form)d' type='action' string='Win' attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}"/>
+						<button name='%(wizard_lost_quotation_form)d' type='action' string='Lost' groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}"/>
+						<button name="cancel_quotation" type="object" string="Cancel" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" />
+						<button name='%(wizard_revise_quotation_form)d' type='action' string='Revise' groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}" confirm="Sure want to revise quotation?"/>
+	                    <field name="quotation_state" widget="statusbar" />
+               		</header>
+					<sheet>
+						<h1>
+                       		 <label string="Quotation " />	
+                       		 <field name="name" class="oe_inline" readonly="1"/>
+                    	</h1>
+						<group>
+							<group>
+								<field name="state" invisible="1"/>
+								<field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True), ('is_company', '=', True)]" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
+								<field name="partner_shipping_id" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery','search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
+								<field name="attention" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
+								<field name="partner_invoice_id" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice'}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
+							</group>
+						<group>
+							<field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>>
+							<field name="date_order" on_change="onchange_dateorder(date_order)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
+							<field name="user_id" on_change="getGroupByUser(user_id)" required="True" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" />
+							<field name="group_id" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" />
+						</group>
+						
+						</group>
+					<notebook>
+						<page string="Sale Items">
+							<field name="order_line" attrs="{'readonly':[('quotation_state','not in',['draft'])]}">
+								<form string="Form order line " version="7.0">
+								<!-- <header>
+										 <field name="state"  invisible='1'/>
+									</header> -->
+									<sheet>
+										<group>
+											<group>
+												<field name="product_id" on_change="onchange_product_quotation(product_id,product_uom_qty,product_uom)" />
+												<field name="name" />
+												<field name="product_uom_qty" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom)" />
+												<field name="product_uom" invisible="1"/>
+											</group>
+											<group>
+												<field name="price_unit" />
+												 <label for="discount"/>
+                                           			<div>
+                                            		    <field name="discount" />
+                                             		   <field name="discount_nominal" on_change="replace_discount(product_uom_qty,price_unit,discount)"/>
+                                            		</div>
+												<field name="tax_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','&lt;&gt;','purchase')]"/>
+												<field name="state" invisible="1" />
+											</group>
+										</group>
+										<notebook>
+											<page string="Material Line">
+												<field name="material_lines">
+													<tree editable="buttom">
+														<field name="product_id" string="Material Item" />
+														<field name="desc" string="Description" />
+														<field name="qty" />
+														<field name="uom" string="Unit" />	
+													</tree>
+												</field>
+											</page>
+										</notebook>
+									</sheet>
+								</form>
+								<tree>
+									<field name="product_id" string="Product / Item"/>
+									<field name="name" string="Description"/>
+									<field name="product_uom_qty" string="QTY" />
+									<field name="product_uom" string="Unit" />
+									<field name="price_unit" string="Price per Unit"/>
+									<field name="tax_id" string="Taxes" />
+									<field name="discount" string="Discount(%%)" />
+									<field name="discount_nominal" string="Discount (Amount)" />
+									<field name="price_subtotal" />
+									<field name="state" invisible="1" />
+								</tree>
+							</field>
+						</page>
+						<page string="Revision History">
+							<field name="revised_histories" readonly='1'>
+								<tree>
+									<field name="sale_order_id"/>
+									<field name="total"/>
+									<field name="revision_reason"/>
+									<field name="revised_on" string="date"/>
+								</tree>
+							</field>
+
+						</page>
+
+					</notebook>
+
+					</sheet>
+					
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_quotation">
+			<field name="name">Quotations</field>
+			<!-- <field name="type">ir.actions.act_window</field> -->
+			<field name="res_model">sale.order</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('state','=','draft')]</field> 
+
+			<!-- <field name="view_id" ref='quotation_form_view'/> -->
+			<!-- <field name="view_id" ref='quotation_tree_view'/> -->
+		</record>
+		<record model="ir.actions.act_window.view" id="act_hr_employee_tree_view">
+	    	<field eval="1" name="sequence"/>
+	    	<field name="view_mode">tree</field>
+	    	<field name="view_id" ref="quotation_tree_view"/>
+	    	<field name="act_window_id" ref="action_quotation"/>
+		</record>
+		<record model="ir.actions.act_window.view" id="act_hr_employee_form_view">
+		    <field eval="2" name="sequence"/>
+		    <field name="view_mode">form</field>
+		    <field name="view_id" ref="quotation_form_view"/>
+		    <field name="act_window_id" ref="action_quotation"/>
+
+		</record>
+		
+		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" />
+
+	</data>
+</openerp>
