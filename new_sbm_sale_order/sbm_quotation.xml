@@ -124,19 +124,29 @@
 									<sheet>
 										<group>
 											<group>
-												<field name="product_id" on_change="onchange_product_quotation(product_id,product_uom_qty,product_uom)" />
+												<field name="product_id" on_change="onchange_product_quotation(product_id,product_uom_qty,product_uom)" domain="[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')]" />
 												<field name="name" />
-												<field name="product_uom_qty" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom)" />
-												<field name="product_uom" invisible="1"/>
+												<!-- <field name="product_uom_qty" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom)" /> -->
+												  <label for="product_uom_qty"/>
+                                            <div>
+                                                <field context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'shop':parent.shop_id, 'uom':product_uom}" name="product_uom_qty" class="oe_inline" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom,price_unit,discount,tax_id)" />
+                                                <field name="product_uom" groups="product.group_uom" on_change="onchange_product_uom(product_id,product_uom)" class="oe_inline oe_no_button"/>
+                                            </div>
+												<!-- <field name="product_uom" invisible="1"/> -->
 											</group>
 											<group>
-												<field name="price_unit" />
+												<field name="price_unit" on_change="onchange_price_unit(product_uom_qty,price_unit,discount,discount_nominal,tax_id)"/>
 												 <label for="discount"/>
                                            			<div>
-                                            		    <field name="discount" />
-                                             		   <field name="discount_nominal" on_change="replace_discount(product_uom_qty,price_unit,discount)"/>
+                                            		    <field name="discount" on_change="replace_discount(product_uom_qty,price_unit,discount)" class="oe_inline" />
+                                            		     <label string="%%" />	
+                                             		   <field name="discount_nominal" on_change="onchange_diskon(product_uom_qty,price_unit,discount,discount_nominal,tax_id)"  class="oe_inline oe_no_button"/>
                                             		</div>
-												<field name="tax_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','&lt;&gt;','purchase')]"/>
+                                            	<field name="base_total"/>
+                                            	<field name="price_subtotal" />
+												<field name="tax_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','&lt;&gt;','purchase')]" on_change="onchange_price_unit(product_uom_qty,price_unit,discount,discount_nominal,tax_id)"/>
+
+												<field name="amount_tax"/>
 												<field name="state" invisible="1" />
 											</group>
 										</group>
@@ -147,7 +157,8 @@
 														<field name="product_id" string="Material Item" />
 														<field name="desc" string="Description" />
 														<field name="qty" />
-														<field name="uom" string="Unit" />	
+														<field name="uom" string="Unit" />
+														<field name="picking_location" />
 													</tree>
 												</field>
 											</page>
@@ -160,13 +171,26 @@
 									<field name="product_uom_qty" string="QTY" />
 									<field name="product_uom" string="Unit" />
 									<field name="price_unit" string="Price per Unit"/>
+									<field name="base_total"/>
 									<field name="tax_id" string="Taxes" />
+									
 									<field name="discount" string="Discount(%%)" />
 									<field name="discount_nominal" string="Discount (Amount)" />
 									<field name="price_subtotal" />
 									<field name="state" invisible="1" />
 								</tree>
 							</field>
+							 <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+
+                                <field name="base_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_untaxed" string="Sub Total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                 <field name="amount_tax" string="Tax" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <div class="oe_subtotal_footer_separator oe_inline">
+                                    <label for="amount_total"/>
+                                    <!-- <button name="button_dummy" states="draft,sent" string="(update)" type="object" class="oe_edit_only oe_link"/> -->
+                                </div>
+                                <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
 						</page>
 						<page string="Revision History">
 							<field name="revised_histories" readonly='1'>
@@ -179,17 +203,39 @@
 							</field>
 
 						</page>
+						<page string="Scope of Work">
+                        <separator string="PT. Supra Bakti Mandiri"/>
+                            <!-- <field name="scope_work_supra" nolabel="1"/> -->
+                            <field name="scope_work_supra_text"/>
+	                     <separator string="Customer"/>
+	                     	<!-- <field name="scope_work_customer" nolabel="1"/> -->
+	                     	<field name="scope_work_customer_text"/>
+	                     	<!-- <field name="payment_term"/> -->
+                    </page>
 
 					</notebook>
-
+					<group>
+						<group>
+							<form string="Form order line " version="7.0">
+								<field name="payment_term"/>
+								<field name="order_policy"/>
+								<field name="term_condition"/>
+								<field name="note" string="Note"/>
+							</form>
+						</group>
+						<group>
+							
+						</group>
+					</group>
 					</sheet>
+
 					
 				</form>
 			</field>
 		</record>
 
 		<record model="ir.actions.act_window" id="action_quotation">
-			<field name="name">Quotations</field>
+			<field name="name">RFQ</field>
 			<!-- <field name="type">ir.actions.act_window</field> -->
 			<field name="res_model">sale.order</field>
 			<field name="view_type">form</field>
@@ -213,7 +259,7 @@
 
 		</record>
 		
-		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" />
+		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" sequence="1"/>
 
 	</data>
 </openerp>
