@@ -365,7 +365,8 @@ class PurchaseOrderFullInvoice(osv.osv):
 # FOR FINANCE DISCOUNT AMOUNT
 class account_invoice_line(osv.osv):
 	def replace_discount(self,cr,uid,ids,qty,price, disc):
-		discount = ((qty*price)*disc)/100
+		
+		discount = ((qty*price)*disc)/100.0
 		return {'value':{ 'amount_discount':discount} }
 	def _amount_line(self, cr, uid, ids, prop, unknow_none, unknow_dict):
 		
@@ -842,6 +843,24 @@ class SaleOrder(osv.osv):
 
 
 class SaleOrderLine(osv.osv):
+	def replace_discount(self,cr,uid,ids,qty,price, disc):
+
+		subtotal = qty*price
+		nilai = (subtotal*disc)/100.00
+		print nilai,'------------------'
+		return {'value':{ 'discount_nominal':nilai} }
+
+
+	def on_change_product_uom_qty(self,cr,uid,ids,product_uom_qty,price_unit,discount):
+		res = {}
+		get_discount = self.replace_discount(cr,uid,ids,product_uom_qty,price_unit,discount)
+		discount_nominal = get_discount['value']['discount_nominal']
+
+
+		res['value'] = {'discount_nominal': discount_nominal,'product_uos_qty':product_uom_qty}
+
+		return res
+
 	_name = 'sale.order.line'
 	_inherit = 'sale.order.line'
 	_columns = {
@@ -2335,6 +2354,9 @@ class sale_advance_payment_inv(osv.osv_memory):
 	_inherit = "sale.advance.payment.inv"
 	_description = "Sales Advance Payment Invoice"
 
+	def _check_is_invoice_by_delivery_note_exist(self,cr,uid,sale_obj):
+		
+		return True
 
 	def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
 		if context is None:
@@ -2348,6 +2370,7 @@ class sale_advance_payment_inv(osv.osv_memory):
 
 		result = []
 		for sale in sale_obj.browse(cr, uid, sale_ids, context=context):
+			self._check_is_invoice_by_delivery_note_exist(ce,uid,ids,sale)
 			val = inv_line_obj.product_id_change(cr, uid, [], wizard.product_id.id,
 					uom_id=False, partner_id=sale.partner_id.id, fposition_id=sale.fiscal_position.id)
 			res = val['value']
@@ -2372,7 +2395,11 @@ class sale_advance_payment_inv(osv.osv_memory):
 				raise osv.except_osv(_('Incorrect Data'),
 					_('The value of Advance Amount must be positive.'))
 			if wizard.advance_payment_method == 'percentage':
-				inv_amount = sale.amount_total * wizard.amount / 100
+				if sale.amount_tax>0.0:
+					inv_amount = sale.amount_untaxed * wizard.amount / 100
+				else:
+					inv_amount = sale.amount_total * wizard.amount / 100
+
 				if not res.get('name'):
 					res['name'] = _("Advance of %s %%") % (wizard.amount)
 			else:
@@ -2408,7 +2435,7 @@ class sale_advance_payment_inv(osv.osv_memory):
 				'name': sale.client_order_ref or sale.name,
 				'origin': sale.name,
 				'type': 'out_invoice',
-				'reference': False,
+				'reference': sale.client_order_ref,
 				'account_id': sale.partner_id.property_account_receivable.id,
 				'partner_id': sale.partner_invoice_id.id,
 				'invoice_line': [(0, 0, inv_line_values)],
@@ -2418,5 +2445,10 @@ class sale_advance_payment_inv(osv.osv_memory):
 				'fiscal_position': sale.fiscal_position.id or sale.partner_id.property_account_position.id,
 				'group_id':sale.group_id.id,
 			}
+
+			if wizard.advance_payment_method == 'percentage':
+				inv_values['payment_for'] = 'dp'
+				inv_values['dp_percentage'] = wizard.amount
+
 			result.append((sale.id, inv_values))
 		return result
