@@ -49,8 +49,8 @@ class Purchase_Order_Sbm(osv.osv):
 	}
 	
 	def create(self, cr, uid, vals, context=None):
-		
-		if vals['jenis'] == 'loc-petty':
+		jenis = vals.get('jenis','loc')
+		if jenis == 'loc-petty':
 			vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.petty')
 		else:
 			vals['name']=int(time.time())

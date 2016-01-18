@@ -1,7 +1,7 @@
 {
     "name": "Purchase Suprabakti",
     "version": "1.0",
-    "depends": ["purchase","hr","product","sale","sbm_saleorder"],
+    "depends": ["purchase","hr","product","sale","sbm_saleorder",'sbm_inherit','ad_delivery_note'],
     "author": "Suprabakti Mandiri",
     "category": "Purchase Suprabakti",
     "description": """Modul ini digunakan untuk Menggolah Data Purchase""",

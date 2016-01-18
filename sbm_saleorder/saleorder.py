@@ -89,8 +89,16 @@ class WizardCreatePB(osv.osv_memory):
 		}
 		return so_item
 
-	def request_create_pb(self,cr,uid,ids,context=None):
+	def request_create_pb(self,cr,uid,ids,context={}):
 		val = self.browse(cr, uid, ids)[0]
+
+		user = self.pool.get('res.users').browse(cr,uid,uid,context)
+
+		if user.employee_ids:
+			employee_id = user.employee_ids[0].id
+		else:
+			employee_id = None
+
 		sale_order = self.pool.get("sale.order")
 		pembelian_barang = self.pool.get('pembelian.barang')
 		detail_pb = self.pool.get('detail.pb')
@@ -101,27 +109,33 @@ class WizardCreatePB(osv.osv_memory):
 			duedate=sale.due_date
 		else:
 			duedate=time.strftime("%Y-%m-%d")
-
+		print uid,"-----------------((((((((((((UIDD"
 		sid = pembelian_barang.create(cr, uid, {
 										'name':self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang'),
-										'employee_id': uid,
+										'employee_id': employee_id,
 										'spk_no':sale.client_order_ref,
 										'tanggal':time.strftime("%Y-%m-%d"),
 										'ref_pb':sale.client_order_ref,
 										'duedate':duedate,
-										'notes':sale.note
+										'notes':sale.note,
+										'state':'draft',
 									   })
-		
+		pp = pembelian_barang.browse(cr,uid,sid,context=context)
+		print pp.state,"<<<-------STATE"
+		print sid,"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX------------------------------------**********************************"
+
+		context.update(pb_change_state_to='draft')
 		for line in val.lines:
+
 			detail_pb.create(cr, uid, {
 										 'name':line.product_id.id,
 										 'detail_pb_id':sid,
-										 'part_number':line.product_id.default_code,
+										 'part_no':line.product_id.default_code,
 										 'jumlah_diminta':line.qty,
 										 'satuan':line.uom.id,
 										 'keterangan':line.description,
 										 'sale_line_ids':line.so_line_id.id
-										 })
+										 },context=context)
 
 
 		pool_data=self.pool.get("ir.model.data")
@@ -229,7 +243,7 @@ class WizardCreatePBSubcount(osv.osv_memory):
 			obj_prs_line.create(cr, uid, {
 										 'name':line.product_id.id,
 										 'detail_pb_id':sid,
-										 'part_number':line.product_id.default_code,
+										 'part_no':line.product_id.default_code,
 										 'jumlah_diminta':line.qty,
 										 'satuan':line.uom.id,
 										 'keterangan':line.description,
