@@ -365,7 +365,68 @@ class import_attendance_log(osv.osv):
 	_columns = {
 		'machine_id': fields.many2one('hr.attendance.machine',string="Machine"),
 		'data':fields.binary('File',required=True),
+		'state':fields.selection([('draft','Draft'),('done','Done'),('cancel','Cancel')],string="State"),
 	}
+
+	_defaults = {
+		'state':'draft'
+	}
+
+
+	# def check_is_log_exists(self,cr,uid,eid,datetime_log,context={}):
+
+	def import_uploaded_file(self,cr,uid,ids,context={}):
+		import base64
+		import csv
+		res = {}
+		
+		hr_employee = self.pool.get('hr.employee')
+		hr_att_log = self.pool.get('hr.attendance.log')
+
+		datas = self.browse(cr,uid,ids,context=context)
+
+		for data in datas:
+			updated = 0 #flag
+			splited_line = (base64.decodestring(data.data).splitlines())
+
+			splited_tab = [line.split('\t') for line in splited_line]
+			data_be_inserted = []
+			for spl in splited_tab:
+				# loop each line SPLITED IN LIST
+				# 0 = PIN
+				# 1 = TIME
+				# 2 - 5 STATE
+				att_pin = int(spl[0])
+				datetime_log = int(time.mktime(time.strptime(spl[1], '%Y-%m-%d %H:%M:%S')))
+
+
+				name = time.strftime('%Y/%m')+"/"+str(att_pin)+"/"+str(datetime_log)
+				employee_id = hr_employee.search(cr,uid,[('att_pin','=',att_pin)])
+				
+				if not hr_att_log.check_is_log_exists(cr,uid,att_pin,datetime_log,context=context) and employee_id:
+					print "ATT PIN ",att_pin, " Log ",datetime_log, " Is NOTTTTTTTTTTTTTT   Exists"
+					att_data = {
+						'name': name,
+						'employee_id': employee_id[0],
+						'att_pin': att_pin,
+						'datetime_log': datetime_log,
+						'm_verified': spl[2],
+						'm_status': spl[3],
+						'm_work_code': spl[4],
+						'state':'3',
+						'machine_id':data.machine_id.id,
+					}
+
+					hr_att_log.create(cr,uid,att_data,context=context)
+					updated = updated+1
+
+				else:
+					print "ATT PIN ",att_pin, " Log ",datetime_log, " Is Exists"
+			# print data_be_inserted
+			# hr_att_log.create(cr,uid,data_be_inserted,context=context)\]
+			if updated:
+				self.write(cr,uid,ids,{'state':'done'},context=context)
+		return res
 
 
 class hr_attendance_manual_reason(osv.osv):
