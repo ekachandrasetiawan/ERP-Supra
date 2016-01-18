@@ -85,10 +85,21 @@
 			<field name="type">form</field>
 			<field name="inherit_id" ref="hr.view_employee_form" />
 			<field name="arch" type="xml">
+
+				
+
 				<field name="active" position="before">
 					<field name="att_pin" />
 					<field name="attendance_type_id" />
 				</field>
+
+				<field name="active" position="after">
+					<button name="sync_employee_into_machine" type="object" string="Register User into Fingerprints" />
+					<button name="resign" type="object" string="Resign" />
+				</field>
+
+
+				
 			</field>
 		</record>
 

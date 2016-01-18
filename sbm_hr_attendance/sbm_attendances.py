@@ -43,6 +43,151 @@ class hr_employee(osv.osv):
 		'attendance_log': fields.one2many('hr.attendance.log','employee_id', string="Attendance Log", ondelete="RESTRICT",onupdate="RESTRICT")
 	}
 
+
+	def get_att_pin_machine(self,cr,uid,pin,machine_ids,context={}):
+		res = False
+		machine_obj = self.pool.get('hr.attendance.machine')
+		# machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0)])
+
+		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
+
+		headers = {
+			'Content-Type':'text/xml'
+		}
+
+		for machine in machines:
+			xml = """<GetUserInfo>
+				<ArgComKey Xsi:type="xsd:integer">{machine_key}</ArgComKey>
+				<Arg>
+					<PIN>{Pin}</PIN>
+				</Arg>
+			</GetUserInfo>""".format(machine_key=machine.key,Pin=pin)
+
+			response = machine_obj._request_to_machine(cr, uid, machine.ip, headers, xml, context=context)
+			print "--------------------------------",response
+			log_tree = ET.fromstring(response)
+			dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
+
+			print "JSONNNNNN--->>>",dictResponse
+			dictRowsResponse = dictResponse['GetUserInfoResponse']
+			res = dictRowsResponse
+
+
+		return res
+
+
+	# upload user info into machines
+	def sync_employee_into_machine(self,cr,uid,ids,context={}):
+		machine_obj = self.pool.get('hr.attendance.machine')
+		machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0)])
+
+		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
+
+		headers = {
+			'Content-Type':'text/xml'
+		}
+
+
+		employees = self.browse(cr,uid,ids,context=context)
+		exists = []
+		for emp in employees:
+			emp_att_pin = emp.att_pin
+			for mac in machines:
+				if not emp.att_pin:
+					self.write(cr,uid,ids,{'att_pin':emp.id},context=context)
+					emp_att_pin = emp.id
+				if emp_att_pin:
+
+					if not self.get_att_pin_machine(cr,uid,emp_att_pin,[mac.id]):
+						# print "777777777777777777777777777777777777777777777777777777777777777777777"
+						print "GET INNNNN ",emp_att_pin
+						xml = """<SetUserInfo>
+							<ArgComKey Xsi:type="xsd:integer">{machine_key}</ArgComKey>
+							<Arg>
+								<PIN>{Pin}</PIN>
+								<Name>{Name}</Name>
+							</Arg>
+						</SetUserInfo>""".format(machine_key=mac.key,Pin=emp_att_pin,Name=emp.name)
+
+						
+						response = machine_obj._request_to_machine(cr, uid, mac.ip, headers, xml, context=context)
+						
+						log_tree = ET.fromstring(response)
+						dictResponse = xmltodict.parse(response)
+						print dictResponse,"XXXXXXXXXXXXXXXXXXXXXX----"
+						# dictRowsResponse = dictResponse['Set']
+					else:
+						exs = {'machine_id':mac.id,'pin':emp_att_pin,'machine_name':mac.name}
+						exists.append(exs)
+					# response = machine_obj._request_to_machine(cr, uid, mac.ip, headers, xml, context=context)
+				
+		if exists:
+			msg = 'Some machine already has user data \r\n'
+			msgs = ['User pin '+str(ii['pin'])+' Exist in Machine '+ii['machine_name']+'\r\n' for ii in exists]
+
+			msg = msg+''.join(msgs)
+			print msg,"=++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			return {'warning':{'title':'Sync Employee Data Info','message':msg}}
+		return True
+
+	def resign(self,cr,uid,ids,context={}):
+		emps = self.browse(cr,uid,ids,context=context)
+
+
+		machine_obj = self.pool.get('hr.attendance.machine')
+		machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0)])
+
+		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
+		for emp in emps:
+			if self.write(cr,uid,emp.id,{'active':False}):
+				if not self.delete_att_pin_machine(cr,uid,emp.att_pin,machine_ids,context=context):
+					raise osv.except_osv(_('Failed!'),_('Failed to delete user on finger!'))
+
+		return True
+
+	def delete_att_pin_machine(self,cr,uid,pin,machine_ids,context={}):
+		res = False
+		machine_obj = self.pool.get('hr.attendance.machine')
+		# machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0)])
+
+		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
+
+		headers = {
+			'Content-Type':'text/xml'
+		}
+
+		for machine in machines:
+			if machine.id == 6:
+				
+				context['att_pin'] = pin
+				machine_obj.stream_data_http(cr,uid,[machine.id],context=context)
+
+
+				xml = """<DeleteUser>
+					<ArgComKey Xsi:type="xsd:integer">{machine_key}</ArgComKey>
+					<Arg>
+						<PIN>{Pin}</PIN>
+					</Arg>
+				</DeleteUser>""".format(machine_key=machine.key,Pin=pin)
+
+				response = machine_obj._request_to_machine(cr, uid, machine.ip, headers, xml, context=context)
+				
+				log_tree = ET.fromstring(response)
+				dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
+
+				
+				dictRowsResponse = dictResponse['DeleteUserResponse']['Row']['Result']
+				print "DELETEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ",dictRowsResponse
+
+				if dictRowsResponse != '1':
+					res=False
+					raise osv.except_osv(_('Error'),_('Error to delete User Info on Machine !, Please Contact system administrator'))
+
+				res = True
+
+
+		return res
+
 	# use for check employee id on list (integer value)
 	def check_employee_ids_on_machine(self,cr,uid,ids,context={}):
 		res = {}
@@ -82,13 +227,19 @@ class hr_attendance_machine(osv.osv):
 
 	# @return xml from xml.etree
 	def _request_to_machine(self, cr, uid, machine_ip, headers, xml, context={}):
+		print "XML = ====== ",xml,machine_ip
+		print "HEADERSSSS ==== ",headers
 		req = urllib2.Request("http://"+machine_ip+"/iWsService",data=xml,headers=headers)
 		res = urllib2.urlopen(req)
 		response = res.read()
 		return response
 
+
+	# action to get attendance log
 	def stream_data_http(self,cr,uid,ids,context={}):
 		# print "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		Pin = context.get('att_pin','All')
+
 		hr_employee = self.pool.get('hr.employee')
 
 		machines = self.browse(cr,uid,ids,context=context)
@@ -96,13 +247,15 @@ class hr_attendance_machine(osv.osv):
 			'Content-Type':'text/xml'
 		}
 		for mac in machines:
+			print mac.ip
 			xml = """<GetAttLog><ArgComKey xsi:type="xsd:integer">{machine_key}</ArgComKey>
-			<Arg><PIN xsi:type="xsd:integer">All</PIN></Arg></GetAttLog>""".format(machine_key=mac.key)
+			<Arg><PIN xsi:type="xsd:integer">{Pin}</PIN></Arg></GetAttLog>""".format(machine_key=mac.key,Pin=Pin)
 			
 			response = self._request_to_machine(cr, uid, mac.ip, headers, xml, context=context)
-
+			print response,"XxXxXx-------------"
 			log_tree = ET.fromstring(response)
 			dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
+
 			dictRowsResponse = dictResponse['GetAttLogResponse']['Row'] #[0]['PIN']
 			uniq_eid = list(set(int(row['PIN']) for row in dictRowsResponse))
 			
@@ -123,9 +276,9 @@ class hr_attendance_machine(osv.osv):
 					xml_pin += """<Arg><PIN xsi:type="xsd:integer">{pin}</PIN></Arg>""".format(pin=not_av)
 				flag_to_act = False
 				xml_get_user = """<GetUserInfo>
-						<ArgComKey xsi:type="xsd:integer">78772</ArgComKey>
+						<ArgComKey xsi:type="xsd:integer">{machine_key}</ArgComKey>
 						{PINS}
-					</GetUserInfo>""".format(PINS=xml_pin)
+					</GetUserInfo>""".format(machine_key=mac.key,PINS=xml_pin)
 				res_get_user = self._request_to_machine(cr,uid, mac.ip, headers, xml_get_user,context=context)
 				dictResponseUser = xmltodict.parse(res_get_user) # JSON Formatted User INfo from machine
 
@@ -205,7 +358,6 @@ class hr_attendance_machine(osv.osv):
 			},
 		}
 		return res
-
 
 
 class hr_attendance_manual_reason(osv.osv):
