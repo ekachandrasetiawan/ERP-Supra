@@ -125,7 +125,8 @@
 			<field name="arch" type="xml">
 				<form string="Machine" version="7.0">
 					<header>
-						<button name="stream_data_http" type="object" string="Stream Data" />
+						<button name="stream_data_http" type="object" string="Stream Data" confirm="Sure want to Sync Data ?" />
+						<button name="clear_log_data" type="object" string="Clear Log Data" confirm="Sure Want to Clear All Log Data ?" />
 						<button name="openprint_min_max" type="object" string="Attendance History (Min Max)" />
 					</header>
 					<sheet>

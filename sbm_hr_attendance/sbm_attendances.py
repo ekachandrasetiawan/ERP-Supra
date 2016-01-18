@@ -235,6 +235,21 @@ class hr_attendance_machine(osv.osv):
 		return response
 
 
+	"""METHOD TO CLEAR LOG DATA
+	USING stream_data_http to secure data"""
+	def clear_log_data(self,cr,uid,ids,context={}):
+		
+		machines = self.browse(cr,uid,ids,context=context)
+		headers = {
+			'Content-Type':'text/xml'
+		}
+		self.stream_data_http(cr,uid,ids,context=context)
+		for mac in machines:
+
+			cmd = "<ClearData><ArgComKey xsi:type=\"xsd:integer\">"+mac.key+"</ArgComKey><Arg><Value xsi:type=\"xsd:integer\">3</Value></Arg></ClearData>"
+			response = self._request_to_machine(cr, uid, mac.ip, headers, cmd, context=context)
+		return True
+
 	# action to get attendance log
 	def stream_data_http(self,cr,uid,ids,context={}):
 		# print "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
