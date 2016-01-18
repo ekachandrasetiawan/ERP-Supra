@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="revise_quotation_wizard" model='ir.ui.view'>
+			<field name='name'>revise.quotation.wizard</field>
+			<field name='model'>wizard.revise.quotation</field>
+			<field name='type'>form</field>
+
+			<field name='arch' type='xml'>
+					<form string='Revise Quotation' version='7.0'>
+					
+						<sheet>
+							<group>
+								<field name='reason' required="True"/>
+							</group>
+						</sheet>
+						<footer>
+							<button name='confirm' type='object' string='Confirm' />
+						</footer>
+					</form>
+			</field>
+		</record>
+
+
+		
+	</data>
+</openerp>
