@@ -360,6 +360,14 @@ class hr_attendance_machine(osv.osv):
 		return res
 
 
+class import_attendance_log(osv.osv):
+	_name = 'hr.attendance.import.attendance.log'
+	_columns = {
+		'machine_id': fields.many2one('hr.attendance.machine',string="Machine"),
+		'data':fields.binary('File',required=True),
+	}
+
+
 class hr_attendance_manual_reason(osv.osv):
 	_name = 'hr.attendance.manual.reason'
 	_columns = {
