@@ -1,0 +1,43 @@
+<openerp>
+	<data>
+		<record id="import_log_absen_tree" model="ir.ui.view">
+			<field name="name">import.log.absen.tree</field>
+			<field name="model">hr.attendance.import.attendance.log</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="import log absen tree">
+					<field name="machine_id" />
+					<field name="data" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="import_log_absen_form" model="ir.ui.view">
+			<field name="name">import.log.absen.form</field>
+			<field name="model">hr.attendance.import.attendance.log</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="import log absen" version="7.0">
+					<sheet>
+						<group>
+							<field name="machine_id" />
+							<field name="data" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_import_log_absen">
+			<field name="name">Import Log Absen</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">hr.attendance.import.attendance.log</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+
+		<menuitem name="Import log absen" parent="sbm_hr_attendance.sbm_hr_attendance_menu" id="import_log_absen_id" action="action_import_log_absen" sequence="11"/>
+
+	</data>
+</openerp>
