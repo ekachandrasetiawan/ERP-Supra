@@ -12,7 +12,7 @@ class order_preparation(osv.osv):
 	_inherit = "order.preparation"
 	_description = "Order Packaging"
 	_columns = {
-		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=[('quotation_state','=', 'confirmed')], states={'draft': [('readonly', False)]}),
+		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=[('quotation_state','=', 'win')], states={'draft': [('readonly', False)]}),
 		'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=False, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
 	}
 
@@ -29,13 +29,25 @@ class order_preparation(osv.osv):
 			for x in data.order_line:
 				material_lines=self.pool.get('sale.order.material.line').search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
 				for y in self.pool.get('sale.order.material.line').browse(cr, uid, material_lines):
-					line.append({
-								 'product_id' : y.product_id.id,
-								 'product_qty': y.qty,
-								 'product_uom': y.uom.id,
-								 'name': y.desc,
-								 'sale_line_material_id':y.id
-					})
+
+					# Cek Material Line Dengan OP Line
+					nilai= 0
+					op_line=self.pool.get('order.preparation.line').search(cr,uid,[('sale_line_material_id', '=' ,y.id)])
+					for l in self.pool.get('order.preparation.line').browse(cr, uid, op_line):
+
+						# Cek Status OP 
+						op=self.pool.get('order.preparation').browse(cr, uid, [l.preparation_id.id])[0]
+						if op.state <> 'cancel':
+							nilai += l.product_qty
+
+					if nilai < y.qty:
+						line.append({
+									 'product_id' : y.product_id.id,
+									 'product_qty': y.qty - nilai,
+									 'product_uom': y.uom.id,
+									 'name': y.desc,
+									 'sale_line_material_id':y.id
+						})
 
 			res['prepare_lines'] = line
 			return  {'value': res}
