@@ -74,7 +74,7 @@ class order_preparation(osv.osv):
 				raise openerp.exceptions.Warning(msg)
 
 		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
-
+		
 order_preparation()
 
 class order_preparation_line(osv.osv):
