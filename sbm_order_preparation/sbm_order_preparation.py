@@ -51,7 +51,30 @@ class order_preparation(osv.osv):
 
 			res['prepare_lines'] = line
 			return  {'value': res}
-			
+
+
+	def preparation_confirm(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		for x in val.prepare_lines:
+
+			nilai= 0
+			op_line=self.pool.get('order.preparation.line').search(cr,uid,[('sale_line_material_id', '=' ,x.sale_line_material_id.id)])
+
+			for l in self.pool.get('order.preparation.line').browse(cr, uid, op_line):
+
+				op=self.pool.get('order.preparation').browse(cr, uid, [l.preparation_id.id])[0]
+				if op.state <> 'cancel':
+					nilai += l.product_qty
+			so_material_line=self.pool.get('sale.order.material.line').browse(cr, uid, [x.sale_line_material_id.id])[0]
+
+			mm = ' ' + so_material_line.product_id.default_code + ' '
+			msg = 'Product' + mm + 'Melebihi Order.!\n'
+
+			if nilai > so_material_line.qty:
+				raise openerp.exceptions.Warning(msg)
+
+		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
+
 order_preparation()
 
 class order_preparation_line(osv.osv):
