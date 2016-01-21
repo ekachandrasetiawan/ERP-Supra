@@ -21,7 +21,7 @@
               </button>
 
               <button name="preparation_done" position="replace">
-                <button name="preparation_done" type="object" states="approve" string="Validate" icon="gtk-apply" confirm="Are you sure to validate Order Preparation" groups="sbm_order_preparation.group_admin_ho"/>
+                <button name="preparation_done" type="object" states="approve" string="Validate" icon="gtk-apply" confirm="Are you sure to validate Order Preparation" groups="sbm_order_preparation.group_admin_warehouse"/>
               </button>
 
               <field name="picking_id" position="replace">
