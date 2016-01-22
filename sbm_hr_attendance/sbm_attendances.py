@@ -5,7 +5,6 @@ import json
 import socket
 import httplib, urllib2
 import telnetlib
-import requests
 import xmltodict
 from openerp import tools
 from openerp.tools.translate import _
@@ -79,7 +78,7 @@ class hr_employee(osv.osv):
 	# upload user info into machines
 	def sync_employee_into_machine(self,cr,uid,ids,context={}):
 		machine_obj = self.pool.get('hr.attendance.machine')
-		machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0)])
+		machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0),('ip','not like','0')])
 
 		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
 
@@ -362,7 +361,7 @@ class hr_attendance_machine(osv.osv):
 		res = False
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"attendance/index"
+		urlTo = str(browseConf.value)+"attendance/first-and-last-scan"
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
