@@ -24,11 +24,13 @@
         "wizard_revised_quotation.xml",
         "wizard_lost_quotation.xml",
         "sbm_quotation.xml",
+        # "reportview.xml",
         "file.sql"
        
     ],
     
     'installable': True,
     'active': False,
+    
     
 }
