@@ -27,9 +27,6 @@ class Pembelian_Barang(osv.osv):
 			operation = context.get('operation',False)
 			action_state = context.get('action_state',False)
 
-			# print '====aaaa=========',operation
-			# print '====bbbb=========',action_state
-
 			if line  == state_done :
 				res[data.id] = "done"
 
@@ -43,15 +40,6 @@ class Pembelian_Barang(osv.osv):
 				res[data.id] = "purchase"
 			elif action_state == "draft":
 				res[data.id] = "draft"
-			
-			# elif data.state=="draft":
-			# 	res[data.id] = "draft"
-			# elif data.state=="confirm":
-			# 	res[data.id] = "confirm"
-			# elif data.state=="confirm2":
-			# 	res[data.id] = "confirm2"
-			# elif data.state=="purchase":
-			# 	res[data.id] = "purchase"
 
 		return res
 
@@ -86,7 +74,6 @@ class Pembelian_Barang(osv.osv):
 		'product_id': fields.related('detail_pb_ids','name', type='many2one', relation='product.product', string='Product'),
 		'source_location_request_id': fields.many2one('stock.location', "Source Location", readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
-		# 'state': fields.selection(STATES,string="State"),
 		'state':fields.function(_getParentState,method=True,string="State",type="selection",selection=STATES,
 			store={
 				'pembelian.barang': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
