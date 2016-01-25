@@ -4,14 +4,6 @@ import netsvc
 from tools.translate import _
 from osv import osv, fields
 
-
-class purchase_order_line(osv.osv):
-	_inherit = 'purchase.order.line'
-	_columns = {
-		'line_pb_general_id':fields.many2one('detail.pb', 'Detail PB Umum'), #re call from sbm_purchaseorder
-	}
-
-
 class Pembelian_Barang(osv.osv):
 	
 	STATES = [
@@ -31,46 +23,25 @@ class Pembelian_Barang(osv.osv):
 			line = [x.id for x in data.detail_pb_ids]
 			state_done =[y.id for y in data.detail_pb_ids if y.state =="done"]
 
-			print state_done,"***",context
-
-
-			operation = context.get('operation',False)
-			if operation:
-				if operation=='create':
-					res[data.id] = 'draft'
-				else:
-					res[data.id]='draft'
-			else:
-				pb_change_state_to = context.get('pb_change_state_to',False)
-				if pb_change_state_to == 'check':
-					if state_done:
-						res[data.id] = 'done'
-				else:
-					res[data.id] = pb_change_state_to
-
-
-			# if line  == state_done :
-			# 	res[data.id] = "done"
-			# elif data.state=="draft":
-			# 	res[data.id] = "confirm"
-			# elif data.state=="confirm":
-			# 	res[data.id] = "confirm2"
-			# elif data.state=="confirm2":
-			# 	res[data.id] = "purchase"
-		print res,"res from _getParentState <<<<<<<<<<<<<<<<<<<<"
-
-		# raise osv.except_osv(_('Error'),_('EEEEEEEEEEEEEEEEEEEEE'))
+			if line  == state_done :
+				res[data.id] = "done"
+			elif data.state=="draft":
+				res[data.id] = "confirm"
+			elif data.state=="confirm":
+				res[data.id] = "confirm2"
+			elif data.state=="confirm2":
+				res[data.id] = "purchase"
 		return res
 
 
-	def _get_cek_state_detail_pb(self, cr, uid, ids, context={}):
+	def _get_cek_state_detail_pb(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('detail.pb').browse(cr, uid, ids, context=context):
 			result[line.detail_pb_id.id] = True
 		return result.keys()
 
 
-	def _get_cek_state_delivery_line(self, cr, uid, ids, context={}):
+	def _get_cek_state_delivery_line(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('order.requisition.delivery.line').browse(cr, uid, ids, context=context):
 			result[line.purchase_requisition_line_id.detail_pb_id.id] = True
@@ -113,7 +84,7 @@ class Pembelian_Barang(osv.osv):
 	}
 
 
-	def _employee_get(obj, cr, uid, context={}):
+	def _employee_get(obj, cr, uid, context=None):
 		if context is None:
 			context = {}
 
@@ -140,7 +111,7 @@ class Pembelian_Barang(osv.osv):
 
 
 
-	def action_cancel_item(self,cr,uid,ids,context={}):
+	def action_cancel_item(self,cr,uid,ids,context=None):
 		if context is None:
 			context = {}
 		
@@ -176,9 +147,8 @@ class Pembelian_Barang(osv.osv):
 		else:
 			return {'value':{'duedate':duedate}}
 		
-	def create(self, cr, uid, vals, context={}):
+	def create(self, cr, uid, vals, context=None):
 		# vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang')
-		print vals,"<<<<<<<<<<<<<<<<<<<<<<<<<<"
 		return super(Pembelian_Barang, self).create(cr, uid, vals, context=context)
 
 
@@ -188,56 +158,46 @@ class Pembelian_Barang(osv.osv):
 		return {'value':{ 'department_id':dept_id} }
 
 	
-	def submit(self,cr,uid,ids,context={}):
-		context.update(pb_change_state_to='confirm')
+	def submit(self,cr,uid,ids,context=None):
 		val = self.browse(cr, uid, ids)[0]
 		code = val.destination_location_request_id.code
 		no = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang') + 'PB/SBM/' + code + '/' + time.strftime('%y') + '/' + time.strftime('%m')
-		
-		return self.write(cr,uid,ids,{'state':'confirm','name':no},context=context)
+		return self.write(cr,uid,ids,{'state':'confirm','name':no})
 
-	def edit(self,cr,uid,ids,context={}):
-		context.update(pb_change_state_to='edit')
+	def edit(self,cr,uid,ids,context=None):
+		return self.write(cr,uid,ids,{'state':'edit'})
 
-		return self.write(cr,uid,ids,{'state':'edit'},context=context)
+	def setdraft(self,cr,uid,ids,context=None):
+		return self.write(cr,uid,ids,{'state':'draft'})
 
-	def setdraft(self,cr,uid,ids,context={}):
-		context.update(pb_change_state_to='draft')
-
-		return self.write(cr,uid,ids,{'state':'draft'},context=context)
-
-	def confirm3(self,cr,uid,ids,context={}):
-		context.update(pb_change_state_to='purchase')
-
+	def confirm3(self,cr,uid,ids,context=None):
 		val = self.browse(cr, uid, ids)[0]
 		obj_detail_pb=self.pool.get('detail.pb')
 		for detail in val.detail_pb_ids:
 			if detail.state == 'draft':
 				cr.execute('Update detail_pb Set state=%s Where id=%s', ('onproses',detail.id))
-		return self.write(cr,uid,ids,{'state':'purchase'},context=context)
+		return self.write(cr,uid,ids,{'state':'purchase'})
 
-	def confirm(self,cr,uid,ids,context={}):
-		context.update(pb_change_state_to='confirm2')
+	def confirm(self,cr,uid,ids,context=None):
 #		val = self.browse(cr, uid, ids)[0]
 #		usermencet = self.pool.get('res.user')
 #		if val.employee_id.parent_id.id != uid :
 #			raise osv.except_osv(('Perhatian..!!'), ('Harus Atasannya langsung ..'))
-		return self.write(cr,uid,ids,{'state':'confirm2'},context=context)
+		return self.write(cr,uid,ids,{'state':'confirm2'})
 
-	def confirm2(self,cr,uid,ids,context={}):
-		context.update(pb_change_state_to='purchase')
+	def confirm2(self,cr,uid,ids,context=None):
 #		val = self.browse(cr, uid, ids)[0]
 #		usermencet = self.pool.get('res.user')
 #		if val.employee_id.parent_id.id != uid :
 #			raise osv.except_osv(('Perhatian..!!'), ('Harus Atasannya langsung ..'))
 		cr.execute('Update detail_pb Set state=%s Where detail_pb_id=%s', ('onproses',ids[0]))
-		return self.write(cr,uid,ids,{'state':'purchase'},context=context)
+		return self.write(cr,uid,ids,{'state':'purchase'})
 
-	def purchase(self,cr,uid,ids,context={}):
+	def purchase(self,cr,uid,ids,context=None):
 		return self.write(cr,uid,ids,{'state':'done'})
 
 
-	def reportpb(self, cr, uid, ids, context={}):
+	def reportpb(self, cr, uid, ids, context=None):
 		if context is None:
 			context = {}
 		datas = {'ids': context.get('active_ids', [])}
@@ -256,7 +216,7 @@ Pembelian_Barang()
 
 class ClassName(osv.osv):
 	
-	def action_cancel_item(self,cr,uid,ids,context={}):
+	def action_cancel_item(self,cr,uid,ids,context=None):
 		if context is None:
 			context = {}
 		
@@ -287,7 +247,7 @@ class ClassName(osv.osv):
 
 class WizardPRCancelItem(osv.osv_memory):
 	
-	def default_get(self, cr, uid, fields, context={}):
+	def default_get(self, cr, uid, fields, context=None):
 		if context is None: context = {}
 		pb_ids = context.get('active_ids', [])
 		# print '====================',pb_ids
@@ -307,7 +267,7 @@ class WizardPRCancelItem(osv.osv_memory):
 		return res
 
 
-	def request_cancel(self,cr,uid,ids,context={}):
+	def request_cancel(self,cr,uid,ids,context=None):
 		print "CALLING request_cancel_item method"
 		data = self.browse(cr,uid,ids,context)[0]
 
@@ -333,7 +293,6 @@ WizardPRCancelItem()
 
 
 class Detail_PB(osv.osv):
-
 	STATES = [
 		('draft', 'Draft'),
 		('onproses', 'Confirm'),
@@ -353,40 +312,6 @@ class Detail_PB(osv.osv):
 			res[item.id] = hasil
 		return res
 
-
-	def _get_new_state_from_po_line_incoming_status(self,cr,uid,ids,context={}):
-		res = {}
-		
-		datas = self.browse(cr,uid,ids,context=context)
-		print datas,"KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKSSSSSSSSSSSSSSSSSS"
-		for data in datas:
-			total_received_items = 0;
-			for po_line in data.po_lines:
-				total_received_items += po_line.received_items
-
-			if total_received_items >= data.jumlah_diminta:
-				res[data.id] = 'done'
-			else:
-				res[data.id] = data.state
-
-
-		return res
-	def write(self,cr,uid,ids,vals,context={}):
-		old = self.browse(cr,uid,ids,context=context)
-
-		state_updated = vals.get('state',False)
-		if state_updated:
-			context.update(pb_change_state_to='check')
-			print state_updated,"------------------------------------------------"
-			if state_updated != 'draft' and state_updated != 'cancel':
-				new_state = self._get_new_state_from_po_line_incoming_status(cr,uid,ids,context=context)
-
-
-
-
-		print "CALLLLLLLL write detail_pb-->>>",vals,"-----",context
-		return super(Detail_PB,self).write(cr,uid,ids,vals,context=context)
-
 	def _get_qty_available(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
@@ -402,13 +327,13 @@ class Detail_PB(osv.osv):
 					self.write(cr,uid,ids,{'state':'onproses'})
 		return res
 
-	def _get_cek_po_line(self, cr, uid, ids, context={}):
+	def _get_cek_po_line(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
 			result[line.line_pb_general_id.id] = True
 		return result.keys()
 
-	def _get_cek_detail_pb(self, cr, uid, ids, context={}):
+	def _get_cek_detail_pb(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('detail.pb').browse(cr, uid, ids, context=context):
 			result[line.id] = True
@@ -425,7 +350,7 @@ class Detail_PB(osv.osv):
 			res[item.id] = hasil
 		return res
 
-	def _get_cek_delivery_item(self, cr, uid, ids, context={}):
+	def _get_cek_delivery_item(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('order.requisition.delivery.line').browse(cr, uid, ids, context=context):
 			result[line.purchase_requisition_line_id.id] = True
@@ -459,20 +384,17 @@ class Detail_PB(osv.osv):
 				res[data.id] = "proses"
 			elif nilai > 0 and data.state=="onproses":
 				res[data.id] = "onproses"
-			print res," _getParentState ON DETAIL PB ID"
-
-			# raise osv.except_osv(_('E'),_('E'))
 		return res
 
 
-	def _get_cek_state_detail_pb(self, cr, uid, ids, context={}):
+	def _get_cek_state_detail_pb(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('order.requisition.delivery.line').browse(cr, uid, ids, context=context):
 			result[line.purchase_requisition_line_id.id] = True
 		return result.keys()
 
 
-	def _get_cek_state_po_line(self, cr, uid, ids, context={}):
+	def _get_cek_state_po_line(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
 			result[line.line_pb_general_id.id] = True
@@ -510,7 +432,6 @@ class Detail_PB(osv.osv):
 				'order.requisition.delivery.line': (_get_cek_state_detail_pb, ['state'], 20),
 				'purchase.order.line': (_get_cek_state_po_line, ['state'], 20),
 			}),
-		'po_lines':fields.one2many('purchase.order.line','line_pb_general_id',string="PO Lines"),
 	}
 
 	_defaults = {'state': 'draft'}
@@ -536,7 +457,7 @@ class Detail_PB(osv.osv):
 		return res
 
 
-	def onchange_product_new(self, cr, uid, ids, name, satuan, context={}):
+	def onchange_product_new(self, cr, uid, ids, name, satuan, context=None):
 		if name:
 			product_id =self.pool.get('product.product').browse(cr,uid,name)
 			if product_id.categ_id.id == 105:
@@ -590,7 +511,7 @@ class Set_PO(osv.osv):
 	_defaults = {
 		'order_type': 1,
 	}
-	def create_po(self,cr,uid,ids,fiscal_position_id=False,context={}):
+	def create_po(self,cr,uid,ids,fiscal_position_id=False,context=None):
 		val = self.browse(cr, uid, ids)[0]
 		# Perhitangan Pajak
 		account_fiscal_position = self.pool.get('account.fiscal.position')
@@ -625,7 +546,7 @@ class Set_PO(osv.osv):
 										'location_id': 12,
 										'origin':detailpb,
 										'type_permintaan':'1',
-										'term_of_payment':val.name.term_payment or None
+										'term_of_payment':val.name.term_payment
 									   })
 		noline=1
 		for line in val.permintaan:
@@ -752,41 +673,3 @@ class Product_Variants(osv.osv):
 	}
 
 Product_Variants()
-
-class stock_picking_in(osv.osv):
-	_inherit = 'stock.picking'
-	# _table="stock_picking"
-
-	"""
-	do_partial
-	@inherit from sbm_inherit 
-
-	"""
-	def do_partial(self, cr, uid, ids, partial_datas, context=None):
-		pol_obj = self.pool.get('purchase.order.line')
-
-		res = super(stock_picking_in, self).do_partial(cr, uid, ids, partial_datas, context=context)
-
-		picks = self.browse(cr,uid,ids,context=context)
-		
-
-		for pick in picks:
-			pol_to_receive = {}
-			if pick.type == 'in':
-				for mv in pick.move_lines:
-					
-					pol_to_receive[mv.purchase_line_id.id] = partial_datas['move'+str(mv.id)].get('product_qty',0.0)
-
-				for po_l in pick.purchase_id.order_line:
-					# check each po lines are full received ?
-					print partial_datas,"PAA"
-					print po_l.received_items, "po l "
-					print po_l.line_pb_general_id.jumlah_diminta, " line_pb_general_id  ----"
-					total_received_items = po_l.received_items + pol_to_receive[po_l.id]
-					if total_received_items >= po_l.line_pb_general_id.jumlah_diminta:
-						print "write detail_pb to done",po_l.line_pb_general_id.id
-						pol_obj.write(cr,uid,[po_l.id],{'state':'done'},context=context)
-				
-
-		# raise osv.except_osv(_('Errror'),_('errr'))
-		return res
