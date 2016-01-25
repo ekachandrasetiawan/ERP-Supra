@@ -15,6 +15,9 @@ TermOfPayment()
 class TermOfPaymentPO(osv.osv):
 	_inherit = 'purchase.order'
 	_columns = {
-		'term_of_payment' : fields.text('Term Of Payment',required=False)
+		'term_of_payment' : fields.text('Term Of Payment',required=True)
+	}
+	_default = {
+		'term_of_payment' : 'Test'
 	}
 TermOfPaymentPO()

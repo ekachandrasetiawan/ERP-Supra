@@ -18,6 +18,10 @@
 			<field name="type">form</field>
 			<field name="arch" type="xml">
 				<form string="import log absen" version="7.0">
+					<header>
+						<button name="import_uploaded_file" string="Sync" type="object" states="draft" />
+						<field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+					</header>
 					<sheet>
 						<group>
 							<field name="machine_id" />

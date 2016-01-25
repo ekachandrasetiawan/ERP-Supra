@@ -16,10 +16,13 @@
     # 'data':[
        
     # ],
-    
-    'update_xml': [
+    'data':[
         'security/ir.model.access.csv',
         'security_rmpsm/ir.model.access.csv',
+    ],
+    
+    'update_xml': [
+        
         "win_quatition_wizard.xml",
         "wizard_revised_quotation.xml",
         "wizard_lost_quotation.xml",
