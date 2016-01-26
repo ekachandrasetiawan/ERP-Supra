@@ -461,179 +461,46 @@ class sale_order_line(osv.osv):
 	
 	def onchange_product_quotation_qty(self,cr,uid,ids,product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines_object,context={}):
 		res={}
-		print material_lines_object,"ini material line nya "
-		if product_uom_qty == False or product_uom_qty<1:
-			res["warning"]={'title':"Error",'message':'Quantity not null'}
-			res['value'] = {
-								
-								"product_uom_qty":1
-							}
-		else:			
-				if product_id:
-
-					order_lines = self.pool.get('sale.order.line').browse(cr,uid,ids)
-					old_material_ids = []
-					for line in order_lines:
-						for material in line.material_lines:
-							old_material_ids.append(material.id)
-
-					print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
-
-
-
-					base_total	= self._count_base_total(product_uom_qty,price_unit)
-					discount_n = self._count_discount_nominal(base_total,discount)
-					subtotal_ = self._count_price_subtotal(base_total,discount_n)
+		print material_lines_object,"cek"
+		if product_id:
+			seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
+			if len(seq_id):
+				seq_id = seq_id[0]
 			
-					taxes_total = self._count_amount_tax(cr,uid,subtotal_,tax_id[0][2])
-					seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
+			product = self.pool.get('product.product').browse(cr,uid,product_id,{})
+			if product.bom_ids:
+				print "ini ada bom"
+			else:
+				all_values_without_bom =[]
+				print "ini tidak ada bom"
+				masih_bisa = True
+				for material in material_lines_object:
+					old_material = self.pool.get("sale.order.material.line").browse(cr,uid,material[1])
+					if material[0]==0 and material[2]['product_id']==product_id and masih_bisa==True:
+						all_values_without_bom.append((0,0,{'product_id':material[2]['product_id'],"qty":product_uom_qty,'uom':material[2]["uom"],"picking_location":seq_id}))
+						print "record baru tapi"
+						masih_bisa = False
+					elif material[0]==0:
+						print "record baru"
+						all_values_without_bom.append((0,0,material[2]))
+					elif material[0]==1 and masih_bisa==True:
+						masih_bisa = False		
+						print "update tapi"
+						all_values_without_bom.append((1,material[1],{'desc':material[2].get('desc',old_material.desc),'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
+					elif material[0]==1:
+						all_values_without_bom.append((1,material[1],{'product_id':material[2]['product_id'],'qty':material[2]['qty'],'uom':material[2]['uom'],'picking_location':seq_id}))
+						print "update record"
+					elif material[0]==2:
+						print "hapus record"
+						all_values_without_bom.append((2,material[1]))
+					elif material[0]==4 and masih_bisa==True:
+						all_values_without_bom.append((1,material[1],{'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
+						print "menambahkan data dari yang sudah ada"
+						masih_bisa = False	
+				res['value']={
+				"material_lines":all_values_without_bom
+				}
 
-					if len(seq_id):
-						seq_id = seq_id[0]
-					product= self.pool.get('product.product').browse(cr,uid,product_id,{})
-			
-					if product.bom_ids:	
-						array_material = []
-						
-						bom_line_set = self.pool.get('mrp.bom').browse(cr,uid,product.bom_ids[0].id)
-						all_values_with_bom= [(0,0,self.loadBomLineqty(cr,uid,product_id,product_uom_qty,product_uom,seq_id,base_total,discount_n,subtotal_,taxes_total)) for product_id in bom_line_set.bom_lines]
-					
-						for material in material_lines_object:
-							tidak_sama = True
-
-							if material[2]:
-								
-								for s in all_values_with_bom:
-									if material[2]['product_id'] == s[2]['product_id']:
-										tidak_sama=False
-										break
-								if tidak_sama:
-									array_material.append(material[2]),
-									all_values_with_bom.append((0,0,material[2]))
-								
-
-							else:
-								if ids:
-
-									self_browse_line = self.browse(cr,uid,ids,context=context)[0]
-									for material_browse in self_browse_line.material_lines:
-										tidak_sama_cek = True
-										for a in all_values_with_bom:
-										
-											if material_browse.product_id.id == a[2]['product_id']:
-												tidak_sama_cek = False
-												break
-										if tidak_sama_cek:
-											all_values_with_bom.append((0,0,{'product_id':material_browse.product_id.id,'qty':material_browse.qty,'uom':material_browse.uom.id,'picking_location':seq_id}))
-
-											
-									# if tidak_sama_cek:
-									# 	# array_material.append(material[2]),
-									# 	# print material[2],"aaaaaaa"
-									# 	all_values_with_bom.append((0,0,material_browse.product_id.id))
-
-
-
-
-							# if material[2]:
-								
-								# for s in all_values_with_bom:
-								# 	if material[2]['product_id'] == s[2]['product_id']:
-								# 		print  material[2]['product_id'],"=",s[2]['product_id']
-								# 		tidak_sama=False
-								# 		break
-								# if tidak_sama:
-								# 	array_material.append(material[2]),
-								# 	print material[2],"aaaaaaa"
-								# 	all_values_with_bom.append((0,0,material[2]))
-
-
-
-
-
-
-								
-						
-						print all_values_with_bom,"dicobaaaa dulu bosssss"
-						res['value'] = {
-								'material_lines':all_values_with_bom,
-								"base_total":base_total,
-								"price_subtotal":subtotal_,
-								"amount_tax":taxes_total
-		
-						}
-
-						# res['value'].update = {'material_lines': [
-						# 			(0,0,{'product_id':product_id,'qty':555,'uom':product_uom,'picking_location':seq_id}),
-						# 							]}
-					else:
-						all_values_without_bom = []
-						tambah_dari_material_browse =[]
-						all_values_without_bom.append((0,0,{'product_id':product_id,'qty':product_uom_qty,'uom':product_uom,'picking_location':seq_id})) 
-						for material in material_lines_object:
-							tidak_sama = True
-							
-							print material,"<<<<<<<<<<<<<<<<<<<<<<material<<<<<<<<<<<<<<<<<<"
-							if material[2]:
-								print "materialllllll  duaaaaaa"
-								for s in all_values_without_bom:
-									if material[2]['product_id'] == s[2]['product_id']:
-										tidak_sama=False
-										break
-								if tidak_sama:
-									print "sssssssssssss"
-									all_values_without_bom.append((0,0,material[2]))
-								
-
-							elif material[1]:	
-								material_browse = self.pool.get('sale.order.material.line').browse(cr,uid,material[1])
-								print material_browse,"<<<<<<<<<><><><:"
-								for i in all_values_without_bom:
-									if material_browse.product_id.id == i[2]['product_id']:
-										tidak_sama =False
-										break
-								if tidak_sama:
-									print "zzzzzzzzzzz"
-									tambah_dari_material_browse.append((0,0,{'product_id':material_browse.product_id.id,'qty':material_browse.qty,'uom':material_browse.uom.id,'picking_location':seq_id}))
-									
-								print tambah_dari_material_browse,"luar if"
-								# all_values_without_bom=all_values_without_bom+tambah_dari_material_browse
-
-						
-
-						
-						res['value'] = {
-								'material_lines': all_values_without_bom,
-								"base_total":base_total,
-								"price_subtotal":subtotal_,
-								"amount_tax":taxes_total
-							}
-
-						if old_material_ids:
-							mtr_lines = res['value']['material_lines']
-
-						for old_mtr in old_material_ids:
-							# print "-------------------->>>>>>>>>>>>>>",mtr_lines
-							lr = (2,old_mtr)
-							mtr_lines.append(lr)
-							print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
-						if ids:
-							cek_id = self.browse(cr,uid,ids)[0]
-							if cek_id.product_id.id == product_id:
-								print tambah_dari_material_browse,"ccccccccccccccc"
-								for q in tambah_dari_material_browse:
-									print q,"aaaa"
-									mtr_lines.append(q)
-							
-						
-					
-						print mtr_lines,"material_line"
-						
-
-						
-						res['value']['material_lines'] = mtr_lines
-		# self.subtotal(cr,uid,ids,product_uom_qty,price_unit,discount_nominal)
-		
 		return res
 
 	
