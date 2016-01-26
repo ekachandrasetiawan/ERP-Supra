@@ -24,12 +24,12 @@ class Sale_order(osv.osv):
 		
 	# 	return res
 
-	# def write(self, cr, uid, ids, vals, context=None):
+	def write(self, cr, uid, ids, vals, context=None):
 
-	# 	print "---------------------------------------"
+		print "---------------------------------------",vals
 	# 	print super(Sale_order, self).write(cr, uid, ids, vals, context=context),"cobaaaaa di test save nya"
 	# 	print "---------------------------------------"
-	# 	return super(Sale_order, self).write(cr, uid, ids, vals, context=context)
+		return super(Sale_order, self).write(cr, uid, ids, vals, context=context)
 
 
 	def _count_total(self, cr, uid, ids, name, args, context={}):
@@ -375,6 +375,15 @@ class sale_order_line(osv.osv):
 
 	def onchange_product_quotation(self,cr,uid,ids,product_id,product_uom_qty,product_uom):
 		res={}
+
+		order_lines = self.pool.get('sale.order.line').browse(cr,uid,ids)
+		old_material_ids = []
+		for line in order_lines:
+			for material in line.material_lines:
+				old_material_ids.append(material.id)
+
+		print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
 		if product_id:
 			seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
 
@@ -383,13 +392,24 @@ class sale_order_line(osv.osv):
 
 			product= self.pool.get('product.product').browse(cr,uid,product_id,{})
 			
-			if product.bom_ids:	
+
+			if product.bom_ids:
 				bom_line_set = self.pool.get('mrp.bom').browse(cr,uid,product.bom_ids[0].id)
 
 				res['value'] = {
 					'material_lines':[(0,0,self.loadBomLine(cr,uid,bom_line,product_uom_qty,product_uom,seq_id)) for bom_line in bom_line_set.bom_lines],
 					"product_uom":product.uom_id.id
 				}
+
+				if old_material_ids:
+					mtr_lines = res['value']['material_lines']
+
+					for old_mtr in old_material_ids:
+						print "-------------------->>>>>>>>>>>>>>",mtr_lines
+						lr = (2,old_mtr)
+						mtr_lines.append(lr)
+						print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
+					res['value']['material_lines'] = mtr_lines
 
 			else:
 
@@ -400,6 +420,15 @@ class sale_order_line(osv.osv):
 					"product_uom":product.uom_id.id
 				}
 
+			if old_material_ids:
+				mtr_lines = res['value']['material_lines']
+
+				for old_mtr in old_material_ids:
+					print "-------------------->>>>>>>>>>>>>>",mtr_lines
+					lr = (2,old_mtr)
+					mtr_lines.append(lr)
+					print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
+				res['value']['material_lines'] = mtr_lines
 
 
 	
@@ -439,10 +468,19 @@ class sale_order_line(osv.osv):
 								
 								"product_uom_qty":1
 							}
-		else:
-
-
+		else:			
 				if product_id:
+
+					order_lines = self.pool.get('sale.order.line').browse(cr,uid,ids)
+					old_material_ids = []
+					for line in order_lines:
+						for material in line.material_lines:
+							old_material_ids.append(material.id)
+
+					print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+
+
 					base_total	= self._count_base_total(product_uom_qty,price_unit)
 					discount_n = self._count_discount_nominal(base_total,discount)
 					subtotal_ = self._count_price_subtotal(base_total,discount_n)
@@ -462,6 +500,7 @@ class sale_order_line(osv.osv):
 					
 						for material in material_lines_object:
 							tidak_sama = True
+
 							if material[2]:
 								
 								for s in all_values_with_bom:
@@ -532,8 +571,10 @@ class sale_order_line(osv.osv):
 						all_values_without_bom.append((0,0,{'product_id':product_id,'qty':product_uom_qty,'uom':product_uom,'picking_location':seq_id})) 
 						for material in material_lines_object:
 							tidak_sama = True
+							tambah_dari_material_browse =[]
+							print material,"<<<<<<<<<<<<<<<<<<<<<<material<<<<<<<<<<<<<<<<<<"
 							if material[2]:
-								
+								print "materialllllll  duaaaaaa"
 								for s in all_values_without_bom:
 									if material[2]['product_id'] == s[2]['product_id']:
 										tidak_sama=False
@@ -542,27 +583,48 @@ class sale_order_line(osv.osv):
 									all_values_without_bom.append((0,0,material[2]))
 								
 
-							else:
-								if ids:
+							elif material[1]:	
+								material_browse = self.pool.get('sale.order.material.line').browse(cr,uid,material[1])
+								print material_browse,"<<<<<<<<<><><><:"
+								for i in all_values_without_bom:
+									if material_browse.product_id.id == i[2]['product_id']:
+										tidak_sama =False
+										break
+								if tidak_sama:
+									tambah_dari_material_browse.append((0,0,{'product_id':material_browse.product_id.id,'qty':material_browse.qty,'uom':material_browse.uom.id,'picking_location':seq_id}))
+									print tambah_dari_material_browse,"dalem if"
+								print tambah_dari_material_browse,"luar if"
+								# all_values_without_bom=all_values_without_bom+tambah_dari_material_browse
 
-									self_browse_line = self.browse(cr,uid,ids,context=context)[0]
-									for material_browse in self_browse_line.material_lines:
-										tidak_sama_cek = True
-										for a in all_values_without_bom:
-										
-											if material_browse.product_id.id == a[2]['product_id']:
-												tidak_sama_cek = False
-												break
-										if tidak_sama_cek:
-											all_values_without_bom.append((0,0,{'product_id':material_browse.product_id.id,'qty':material_browse.qty,'uom':material_browse.uom.id,'picking_location':seq_id}))
+						
 
-											
+						print all_values_without_bom,"<><><><><<<><><<><><>"		
 						res['value'] = {
 								'material_lines': all_values_without_bom,
 								"base_total":base_total,
 								"price_subtotal":subtotal_,
 								"amount_tax":taxes_total
 							}
+
+						if old_material_ids:
+							mtr_lines = res['value']['material_lines']
+
+						for old_mtr in old_material_ids:
+							# print "-------------------->>>>>>>>>>>>>>",mtr_lines
+							lr = (2,old_mtr)
+							mtr_lines.append(lr)
+							print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
+						
+						
+						for q in tambah_dari_material_browse:
+							mtr_lines.append(q)
+							
+					
+						print mtr_lines,"material_line"
+						
+
+						
+						res['value']['material_lines'] = mtr_lines
 		# self.subtotal(cr,uid,ids,product_uom_qty,price_unit,discount_nominal)
 		
 		return res
