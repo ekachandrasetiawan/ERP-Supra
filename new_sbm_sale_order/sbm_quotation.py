@@ -461,7 +461,7 @@ class sale_order_line(osv.osv):
 	
 	def onchange_product_quotation_qty(self,cr,uid,ids,product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines_object,context={}):
 		res={}
-		print ids,"ini id nya"
+		print material_lines_object,"ini material line nya "
 		if product_uom_qty == False or product_uom_qty<1:
 			res["warning"]={'title':"Error",'message':'Quantity not null'}
 			res['value'] = {
@@ -568,10 +568,11 @@ class sale_order_line(osv.osv):
 						# 							]}
 					else:
 						all_values_without_bom = []
+						tambah_dari_material_browse =[]
 						all_values_without_bom.append((0,0,{'product_id':product_id,'qty':product_uom_qty,'uom':product_uom,'picking_location':seq_id})) 
 						for material in material_lines_object:
 							tidak_sama = True
-							tambah_dari_material_browse =[]
+							
 							print material,"<<<<<<<<<<<<<<<<<<<<<<material<<<<<<<<<<<<<<<<<<"
 							if material[2]:
 								print "materialllllll  duaaaaaa"
@@ -580,6 +581,7 @@ class sale_order_line(osv.osv):
 										tidak_sama=False
 										break
 								if tidak_sama:
+									print "sssssssssssss"
 									all_values_without_bom.append((0,0,material[2]))
 								
 
@@ -591,14 +593,15 @@ class sale_order_line(osv.osv):
 										tidak_sama =False
 										break
 								if tidak_sama:
+									print "zzzzzzzzzzz"
 									tambah_dari_material_browse.append((0,0,{'product_id':material_browse.product_id.id,'qty':material_browse.qty,'uom':material_browse.uom.id,'picking_location':seq_id}))
-									print tambah_dari_material_browse,"dalem if"
+									
 								print tambah_dari_material_browse,"luar if"
 								# all_values_without_bom=all_values_without_bom+tambah_dari_material_browse
 
 						
 
-						print all_values_without_bom,"<><><><><<<><><<><><>"		
+						
 						res['value'] = {
 								'material_lines': all_values_without_bom,
 								"base_total":base_total,
@@ -614,11 +617,15 @@ class sale_order_line(osv.osv):
 							lr = (2,old_mtr)
 							mtr_lines.append(lr)
 							print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
-						
-						
-						for q in tambah_dari_material_browse:
-							mtr_lines.append(q)
+						if ids:
+							cek_id = self.browse(cr,uid,ids)[0]
+							if cek_id.product_id.id == product_id:
+								print tambah_dari_material_browse,"ccccccccccccccc"
+								for q in tambah_dari_material_browse:
+									print q,"aaaa"
+									mtr_lines.append(q)
 							
+						
 					
 						print mtr_lines,"material_line"
 						
