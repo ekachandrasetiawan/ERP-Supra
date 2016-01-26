@@ -1,6 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
+
+		       <record id="quatation_rep_webk_head" model="ir.header_webkit">
+                           <field name="footer_html"><![CDATA[
+            <html>
+                <body>
+                    <center></center>
+                </body>
+            </html>]]>
+            </field>
+            
+            <field name="orientation">Portrait</field>
+            <field name="format">A4</field>
+            <field name="html"><![CDATA[<html>
+                <body>
+                    <center></center>
+                </body>
+              ]]>
+                </field>
+                <field eval="10" name="margin_top"/>
+                <field eval="10" name="margin_bottom"/>
+                <field eval="5" name="margin_left"/>
+                 <field eval="5" name="margin_right"/>
+               <!--  <field name="css"><![CDATA[
+                <field name="css"><![CDATA[
+    
+                    body {
+                        font-family:Arial;
+                        font-size:12;
+                    }
+                    
+                    .cell{
+                        border-spacing: 0;
+                        border-collapse: collapse;
+                        border-style:solid;
+                        border: 1px solid grey;
+                        font-size:10px;
+                        text-align:center;
+                    }
+                ]]>
+                          </field> -->
+                          <field name="name">quatation Webkit Header</field>
+                      </record>
+
 		<record model="res.groups" id="new_sales_supra">
 			<field name="name">New Sales Supra</field>
 			<field name="category_id" ref="base.module_category_sales_management"/>
@@ -129,7 +172,7 @@
 												<!-- <field name="product_uom_qty" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom)" /> -->
 												  <label for="product_uom_qty"/>
                                             <div>
-                                                <field context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'shop':parent.shop_id, 'uom':product_uom}" name="product_uom_qty" class="oe_inline" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom,price_unit,discount,tax_id)" />
+                                                <field context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'shop':parent.shop_id, 'uom':product_uom}" name="product_uom_qty" class="oe_inline" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines)" />
                                                 <field name="product_uom" groups="product.group_uom" on_change="onchange_product_uom(product_id,product_uom)" class="oe_inline oe_no_button"/>
                                             </div>
 												<!-- <field name="product_uom" invisible="1"/> -->
@@ -154,11 +197,11 @@
 											<page string="Material Line">
 												<field name="material_lines">
 													<tree editable="buttom">
-														<field name="product_id" string="Material Item" />
+														<field name="product_id" string="Material Item" on_change="onchange_product_material(product_id)"/>
 														<field name="desc" string="Description" />
 														<field name="qty" />
-														<field name="uom" string="Unit" />
-														<field name="picking_location" />
+														<field name="uom" string="Unit" on_change="onchange_product_uom(product_id,uom)" />
+														<field name="picking_location" invisible="1"/>
 													</tree>
 												</field>
 											</page>
@@ -262,4 +305,16 @@
 		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" sequence="1"/>
 
 	</data>
+	 <data>
+                      <report auto="False"
+                        id="quotation_webkit_view_id" 
+                        model="sale.order" 
+                        name="quotation.webkit" 
+                        file="new_sbm_sale_order/report/quotation_webkit.mako"
+                        string="New Quotation"
+                        report_type="webkit"
+                       webkit_header ="quatation_rep_webk_head" 
+                       />
+            </data>
+
 </openerp>
