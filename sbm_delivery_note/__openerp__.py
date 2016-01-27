@@ -13,9 +13,11 @@
     "category": "Module Delivery Note",
     "description": """ Module Delivey Note Suprabakti Mandiri""",
     "init_xml": [],
-    "data":['sbm_delivery_note_view.xml'],
+    "update_xml":['sbm_delivery_note_view.xml'],
     'demo_xml': [],
     'installable': True,
     'active': False,
     'certificate': '',
 }
+
+

@@ -7,6 +7,23 @@
            <field name="type">form</field>
            <field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form"/>
            <field name="arch" type="xml">
+
+              <button name="package_validate" position="after">
+                <button name="package_postpone" type="object" states="approve" string="Postpone" icon="gtk-media-pause" confirm="Are you sure to Postpone Delivery Note"/>
+
+                <button name="package_continue" type="object" states="postpone" string="Continue" icon="STOCK_JUMP_TO" confirm="Are you sure to Continue Delivery Note"/>
+              </button>
+
+              <button name="package_draft" position="replace">
+                <button name="package_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" confirm="Are you sure to Set To Draft Delivery Note ?"/>
+              </button>
+
+              <button name="package_confirm" position="replace">
+                  <button name="package_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Delivery Note"/>
+              </button>
+              
+              
+
            	  <field name="note_lines" position="replace">
            	  		 <field col="4" colspan="4" name="note_lines" nolabel="1" widget="one2many_list">
            	  		 	    <form>
@@ -20,29 +37,29 @@
                                 <field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
                                 	<tree>
                                 		<field name="name"/>
+                                    <field name="prodlot_id"/>
 	                                	<field name="desc"/>
 	                                	<field name="qty"/>
 	                                	<field name="product_uom"/>
-	                                	<field name="state"/>
                                 	</tree>
                                 </field>
                             </form>
                             <tree string="Delviery Note Line" colors="red:state == 'donerefund'">
                                 <field name="no"/>
-				                <field name="name"/>
-				                <field name="product_id"/>
-				                <field name="product_qty"/>
-				                <field name="product_uom"/>
-				                <field name="product_packaging"/>
+        				                <field name="name"/>
+        				                <field name="product_id"/>
+        				                <field name="product_qty"/>
+        				                <field name="product_uom"/>
+        				                <field name="product_packaging"/>
                                 <field name="refunded_item" />
                                 <field name="state" invisible="1"/>
                                 <field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
                                 	<tree>
                                 		<field name="name"/>
+                                    <field name="prodlot_id"/>
 	                                	<field name="desc"/>
 	                                	<field name="qty"/>
 	                                	<field name="product_uom"/>
-	                                	<field name="state"/>
                                 	</tree>
                                 </field>
                             </tree>

@@ -15,9 +15,14 @@ from openerp.tools.float_utils import float_compare
 class delivery_note(osv.osv):
 	_inherit = "delivery.note"
 	_columns = {
+		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
+		'tanggal' : fields.date('Delivery Date',track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
+		'attn':fields.many2one('res.partner',string="Attention",readonly=True, states={'draft': [('readonly', False)]}),
 		'note_lines': fields.one2many('delivery.note.line', 'note_id', 'Note Lines', readonly=True, states={'draft': [('readonly', False)]}),
-		'picking_id': fields.many2one('stock.picking', 'Stock Picking', domain=[('type', '=', 'out')], required=False),
-		'postpone_picking': fields.many2one('stock.picking', 'Postpone Picking', required=False),
+		'picking_id': fields.many2one('stock.picking', 'Stock Picking', domain=[('type', '=', 'out')], required=False,readonly=True, states={'draft': [('readonly', False)]}),
+		'postpone_picking': fields.many2one('stock.picking', 'Postpone Picking', required=False,readonly=True, states={'draft': [('readonly', False)]}),
+		'work_order_id': fields.many2one('perintah.kerja',string="SPK",store=True,required=False,readonly=True, states={'draft': [('readonly', False)]}),
+		'work_order_in': fields.many2one('perintah.kerja.internal',string="SPK Internal",readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
 	}
 
@@ -32,7 +37,6 @@ class delivery_note(osv.osv):
 
 			product =[x.sale_line_material_id.sale_order_line_id.id for x in data.prepare_lines if x.sale_line_material_id]
 
-			
 			if product == []:
 				raise openerp.exceptions.Warning("Order Preparation Tidak Memiliki Material Lines")
 
@@ -50,12 +54,28 @@ class delivery_note(osv.osv):
 					data_op_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
 					if data_op_line:
 						for dopline in data_op_line:
-							material_line.append({
-								'name':dopline.product_id.id,
-								'desc':dopline.name,
-								'qty':dopline.product_qty,
-								'product_uom':dopline.product_uom.id
-								})
+
+							# Cek Batch
+							batch = self.pool.get('order.preparation.batch').search(cr, uid, [('batch_id', '=', [dopline.id])])
+							data_batch = self.pool.get('order.preparation.batch').browse(cr, uid, batch)
+
+							if data_batch:
+								# Jika Ada Batch Maka Tampilkan Batch
+								for xbatch in data_batch:
+									material_line.append((0,0,{
+										'name':dopline.product_id.id,
+										'prodlot_id':xbatch.name.id,
+										'desc':xbatch.desc,
+										'qty':xbatch.qty,
+										'product_uom':dopline.product_uom.id,
+									}))
+							else:
+								material_line.append((0,0,{
+									'name':dopline.product_id.id,
+									'desc':dopline.name,
+									'qty':dopline.product_qty,
+									'product_uom':dopline.product_uom.id
+									}))
 				line.append({
 					'no': y.sequence,
 					'product_id' : y.product_id.id,
@@ -71,9 +91,176 @@ class delivery_note(osv.osv):
 			res['partner_id'] = data.sale_id.partner_id.id
 			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
 			res['attn'] = data.sale_id.attention.id
-
 		return  {'value': res}
 
+
+	def package_confirm(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		dn = self.pool.get('delivery.note')
+		dn_line = self.pool.get('delivery.note.line')
+		dn_material = self.pool.get('delivery.note.line.material')
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+		
+		picking_type = 'out'
+		seq_obj_name =  'stock.picking.' + picking_type
+
+		# Create Stock Picking 
+		picking = stock_picking.create(cr, uid, {
+					'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+					'origin':val.prepare_id.sale_id.name,
+					'partner_id':val.partner_id.id,
+					'stock_journal_id':1,
+					'move_type':'direct',
+					'invoice_state':'none',
+					'auto_picking':False,
+					'type':picking_type,
+					'sale_id':val.prepare_id.sale_id.id,
+					'note_id':val.id,
+					'state':'confirmed'
+					})
+
+		# Create Stock Move
+		for line in val.note_lines:
+			for x in line.note_lines_material:
+				move_id = stock_move.create(cr,uid,{
+					'name' : x.name.name,
+					'origin':val.prepare_id.sale_id.name,
+					'product_uos_qty':x.qty,
+					'product_uom':x.product_uom.id,
+					'prodlot_id':x.prodlot_id.id,
+					'product_qty':x.qty,
+					'product_uos':x.product_uom.id,
+					'partner_id':val.partner_id.id,
+					'product_id':x.name.id,
+					'auto_validate':False,
+					'location_id' :12,
+					'company_id':1,
+					'picking_id': picking,
+					'state':'confirmed',
+					'location_dest_id' :9
+					},context=context)
+				
+				# Update DN Line Material Dengan ID Move
+				dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
+
+		# Update Picking id di DN
+		dn.write(cr,uid,val.id,{'picking_id':picking})
+
+		res = super(delivery_note,self).package_confirm(cr, uid, ids, context=None)
+		return res
+
+
+	def package_draft(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		if val.postpone_picking:
+			move = self.pool.get('stock.move').search(cr, uid, [('picking_id', '=', [val.postpone_picking.id])])
+			data = self.pool.get('stock.move').browse(cr, uid, move)
+			# Delete Move Postpone Picking
+			for x in data:
+				self.pool.get('stock.move').write(cr,uid,x.id,{'state':'draft'})
+				self.pool.get('stock.move').unlink(cr,uid,[x.id],context)
+
+			# Delete  Postpone Picking
+			self.pool.get('stock.picking').write(cr,uid,val.postpone_picking.id,{'state':'draft'})
+			self.pool.get('stock.picking').unlink(cr,uid,[val.postpone_picking.id],context)
+			self.write(cr, uid, ids, {'state': 'draft','postpone_picking':False})
+
+		if val.picking_id:
+			move = self.pool.get('stock.move').search(cr, uid, [('picking_id', '=', [val.picking_id.id])])
+			data = self.pool.get('stock.move').browse(cr, uid, move)
+			# Delete Move Picking
+			for x in data:
+				self.pool.get('stock.move').write(cr,uid,x.id,{'state':'draft'})
+				self.pool.get('stock.move').unlink(cr,uid,[x.id],context)
+
+			# Delete Picking
+			self.pool.get('stock.picking').unlink(cr,uid,[val.picking_id.id],context)
+			self.write(cr, uid, ids, {'state': 'draft','picking_id':False})
+		
+		self.write(cr, uid, ids, {'state': 'draft'})
+		return True                               
+
+
+	def package_postpone(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		dn = self.pool.get('delivery.note')
+		dn_line = self.pool.get('delivery.note.line')
+		dn_material = self.pool.get('delivery.note.line.material')
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+
+		picking_type = 'out'
+		seq_obj_name =  'stock.picking.' + picking_type
+
+		if val.postpone_picking:
+			stock_picking.write(cr,uid,val.postpone_picking.id,{'state':'done'})
+
+			for move_line in val.postpone_picking.move_lines:
+				stock_move.write(cr,uid,move_line.id,{'state':'done'})
+		else:
+			# Create Stock Picking 
+			picking = stock_picking.create(cr, uid, {
+						'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+						'origin':val.prepare_id.sale_id.name,
+						'partner_id':val.partner_id.id,
+						'stock_journal_id':1,
+						'move_type':'direct',
+						'invoice_state':'none',
+						'auto_picking':False,
+						'type':picking_type,
+						'sale_id':val.prepare_id.sale_id.id,
+						'note_id':val.id,
+						'state':'done'
+						})
+
+			# Create Stock Move
+			location = self.pool.get('stock.location').search(cr, uid, [('code', '=', 'PRTS')])
+			data_location = self.pool.get('stock.location').browse(cr, uid, location)[0]
+
+			for line in val.note_lines:
+				for x in line.note_lines_material:
+					move_id = stock_move.create(cr,uid,{
+						'name' : x.name.name,
+						'origin':val.prepare_id.sale_id.name,
+						'product_uos_qty':x.qty,
+						'product_uom':x.product_uom.id,
+						'prodlot_id':x.prodlot_id.id,
+						'product_qty':x.qty,
+						'product_uos':x.product_uom.id,
+						'partner_id':val.partner_id.id,
+						'product_id':x.name.id,
+						'auto_validate':False,
+						'location_id' :12,
+						'company_id':1,
+						'picking_id': picking,
+						'state':'done',
+						'location_dest_id' : data_location.id
+						},context=context)
+					
+					# Update DN Line Material Dengan ID Move
+					dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
+
+			# Update Picking id di DN
+			dn.write(cr,uid,val.id,{'postpone_picking':picking})
+
+		self.write(cr, uid, ids, {'state': 'postpone'})
+		return True
+
+
+	def package_continue(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+
+		if val.postpone_picking:
+			stock_picking.write(cr,uid,val.postpone_picking.id,{'state':'cancel'})
+
+			for move_line in val.postpone_picking.move_lines:
+				stock_move.write(cr,uid,move_line.id,{'state':'cancel'})
+
+		self.write(cr, uid, ids, {'state': 'approve'})
+		return True
 delivery_note()
 
 class delivery_note_line(osv.osv):
@@ -104,10 +291,11 @@ class delivery_note_line_material(osv.osv):
 	_name = "delivery.note.line.material"
 	_columns = {
 		'name' : fields.many2one('product.product',required=True, string="Product"),
+		'prodlot_id':fields.many2one('stock.production.lot','Serial Number'),
 		'note_line_id': fields.many2one('delivery.note.line', 'Delivery Note Line', required=True, ondelete='cascade'),
 		'qty': fields.float('Qty',required=True),
 		'product_uom': fields.many2one('product.uom',required=True, string='UOM'),
-		'stock_move_id': fields.many2one('stock.move',required=True, string='Stock Move'),
+		'stock_move_id': fields.many2one('stock.move',required=False, string='Stock Move'),
 		'desc': fields.text('Description',required=False),
 		'state': fields.related('note_line_id','state', type='many2one', relation='delivery.note.line', string='State'),
 	}
