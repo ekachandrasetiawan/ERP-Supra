@@ -26,6 +26,21 @@ class delivery_note(osv.osv):
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
 	}
 
+	_order = "name, state desc"
+
+
+	def create(self, cr, uid, vals, context=None):
+		prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
+		if prepareExists and vals['special']==False:
+			no = ""
+			for nt in self.browse(cr,uid,prepareExists,context):
+				no += "["+nt.name+"]\n"
+			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
+		vals['name'] ='/'
+		return super(delivery_note, self).create(cr, uid, vals, context=context)
+
+
+
 	def prepare_change(self, cr, uid, ids, pre):
 		res = super(delivery_note,self).prepare_change(cr, uid, ids, pre)
 		if pre :
@@ -50,7 +65,7 @@ class delivery_note(osv.osv):
 				material_line = []
 
 				for dline in data_material_line:
-					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', '=', [dline.id])])
+					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', '=', [dline.id]), ('preparation_id', '=', [pre])])
 					data_op_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
 					if data_op_line:
 						for dopline in data_op_line:
@@ -102,6 +117,22 @@ class delivery_note(osv.osv):
 		stock_picking = self.pool.get('stock.picking')
 		stock_move = self.pool.get('stock.move')
 		
+
+		# Create No Delivery Note
+		if val.special==True:
+			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+			usa = 'SPC'
+			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+			dn_no =time.strftime('%y')+ vals[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(vals[2])]+'/'+vals[1]
+		else:    
+			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+			saleid = self.pool.get('order.preparation').browse(cr, uid, val.prepare_id.id).sale_id.id
+			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
+			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+			dn_no =time.strftime('%y')+ vals[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(vals[2])]+'/'+vals[1]
+
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
 
@@ -117,7 +148,7 @@ class delivery_note(osv.osv):
 					'type':picking_type,
 					'sale_id':val.prepare_id.sale_id.id,
 					'note_id':val.id,
-					'state':'confirmed'
+					'state':'draft'
 					})
 
 		# Create Stock Move
@@ -137,15 +168,18 @@ class delivery_note(osv.osv):
 					'location_id' :12,
 					'company_id':1,
 					'picking_id': picking,
-					'state':'confirmed',
+					'state':'draft',
 					'location_dest_id' :9
 					},context=context)
 				
 				# Update DN Line Material Dengan ID Move
 				dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
 
+		
 		# Update Picking id di DN
-		dn.write(cr,uid,val.id,{'picking_id':picking})
+		dn.write(cr,uid,val.id,{'picking_id':picking,'name':dn_no})
+
+		stock_picking.action_assign(cr, uid, [picking])
 
 		res = super(delivery_note,self).package_confirm(cr, uid, ids, context=None)
 		return res
@@ -261,6 +295,38 @@ class delivery_note(osv.osv):
 
 		self.write(cr, uid, ids, {'state': 'approve'})
 		return True
+
+
+	def package_new_validate(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+		partial_data = {}
+		move = self.pool.get('stock.move').search(cr, uid, [('picking_id', '=', val.picking_id.id)])
+		data_move = self.pool.get('stock.move').browse(cr, uid, move)
+		# Update Done Picking & Move
+		stock_picking.action_move(cr, uid, [val.picking_id.id])
+
+		self.write(cr, uid, ids, {'state': 'done'})
+		return True
+		
+
+	def package_cancel(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+
+		if val.picking_id:
+			stock_picking.action_cancel(cr, uid, [val.picking_id.id])
+
+		if val.postpone_picking:
+			stock_picking.action_cancel(cr, uid, [val.postpone_picking.id])
+
+		self.write(cr, uid, ids, {'state':'cancel'})
+		return True
+
+
+
 delivery_note()
 
 class delivery_note_line(osv.osv):
@@ -311,3 +377,5 @@ class stock_picking(osv.osv):
 	}
 
 stock_picking()
+
+

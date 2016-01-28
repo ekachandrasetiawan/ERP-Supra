@@ -1,80 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
+
+			<record id="view_delivery_note_tree_new" model="ir.ui.view">
+					 <field name="name">delivery.note.tree</field>
+					 <field name="model">delivery.note</field>
+					 <field name="type">form</field>
+					 <field name="inherit_id" ref="ad_delivery_note.view_delivery_note_tree"/>
+					 <field name="arch" type="xml">
+								<xpath expr="//tree[@string='Delivery Note']" position="attributes">
+										 <attribute name="colors">#0707e8:state == 'draft';</attribute>
+								</xpath>
+					 </field>
+			</record>
+
 		<record id="delivery_note_form" model="ir.ui.view">
-           <field name="name">delivery.note.form</field>
-           <field name="model">delivery.note</field>
-           <field name="type">form</field>
-           <field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form"/>
-           <field name="arch" type="xml">
+					 <field name="name">delivery.note.form</field>
+					 <field name="model">delivery.note</field>
+					 <field name="type">form</field>
+					 <field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form"/>
+					 <field name="arch" type="xml">
+							<button name="package_validate" position="after">
+								<button name="package_postpone" type="object" states="approve" string="Postpone" icon="gtk-media-pause" confirm="Are you sure to Postpone Delivery Note" groups="sbm_order_preparation.group_admin_ho"/>
 
-              <button name="package_validate" position="after">
-                <button name="package_postpone" type="object" states="approve" string="Postpone" icon="gtk-media-pause" confirm="Are you sure to Postpone Delivery Note"/>
+								<button name="package_continue" type="object" states="postpone" string="Continue" icon="STOCK_JUMP_TO" confirm="Are you sure to Continue Delivery Note" groups="sbm_order_preparation.group_admin_ho"/>
+							</button>
 
-                <button name="package_continue" type="object" states="postpone" string="Continue" icon="STOCK_JUMP_TO" confirm="Are you sure to Continue Delivery Note"/>
-              </button>
+							<button name="package_draft" position="replace">
+								<button name="package_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" confirm="Are you sure to Set To Draft Delivery Note ?" groups="sbm_delivery_note.group_admin_spv"/>
+							</button>
 
-              <button name="package_draft" position="replace">
-                <button name="package_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" confirm="Are you sure to Set To Draft Delivery Note ?"/>
-              </button>
+							<button name="package_confirm" position="replace">
+									<button name="package_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Delivery Note" groups="sbm_order_preparation.group_admin_ho"/>
+							</button>
 
-              <button name="package_confirm" position="replace">
-                  <button name="package_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Delivery Note"/>
-              </button>
-              
-              
+							<button name="package_validate" position="replace">
+									<button name="package_new_validate" type="object" states="approve" string="Validate" icon="gtk-apply" confirm="Are you sure to Validate Delivery Note" groups="sbm_order_preparation.group_admin_warehouse"/>
+							</button>
 
-           	  <field name="note_lines" position="replace">
-           	  		 <field col="4" colspan="4" name="note_lines" nolabel="1" widget="one2many_list">
-           	  		 	    <form>
-				                <field name="no"/>
-				                <field name="product_id"/>
-				                <field name="product_qty"/>
-				                <field name="product_uom"/>
-				                <field name="product_packaging"/>
-				                <field name="name" colspan="4"/>
-                                <field name="refunded_item" />
-                                <field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
-                                	<tree>
-                                		<field name="name"/>
-                                    <field name="prodlot_id"/>
-	                                	<field name="desc"/>
-	                                	<field name="qty"/>
-	                                	<field name="product_uom"/>
-                                	</tree>
-                                </field>
-                            </form>
-                            <tree string="Delviery Note Line" colors="red:state == 'donerefund'">
-                                <field name="no"/>
-        				                <field name="name"/>
-        				                <field name="product_id"/>
-        				                <field name="product_qty"/>
-        				                <field name="product_uom"/>
-        				                <field name="product_packaging"/>
-                                <field name="refunded_item" />
-                                <field name="state" invisible="1"/>
-                                <field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
-                                	<tree>
-                                		<field name="name"/>
-                                    <field name="prodlot_id"/>
-	                                	<field name="desc"/>
-	                                	<field name="qty"/>
-	                                	<field name="product_uom"/>
-                                	</tree>
-                                </field>
-                            </tree>
-           	  		 </field>
-           	  </field>
+							<button name="package_cancel" position="replace">
+									<button name="package_cancel" type="object" states="draft,postpone,approve" string="Cancel Delivery Note" icon="STOCK_CANCEL" confirm="Are you sure to Cancel Delivery Note" groups="sbm_delivery_note.group_admin_spv"/>
+							</button>
 
-           	  <xpath expr="//page[@string='Notes']" position="after">
-                  <page string="Others">
-                  	<group>
-                  		<field name="picking_id"/>
-                  		<field name="postpone_picking"/>
-                  	</group>
-                 </page>
-              </xpath>
-           </field>
-         </record>
+							<button string="Return Products" position="replace">
+									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done,refunded,torefund" type="action" groups="base.group_user, sbm_order_preparation.group_admin_warehouse"/>
+							</button>
+
+
+							<button name="cancel_dn_all" position="replace"/>
+
+							<field name="state" position="replace">
+									<field name="state" widget="statusbar" statusbar_visible="draft,approve,done" statusbar_colors='{"draft":"red","approve":"blue"}'/>
+							</field>
+							
+
+							<field name="note_lines" position="replace">
+									 <field col="4" colspan="4" name="note_lines" nolabel="1" widget="one2many_list">
+												<form>
+												<field name="no"/>
+												<field name="product_id"/>
+												<field name="product_qty"/>
+												<field name="product_uom"/>
+												<field name="product_packaging"/>
+												<field name="name" colspan="4"/>
+																<field name="refunded_item" />
+																<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
+																	<tree>
+																		<field name="name"/>
+																		<field name="prodlot_id"/>
+																		<field name="desc"/>
+																		<field name="qty"/>
+																		<field name="product_uom"/>
+																	</tree>
+																</field>
+														</form>
+														<tree string="Delviery Note Line" colors="red:state == 'donerefund'">
+																<field name="no"/>
+																<field name="name"/>
+																<field name="product_id"/>
+																<field name="product_qty"/>
+																<field name="product_uom"/>
+																<field name="product_packaging"/>
+																<field name="refunded_item" />
+																<field name="state" invisible="1"/>
+																<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
+																	<tree>
+																		<field name="name"/>
+																		<field name="prodlot_id"/>
+																		<field name="desc"/>
+																		<field name="qty"/>
+																		<field name="product_uom"/>
+																	</tree>
+																</field>
+														</tree>
+									 </field>
+							</field>
+
+							<xpath expr="//page[@string='Notes']" position="after">
+									<page string="Others">
+										<group>
+											<field name="picking_id"/>
+											<field name="postpone_picking"/>
+										</group>
+								 </page>
+							</xpath>
+					 </field>
+				 </record>
+
+				<menuitem name="Delivery Note" parent="base.menu_sales" id="sale_delivery_note" action="ad_delivery_note.action_delivery_note_form" groups="sbm_order_preparation.group_admin_ho"/>
+				 
 	</data>
 </openerp>
