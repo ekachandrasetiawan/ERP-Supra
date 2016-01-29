@@ -26,7 +26,7 @@ class delivery_note(osv.osv):
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
 	}
 
-	_order = "name, state desc"
+	_order = "id desc"
 
 
 	def create(self, cr, uid, vals, context=None):
@@ -37,6 +37,15 @@ class delivery_note(osv.osv):
 				no += "["+nt.name+"]\n"
 			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
 		vals['name'] ='/'
+
+
+		for lines in vals['note_lines']:
+			if lines[2]:
+				if lines[2]['product_qty'] == 0:
+					# Cek Part Number Value
+					product = self.pool.get('product.product').browse(cr, uid, [lines[2]['product_id']])[0]
+
+					raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 
@@ -58,15 +67,32 @@ class delivery_note(osv.osv):
 			order_line = self.pool.get('sale.order.line').search(cr, uid, [('id', 'in', product)])
 			data_order_line = self.pool.get('sale.order.line').browse(cr, uid, order_line)
 
+			qty_dn_line = 0
+
 			for y in data_order_line:
 				so_material_line = self.pool.get('sale.order.material.line').search(cr, uid, [('sale_order_line_id', '=', [y.id])])
-				data_material_line = self.pool.get('sale.order.material.line').browse(cr, uid, so_material_line)
+				data_material_line = self.pool.get('sale.order.material.line').browse(cr, uid, so_material_line)					
 
 				material_line = []
+
+				# Cek Jumlah Line Material
+				if len(data_material_line) == 1:
+
+					for qty_dn in data_material_line:
+						
+						if qty_dn.product_id.id == y.product_id.id:
+							op_qty = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', '=', [qty_dn.id]), ('preparation_id', '=', [pre])])
+							qty_op = self.pool.get('order.preparation.line').browse(cr, uid, op_qty)[0]
+							
+							# Set Product Qty yang bukan Set
+							qty_dn_line = qty_op.product_qty
+
 
 				for dline in data_material_line:
 					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', '=', [dline.id]), ('preparation_id', '=', [pre])])
 					data_op_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
+
+					
 					if data_op_line:
 						for dopline in data_op_line:
 
@@ -94,7 +120,7 @@ class delivery_note(osv.osv):
 				line.append({
 					'no': y.sequence,
 					'product_id' : y.product_id.id,
-					'product_qty': 0,
+					'product_qty': qty_dn_line,
 					'product_uom': x.product_uom.id,
 					'name': y.name,
 					'note_lines_material': material_line
@@ -245,6 +271,7 @@ class delivery_note(osv.osv):
 						'type':picking_type,
 						'sale_id':val.prepare_id.sale_id.id,
 						'note_id':val.id,
+						'is_postpone':True,
 						'state':'done'
 						})
 
