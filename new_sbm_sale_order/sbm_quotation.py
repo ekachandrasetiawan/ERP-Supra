@@ -10,7 +10,8 @@ from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
 class Sale_order(osv.osv):	
-	_inherit ='sale.order'
+	_name ='sale.order'
+	_inherit =['sale.order','mail.thread']
 
 	# def _count_total(self,cr,uid,ids,fields_name,args,context={}):
 	# 	res={}
@@ -60,6 +61,21 @@ class Sale_order(osv.osv):
 		for line in self.pool.get('sale.order.line').browse(cr,uid,ids,context=context):
 			res[line.order_id.id]=True
 		return res.keys()
+	def _get_total_discount(self, cr, uid, ids, name, args, context={}):
+		print "PANGGIL _COUNT_TOTAL"
+		res = {}
+		print "cobaaa di baca"
+		print res,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<==============================================="
+		sale_order = self.browse(cr,uid,ids,context=context)
+		print sale_order
+		total_discount_nominal=0
+		for i in sale_order:
+			for r in i.order_line:
+				print r.id,"-----",r.discount_nominal
+				total_discount_nominal += r.discount_nominal
+			res[i.id] = {"total_amount_discount":total_discount_nominal,}
+		print total_discount_nominal
+		return res
 
 	_columns = {
 		'quotation_no':fields.char(required=True,string='Quotation#'),
@@ -74,10 +90,21 @@ class Sale_order(osv.osv):
 			multi="line_total"
 		),
 
-		'quotation_state':fields.selection([('draft','Draft'),('confirmed','Confirmed'),('win','Win'),('lost','Lost'),('cancel','Cancel')],string="Quotation State"),
+		'quotation_state':fields.selection([('draft','Draft'),('confirmed','Confirmed'),('win','Win'),('lost','Lost'),('cancel','Cancel')],string="Quotation State",track_visibility="onchange"),
 		'cancel_stage':fields.selection([('internal user fault','Internal User Fault'),('external user fault','External User Fault'),('lose','Lose')]),
 		'cancel_message':fields.text(string="Cancel Message"),
-		'revised_histories':fields.one2many('sale.order.revision.history','sale_order_id')
+		'revised_histories':fields.one2many('sale.order.revision.history','sale_order_id'),
+		'total_amount_discount':fields.function(
+			_get_total_discount, 
+			string="total Discount",
+			type="float",
+			store={
+				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 20),
+				'sale.order.line': (_get_so_line_by_so, ['discount','discount_nominal'], 20),
+			},
+			multi="line"
+
+			)
 	}
 	_sql_constraints = [
 		('quotation_no_unique', 'unique(quotation_no)', 'The quotation_no must be unique !')
@@ -86,7 +113,18 @@ class Sale_order(osv.osv):
 		
 		'quotation_state':'draft'
 	}
-
+	_track={
+		'partner_id':{},
+		'payment_term':{},
+		'partner_shipping_id':{},
+		'attention':{},
+		'partner_invoice_id':{},
+		'pricelist_id':{},
+		'date_order':{},
+		'user_id':{},
+		'group_id':{},
+		'amount_untaxed':{}
+	}
 	def confirm_quotation(self,cr,uid,ids,context={}):
 		res = False
 		quotation_obj = self.pool.get("sale.order")
@@ -157,8 +195,13 @@ class sale_order_material_line(osv.osv):
 		'desc':fields.text(string="Description"),
 		'qty':fields.float(string="Qty",required=True),
 		'uom':fields.many2one("product.uom",required=True,string="uom"),
-		'picking_location':fields.many2one('stock.location',required=True)
+		'picking_location':fields.many2one('stock.location',required=True),
+		'is_loaded_from_change':fields.boolean('Load From Change ?'),
 		}
+
+	_defaults = {
+		'is_loaded_from_change':False
+	}
 
 	def _get_ho_location(self,cr,uid,ids,context={}):
 		test_obj = self.pool.get("sale.order")
@@ -347,7 +390,7 @@ class sale_order_line(osv.osv):
 						}
 		return res
 
-	def loadBomLine(self,cr,uid,bom_line,product_uom_qty,product_uom,seq_id):
+	def loadBomLine(self,cr,uid,bom_line,product_uom_qty,product_uom,seq_id,is_loaded_from_change=True):
 		res = {}
 		print bom_line, 
 		print bom_line.product_id.id, "iddd" 
@@ -356,7 +399,7 @@ class sale_order_line(osv.osv):
 				'uom':bom_line.product_uom.id,
 				'qty':product_uom_qty*bom_line.product_qty,
 				'picking_location':seq_id,
-				
+				'is_loaded_from_change':is_loaded_from_change,
 		}
 		return res
 
@@ -415,7 +458,7 @@ class sale_order_line(osv.osv):
 
 				res['value'] = {
 					'material_lines': [
-						(0,0,{'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}),
+						(0,0,{'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id,'is_loaded_from_change':True}),
 					],
 					"product_uom":product.uom_id.id
 				}
@@ -461,45 +504,156 @@ class sale_order_line(osv.osv):
 	
 	def onchange_product_quotation_qty(self,cr,uid,ids,product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines_object,context={}):
 		res={}
-		print material_lines_object,"cek"
-		if product_id:
-			seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
-			if len(seq_id):
-				seq_id = seq_id[0]
+		print material_lines_object,"cek------------------------------>"
+		if product_uom_qty == False or product_uom_qty<1:
+			res["warning"]={'title':"Error",'message':'Quantity not null'}
+			res['value'] = {
+								
+								"product_uom_qty":1
+							}
+		else:
+
+			if product_id:
+				base_total	= self._count_base_total(product_uom_qty,price_unit)
+				discount_n = self._count_discount_nominal(base_total,discount)
+				subtotal_ = self._count_price_subtotal(base_total,discount_n)
+				taxes_total = self._count_amount_tax(cr,uid,subtotal_,tax_id[0][2])
+				seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
+				if len(seq_id):
+					seq_id = seq_id[0]
+				
+				product = self.pool.get('product.product').browse(cr,uid,product_id,{})
+				
 			
-			product = self.pool.get('product.product').browse(cr,uid,product_id,{})
-			if product.bom_ids:
-				print "ini ada bom"
-			else:
 				all_values_without_bom =[]
 				print "ini tidak ada bom"
-				masih_bisa = True
+				change_applied = True
 				for material in material_lines_object:
-					old_material = self.pool.get("sale.order.material.line").browse(cr,uid,material[1])
-					if material[0]==0 and material[2]['product_id']==product_id and masih_bisa==True:
-						all_values_without_bom.append((0,0,{'product_id':material[2]['product_id'],"qty":product_uom_qty,'uom':material[2]["uom"],"picking_location":seq_id}))
-						print "record baru tapi"
-						masih_bisa = False
-					elif material[0]==0:
-						print "record baru"
-						all_values_without_bom.append((0,0,material[2]))
-					elif material[0]==1 and masih_bisa==True:
-						masih_bisa = False		
-						print "update tapi"
-						all_values_without_bom.append((1,material[1],{'desc':material[2].get('desc',old_material.desc),'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
+					old_material = self.pool.get("sale.order.material.line").browse(cr,uid,material[1],context=context)
+					# if material[0]==0 and material[2]['product_id']==product_id and masih_bisa==True:
+					# 	all_values_without_bom.append((0,0,{'desc':material[2].get('desc',False),'product_id':material[2]['product_id'],"qty":product_uom_qty,'uom':material[2]["uom"],"picking_location":seq_id}))
+					# 	print "record baru tapi"
+					# 	masih_bisa = False
+					# elif material[0]==0:
+					# 	print "record baru"
+					# 	all_values_without_bom.append((0,0,{'desc':material[2].get('desc',False),'product_id':material[2]['product_id'],"qty":material[2]["qty"],'uom':material[2]["uom"],"picking_location":seq_id}))
+					# elif material[0]==1 and masih_bisa==True:
+					# 	masih_bisa = False		
+					# 	print "update tapi"
+					# 	all_values_without_bom.append((1,material[1],{'desc':material[2].get('desc',old_material.desc),'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
+					# elif material[0]==1:
+					# 	all_values_without_bom.append((1,material[1],{'product_id':material[2]['product_id'],'qty':material[2]['qty'],'uom':material[2]['uom'],'picking_location':seq_id}))
+					# 	print "update record"
+					# elif material[0]==2:
+					# 	print "hapus record"
+					# 	all_values_without_bom.append((2,material[1]))
+					# elif material[0]==4 and masih_bisa==True:
+					# 	all_values_without_bom.append((1,material[1],{'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
+					# 	print "menambahkan data dari yang sudah ada"
+					# 	masih_bisa = False
+					if material[0]==0:
+						# new record
+						print "New Record"
+						update_values = {
+							'desc':material[2].get('desc',False),
+							'product_id':material[2]['product_id'],
+							"qty":product_uom_qty,
+							'uom':material[2]["uom"],
+							"picking_location":seq_id,
+							'is_loaded_from_change':False
+						}
+						if material[2].get('is_loaded_from_change',False):
+							
+							update_values['qty'] = product_uom_qty
+							update_values['is_loaded_from_change'] = True
+						else:
+							update_values['qty'] = material[2].get('qty',0.0)
+
+						all_values_without_bom.append((0,0,update_values))
 					elif material[0]==1:
-						all_values_without_bom.append((1,material[1],{'product_id':material[2]['product_id'],'qty':material[2]['qty'],'uom':material[2]['uom'],'picking_location':seq_id}))
-						print "update record"
+						# update record
+						print "Update Record"
+						
+						updated_val = {
+							'qty':material[2].get('qty',old_material.qty),
+							'is_loaded_from_change':False,
+							'product_id':material[2].get('product_id',old_material.product_id.id),
+							'desc':material[2].get('desc',old_material.desc),
+							'uom':material[2].get('uom',old_material.uom.id),
+							'picking_location':seq_id
+
+
+
+						}
+
+						if old_material.is_loaded_from_change:
+							updated_val['qty'] = product_uom_qty
+							all_values_without_bom.append((1,material[1],updated_val))
+							updated_val['is_loaded_from_change'] = True
+						else:
+							all_values_without_bom.append((1,material[1],updated_val))
+
+
+						# if old_material.product_id.id == product_id:
+						# 	if change_applied:
+						# 		updated_val['qty'] = product_uom_qty
+								
+						# 		all_values_without_bom.append((1,material[1],updated_val))
+						# 		change_applied = False
+						# 	else:
+						# 		all_values_without_bom.append((1,material[1],updated_val))
+						# else:
+						# 	all_values_without_bom.append((1,material[1],updated_val))
+
+
 					elif material[0]==2:
-						print "hapus record"
 						all_values_without_bom.append((2,material[1]))
-					elif material[0]==4 and masih_bisa==True:
-						all_values_without_bom.append((1,material[1],{'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
-						print "menambahkan data dari yang sudah ada"
-						masih_bisa = False	
-				res['value']={
-				"material_lines":all_values_without_bom
-				}
+						# delete
+						print "Delete Record"
+					elif material[0]==4:
+						# existing data tinggal add
+						print "Exist Record"
+						print "Change applied--->",change_applied,">>>>",old_material.is_loaded_from_change
+						update_values = {
+							'desc':old_material.desc,
+							'product_id':old_material.product_id.id,
+							"qty":product_uom_qty,
+							'uom':old_material.uom.id,
+							"picking_location":seq_id,
+							'is_loaded_from_change':False
+						}
+						if old_material.is_loaded_from_change:
+							all_values_without_bom.append((1,material[1],update_values))
+							update_values['is_loaded_from_change'] = True
+						else:
+							all_values_without_bom.append((4,material[1],False))
+
+						# if old_material.product_id.id == product_id:
+						# 	# jika product sama
+							
+						# 	if change_applied:
+						# 		all_values_without_bom.append((1,material[1],{'qty':product_uom_qty}))
+						# 		change_applied = False
+								
+						# 	else:
+						# 		all_values_without_bom.append((4,material[1],False))
+						# else:
+
+						# 	all_values_without_bom.append((4,material[1],False))
+
+
+
+							
+
+
+
+						
+					res['value']={
+					"material_lines":all_values_without_bom,
+					"base_total":base_total,
+					"price_subtotal":subtotal_,
+					"amount_tax":taxes_total
+					}
 
 		return res
 
