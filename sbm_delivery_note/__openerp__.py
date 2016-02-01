@@ -18,6 +18,7 @@
     'installable': True,
     'active': False,
     'certificate': '',
+    'js':['static/src/js/delivery_note.js'],
 }
 
 

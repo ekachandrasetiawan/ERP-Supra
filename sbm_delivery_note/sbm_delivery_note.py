@@ -29,6 +29,20 @@ class delivery_note(osv.osv):
 	_order = "id desc"
 
 
+	def print_dn_out_new(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"delivery-note/printnew&id="+str(ids[0])+"&uid="+str(uid)
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.int.move',
+			'params': {
+				'redir'	: urlTo,
+				'uid':uid
+			},
+		}
+
 	def create(self, cr, uid, vals, context=None):
 		prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
 		if prepareExists and vals['special']==False:
