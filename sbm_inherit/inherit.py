@@ -1155,7 +1155,7 @@ class stock_move(osv.osv):
 
 class bom(osv.osv):
 	def checkUniqueByProduct(self,cr,uid,prod_id):
-		objs = self.search(cr,uid,[('product_id', '=', prod_id)])
+		objs = self.search(cr,uid,[('product_id', '=', prod_id),('bom_id','=',False)])
 		return objs
 
 	def create(self,cr,uid,vals,context=None):
