@@ -149,15 +149,9 @@ class delivery_note(osv.osv):
 		return  {'value': res}
 
 
-	def package_confirm(self, cr, uid, ids, context=None):
+	def get_sequence_no(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		dn = self.pool.get('delivery.note')
-		dn_line = self.pool.get('delivery.note.line')
-		dn_material = self.pool.get('delivery.note.line.material')
-		stock_picking = self.pool.get('stock.picking')
-		stock_move = self.pool.get('stock.move')
-		
-
 		# Create No Delivery Note
 		if val.special==True:
 			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
@@ -172,6 +166,19 @@ class delivery_note(osv.osv):
 			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
 			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
 			dn_no =time.strftime('%y')+ vals[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(vals[2])]+'/'+vals[1]
+
+		return dn.write(cr,uid,val.id,{'name':dn_no})
+
+	def package_confirm(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		dn = self.pool.get('delivery.note')
+		dn_line = self.pool.get('delivery.note.line')
+		dn_material = self.pool.get('delivery.note.line.material')
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+		
+
+		dn.get_sequence_no(cr, uid, ids)
 
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
@@ -217,7 +224,7 @@ class delivery_note(osv.osv):
 
 		
 		# Update Picking id di DN
-		dn.write(cr,uid,val.id,{'picking_id':picking,'name':dn_no})
+		dn.write(cr,uid,val.id,{'picking_id':picking})
 
 		stock_picking.action_assign(cr, uid, [picking])
 
