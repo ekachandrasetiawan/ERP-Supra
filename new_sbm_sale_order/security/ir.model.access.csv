@@ -189,6 +189,11 @@ term_condition_new_direksi,term.condition,ad_sales_project.model_term_condition,
 week_status_new_direksi,week.status,ad_sales_project.model_week_status,new_direksi,1,1,1,1
 week_status_Line_new_direksi,week.status.line,ad_sales_project.model_week_status_line,new_direksi,1,1,1,1
 management_summary_new_direksi,management.summary,ad_report_management.model_management_summary,new_direksi,1,1,1,1
+sale_order_revision_history_new_direksi,sale.order.revision,new_sbm_sale_order.model_sale_order_revision_history,new_direksi,1,1,1,1
+sale_order_revision_history_new_sales_admin,sale.order.revision,new_sbm_sale_order.model_sale_order_revision_history,new_sales_admin,1,1,1,1
+sale_order_revision_history_new_sales_supra,sale.order.revision,new_sbm_sale_order.model_sale_order_revision_history,new_sales_supra,1,1,1,1
+sale_order_revision_history_new_rmpsm,sale.order.revision,new_sbm_sale_order.model_sale_order_revision_history,new_rmpsm,1,1,1,1
+
 
 
 
