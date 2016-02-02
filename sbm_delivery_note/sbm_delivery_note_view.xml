@@ -20,10 +20,13 @@
 					 <field name="type">form</field>
 					 <field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form"/>
 					 <field name="arch" type="xml">
+
 							<button name="package_validate" position="after">
 								<button name="package_postpone" type="object" states="approve" string="Postpone" icon="gtk-media-pause" confirm="Are you sure to Postpone Delivery Note" groups="sbm_order_preparation.group_admin_ho"/>
 
 								<button name="package_continue" type="object" states="postpone" string="Continue" icon="STOCK_JUMP_TO" confirm="Are you sure to Continue Delivery Note" groups="sbm_order_preparation.group_admin_ho"/>
+
+								<button name="generate_no" type="object" states="draft,approve" string="Generate No" icon="STOCK_NEW" confirm="Are you sure to Generate No" groups="sbm_delivery_note.group_admin_spv"/>
 							</button>
 
 							<button name="package_draft" position="replace">
@@ -44,7 +47,6 @@
 
 							<button string="Return Products" position="replace">
 									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done,refunded,torefund" type="action" groups="base.group_user, sbm_order_preparation.group_admin_warehouse"/>
-
 									<button name="print_dn_out_new" type="object" states="done" string="Print Out DN" icon="gtk-dnd-multiple"/>
 							</button>
 

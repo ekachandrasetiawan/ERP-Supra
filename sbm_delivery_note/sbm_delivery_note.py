@@ -169,6 +169,11 @@ class delivery_note(osv.osv):
 
 		return dn.write(cr,uid,val.id,{'name':dn_no})
 
+
+	def generate_no(self, cr, uid, ids, context=None):
+
+		return self.pool.get('delivery.note').get_sequence_no(cr, uid, ids)
+
 	def package_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		dn = self.pool.get('delivery.note')
