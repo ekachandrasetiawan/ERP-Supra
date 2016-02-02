@@ -373,9 +373,33 @@ class delivery_note(osv.osv):
 		self.write(cr, uid, ids, {'state':'cancel'})
 		return True
 
-
-
 delivery_note()
+
+class packing_list_line(osv.osv):
+	_inherit = "packing.list.line"
+
+
+	def refresh(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		if val.note_id.prepare_id.picking_id.id:
+			res = super(packing_list_line,self).refresh(cr,uid,ids,context={})
+		else:
+			for y in val.note_id.note_lines:
+				for x in y.note_lines_material:
+					res = self.pool.get('product.list.line').create(cr, uid, {
+																  'no': y.no,
+																  'name': x.name,
+																  'packing_id': val.id,
+																  'product_id': x.name.id,
+																  'product_qty': x.qty,
+																  'product_uom': x.product_uom.id,
+																  # 'product_packaging': y.note_id.product_packaging.id,
+																  })
+		return res
+
+
+packing_list_line()
+
 
 class delivery_note_line(osv.osv):
 	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
