@@ -375,6 +375,7 @@ class delivery_note(osv.osv):
 
 delivery_note()
 
+
 class packing_list_line(osv.osv):
 	_inherit = "packing.list.line"
 
@@ -451,3 +452,258 @@ class stock_picking(osv.osv):
 stock_picking()
 
 
+class stock_return_picking(osv.osv_memory):
+	_inherit = 'stock.return.picking'
+	_name = 'stock.return.picking'
+	_description = 'Return Picking'
+
+
+	def default_get(self, cr, uid, fields, context=None):
+
+		result1 = []
+		if context is None:
+			context = {}
+		res = super(stock_return_picking, self).default_get(cr, uid, fields, context=context)
+
+		record_idx = context and context.get('active_id', False) or False
+
+		if context.get('active_model') == 'stock.picking' or context.get('active_model') =='stock.picking.in' or context.get('active_model') =='stock.picking.out':
+			record_id = context and context.get('active_id', False)
+		else:
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			if val.prepare_id.picking_id.id:
+				record_id = val.prepare_id.picking_id.id
+			else:
+				record_id = val.picking_id.id
+
+		pick_obj = self.pool.get('stock.picking')
+		pick = pick_obj.browse(cr, uid, record_id, context=context)
+		if pick:
+			if 'invoice_state' in fields:
+				if pick.invoice_state=='invoiced':
+					res.update({'invoice_state': '2binvoiced'})
+				else:
+					res.update({'invoice_state': 'none'})
+			return_history = self.get_return_history(cr, uid, record_id, context)       
+			for line in pick.move_lines:
+				qty = line.product_qty - return_history.get(line.id, 0)
+				if qty > 0:
+					result1.append({'product_id': line.product_id.id, 'sisa':qty, 'quantity': qty,'move_id':line.id, 'prodlot_id': line.prodlot_id and line.prodlot_id.id or False})
+
+			if 'product_return_moves' in fields:
+				res.update({'product_return_moves': result1})
+
+		return res
+
+
+	def view_init(self, cr, uid, fields_list, context=None):
+
+		res ={}
+		if context is None:
+			context = {}
+		record_idx = context and context.get('active_id', False)
+		if context.get('active_model') == 'stock.picking' or context.get('active_model') == 'stock.picking.in' or context.get('active_model') == 'stock.picking.out':
+			record_id = context and context.get('active_id', False)
+		else:
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+
+			if val.prepare_id.picking_id.id:
+				record_id = val.prepare_id.picking_id.id
+				context.update({
+					'active_model': 'stock.picking',
+					'active_ids': [val.prepare_id.picking_id.id],
+					'active_id': val.prepare_id.picking_id.id
+				})
+			else:
+				record_id = val.picking_id.id
+				context.update({
+					'active_model': 'stock.picking',
+					'active_ids': [val.picking_id.id],
+					'active_id': val.picking_id.id
+				})
+		res = super(stock_return_picking, self).view_init(cr, uid, fields_list, context=context)
+		return res
+
+
+	def get_return_history(self, cr, uid, pick_id, context=None):
+		
+		return super(stock_return_picking, self).get_return_history(cr, uid, pick_id, context=context)
+
+
+	def create_returns(self, cr, uid, ids, context=None):
+		dn = self.pool.get('delivery.note')
+		# call active dn
+		active_dn_id = context['active_ids'][0]
+		dn_obj = dn.browse(cr,uid,context['active_ids'][0],context=context)
+
+
+		if context is None:
+			context = {} 
+		record_idx = context and context.get('active_id', False) or False
+
+		if context.get('active_model') == 'stock.picking' or context.get('active_model') == 'stock.picking.in' or context.get('active_model') == 'stock.picking.out':
+			record_id = context and context.get('active_id', False) or False
+		else:
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			if val.prepare_id.picking_id.id:
+				record_id = val.prepare_id.picking_id.id
+			else:
+				record_id = val.picking_id.id
+
+		move_obj = self.pool.get('stock.move')
+		pick_obj = self.pool.get('stock.picking')
+		uom_obj = self.pool.get('product.uom')
+		data_obj = self.pool.get('stock.return.picking.memory')
+		act_obj = self.pool.get('ir.actions.act_window')
+		model_obj = self.pool.get('ir.model.data')
+		#  Delivery Note
+		del_note = self.pool.get('delivery.note')
+
+		wf_service = netsvc.LocalService("workflow")
+		
+		if context.get('active_model') == 'stock.picking' or context.get('active_model') == 'stock.picking.in' or context.get('active_model') == 'stock.picking.out':
+			record_id = context and context.get('active_id', False) or False
+			pick = pick_obj.browse(cr, uid, record_id, context=context)
+		else:
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			if val.prepare_id.picking_id.id:
+				pick = pick_obj.browse(cr, uid, val.prepare_id.picking_id.id, context=context)
+			else:
+				pick = pick_obj.browse(cr, uid, val.picking_id.id, context=context)
+
+		
+		data = self.read(cr, uid, ids[0], context=context)
+		date_cur = time.strftime('%Y-%m-%d %H:%M:%S')
+		set_invoice_state_to_none = True
+		returned_lines = 0
+		
+		#Create new picking for returned products
+		seq_obj_name = 'stock.picking'
+		new_type = 'internal'
+		if pick.type =='out':
+			new_type = 'in'
+			seq_obj_name = 'stock.picking.in'
+		elif pick.type =='in':
+			new_type = 'out'
+			seq_obj_name = 'stock.picking.out'
+		new_pick_name = self.pool.get('ir.sequence').get(cr, uid, seq_obj_name)
+		
+		if context.get('active_model') == 'stock.picking' or context.get('active_model') ==  'stock.picking.in' or context.get('active_model') == 'stock.picking.out':
+			new_picking = pick_obj.copy(cr, uid, pick.id, {
+								'name': _('%s-%s-return') % (new_pick_name, pick.name),
+								'move_lines': [], 
+								'state':'draft', 
+								'type': new_type,
+								'date':date_cur,
+								'invoice_state': data['invoice_state'],
+								})
+		else:
+			new_picking = pick_obj.copy(cr, uid, pick.id, {
+								'name': _('%s-%s-return') % (new_pick_name, pick.name),
+								'move_lines': [], 
+								'state':'draft', 
+								'type': new_type,
+								'date':date_cur,
+								'note_id':val.id,
+								'invoice_state': data['invoice_state'],
+								})
+			dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
+
+		dn_return_rel = []
+		val_id = data['product_return_moves']
+		
+		# prepare op / to get note line id
+		if context.get('active_model') == 'delivery.note':
+			op_line = self.pool.get('order.preparation.line')
+			dn_line = self.pool.get('delivery.note.line')
+
+		for v in val_id:
+			data_get = data_obj.browse(cr, uid, v, context=context)
+			mov_id = data_get.move_id.id
+			
+			# search op and dn
+			if context.get('active_model') == 'delivery.note':
+				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+				if val.prepare_id.picking_id.id:
+					op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
+					dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
+
+			if not mov_id:
+				raise osv.except_osv(_('Warning !'), _("You have manually created product lines, please delete them to proceed"))
+
+			# Cek Barang yang sisa & yang di input
+			return_history = self.get_return_history(cr, uid, pick.id, context)
+			
+			qty = 0
+			for line in pick.move_lines:
+				qty += line.product_qty - return_history.get(line.id, 0)
+
+			if context.get('active_model') == 'delivery.note':
+				if data_get.quantity > qty:
+					raise osv.except_osv(_('Warning !'), _("Product Qty Tidak Mencukupi"))
+					
+			new_qty = data_get.quantity
+			move = move_obj.browse(cr, uid, mov_id, context=context)
+			new_location = move.location_dest_id.id
+			returned_qty = move.product_qty
+			for rec in move.move_history_ids2:
+				returned_qty -= rec.product_qty
+
+			if returned_qty != new_qty:
+				set_invoice_state_to_none = False
+			if new_qty:
+				returned_lines += 1
+				new_move=move_obj.copy(cr, uid, move.id, {
+											'product_qty': new_qty,
+											'product_uos_qty': uom_obj._compute_qty(cr, uid, move.product_uom.id, new_qty, move.product_uos.id),
+											'picking_id': new_picking, 
+											'state': 'draft',
+											'location_id': new_location, 
+											'location_dest_id': move.location_id.id,
+											'date': date_cur,
+				})
+				move_obj.write(cr, uid, [move.id], {'move_history_ids2':[(4,new_move)]}, context=context)
+				
+			if context.get('active_model') == 'delivery.note':
+				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+				if val.prepare_id.picking_id.id:
+					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
+					dn_return_rel.append(tpl)
+				else:
+					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'stock_move_id':new_move}
+					dn_return_rel.append(tpl)
+
+		if context.get('active_model') == 'delivery.note':
+			dn_r = self.pool.get('delivery.note.line.return')
+			# write into dn line rel
+			for note_line_return in dn_return_rel:
+				dn_r.create(cr,uid,note_line_return)
+
+		if not returned_lines:
+			raise osv.except_osv(_('Warning!'), _("Please specify at least one non-zero quantity."))
+
+		if set_invoice_state_to_none:
+			pick_obj.write(cr, uid, [pick.id], {'invoice_state':'none'}, context=context)
+		wf_service.trg_validate(uid, 'stock.picking', new_picking, 'button_confirm', cr)
+		pick_obj.force_assign(cr, uid, [new_picking], context)
+		# update Delivery Note
+		if context.get('active_model') == 'delivery.note':
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			del_note.write(cr, uid, val.id, {'state':'torefund','refund_id':new_picking}, context=context)
+
+		model_list = {
+				'out': 'stock.picking.out',
+				'in': 'stock.picking.in',
+				'internal': 'stock.picking',
+		}
+		return {
+			'domain': "[('id', 'in', ["+str(new_picking)+"])]",
+			'name': _('Returned Picking'),
+			'view_type':'form',
+			'view_mode':'tree,form',
+			'res_model': model_list.get(new_type, 'stock.picking'),
+			'type':'ir.actions.act_window',
+			'context':context,
+		}
+
+stock_return_picking()
