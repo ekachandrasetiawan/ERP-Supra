@@ -382,6 +382,7 @@ class delivery_note(osv.osv):
 	def return_product(self, cr, uid, ids, context=None):
 		res = {}
 		val = self.browse(cr, uid, ids)[0]
+		dn = self.pool.get('delivery.note')
 		if val.prepare_id.picking_id.id:
 			res = super(delivery_note,self).return_product(cr,uid,ids,context={})
 		else:
@@ -405,6 +406,9 @@ class delivery_note(osv.osv):
 					'active_ids':val.picking_id.id,
 				}
 			}
+			if val.picking_id.id==False:
+				dn.write(cr,uid,val.id,{'picking_id':val.prepare_id.picking_id.id})
+
 		return res
 
 
@@ -646,7 +650,10 @@ class stock_return_picking(osv.osv_memory):
 			if val.prepare_id.picking_id.id:
 				dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
 			else:
-				dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)],'picking_id':val.prepare_id.picking_id.id})
+				if val.picking_id.id==False:
+					dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)],'picking_id':val.prepare_id.picking_id.id})
+				else:
+					dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
 
 		dn_return_rel = []
 		val_id = data['product_return_moves']
@@ -711,7 +718,7 @@ class stock_return_picking(osv.osv_memory):
 					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 				else:
-					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
+					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 
 		if context.get('active_model') == 'delivery.note':
