@@ -1,0 +1,20 @@
+<openerp>
+	<data>
+		<record id="button_print_name" model='ir.ui.view'>
+			<field name="name">button print</field>
+			<field name="model">sale.order</field>
+			<field name='type'>form</field>
+			<field name="inherit_id" ref='new_sbm_sale_order.quotation_form_view'/>
+			<field name="arch" type='xml'>
+				<header>
+					<button name="print_rfq" type="object" string="Print Quotation"/>
+						
+				</header>
+			</field>
+
+
+
+		</record>
+		
+	</data>
+</openerp>
