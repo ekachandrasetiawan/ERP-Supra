@@ -378,6 +378,36 @@ class delivery_note(osv.osv):
 		self.write(cr, uid, ids, {'state':'cancel'})
 		return True
 
+
+	def return_product(self, cr, uid, ids, context=None):
+		res = {}
+		val = self.browse(cr, uid, ids)[0]
+		if val.prepare_id.picking_id.id:
+			res = super(delivery_note,self).return_product(cr,uid,ids,context={})
+		else:
+			dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_stock_return_picking_form')
+			res = {
+				'name':'Return Shipment',
+				'view_mode': 'form',
+				'view_id': view_id,
+				'view_type': 'form',
+				'view_name':'stock.stock_return_picking_memory',
+				'res_model': 'stock.return.picking.memory',
+				'type': 'ir.actions.act_window',
+				'target': 'new',
+				'res_id':val.picking_id.id,
+				'domain': "[('id','=',"+str(val.picking_id.id)+")]",
+				'key2':'client_action_multi',
+				'multi':"True",
+				'context':{
+					'active_id':val.picking_id.id,
+					'active_model':'stock.return.picking',
+					'active_ids':val.picking_id.id,
+				}
+			}
+		return res
+
+
 delivery_note()
 
 
@@ -545,11 +575,13 @@ class stock_return_picking(osv.osv_memory):
 		if context is None:
 			context = {} 
 		record_idx = context and context.get('active_id', False) or False
+		
+		val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 
 		if context.get('active_model') == 'stock.picking' or context.get('active_model') == 'stock.picking.in' or context.get('active_model') == 'stock.picking.out':
 			record_id = context and context.get('active_id', False) or False
 		else:
-			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
+			
 			if val.prepare_id.picking_id.id:
 				record_id = val.prepare_id.picking_id.id
 			else:
@@ -570,7 +602,6 @@ class stock_return_picking(osv.osv_memory):
 			record_id = context and context.get('active_id', False) or False
 			pick = pick_obj.browse(cr, uid, record_id, context=context)
 		else:
-			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 			if val.prepare_id.picking_id.id:
 				pick = pick_obj.browse(cr, uid, val.prepare_id.picking_id.id, context=context)
 			else:
@@ -612,7 +643,10 @@ class stock_return_picking(osv.osv_memory):
 								'note_id':val.id,
 								'invoice_state': data['invoice_state'],
 								})
-			dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
+			if val.prepare_id.picking_id.id:
+				dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
+			else:
+				dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)],'picking_id':val.prepare_id.picking_id.id})
 
 		dn_return_rel = []
 		val_id = data['product_return_moves']
@@ -632,6 +666,8 @@ class stock_return_picking(osv.osv_memory):
 				if val.prepare_id.picking_id.id:
 					op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
 					dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
+				else:
+					op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
 
 			if not mov_id:
 				raise osv.except_osv(_('Warning !'), _("You have manually created product lines, please delete them to proceed"))
@@ -675,7 +711,7 @@ class stock_return_picking(osv.osv_memory):
 					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 				else:
-					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'stock_move_id':new_move}
+					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 
 		if context.get('active_model') == 'delivery.note':
