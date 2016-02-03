@@ -76,7 +76,30 @@ class delivery_note(osv.osv):
 			product =[x.sale_line_material_id.sale_order_line_id.id for x in data.prepare_lines if x.sale_line_material_id]
 
 			if product == []:
-				raise openerp.exceptions.Warning("Order Preparation Tidak Memiliki Material Lines")
+				
+				# Jika OP merupakan OP Lama
+				line_op = self.pool.get('order.preparation.line').search(cr, uid, [('preparation_id', '=', pre)])
+				for op_line in self.pool.get('order.preparation.line').browse(cr,uid,line_op):
+					
+					material_line = []
+
+					material_line.append((0,0,{
+						'name':op_line.product_id.id,
+						'desc':op_line.name,
+						'qty':op_line.product_qty,
+						'product_uom':op_line.product_uom.id,
+					}))
+
+					line.append({
+						'no': op_line.no,
+						'product_id' : op_line.product_id.id,
+						'product_qty': op_line.product_qty,
+						'product_uom': op_line.product_uom.id,
+						'name': op_line.name,
+						'note_lines_material': material_line
+					})
+
+				# raise openerp.exceptions.Warning("Order Preparation Tidak Memiliki Material Lines")
 
 			order_line = self.pool.get('sale.order.line').search(cr, uid, [('id', 'in', product)])
 			data_order_line = self.pool.get('sale.order.line').browse(cr, uid, order_line)
@@ -174,16 +197,13 @@ class delivery_note(osv.osv):
 
 		return self.pool.get('delivery.note').get_sequence_no(cr, uid, ids)
 
-	def package_confirm(self, cr, uid, ids, context=None):
+
+	def create_picking(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		dn = self.pool.get('delivery.note')
-		dn_line = self.pool.get('delivery.note.line')
-		dn_material = self.pool.get('delivery.note.line.material')
 		stock_picking = self.pool.get('stock.picking')
 		stock_move = self.pool.get('stock.move')
-		
-
-		dn.get_sequence_no(cr, uid, ids)
+		dn_material = self.pool.get('delivery.note.line.material')
 
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
@@ -227,15 +247,40 @@ class delivery_note(osv.osv):
 				# Update DN Line Material Dengan ID Move
 				dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
 
-		
 		# Update Picking id di DN
 		dn.write(cr,uid,val.id,{'picking_id':picking})
 
 		stock_picking.action_assign(cr, uid, [picking])
 
-		res = super(delivery_note,self).package_confirm(cr, uid, ids, context=None)
-		return res
+		return True
 
+
+	def approve_note(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		dn = self.pool.get('delivery.note')
+		dn_line = self.pool.get('delivery.note.line')
+		dn_material = self.pool.get('delivery.note.line.material')
+		stock_picking = self.pool.get('stock.picking')
+		stock_move = self.pool.get('stock.move')
+
+
+		cek = dn_line.search(cr,uid, [('note_id','=', ids)])
+		hasil = dn_line.browse(cr, uid, cek)
+		for data in hasil:
+			product =[x.id for x in data.note_lines_material if x.id]
+			if product == []:
+				raise openerp.exceptions.Warning("Delivery Note Line Tidak Memiliki Material Lines")
+
+		# Jalankan Fungsi Asli Package Confirm
+		dn.package_confirm(cr,uid, ids)
+
+		# Jalankan Fungsi Sequence No
+		dn.get_sequence_no(cr, uid, ids)
+
+		# Jalankan Fungsi Create Picking
+		dn.create_picking(cr, uid, ids)
+
+		return True
 
 	def package_draft(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
@@ -352,15 +397,18 @@ class delivery_note(osv.osv):
 
 	def package_new_validate(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-		stock_picking = self.pool.get('stock.picking')
-		stock_move = self.pool.get('stock.move')
-		partial_data = {}
-		move = self.pool.get('stock.move').search(cr, uid, [('picking_id', '=', val.picking_id.id)])
-		data_move = self.pool.get('stock.move').browse(cr, uid, move)
-		# Update Done Picking & Move
-		stock_picking.action_move(cr, uid, [val.picking_id.id])
+		if val.picking_id.id:
+			stock_picking = self.pool.get('stock.picking')
+			stock_move = self.pool.get('stock.move')
+			partial_data = {}
+			move = self.pool.get('stock.move').search(cr, uid, [('picking_id', '=', val.picking_id.id)])
+			data_move = self.pool.get('stock.move').browse(cr, uid, move)
+			# Update Done Picking & Move
+			stock_picking.action_move(cr, uid, [val.picking_id.id])
 
-		self.write(cr, uid, ids, {'state': 'done'})
+			self.write(cr, uid, ids, {'state': 'done'})
+		else:
+			self.pool.get('delivery.note').package_validate(cr, uid, ids)
 		return True
 		
 
@@ -383,9 +431,8 @@ class delivery_note(osv.osv):
 		res = {}
 		val = self.browse(cr, uid, ids)[0]
 		dn = self.pool.get('delivery.note')
-		if val.prepare_id.picking_id.id:
-			res = super(delivery_note,self).return_product(cr,uid,ids,context={})
-		else:
+
+		if val.picking_id.id:
 			dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'view_stock_return_picking_form')
 			res = {
 				'name':'Return Shipment',
@@ -408,6 +455,8 @@ class delivery_note(osv.osv):
 			}
 			if val.picking_id.id==False:
 				dn.write(cr,uid,val.id,{'picking_id':val.prepare_id.picking_id.id})
+		else:
+			res = super(delivery_note,self).return_product(cr,uid,ids,context={})
 
 		return res
 
@@ -421,9 +470,7 @@ class packing_list_line(osv.osv):
 
 	def refresh(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
-		if val.note_id.prepare_id.picking_id.id:
-			res = super(packing_list_line,self).refresh(cr,uid,ids,context={})
-		else:
+		if val.picking_id.id:
 			for y in val.note_id.note_lines:
 				for x in y.note_lines_material:
 					res = self.pool.get('product.list.line').create(cr, uid, {
@@ -435,6 +482,9 @@ class packing_list_line(osv.osv):
 																  'product_uom': x.product_uom.id,
 																  # 'product_packaging': y.note_id.product_packaging.id,
 																  })
+		else:
+			res = super(packing_list_line,self).refresh(cr,uid,ids,context={})
+
 		return res
 
 
@@ -510,10 +560,12 @@ class stock_return_picking(osv.osv_memory):
 			record_id = context and context.get('active_id', False)
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
-			if val.prepare_id.picking_id.id:
-				record_id = val.prepare_id.picking_id.id
-			else:
+
+			if val.picking_id.id:
 				record_id = val.picking_id.id
+			else:
+				record_id = val.prepare_id.picking_id.id
+				
 
 		pick_obj = self.pool.get('stock.picking')
 		pick = pick_obj.browse(cr, uid, record_id, context=context)
@@ -546,19 +598,19 @@ class stock_return_picking(osv.osv_memory):
 		else:
 			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 
-			if val.prepare_id.picking_id.id:
-				record_id = val.prepare_id.picking_id.id
-				context.update({
-					'active_model': 'stock.picking',
-					'active_ids': [val.prepare_id.picking_id.id],
-					'active_id': val.prepare_id.picking_id.id
-				})
-			else:
+			if val.picking_id.id:
 				record_id = val.picking_id.id
 				context.update({
 					'active_model': 'stock.picking',
 					'active_ids': [val.picking_id.id],
 					'active_id': val.picking_id.id
+				})
+			else:
+				record_id = val.prepare_id.picking_id.id
+				context.update({
+					'active_model': 'stock.picking',
+					'active_ids': [val.prepare_id.picking_id.id],
+					'active_id': val.prepare_id.picking_id.id
 				})
 		res = super(stock_return_picking, self).view_init(cr, uid, fields_list, context=context)
 		return res
@@ -585,11 +637,11 @@ class stock_return_picking(osv.osv_memory):
 		if context.get('active_model') == 'stock.picking' or context.get('active_model') == 'stock.picking.in' or context.get('active_model') == 'stock.picking.out':
 			record_id = context and context.get('active_id', False) or False
 		else:
-			
-			if val.prepare_id.picking_id.id:
-				record_id = val.prepare_id.picking_id.id
-			else:
+			if val.picking_id.id:
 				record_id = val.picking_id.id
+			else:
+				record_id = val.prepare_id.picking_id.id
+
 
 		move_obj = self.pool.get('stock.move')
 		pick_obj = self.pool.get('stock.picking')
@@ -606,12 +658,11 @@ class stock_return_picking(osv.osv_memory):
 			record_id = context and context.get('active_id', False) or False
 			pick = pick_obj.browse(cr, uid, record_id, context=context)
 		else:
-			if val.prepare_id.picking_id.id:
-				pick = pick_obj.browse(cr, uid, val.prepare_id.picking_id.id, context=context)
-			else:
+			if val.picking_id.id:
 				pick = pick_obj.browse(cr, uid, val.picking_id.id, context=context)
+			else:
+				pick = pick_obj.browse(cr, uid, val.prepare_id.picking_id.id, context=context)
 
-		
 		data = self.read(cr, uid, ids[0], context=context)
 		date_cur = time.strftime('%Y-%m-%d %H:%M:%S')
 		set_invoice_state_to_none = True
@@ -647,13 +698,14 @@ class stock_return_picking(osv.osv_memory):
 								'note_id':val.id,
 								'invoice_state': data['invoice_state'],
 								})
-			if val.prepare_id.picking_id.id:
-				dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
-			else:
+			if val.picking_id.id:
 				if val.picking_id.id==False:
 					dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)],'picking_id':val.prepare_id.picking_id.id})
 				else:
 					dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
+			else:
+				dn.write(cr,uid,val.id,{'note_return_ids':[(4,new_picking)]})
+
 
 		dn_return_rel = []
 		val_id = data['product_return_moves']
@@ -670,11 +722,11 @@ class stock_return_picking(osv.osv_memory):
 			# search op and dn
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
-				if val.prepare_id.picking_id.id:
+				if val.picking_id.id:
 					op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
-					dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
 				else:
 					op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
+					dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
 
 			if not mov_id:
 				raise osv.except_osv(_('Warning !'), _("You have manually created product lines, please delete them to proceed"))
@@ -714,11 +766,11 @@ class stock_return_picking(osv.osv_memory):
 				
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
-				if val.prepare_id.picking_id.id:
-					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
+				if val.picking_id.id:
+					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 				else:
-					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'stock_move_id':new_move}
+					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 
 		if context.get('active_model') == 'delivery.note':

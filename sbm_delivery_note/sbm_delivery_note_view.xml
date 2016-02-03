@@ -34,7 +34,7 @@
 							</button>
 
 							<button name="package_confirm" position="replace">
-									<button name="package_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Delivery Note" groups="sbm_order_preparation.group_admin_ho"/>
+									<button name="approve_note" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Delivery Note" groups="sbm_order_preparation.group_admin_ho"/>
 							</button>
 
 							<button name="package_validate" position="replace">
