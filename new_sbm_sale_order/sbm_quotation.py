@@ -25,8 +25,25 @@ class Sale_order(osv.osv):
 		
 	# 	return res
 
-	def write(self, cr, uid, ids, vals, context=None):
+	def _check_before_save(self,cr,uid,order_line):
+		for material in order_line:
+			material_lines = material[2]['material_lines']
+		if order_line and material_lines:
+			res = True
+		else:
+			res = False
+		return res
 
+	def create(self, cr, uid,vals, context=None):
+	
+		if(self._check_before_save(cr,uid,vals.get('order_line'))):
+			sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
+			vals['quotation_no'] = sequence_no_quotation
+			return super(Sale_order, self).create(cr, uid, vals, context=context)
+		else:
+			raise osv.except_osv(_('Warning'),_('Order Line dan Material Line tidak boleh kosong'))
+	
+	def write(self, cr, uid, ids, vals, context=None):
 		print "---------------------------------------",vals
 	# 	print super(Sale_order, self).write(cr, uid, ids, vals, context=context),"cobaaaaa di test save nya"
 	# 	print "---------------------------------------"
@@ -77,8 +94,54 @@ class Sale_order(osv.osv):
 		print total_discount_nominal
 		return res
 
+	def _get_years(self,cr,uid,ids,name,args,context={}):
+		res={}
+		sale_order = self.browse(cr,uid,ids,context=context)
+		# print sale_order,"aaaaaaaaaaa"
+		for i in sale_order:
+			name = i.quotation_no[3:5]
+			print name,"ini namanya"
+			res[i.id]={'is_year':'20'+name}	
+
+		
+		return res
+
+	def _get_month(self,cr,uid,ids,name,args,context={}):
+		res={}
+		sale_order = self.browse(cr,uid,ids,context=context)
+		# print sale_order,"aaaaaaaaaaa"
+		for i in sale_order:
+			name = i.quotation_no[6:8]
+			# print name,"ini namanya"
+			
+			res[i.id]={'month':name}	
+
+		
+		return res
+
+	def _search_month(self, cr, uid, obj, name, args, context):
+		
+		for i in args:
+			filter_no=str(i[2])
+			if len(filter_no)==1:
+				filter_no="0"+str(i[2])
+		res = [('name','like','%/%/'+filter_no+"/%")]
+	
+		return res
+
+	def _search_years(self, cr, uid,obj, name, args, context={}):
+		for i in args:
+			print i[2]
+			filter_no = str(i[2])
+			if len(filter_no)>2:
+				filter_no=filter_no[-2:]
+		res = [('name','ilike','%/'+str(filter_no))]
+		return res
+
+		
+
 	_columns = {
-		'quotation_no':fields.char(required=True,string='Quotation#'),
+		'quotation_no':fields.char(string='Quotation#',required=True),
 		'base_total':fields.function(
 			_count_total,
 			string='Base Total',
@@ -89,7 +152,8 @@ class Sale_order(osv.osv):
 			},
 			multi="line_total"
 		),
-
+		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
+		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
 		'quotation_state':fields.selection([('draft','Draft'),('confirmed','Confirmed'),('win','Win'),('lost','Lost'),('cancel','Cancel')],string="Quotation State",track_visibility="onchange"),
 		'cancel_stage':fields.selection([('internal user fault','Internal User Fault'),('external user fault','External User Fault'),('lose','Lose')]),
 		'cancel_message':fields.text(string="Cancel Message"),
@@ -110,7 +174,7 @@ class Sale_order(osv.osv):
 		('quotation_no_unique', 'unique(quotation_no)', 'The quotation_no must be unique !')
 		]
 	_defaults={
-		
+		'quotation_no':"/",
 		'quotation_state':'draft'
 	}
 	_track={
@@ -125,6 +189,44 @@ class Sale_order(osv.osv):
 		'group_id':{},
 		'amount_untaxed':{}
 	}
+
+	def print_rfq(self,cr,uid,ids,context={}):
+		res={}
+		sale_order = self.browse(cr,uid,ids,context=context)[0]
+		id_report = self.pool.get('ir.actions.report.xml').search(cr, uid, [('report_name','=','quotation.webkit')])
+		datas = {
+                 'model': 'sale.order',
+                 'ids': ids,
+                 'form': self.read(cr, uid, ids[0], context=context),
+        }
+		# self.pool.get('ir.actions.report.xml').write(cr,uid,id_report,{'name':sale_order.name})
+		return {
+			'type': 'ir.actions.report.xml', 
+			'report_name': 'quotation.webkit',
+			'name': sale_order.name,
+			'datas': datas,
+			'nodestroy': True
+		}
+		
+	def print_so(self,cr,uid,ids,context={}):
+		res={}
+		sale_order = self.browse(cr,uid,ids,context=context)[0]
+		id_report = self.pool.get('ir.actions.report.xml').search(cr, uid, [('report_name','=','quotation.webkit')])
+		datas = {
+                 'model': 'sale.order',
+                 'ids': ids,
+                 'form': self.read(cr, uid, ids[0], context=context),
+        }
+		# self.pool.get('ir.actions.report.xml').write(cr,uid,id_report,{'name':sale_order.name})
+		return {
+			'type': 'ir.actions.report.xml', 
+			'report_name':'sale.order.webkit',
+			'name': sale_order.name,
+			'datas': datas,
+			'nodestroy': True
+		}
+
+
 	def confirm_quotation(self,cr,uid,ids,context={}):
 		res = False
 		quotation_obj = self.pool.get("sale.order")
@@ -138,10 +240,71 @@ class Sale_order(osv.osv):
 					quotation_obj.write(cr,uid,ids,{'quotation_state':'draft'},context=context)
 					raise osv.except_osv(_('Warning'),_('Order Cant be confirmed'))
 		if data_sekarang.quotation_state == 'draft':
+			# sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
 			if quotation_obj.write(cr,uid,ids,{'quotation_state':'confirmed'},context=context):
 				res = True
 		else:
 			raise osv.except_osv(_('Warning'),_('Order Cant be confirmed'))
+
+		return res
+
+	def loadBomLine(self,cr,uid,bom_line,product_uom_qty,product_uom,seq_id,is_loaded_from_change=True):
+		res = {}
+		print bom_line, 
+		print bom_line.product_id.id, "iddd" 
+		res = {
+				'product_id':bom_line.product_id.id,
+				'uom':bom_line.product_uom.id,
+				'qty':product_uom_qty*bom_line.product_qty,
+				'picking_location':seq_id,
+				'is_loaded_from_change':is_loaded_from_change,
+		}
+		return res
+
+	def generate_material(self,cr,uid,ids,context={}):
+		res={}
+		vals = {}
+	 	sale_order = self.browse(cr,uid,ids,context)[0]
+		if sale_order.quotation_state ==False:
+			self.write(cr,uid,ids,{'quotation_state':'win'})
+		for material in sale_order.order_line:
+
+			if material.material_lines ==[]:
+				product=self.pool.get('product.product').browse(cr,uid,material.product_id.id,context)
+				this_material = self.pool.get('sale.order.line')
+
+				seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
+
+				if len(seq_id):
+					seq_id = seq_id[0]
+				if product.bom_ids:
+					bom_line_set = self.pool.get('mrp.bom').browse(cr,uid,product.bom_ids[0].id)
+
+					vals= {
+					'material_lines':[(0,0,self.loadBomLine(cr,uid,bom_line,material.product_uom_qty,material.product_uom,seq_id)) for bom_line in bom_line_set.bom_lines],
+					
+					}
+				else:
+					vals={
+					'material_lines': [
+							(0,0,{
+								'product_id':material.product_id.id,
+								'qty':material.product_uom_qty,
+								'uom':material.product_uom.id,
+								'picking_location':seq_id,
+								'is_loaded_from_change':True
+								} )
+						],
+					
+					}
+				print material.product_uom.id,"<<<<<<<<<<<"
+				this_material.write(cr,uid,material.id,vals,context)
+			else:
+				raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
+		
+
+
+		
 
 		return res
 
@@ -254,12 +417,13 @@ class sale_order_material_line(osv.osv):
 		if product_id:
 				
 			product = self.pool.get("product.product").browse(cr,uid,product_id,context=context)
-			product_uom_browse = self.pool.get("product.uom").browse(cr,uid,uom,context=context)
-			
+		
 			kategori_uom_product = product.uom_id.category_id.id
-			Kategori_uom =product_uom_browse.category_id.id
+			
 			# print Kategori_uom	,"<<<<<<<<<<<<<<<<<<<<<<<<"
 			if uom:
+				product_uom_browse = self.pool.get("product.uom").browse(cr,uid,uom,context=context)
+				Kategori_uom =product_uom_browse.category_id.id
 				if Kategori_uom != kategori_uom_product :
 					if uom != product.uos_id.id:
 						res["value"]={"uom":product.uom_id.id}
@@ -341,7 +505,8 @@ class sale_order_line(osv.osv):
 			string="Tax Amount",
 			multi="line_total"
 			),		
-		'material_lines':fields.one2many('sale.order.material.line','sale_order_line_id')		
+		'material_lines':fields.one2many('sale.order.material.line','sale_order_line_id'),
+		'name':fields.text(string='Description',required=False)	
 	}
 
 
@@ -441,7 +606,8 @@ class sale_order_line(osv.osv):
 
 				res['value'] = {
 					'material_lines':[(0,0,self.loadBomLine(cr,uid,bom_line,product_uom_qty,product_uom,seq_id)) for bom_line in bom_line_set.bom_lines],
-					"product_uom":product.uom_id.id
+					"product_uom":product.uom_id.id,
+					# "tax_id":[(0,0,)]
 				}
 
 				if old_material_ids:
@@ -472,6 +638,19 @@ class sale_order_line(osv.osv):
 					mtr_lines.append(lr)
 					print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 				res['value']['material_lines'] = mtr_lines
+			if product.description_sale:
+				res['value']['name']=product.description_sale
+			else:
+				res['value']['name']=False
+			if product.supplier_taxes_id:
+				tax =[]
+				for i in product.supplier_taxes_id:
+					print i.id
+					tax.append(i.id)
+				print tax,"++++++++++++++++++++++++++++++++++"
+				res['value']['tax_id']=tax
+			else:
+				res['value']['tax_id']=False
 
 
 	
@@ -485,12 +664,13 @@ class sale_order_line(osv.osv):
 		if product_id:
 				
 			product = self.pool.get("product.product").browse(cr,uid,product_id,context=context)
-			product_uom_browse = self.pool.get("product.uom").browse(cr,uid,product_uom,context=context)
 			print "LLLLLLLLLLLLLl"
 			kategori_uom_product = product.uom_id.category_id.id
-			Kategori_uom =product_uom_browse.category_id.id
+			
 			# print Kategori_uom	,"<<<<<<<<<<<<<<<<<<<<<<<<"
 			if product_uom:
+				product_uom_browse = self.pool.get("product.uom").browse(cr,uid,product_uom,context=context)
+				Kategori_uom =product_uom_browse.category_id.id
 				if Kategori_uom != kategori_uom_product :
 					if product_uom != product.uos_id.id:
 						res["value"]={"product_uom":product.uom_id.id}

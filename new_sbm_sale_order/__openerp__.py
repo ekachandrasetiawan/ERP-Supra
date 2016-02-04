@@ -27,6 +27,7 @@
         "wizard_revised_quotation.xml",
         "wizard_lost_quotation.xml",
         "sbm_quotation.xml",
+        "print_name_button.xml",
         # "reportview.xml",
         "file.sql"
        
