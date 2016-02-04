@@ -19,7 +19,7 @@ class delivery_note(osv.osv):
 		for item in self.browse(cr,uid,ids,context=context):
 			if item.name <> '/':
 				dn_no = item.name[-2:]
-				res[item.id] = {'data_years':dn_no}
+				res[item.id] = {'data_years':float(dn_no)}
 		return res
 		
 	_inherit = "delivery.note"
