@@ -25,7 +25,7 @@
 	    </record>
 
 
-		<!-- Setting Access Rigths -->
+		<!-- Setting Access Rigths	 -->
 
     	<!-- Order Requisition Delivery  -->
 	    <record model="ir.model.access" id="ir_access_order_preparation_warehouse">

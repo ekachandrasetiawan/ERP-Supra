@@ -23,13 +23,13 @@ class order_requisition_delivery(osv.osv):
 
 	_name = 'order.requisition.delivery'
 	_columns = {
-		'name':fields.char('Refference',required=True, readonly=False,size=64,states={'confirmed':[('readonly',True)], 'approved':[('readonly',False)],'done':[('readonly',True)]}),
-		'source_location': fields.many2one('stock.location', "Source Location", required=True, states={'confirmed':[('readonly',True)], 'approved':[('readonly',False)],'done':[('readonly',True)]}),
-		'destination_location_id': fields.many2one('stock.location', "Destination Location", required=True,states={'confirmed':[('readonly',True)], 'approved':[('readonly',False)],'done':[('readonly',True)]}),
-		'date':fields.date('Date',required=True,states={'confirmed':[('readonly',True)], 'approved':[('readonly',False)],'done':[('readonly',True)]}),
-		'pr_names': fields.function(_get_pr_names,string="PR Names",type="char",store=False, readonly=False,states={'confirmed':[('readonly',True)], 'approved':[('readonly',False)],'done':[('readonly',True)]}),
-		'notes':fields.text('Date',required=False,states={'confirmed':[('readonly',True)], 'approved':[('readonly',False)],'done':[('readonly',True)]}),
-		'lines': fields.one2many('order.requisition.delivery.line', 'order_requisition_delivery_id', 'Lines',readonly=False,states={'confirmed':[('readonly',True)], 'approved':[('readonly',False)],'done':[('readonly',True)]}),
+		'name':fields.char('Refference',required=True, readonly=False,size=64,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'source_location': fields.many2one('stock.location', "Source Location", required=True, states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'destination_location_id': fields.many2one('stock.location', "Destination Location", required=True,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'date':fields.date('Date',required=True,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'pr_names': fields.function(_get_pr_names,string="PR Names",type="char",store=False, readonly=False,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'notes':fields.text('Date',required=False,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]}),
+		'lines': fields.one2many('order.requisition.delivery.line', 'order_requisition_delivery_id', 'Lines',readonly=False,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]}),
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('confirmed', 'Wait For Approve'),
