@@ -13,6 +13,15 @@ from openerp.tools.float_utils import float_compare
 
 
 class delivery_note(osv.osv):
+
+	def _is_filter_years(self,cr,uid,ids,field_name,arg,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			if item.name <> '/':
+				dn_no = item.name[-2:]
+				res[item.id] = {'data_years':dn_no}
+		return res
+		
 	_inherit = "delivery.note"
 	_columns = {
 		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
@@ -24,9 +33,11 @@ class delivery_note(osv.osv):
 		'work_order_id': fields.many2one('perintah.kerja',string="SPK",store=True,required=False,readonly=True, states={'draft': [('readonly', False)]}),
 		'work_order_in': fields.many2one('perintah.kerja.internal',string="SPK Internal",readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
+		'data_years':fields.function(_is_filter_years, store=True, string="Years Delivery Note", multi="data_years"),
 	}
 
 	_order = "id desc"
+
 
 
 	def print_dn_out_new(self,cr,uid,ids,context=None):
