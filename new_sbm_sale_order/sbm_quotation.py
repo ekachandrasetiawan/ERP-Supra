@@ -92,6 +92,31 @@ class Sale_order(osv.osv):
 		print total_discount_nominal
 		return res
 
+	def _get_years(self,cr,uid,ids,name,args,context={}):
+		res={}
+		sale_order = self.browse(cr,uid,ids,context=context)
+		# print sale_order,"aaaaaaaaaaa"
+		for i in sale_order:
+			name = i.name[3:5]
+			print name,"ini namanya"
+			res[i.id]={'is_year':'20'+name}	
+
+		
+		return res
+
+	def _get_month(self,cr,uid,ids,name,args,context={}):
+		res={}
+		sale_order = self.browse(cr,uid,ids,context=context)
+		# print sale_order,"aaaaaaaaaaa"
+		for i in sale_order:
+			name = i.name[6:8]
+			# print name,"ini namanya"
+			
+			res[i.id]={'month':name}	
+
+		
+		return res
+
 	_columns = {
 		'quotation_no':fields.char(required=True,string='Quotation#'),
 		'base_total':fields.function(
@@ -104,7 +129,8 @@ class Sale_order(osv.osv):
 			},
 			multi="line_total"
 		),
-
+		'is_year':fields.function(_get_years,string='Years',store=True,multi="years"),
+		'month':fields.function(_get_month,string='Date',store=True,multi="month"),
 		'quotation_state':fields.selection([('draft','Draft'),('confirmed','Confirmed'),('win','Win'),('lost','Lost'),('cancel','Cancel')],string="Quotation State",track_visibility="onchange"),
 		'cancel_stage':fields.selection([('internal user fault','Internal User Fault'),('external user fault','External User Fault'),('lose','Lose')]),
 		'cancel_message':fields.text(string="Cancel Message"),
@@ -150,10 +176,32 @@ class Sale_order(osv.osv):
                  'ids': ids,
                  'form': self.read(cr, uid, ids[0], context=context),
         }
-		self.pool.get('ir.actions.report.xml').write(cr,uid,id_report,{'name':sale_order.name})
-		return {'type': 'ir.actions.report.xml', 'report_name': 'quotation.webkit', 'datas': datas, 'nodestroy': True}
+		# self.pool.get('ir.actions.report.xml').write(cr,uid,id_report,{'name':sale_order.name})
+		return {
+			'type': 'ir.actions.report.xml', 
+			'report_name': 'quotation.webkit',
+			'name': sale_order.name,
+			'datas': datas,
+			'nodestroy': True
+		}
 		
-         
+	def print_so(self,cr,uid,ids,context={}):
+		res={}
+		sale_order = self.browse(cr,uid,ids,context=context)[0]
+		id_report = self.pool.get('ir.actions.report.xml').search(cr, uid, [('report_name','=','quotation.webkit')])
+		datas = {
+                 'model': 'sale.order',
+                 'ids': ids,
+                 'form': self.read(cr, uid, ids[0], context=context),
+        }
+		# self.pool.get('ir.actions.report.xml').write(cr,uid,id_report,{'name':sale_order.name})
+		return {
+			'type': 'ir.actions.report.xml', 
+			'report_name':'sale.order.webkit',
+			'name': sale_order.name,
+			'datas': datas,
+			'nodestroy': True
+		}
 
 
 	def confirm_quotation(self,cr,uid,ids,context={}):
@@ -194,7 +242,7 @@ class Sale_order(osv.osv):
 		vals = {}
 	 	sale_order = self.browse(cr,uid,ids,context)[0]
 		if sale_order.quotation_state ==False:
-			self.write(cr,uid,ids,{'quotation_state':'draft'})
+			self.write(cr,uid,ids,{'quotation_state':'win'})
 		for material in sale_order.order_line:
 
 			if material.material_lines ==[]:
