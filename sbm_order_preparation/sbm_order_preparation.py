@@ -12,6 +12,8 @@ class order_preparation(osv.osv):
 	_inherit = "order.preparation"
 	_description = "Order Packaging"
 	_columns = {
+		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
+		'name': fields.char('Reference', required=True, size=64, select=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=[('quotation_state','=', 'win')], states={'draft': [('readonly', False)]}),
 		'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=False, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
 	}

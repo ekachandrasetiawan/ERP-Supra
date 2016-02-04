@@ -1048,35 +1048,36 @@ class delivery_note(osv.osv):
 		}
 	
 	 
-	def create(self, cr, uid, vals, context=None):
-		# validate dn input
+	# def create(self, cr, uid, vals, context=None):
+	# 	# validate dn input
 		
-		prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
+	# 	prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
 		
-		if prepareExists and vals['special']==False:
-			no = ""
-			for nt in self.browse(cr,uid,prepareExists,context):
-				no += "["+nt.name+"]\n"
-			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
+	# 	if prepareExists and vals['special']==False:
+	# 		no = ""
+	# 		for nt in self.browse(cr,uid,prepareExists,context):
+	# 			no += "["+nt.name+"]\n"
+	# 		raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
 
 
-		if vals['special']==True:
-			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-			# saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
-			usa = 'SPC'
-			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-			vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-			return super(delivery_note, self).create(cr, uid, vals, context=context)
-		else:    
-			# ex: 000001C/SBM-ADM/JH-NR/X/13
-			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-			saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
-			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
-			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-			vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-			return super(delivery_note, self).create(cr, uid, vals, context=context)
+	# 	if vals['special']==True:
+	# 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+	# 		# saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
+	# 		usa = 'SPC'
+	# 		val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+	# 		use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+	# 		vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+	# 		return super(delivery_note, self).create(cr, uid, vals, context=context)
+	# 	else:    
+	# 		# ex: 000001C/SBM-ADM/JH-NR/X/13
+	# 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+	# 		saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
+	# 		usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
+	# 		val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+	# 		use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+	# 		vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+	# 		return super(delivery_note, self).create(cr, uid, vals, context=context)
+			
 	def package_draft(self, cr, uid, ids, context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
 		return True                               

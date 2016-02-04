@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    	<record model="res.groups" id="group_admin_spv">
+			<field name="category_id" ref="base.module_category_sales_management"/>
+			<field name="name">Admin Supervisior</field>
+		</record>
+
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_admin_ho">
+	        <field name="name">Access Delivery Note Admin HO</field>
+	        <field name="model_id" ref="model_delivery_note"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_admin_spv">
+	        <field name="name">Access Delivery Note Admin SPV</field>
+	        <field name="model_id" ref="model_delivery_note"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('sbm_delivery_note.group_admin_spv'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_admin_warehouse">
+	        <field name="name">Access Delivery Note Admin Warehouse</field>
+	        <field name="model_id" ref="model_delivery_note"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_warehouse'))]"/>
+	    </record>
+
+
+
+
+	    <!-- DN Line Mateterial -->
+	   	<record model="ir.model.access" id="ir_access_delivery_note_line_admin_ho">
+	        <field name="name">Access Delivery Note Line Admin HO</field>
+	        <field name="model_id" ref="model_delivery_note_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_line_admin_spv">
+	        <field name="name">Access Delivery Note Line Admin SPV</field>
+	        <field name="model_id" ref="model_delivery_note_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_delivery_note.group_admin_spv'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_line_admin_warehouse">
+	        <field name="name">Access Delivery Note Line Admin Warehouse</field>
+	        <field name="model_id" ref="model_delivery_note_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_warehouse'))]"/>
+	    </record>
+
+
+	    <!-- DN Line Mateterial -->
+	   	<record model="ir.model.access" id="ir_access_delivery_note_line_material_admin_ho">
+	        <field name="name">Access Delivery Note Admin HO</field>
+	        <field name="model_id" ref="model_delivery_note_line_material"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_line_material_admin_spv">
+	        <field name="name">Access Delivery Note Admin SPV</field>
+	        <field name="model_id" ref="model_delivery_note_line_material"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_delivery_note.group_admin_spv'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_line_material_admin_warehouse">
+	        <field name="name">Access Delivery Note Admin Warehouse</field>
+	        <field name="model_id" ref="model_delivery_note_line_material"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_warehouse'))]"/>
+	    </record>
+
+
+    </data>
+</openerp>

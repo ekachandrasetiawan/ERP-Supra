@@ -20,17 +20,27 @@ class Pembelian_Barang(osv.osv):
 	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for data in self.browse(cr,uid,ids,context):
+
 			line = [x.id for x in data.detail_pb_ids]
 			state_done =[y.id for y in data.detail_pb_ids if y.state =="done"]
+			
+			operation = context.get('operation',False)
+			action_state = context.get('action_state',False)
 
 			if line  == state_done :
 				res[data.id] = "done"
-			elif data.state=="draft":
+
+			if operation == "create":
+				res[data.id] = "draft"
+			elif action_state == "submit":
 				res[data.id] = "confirm"
-			elif data.state=="confirm":
+			elif action_state == "confirm":
 				res[data.id] = "confirm2"
-			elif data.state=="confirm2":
+			elif action_state == "confirm2":
 				res[data.id] = "purchase"
+			elif action_state == "draft":
+				res[data.id] = "draft"
+
 		return res
 
 
@@ -64,7 +74,6 @@ class Pembelian_Barang(osv.osv):
 		'product_id': fields.related('detail_pb_ids','name', type='many2one', relation='product.product', string='Product'),
 		'source_location_request_id': fields.many2one('stock.location', "Source Location", readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
-		# 'state': fields.selection(STATES,string="State"),
 		'state':fields.function(_getParentState,method=True,string="State",type="selection",selection=STATES,
 			store={
 				'pembelian.barang': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
@@ -147,8 +156,9 @@ class Pembelian_Barang(osv.osv):
 		else:
 			return {'value':{'duedate':duedate}}
 		
-	def create(self, cr, uid, vals, context=None):
+	def create(self, cr, uid, vals, context={}):
 		# vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang')
+		context.update(action_state='confirm')
 		return super(Pembelian_Barang, self).create(cr, uid, vals, context=context)
 
 
@@ -158,19 +168,22 @@ class Pembelian_Barang(osv.osv):
 		return {'value':{ 'department_id':dept_id} }
 
 	
-	def submit(self,cr,uid,ids,context=None):
+	def submit(self,cr,uid,ids,context={}):
+		context.update(action_state='submit')
 		val = self.browse(cr, uid, ids)[0]
 		code = val.destination_location_request_id.code
 		no = self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang') + 'PB/SBM/' + code + '/' + time.strftime('%y') + '/' + time.strftime('%m')
-		return self.write(cr,uid,ids,{'state':'confirm','name':no})
+		return self.write(cr,uid,ids,{'state':'confirm','name':no},context=context)
 
 	def edit(self,cr,uid,ids,context=None):
 		return self.write(cr,uid,ids,{'state':'edit'})
 
-	def setdraft(self,cr,uid,ids,context=None):
-		return self.write(cr,uid,ids,{'state':'draft'})
+	def setdraft(self,cr,uid,ids,context={}):
+		context.update(action_state='draft')
+		# print '============',data
+		return self.write(cr,uid,ids,{'state':'draft'},context=context)
 
-	def confirm3(self,cr,uid,ids,context=None):
+	def confirm3(self,cr,uid,ids,context={}):
 		val = self.browse(cr, uid, ids)[0]
 		obj_detail_pb=self.pool.get('detail.pb')
 		for detail in val.detail_pb_ids:
@@ -178,22 +191,24 @@ class Pembelian_Barang(osv.osv):
 				cr.execute('Update detail_pb Set state=%s Where id=%s', ('onproses',detail.id))
 		return self.write(cr,uid,ids,{'state':'purchase'})
 
-	def confirm(self,cr,uid,ids,context=None):
+	def confirm(self,cr,uid,ids,context={}):
 #		val = self.browse(cr, uid, ids)[0]
 #		usermencet = self.pool.get('res.user')
 #		if val.employee_id.parent_id.id != uid :
 #			raise osv.except_osv(('Perhatian..!!'), ('Harus Atasannya langsung ..'))
-		return self.write(cr,uid,ids,{'state':'confirm2'})
+		context.update(action_state='confirm')
+		return self.write(cr,uid,ids,{'state':'confirm2'},context=context)
 
-	def confirm2(self,cr,uid,ids,context=None):
+	def confirm2(self,cr,uid,ids,context={}):
 #		val = self.browse(cr, uid, ids)[0]
 #		usermencet = self.pool.get('res.user')
 #		if val.employee_id.parent_id.id != uid :
 #			raise osv.except_osv(('Perhatian..!!'), ('Harus Atasannya langsung ..'))
+		context.update(action_state='confirm2')
 		cr.execute('Update detail_pb Set state=%s Where detail_pb_id=%s', ('onproses',ids[0]))
-		return self.write(cr,uid,ids,{'state':'purchase'})
+		return self.write(cr,uid,ids,{'state':'purchase'},context=context)
 
-	def purchase(self,cr,uid,ids,context=None):
+	def purchase(self,cr,uid,ids,context={}):
 		return self.write(cr,uid,ids,{'state':'done'})
 
 
