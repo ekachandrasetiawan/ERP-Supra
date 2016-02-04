@@ -37,6 +37,8 @@ class Sale_order(osv.osv):
 	def create(self, cr, uid,vals, context=None):
 	
 		if(self._check_before_save(cr,uid,vals.get('order_line'))):
+			sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
+			vals['quotation_no'] = sequence_no_quotation
 			return super(Sale_order, self).create(cr, uid, vals, context=context)
 		else:
 			raise osv.except_osv(_('Warning'),_('Order Line dan Material Line tidak boleh kosong'))
@@ -97,7 +99,7 @@ class Sale_order(osv.osv):
 		sale_order = self.browse(cr,uid,ids,context=context)
 		# print sale_order,"aaaaaaaaaaa"
 		for i in sale_order:
-			name = i.name[3:5]
+			name = i.quotation_no[3:5]
 			print name,"ini namanya"
 			res[i.id]={'is_year':'20'+name}	
 
@@ -109,7 +111,7 @@ class Sale_order(osv.osv):
 		sale_order = self.browse(cr,uid,ids,context=context)
 		# print sale_order,"aaaaaaaaaaa"
 		for i in sale_order:
-			name = i.name[6:8]
+			name = i.quotation_no[6:8]
 			# print name,"ini namanya"
 			
 			res[i.id]={'month':name}	
@@ -117,8 +119,29 @@ class Sale_order(osv.osv):
 		
 		return res
 
+	def _search_month(self, cr, uid, obj, name, args, context):
+		
+		for i in args:
+			filter_no=str(i[2])
+			if len(filter_no)==1:
+				filter_no="0"+str(i[2])
+		res = [('name','like','%/%/'+filter_no+"/%")]
+	
+		return res
+
+	def _search_years(self, cr, uid,obj, name, args, context={}):
+		for i in args:
+			print i[2]
+			filter_no = str(i[2])
+			if len(filter_no)>2:
+				filter_no=filter_no[-2:]
+		res = [('name','ilike','%/'+str(filter_no))]
+		return res
+
+		
+
 	_columns = {
-		'quotation_no':fields.char(required=True,string='Quotation#'),
+		'quotation_no':fields.char(string='Quotation#',required=True),
 		'base_total':fields.function(
 			_count_total,
 			string='Base Total',
@@ -129,8 +152,8 @@ class Sale_order(osv.osv):
 			},
 			multi="line_total"
 		),
-		'is_year':fields.function(_get_years,string='Years',store=True,multi="years"),
-		'month':fields.function(_get_month,string='Date',store=True,multi="month"),
+		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
+		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
 		'quotation_state':fields.selection([('draft','Draft'),('confirmed','Confirmed'),('win','Win'),('lost','Lost'),('cancel','Cancel')],string="Quotation State",track_visibility="onchange"),
 		'cancel_stage':fields.selection([('internal user fault','Internal User Fault'),('external user fault','External User Fault'),('lose','Lose')]),
 		'cancel_message':fields.text(string="Cancel Message"),
@@ -151,7 +174,7 @@ class Sale_order(osv.osv):
 		('quotation_no_unique', 'unique(quotation_no)', 'The quotation_no must be unique !')
 		]
 	_defaults={
-		
+		'quotation_no':"/",
 		'quotation_state':'draft'
 	}
 	_track={
@@ -217,6 +240,7 @@ class Sale_order(osv.osv):
 					quotation_obj.write(cr,uid,ids,{'quotation_state':'draft'},context=context)
 					raise osv.except_osv(_('Warning'),_('Order Cant be confirmed'))
 		if data_sekarang.quotation_state == 'draft':
+			# sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
 			if quotation_obj.write(cr,uid,ids,{'quotation_state':'confirmed'},context=context):
 				res = True
 		else:
@@ -481,7 +505,8 @@ class sale_order_line(osv.osv):
 			string="Tax Amount",
 			multi="line_total"
 			),		
-		'material_lines':fields.one2many('sale.order.material.line','sale_order_line_id')		
+		'material_lines':fields.one2many('sale.order.material.line','sale_order_line_id'),
+		'name':fields.text(string='Description',required=False)	
 	}
 
 
@@ -581,7 +606,8 @@ class sale_order_line(osv.osv):
 
 				res['value'] = {
 					'material_lines':[(0,0,self.loadBomLine(cr,uid,bom_line,product_uom_qty,product_uom,seq_id)) for bom_line in bom_line_set.bom_lines],
-					"product_uom":product.uom_id.id
+					"product_uom":product.uom_id.id,
+					# "tax_id":[(0,0,)]
 				}
 
 				if old_material_ids:
@@ -612,6 +638,19 @@ class sale_order_line(osv.osv):
 					mtr_lines.append(lr)
 					print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 				res['value']['material_lines'] = mtr_lines
+			if product.description_sale:
+				res['value']['name']=product.description_sale
+			else:
+				res['value']['name']=False
+			if product.supplier_taxes_id:
+				tax =[]
+				for i in product.supplier_taxes_id:
+					print i.id
+					tax.append(i.id)
+				print tax,"++++++++++++++++++++++++++++++++++"
+				res['value']['tax_id']=tax
+			else:
+				res['value']['tax_id']=False
 
 
 	

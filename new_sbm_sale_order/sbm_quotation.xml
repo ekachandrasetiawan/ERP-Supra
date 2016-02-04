@@ -49,7 +49,7 @@
 </head>
 
   <tr width="100%" align="center"><td colspan="2"><font size="2"><b>QUOTATION</b></font></td></tr>
-     <tr width="100%" align="center"> <td colspan="2"> <font size="2"><b>${o.name or ""}</b></font> </td></tr>
+     <tr width="100%" align="center"> <td colspan="2"> <font size="2"><b>${o.quotation_no or ""}</b></font> </td></tr>
 <td width="65%">
             <table width="100%" >
                 <tr width="100%" valign="top">
@@ -683,10 +683,10 @@
 			<field name="type">tree</field>
 			<!-- <field name="domain">[('quotation_state', '=', 'win')]</field> -->
 			<field name="arch" type="xml">
-				<tree string="Quotation" fonts="bold:message_unread==True;bold:quotation_state=='lost';bold:quotation_state=='confirmed'" colors="blue:quotation_state=='draft';black:quotation_state=='win';red:quotation_state=='lost';gray:quotation_state=='cancel';">
+				<tree string="Quotation" fonts="bold:message_unread==True;bold:quotation_state=='lost'" colors="blue:quotation_state=='draft';black:quotation_state=='win';red:quotation_state=='lost';gray:quotation_state=='cancel';">
                    <field name="message_unread" invisible="1" modifiers="{'readonly': true, 'tree_invisible': true}"/>
                     <field name="state" invisible="1"/>
-                    <field name="name" string="Quotation Number"/>
+                    <field name="quotation_no" string="Quotation Number"/>
                     <field name="date_order"/>
                     <field name="partner_id"/>
                     <field name="user_id"/>
@@ -697,6 +697,17 @@
                
 			</field>
 		</record>
+        <record id='quotation_sequence_type' model="ir.sequence.type">
+            <field name="name">Quotation Sequence Type</field>
+            <field name="code">quotation.sequence.type</field>
+        </record>
+
+        <record id="quotation_sequence" model="ir.sequence">
+            <field name="name">Quotation Sequence</field>
+            <field name="code">quotation.sequence.type</field>
+            <field name="padding">5</field>
+            <field name="prefix">RFQ/%(y)s/%(month)s/</field>
+        </record>
 
         <record id="quotation_filter" model="ir.ui.view">
             <field name="name">quotation.filter</field>
@@ -705,14 +716,20 @@
             <field name="arch" type="xml">
 
                 <search string="Quotation State">
-                    <filter icon="terp-dolar_ok!" string="Draft" domain="[('quotation_state','=','draft')]" help="Quotation Order Draft"/>
-                    <filter icon="terp-dolar_ok!" string="Confirm" domain="[('quotation_state','=','confirmed')]" help="Quotation Order Confirm"/>
-                    <filter icon="terp-dolar_ok!" string="Win" domain="[('quotation_state','=','win')]" help="Quotation Order Win"/>
-                    <filter icon="terp-dolar_ok!" string="Lost" domain="[('quotation_state','=','lost')]" help="Quotation Order Lost"/>
+                    <filter icon="terp-dolar_ok!" string="Draft" domain="[('quotation_state','=','draft')]" help="Quotation Order Draft" name="filter_draft"/>
+                    <filter icon="terp-dolar_ok!" string="Confirm" domain="[('quotation_state','=','confirmed')]" help="Quotation Order Confirm" name="filter_confirm"/>
+                    <filter icon="terp-dolar_ok!" string="Win" domain="[('quotation_state','=','win')]" help="Quotation Order Win" name="filter_win"/>
+                    <filter icon="terp-dolar_ok!" string="Lost" domain="[('quotation_state','=','lost')]" help="Quotation Order Lost" name="filter_lost"/>
+                     <filter icon="terp-dolar_ok!" string="Cancel" domain="[('quotation_state','=','cancel')]" help="Quotation Order Cancel" name="filter_cancel"/>
 
-                     <group expand="0" string="Group By...">
-                        <filter string="Years" icon="terp-personal" domain="[]" context="{'group_by':'is_year'}"/>
-                         <filter string="Month" icon="terp-personal" domain="[]" context="{'group_by':'month'}"/>
+                    <field name="doc_year" filter_domain="[('doc_year','=',self)]"/>
+                    <field name="doc_month" filter_domain="[('doc_month','=',self)]"/>
+                    <field name="partner_id" filter_domain="[('partner_id','=',self)]"/>
+                    <field name="group_id" filter_domain="[('partner_id','=',self)]"/>
+                    <field name="user_id" filter_domain="[('user_id','=',self)]"/>
+                    <group expand="0" string="Group By...">
+                       <!--  <filter string="Years" icon="terp-personal" domain="[]" context="{'group_by':'doc_year'}"/>
+                         <filter string="Month" icon="terp-personal" domain="[]" context="{'group_by':'doc_month'}"/> -->
                         <filter string="Customer" icon="terp-personal" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Sales Group" icon="terp-personal" domain="[]" context="{'group_by':'group_id'}"/>
                         <filter string="Sales Person" icon="terp-personal" domain="[]" context="{'group_by':'user_id'}"/>
@@ -742,7 +759,9 @@
 					<sheet>
 						<h1>
                        		 <label string="Quotation " />	
-                       		 <field name="name" class="oe_inline" readonly="1"/>
+                             <!-- <field name='name'/> -->
+                             <!-- <field name="quotation_no" eval="/" /> -->
+                       		 <field name="quotation_no" class="oe_inline" readonly="1"/>
                     	</h1>
 						<group>
 							<group>
@@ -894,6 +913,7 @@
 			<field name="view_mode">tree,form</field>
 			<field name="domain">['|',('state','in',['draft','cancel']),('quotation_state','in',['win'])]</field> 
             <field name="search_view_id" ref="quotation_filter"/>
+            <field name="context">{"search_default_filter_draft":1,"search_default_filter_confirm":1}</field>
 
 			<!-- <field name="view_id" ref='quotation_form_view'/> -->
 			<!-- <field name="view_id" ref='quotation_tree_view'/> -->
