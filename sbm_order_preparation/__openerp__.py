@@ -1,0 +1,22 @@
+{
+    "name": "Order Preparation",
+    "version": "1.0",
+    "depends": [
+                "base",
+                "sale",
+                "stock",
+                "ad_order_preparation",
+                "sbm_inherit",
+                "ad_delivery_note",
+                "new_sbm_sale_order",
+                ],
+    "author": "PT.Suprabakti Mandiri",
+    "category": "Order Preparation",
+    "description": """ Provide Print Button in Various Format """,
+    "init_xml": [],
+    "data":['sbm_order_preparation_view.xml','setting.xml'],
+    'demo_xml': [],
+    'installable': True,
+    'active': False,
+    'certificate': '',
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="djp_tax_rate_form" model="ir.ui.view">
+			<field name="name">djp.tax.rate.form</field>
+			<field name="model">djp.tax.rate</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form version="7.0" string="DJP Tax Rates">
+					
+					<header>
+						<button name="action_activate" type="object" string="Activate" attrs="{'invisible':[('state','in',['done','cancel'])]}" />
+						<button name="action_cancel" type="object" string="Cancel" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure you want to cancel this?" />
+						<field name="state" widget="statusbar" />
+					</header>
+					<sheet>
+						<group>
+							<field name="currency_id" />
+							<field name="start_active_on" />
+							<field name="active_till_on" />
+							<field name="rate" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="djp_tax_rate_tree" model="ir.ui.view">
+			<field name="name">djp.tax.rate.tree</field>
+			<field name="model">djp.tax.rate</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="DJP Tax Rate Tree">
+					<field name="currency_id" />
+					<field name="start_active_on" />
+					<field name="active_till_on" />
+					<field name="rate" />
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="djp_tax_rate_action">
+			<field name="name">DJP Tax Rate Action</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">djp.tax.rate</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem name="DJP Tax Rate" parent="account.next_id_27" id="djp_tax_rate" sequence="1" action="djp_tax_rate_action" groups="" />
+	</data>
+</openerp>
