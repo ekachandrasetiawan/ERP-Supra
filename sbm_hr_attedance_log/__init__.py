@@ -1,0 +1,1 @@
+import attedance_log
