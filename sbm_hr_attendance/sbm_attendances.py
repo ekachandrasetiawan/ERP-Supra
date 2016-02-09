@@ -7,6 +7,7 @@ import httplib, urllib2
 import telnetlib
 import xmltodict
 from openerp import tools
+from openerp.exceptions import Warning
 from openerp.tools.translate import _
 from osv import osv, fields
 from xml.etree import ElementTree as ET
@@ -32,6 +33,7 @@ class hr_attendance_non_shift_timetable(osv.osv):
 		'start_at': fields.float('Start Work At',required=True),
 		'finish_work_at': fields.float('Finish Work At',required=True),
 		'as_ot_day': fields.boolean('As OT Day'),
+
 	}
 
 class hr_employee(osv.osv):
@@ -78,7 +80,8 @@ class hr_employee(osv.osv):
 	# upload user info into machines
 	def sync_employee_into_machine(self,cr,uid,ids,context={}):
 		machine_obj = self.pool.get('hr.attendance.machine')
-		machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0),('ip','not like','0')])
+		machine_ids = machine_obj.search(cr,uid,[('online','!=',False)])
+		print "Get Machine Result -----",machine_ids,"::::::::::::::::::::::::::::::::::::::::::::"
 
 		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
 
@@ -216,6 +219,7 @@ class hr_attendance_machine(osv.osv):
 		'ip': fields.char('IP',required=True),
 		'port': fields.char('Port', required=True),
 		'key': fields.char('Key',help="Key to Communicate with Machine", required=True),
+		'online':fields.boolean('Online State'),
 	}
 	_sql_constraints = [
 		('unique_machine_id', 'unique(machine_id)', "Machine ID already defined on other machine, Machine ID must be Unique"),
@@ -237,7 +241,7 @@ class hr_attendance_machine(osv.osv):
 	"""METHOD TO CLEAR LOG DATA
 	USING stream_data_http to secure data"""
 	def clear_log_data(self,cr,uid,ids,context={}):
-		
+
 		machines = self.browse(cr,uid,ids,context=context)
 		headers = {
 			'Content-Type':'text/xml'
@@ -249,9 +253,20 @@ class hr_attendance_machine(osv.osv):
 			response = self._request_to_machine(cr, uid, mac.ip, headers, cmd, context=context)
 		return True
 
+	def _trying_connection(self,ip):
+		
+		try:
+			print "Trying to connect "+str(ip)
+			urllib2.urlopen('http://'+ip,timeout=1)
+			return True
+		except urllib2.URLError as err:
+			print err,"---------------------------------------------------------------------------------------"
+			return False
+
+
 	# action to get attendance log
 	def stream_data_http(self,cr,uid,ids,context={}):
-		# print "aaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		print "aaaaaaaaaaaaaaaaaaaaaaaaaaaa FETCH machine_id",ids
 		Pin = context.get('att_pin','All')
 
 		hr_employee = self.pool.get('hr.employee')
@@ -260,13 +275,20 @@ class hr_attendance_machine(osv.osv):
 		headers = {
 			'Content-Type':'text/xml'
 		}
+		failed_connection = []
 		for mac in machines:
 			print mac.ip
+
+			if not self._trying_connection(mac.ip):
+				failed_connection.append({'ip':mac.ip,'name':mac.name})
+				continue
+				
+
 			xml = """<GetAttLog><ArgComKey xsi:type="xsd:integer">{machine_key}</ArgComKey>
 			<Arg><PIN xsi:type="xsd:integer">{Pin}</PIN></Arg></GetAttLog>""".format(machine_key=mac.key,Pin=Pin)
 			
 			response = self._request_to_machine(cr, uid, mac.ip, headers, xml, context=context)
-			print response,"XxXxXx-------------"
+			# print response,"XxXxXx-------------"
 			log_tree = ET.fromstring(response)
 			dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
 
@@ -355,7 +377,13 @@ class hr_attendance_machine(osv.osv):
 				# insert only the filtered log
 				print log_to_insert
 				att_log_obj.creates(cr,uid,log_to_insert,context=context)
-		
+		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",failed_connection
+		if len(failed_connection)>0:
+			msg = ""
+			for fail in failed_connection:
+				msg += "- Machine "+fail['name']+' On IP : '+fail['ip']+'\r\n'
+			raise Warning(_('Some Connection was not success to some machine.\r\nFailed to connect with :\r\n '+msg))
+
 		return True
 	def openprint_min_max(self,cr,uid,ids,context={}):
 		res = False

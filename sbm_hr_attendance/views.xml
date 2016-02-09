@@ -71,6 +71,7 @@
 			<field name="ip">0</field>
 			<field name="key">0</field>
 			<field name="port">0</field>
+			
 
 		</record>
 
@@ -137,6 +138,7 @@
 							<field name="port" />
 							<field name="key" />
 							<field name="desc" />
+							<field name="online" />
 						</group>
 					</sheet>
 				</form>
