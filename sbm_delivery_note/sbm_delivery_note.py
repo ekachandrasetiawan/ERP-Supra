@@ -335,6 +335,12 @@ class delivery_note(osv.osv):
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
 
+		if val.prepare_id.picking_id.id and val.picking_id.id:
+			continue
+		elif val.prepare_id.picking_id.id:
+			raise openerp.exceptions.Warning("Delivery Note Tidak Dapat di Postpone")
+
+
 		if val.postpone_picking:
 			stock_picking.write(cr,uid,val.postpone_picking.id,{'state':'done'})
 
