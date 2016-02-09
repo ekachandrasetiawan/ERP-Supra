@@ -1,0 +1,61 @@
+<openerp>
+	<data>
+		<record id="sbm_hr_attendance.sbm_hr_attendance_log_menu" model="ir.ui.menu">
+			<field name="name">Attendance Log</field>
+		</record>
+
+		<record model="ir.rule" id="ir_rule_attendance_log_emlpoyee">
+			<field name="name">Rule Attendance Log Employee</field>
+			<field name="model_id" ref="model_hr_attendance_log"/>
+			<field name="domain_force">[('employee_id.user_id','=',user.id)]</field>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="False"/>
+			<field name="perm_unlink" eval="False"/>
+			<field name="perm_create" eval="True"/>
+		</record>
+
+		<record model="ir.rule" id="ir_rule_attendance_log">
+			<field name="name">Rule Attendance Log</field>
+			<field name="model_id" ref="model_hr_attendance_log"/>
+			<field name="domain_force">[(1,'=',1)]</field>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="False"/>
+			<field name="perm_unlink" eval="False"/>
+			<field name="perm_create" eval="True"/>
+		</record>
+
+		<record model="res.groups" id="base.group_user">
+			<field name="rule_groups" eval="[(6,0,[ref('hr_evaluation.hr_employee_interview'),ref('hr_holidays.property_rule_holidays_employee'),ref('ir_rule_attendance_log_emlpoyee')])]" />
+		</record>
+		
+		<record model="res.groups" id="base.group_hr_manager">
+			<field name="rule_groups" eval="[(6,0,[ref('ir_rule_attendance_log')])]" />
+		</record>
+
+		<record model="res.groups" id="base.group_hr_user">
+			<field name="rule_groups" eval="[(6,0,[ref('hr_evaluation.hr_employee_interview_hr'),ref('hr_holidays.property_rule_holidays_officer'),ref('ir_rule_attendance_log_emlpoyee')])]" />
+		</record>
+
+		 <record id="attedance_time_filter" model="ir.ui.view">
+            <field name="name">Attedannce Time Filter</field>
+            <field name="model">hr.attendance.log</field>
+            <field name="type">search</field>
+            <field name="arch" type="xml">
+
+            <search string="Time">
+				 <filter icon="terp-dolar_ok!" string="Today" domain="[('log_time','&gt;=', ((context_today()).strftime('%%Y-%%m-%%d')))]" help="Today" name="filter_today"/>
+
+				 <filter string="Last week" domain="[('log_time', '&gt;=', (context_today()-datetime.timedelta(weeks=1)).strftime('%%Y-%%m-%%d'))]"/>
+
+				 <filter string="Current Month" name="current_month" domain="[('log_time','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('log_time','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
+
+			</search>
+
+
+            </field>
+        </record>
+
+		
+
+	</data>
+</openerp>
