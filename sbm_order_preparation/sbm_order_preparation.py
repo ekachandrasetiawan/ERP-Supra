@@ -67,13 +67,13 @@ class order_preparation(osv.osv):
 				op=self.pool.get('order.preparation').browse(cr, uid, [l.preparation_id.id])[0]
 				if op.state <> 'cancel':
 					nilai += l.product_qty
-			so_material_line=self.pool.get('sale.order.material.line').browse(cr, uid, [x.sale_line_material_id.id])[0]
+			if x.sale_line_material_id.id:
+				so_material_line=self.pool.get('sale.order.material.line').browse(cr, uid, [x.sale_line_material_id.id])[0]
+				mm = ' ' + so_material_line.product_id.default_code + ' '
+				msg = 'Product' + mm + 'Melebihi Order.!\n'
 
-			mm = ' ' + so_material_line.product_id.default_code + ' '
-			msg = 'Product' + mm + 'Melebihi Order.!\n'
-
-			if nilai > so_material_line.qty:
-				raise openerp.exceptions.Warning(msg)
+				if nilai > so_material_line.qty:
+					raise openerp.exceptions.Warning(msg)
 
 		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
 		
