@@ -273,8 +273,8 @@ class delivery_note(osv.osv):
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
 
-		location = stock_location.search(cr, uid, [('usage', '=', 'customer')])
-		loc = stock_location.browse(cr, uid, location)[0]
+		m  = self.pool.get('ir.model.data')
+		id_loc = m.get_object(cr, uid, 'stock', 'stock_location_customers').id
 
 		# Create Stock Picking 
 		picking = stock_picking.create(cr, uid, {
@@ -309,7 +309,7 @@ class delivery_note(osv.osv):
 					'company_id':1,
 					'picking_id': picking,
 					'state':'draft',
-					'location_dest_id' :loc.id
+					'location_dest_id' :id_loc
 					},context=context)
 				
 				# Update DN Line Material Dengan ID Move
