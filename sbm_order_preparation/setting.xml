@@ -52,7 +52,7 @@
 
 	    <record model="ir.model.access" id="ir_access_sale_order_material_line_admin_ho">
 	        <field name="name">Access Sale Order Material Line Admin HO</field>
-	        <field name="model_id" ref="model_sale_order_material_line"/>
+	        <field name="model_id" ref="new_sbm_sale_order.model_sale_order_material_line"/>
 	        <field name="perm_read" eval="True"/>
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
