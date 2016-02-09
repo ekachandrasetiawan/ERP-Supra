@@ -536,7 +536,7 @@
 			<field name="category_id" ref="base.module_category_sales_management"/>
 			<field name="menu_access" eval="[(6,0,[ref('sale.menu_sale_order'),ref('base.menu_base_partner')])]" />
 		</record>
-        <delete id="sale_stock.trans_router_wait_ship" model="workflow.transition" />
+        <!-- <delete id="sale_stock.trans_router_wait_ship" model="workflow.transition" /> -->
 
 
 <record id="inherit_new_order_line" model="ir.ui.view">
@@ -593,7 +593,7 @@
                                                         <field name="desc" string="Description" />
                                                         <field name="qty" />
                                                         <field name="uom" string="Unit" on_change="onchange_product_uom(product_id,uom)" />
-                                                        <field name="picking_location" invisible="1"/>
+                                                        <field name="picking_location" string="Picking Location"/>
                                                         <field name="is_loaded_from_change" invisible="1" />
                                                     </tree>
                                                 </field>
@@ -818,7 +818,7 @@
 														<field name="desc" string="Description" />
 														<field name="qty" />
 														<field name="uom" string="Unit" on_change="onchange_product_uom(product_id,uom)" />
-														<field name="picking_location" invisible="1"/>
+														<field name="picking_location" string="Picking Location"/>
 														<field name="is_loaded_from_change" invisible="1" />
 													</tree>
 												</field>

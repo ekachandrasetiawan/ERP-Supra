@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+hr_attendance_log_employee,hr attedance log employee,sbm_hr_attendance.model_hr_attendance_log,base.group_user,1,0,1,0
+hr_attendance_log_office,hr attedance log office,sbm_hr_attendance.model_hr_attendance_log,base.group_hr_user,1,0,1,0
+hr_attendance_log_office,hr attedance log office,sbm_hr_attendance.model_hr_attendance_log,base.group_hr_user,1,0,1,0
+hr_attendance_log_manager,hr attedance log manager,sbm_hr_attendance.model_hr_attendance_log,base.group_hr_manager,1,0,1,0
+
