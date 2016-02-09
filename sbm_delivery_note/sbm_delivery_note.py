@@ -21,7 +21,56 @@ class delivery_note(osv.osv):
 				dn_no = item.name[-2:]
 				res[item.id] = {'data_years':float(dn_no)}
 		return res
-		
+
+	def _get_years(self,cr,uid,ids,field_name,arg,context={}):
+
+		return True
+
+
+	def _get_month(self,cr,uid,ids,field_name,arg,context={}):
+
+		return True
+
+
+	def _search_month(self, cr, uid, obj, name, args, context):
+		for x in args:
+			filter_no=str(x[2])
+			month = '0'
+			if filter_no == '1':
+				month = 'I'
+			elif filter_no == '2':
+				month = 'II'
+			elif filter_no == '3':
+				month = 'III'
+			elif filter_no == '4':
+				month = 'IV'
+			elif filter_no == '5':
+				month = 'V'
+			elif filter_no == '6':
+				month = 'VI'
+			elif filter_no == '7':
+				month = 'VII'
+			elif filter_no == '8':
+				month = 'VIII'
+			elif filter_no == '9':
+				month = 'IX'
+			elif filter_no == '10':
+				month = 'X'
+			elif filter_no == '11':
+				month = 'XI'
+			elif filter_no == '12':
+				month = 'XII'
+		res = [('name','like','%/%/%/'+month+"/%")]
+		return res
+
+	def _search_years(self, cr, uid,obj, name, args, context={}):
+		for x in args:
+			filter_no = str(x[2])
+			if len(filter_no)>2:
+				filter_no=filter_no[-2:]
+		res = [('name','ilike','%/'+str(filter_no))]
+		return res
+
 	_inherit = "delivery.note"
 	_columns = {
 		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
@@ -34,6 +83,8 @@ class delivery_note(osv.osv):
 		'work_order_in': fields.many2one('perintah.kerja.internal',string="SPK Internal",readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
 		'data_years':fields.function(_is_filter_years, store=True, string="Years Delivery Note", multi="data_years"),
+		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
+		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
 	}
 
 	_order = "id desc"
@@ -169,7 +220,7 @@ class delivery_note(osv.osv):
 					'no': y.sequence,
 					'product_id' : y.product_id.id,
 					'product_qty': qty_dn_line,
-					'product_uom': x.product_uom.id,
+					'product_uom': y.product_uom.id,
 					'name': y.name,
 					'note_lines_material': material_line
 					})
@@ -334,6 +385,10 @@ class delivery_note(osv.osv):
 
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
+
+		if val.picking_id.id == False:
+			raise openerp.exceptions.Warning("Delivery Note Tidak Dapat di Postpone")
+
 
 		if val.postpone_picking:
 			stock_picking.write(cr,uid,val.postpone_picking.id,{'state':'done'})
