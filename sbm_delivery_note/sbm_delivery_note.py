@@ -169,7 +169,7 @@ class delivery_note(osv.osv):
 					'no': y.sequence,
 					'product_id' : y.product_id.id,
 					'product_qty': qty_dn_line,
-					'product_uom': x.product_uom.id,
+					'product_uom': y.product_uom.id,
 					'name': y.name,
 					'note_lines_material': material_line
 					})
@@ -335,9 +335,7 @@ class delivery_note(osv.osv):
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
 
-		if val.prepare_id.picking_id.id and val.picking_id.id:
-			continue
-		elif val.prepare_id.picking_id.id:
+		if val.picking_id.id == False:
 			raise openerp.exceptions.Warning("Delivery Note Tidak Dapat di Postpone")
 
 
