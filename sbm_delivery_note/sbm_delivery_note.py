@@ -208,13 +208,15 @@ class delivery_note(osv.osv):
 										'desc':xbatch.desc,
 										'qty':xbatch.qty,
 										'product_uom':dopline.product_uom.id,
+										'location_id':dline.picking_location.id
 									}))
 							else:
 								material_line.append((0,0,{
 									'name':dopline.product_id.id,
 									'desc':dopline.name,
 									'qty':dopline.product_qty,
-									'product_uom':dopline.product_uom.id
+									'product_uom':dopline.product_uom.id,
+									'location_id':dline.picking_location.id
 									}))
 				line.append({
 					'no': y.sequence,
@@ -264,11 +266,15 @@ class delivery_note(osv.osv):
 		val = self.browse(cr, uid, ids, context={})[0]
 		dn = self.pool.get('delivery.note')
 		stock_picking = self.pool.get('stock.picking')
+		stock_location = self.pool.get('stock.location')
 		stock_move = self.pool.get('stock.move')
 		dn_material = self.pool.get('delivery.note.line.material')
 
 		picking_type = 'out'
 		seq_obj_name =  'stock.picking.' + picking_type
+
+		m  = self.pool.get('ir.model.data')
+		id_loc = m.get_object(cr, uid, 'stock', 'stock_location_customers').id
 
 		# Create Stock Picking 
 		picking = stock_picking.create(cr, uid, {
@@ -299,11 +305,11 @@ class delivery_note(osv.osv):
 					'partner_id':val.partner_id.id,
 					'product_id':x.name.id,
 					'auto_validate':False,
-					'location_id' :12,
+					'location_id' :x.location_id.id,
 					'company_id':1,
 					'picking_id': picking,
 					'state':'draft',
-					'location_dest_id' :9
+					'location_dest_id' :id_loc
 					},context=context)
 				
 				# Update DN Line Material Dengan ID Move
@@ -591,6 +597,7 @@ class delivery_note_line_material(osv.osv):
 		'product_uom': fields.many2one('product.uom',required=True, string='UOM'),
 		'stock_move_id': fields.many2one('stock.move',required=False, string='Stock Move'),
 		'desc': fields.text('Description',required=False),
+		'location_id':fields.many2one('stock.location',required=True),
 		'state': fields.related('note_line_id','state', type='many2one', relation='delivery.note.line', string='State'),
 	}
 
