@@ -91,7 +91,7 @@ th {
 					  <!--   %for material in line.material_lines: -->
 						<td width="47%" class="alignTop"> 
 							  [${line.product_id.default_code}] ${line.product_id.name}<br/>
-							  ${line.name}<br/> 
+							  ${line.name or ""}<br/> 
 							   %if len(line.material_lines)>1: 
 
 									   &nbsp; &nbsp;  Consist of :
@@ -102,12 +102,12 @@ th {
 															${material.desc or ""}
 
 															</li>
-								<!-- $endif -->
-										 <!-- %endfor -->
+								
 													  %endfor
 												 </ul>
 							 %elif len(line.material_lines)==1:
-								%if line.material_lines.product_id.id != line.product_id.id:
+							 	
+								%if line.material_lines.product_id.id[0]!= line.product_id.id:
 									   &nbsp; &nbsp;  Consist of :
 											<ul type="circle">
 												  %for material in line.material_lines: 
