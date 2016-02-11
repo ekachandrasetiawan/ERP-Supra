@@ -488,6 +488,7 @@ class delivery_note(osv.osv):
 			self.write(cr, uid, ids, {'state': 'done'})
 		else:
 			self.pool.get('delivery.note').package_validate(cr, uid, ids)
+			self.write(cr, uid, ids, {'picking_id': val.prepare_id.picking_id.id})
 		return True
 		
 
