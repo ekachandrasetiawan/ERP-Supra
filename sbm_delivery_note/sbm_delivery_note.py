@@ -293,8 +293,14 @@ class delivery_note(osv.osv):
 					})
 
 		# Create Stock Move
+
 		for line in val.note_lines:
 			for x in line.note_lines_material:
+				if x.location_id.id:
+					loc_id =x.location_id.id
+				else:
+					loc_id = 12
+
 				move_id = stock_move.create(cr,uid,{
 					'name' : x.name.name,
 					'origin':val.prepare_id.sale_id.name,
@@ -306,7 +312,7 @@ class delivery_note(osv.osv):
 					'partner_id':val.partner_id.id,
 					'product_id':x.name.id,
 					'auto_validate':False,
-					'location_id' :x.location_id.id,
+					'location_id' :loc_id,
 					'company_id':1,
 					'picking_id': picking,
 					'state':'draft',
@@ -585,6 +591,26 @@ class delivery_note_line(osv.osv):
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 	}
 
+	def onchange_product_id(self, cr, uid, ids, product_id, uom_id):
+		product = self.pool.get('product.template').browse(cr, uid, product_id)
+
+		uom = uom_id
+
+		if product_id:
+			if uom_id == False:
+				uom = product.uom_id.id
+			else:
+				if uom_id == product.uom_id.id:
+					uom = product.uom_id.id
+				elif uom_id == product.uos_id.id:
+					uom = product.uos_id.id
+				elif uom_id <> product.uom_id.id or uom_id <> product.uos_id.id:
+					uom = product.uom_id.id
+				else:
+					uom = False
+					raise openerp.exceptions.Warning('UOM Error')
+		return {'value':{'product_uom':uom}}
+
 delivery_note_line()
 
 
@@ -612,7 +638,7 @@ class delivery_note_line_material(osv.osv):
 		'product_uom': fields.many2one('product.uom',required=True, string='UOM'),
 		'stock_move_id': fields.many2one('stock.move',required=False, string='Stock Move'),
 		'desc': fields.text('Description',required=False),
-		'location_id':fields.many2one('stock.location',required=True),
+		'location_id':fields.many2one('stock.location',required=False),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
 		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
