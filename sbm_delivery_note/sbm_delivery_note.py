@@ -11,7 +11,6 @@ import openerp.addons.decimal_precision as dp
 from openerp import netsvc
 from openerp.tools.float_utils import float_compare
 
-
 class delivery_note(osv.osv):
 
 	def _is_filter_years(self,cr,uid,ids,field_name,arg,context={}):
@@ -138,7 +137,6 @@ class delivery_note(osv.osv):
 			product =[x.sale_line_material_id.sale_order_line_id.id for x in data.prepare_lines if x.sale_line_material_id]
 
 			if product == []:
-				
 				# Jika OP merupakan OP Lama
 				line_op = self.pool.get('order.preparation.line').search(cr, uid, [('preparation_id', '=', pre)])
 				for op_line in self.pool.get('order.preparation.line').browse(cr,uid,line_op):
@@ -150,6 +148,7 @@ class delivery_note(osv.osv):
 						'desc':op_line.name,
 						'qty':op_line.product_qty,
 						'product_uom':op_line.product_uom.id,
+						'op_line_id':op_line.id
 					}))
 
 					line.append({
@@ -208,7 +207,8 @@ class delivery_note(osv.osv):
 										'desc':xbatch.desc,
 										'qty':xbatch.qty,
 										'product_uom':dopline.product_uom.id,
-										'location_id':dline.picking_location.id
+										'location_id':dline.picking_location.id,
+										'op_line_id':dopline.id
 									}))
 							else:
 								material_line.append((0,0,{
@@ -216,7 +216,8 @@ class delivery_note(osv.osv):
 									'desc':dopline.name,
 									'qty':dopline.product_qty,
 									'product_uom':dopline.product_uom.id,
-									'location_id':dline.picking_location.id
+									'location_id':dline.picking_location.id,
+									'op_line_id':dopline.id
 									}))
 				line.append({
 					'no': y.sequence,
@@ -588,6 +589,20 @@ delivery_note_line()
 
 
 class delivery_note_line_material(osv.osv):
+
+	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			refunded_total = 0
+			for refund in item.note_line_material_return_ids:
+				refunded_total += refund.product_qty
+
+			if item.qty == refunded_total:
+				self.write(cr,uid,[item.id],{'state':'donerefund'})
+			res[item.id] = refunded_total
+		return res
+
+
 	_name = "delivery.note.line.material"
 	_columns = {
 		'name' : fields.many2one('product.product',required=True, string="Product"),
@@ -598,10 +613,39 @@ class delivery_note_line_material(osv.osv):
 		'stock_move_id': fields.many2one('stock.move',required=False, string='Stock Move'),
 		'desc': fields.text('Description',required=False),
 		'location_id':fields.many2one('stock.location',required=True),
+		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
+		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
+		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
 		'state': fields.related('note_line_id','state', type='many2one', relation='delivery.note.line', string='State'),
 	}
 
 delivery_note_line_material()
+
+
+
+class order_preparation_line(osv.osv):
+	_inherit = "order.preparation.line"
+	_columns = {
+		'dn_line_materials':fields.one2many('delivery.note.line.material','op_line_id', string='DN Materail', required=False),
+	}
+
+order_preparation_line()
+
+
+
+class delivery_note_line_material_return(osv.osv):
+	_name = 'delivery.note.line.material.return'	
+	_columns = {
+		'id':fields.integer('ID'),
+		'delivery_note_id': fields.many2one('delivery.note','Delivery Note', ondelete='cascade',onupdate="cascade"),
+		'delivery_note_line_id': fields.many2one('delivery.note.line','Delivery Note Line',ondelete='cascade',onupdate="cascade"),
+		'delivery_note_line_material_id': fields.many2one('delivery.note.line.material','Delivery Note Line Material',ondelete='cascade',onupdate="cascade"),
+		'stock_picking_id': fields.many2one('stock.picking','Stock Picking',ondelete='cascade',onupdate="cascade"),
+		'stock_move_id': fields.many2one('stock.move','Stock Move',ondelete='cascade', onupdate="cascade"),
+	}
+
+delivery_note_line_material_return()
+
 
 
 class stock_picking(osv.osv):
@@ -787,19 +831,27 @@ class stock_return_picking(osv.osv_memory):
 		if context.get('active_model') == 'delivery.note':
 			op_line = self.pool.get('order.preparation.line')
 			dn_line = self.pool.get('delivery.note.line')
+			dn_line_material = self.pool.get('delivery.note.line.material')
 
 		for v in val_id:
 			data_get = data_obj.browse(cr, uid, v, context=context)
 			mov_id = data_get.move_id.id
-			
+
 			# search op and dn
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 				if val.picking_id.id:
-					op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
+					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',mov_id)],context=context)
+					dn_line_id = dn_line.search(cr,uid,[('note_lines_material','=',dn_line_material_id[0])],context=context)[0]
+					id_line_material = dn_line_material_id[0]
+
 				else:
-					op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
-					dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
+					# op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
+					# dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
+					
+					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',mov_id)],context=context)
+					dn_line_id = dn_line.search(cr,uid,[('note_lines_material','=',dn_line_material_id[0])],context=context)[0]
+					id_line_material = dn_line_material_id[0]
 
 			if not mov_id:
 				raise osv.except_osv(_('Warning !'), _("You have manually created product lines, please delete them to proceed"))
@@ -840,18 +892,28 @@ class stock_return_picking(osv.osv_memory):
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 				if val.picking_id.id:
-					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'stock_move_id':new_move}
+					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'delivery_note_line_material_id':id_line_material,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 				else:
 					tpl = {'delivery_note_id':active_dn_id,'stock_picking_id':new_picking,'delivery_note_line_id':dn_line_id,'stock_move_id':new_move}
 					dn_return_rel.append(tpl)
 
 		if context.get('active_model') == 'delivery.note':
-			dn_r = self.pool.get('delivery.note.line.return')
-			# write into dn line rel
-			for note_line_return in dn_return_rel:
-				dn_r.create(cr,uid,note_line_return)
+			val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 
+			dn_r = self.pool.get('delivery.note.line.return')
+			dn_rm = self.pool.get('delivery.note.line.material.return')
+			# write into dn line rel
+
+			if val.picking_id.id:
+				for note_line_return in dn_return_rel:
+					print '===============',note_line_return
+					dn_rm.create(cr,uid,note_line_return)
+					# a
+			else:	
+				# Create return Lama 
+				for note_line_return in dn_return_rel:
+					dn_r.create(cr,uid,note_line_return)
 		if not returned_lines:
 			raise osv.except_osv(_('Warning!'), _("Please specify at least one non-zero quantity."))
 

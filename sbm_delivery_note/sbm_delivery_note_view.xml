@@ -75,6 +75,7 @@
 																		<field name="desc"/>
 																		<field name="qty"/>
 																		<field name="product_uom"/>
+																		<field name="refunded_item"/>
 																	</tree>
 																</field>
 														</form>
@@ -94,6 +95,7 @@
 																		<field name="desc"/>
 																		<field name="qty"/>
 																		<field name="product_uom"/>
+																		<field name="refunded_item"/>
 																	</tree>
 																</field>
 														</tree>
