@@ -9,6 +9,198 @@ from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
+
+class res_partner_extention(osv.osv):
+
+	_inherit = 'res.partner'
+	def name_get(self, cr, uid, ids, context=None):
+		# print context,"CONTEXXXXXXXXXXXXXXX"
+		if context is None:
+			context = {}
+		if isinstance(ids, (int, long)):
+			ids = [ids]
+		res = []
+		results = super(res_partner_extention,self).name_get(cr, uid, ids, context)
+		tmp = 0
+		for index, result in results:
+			record_partner = self.browse(cr,uid,index,context=context) #siapin data object
+			# print index,"<<<<<<<",result
+			# print record_partner
+			tmp = index
+			if record_partner.city:
+				city=" "+record_partner.city
+			else:
+				city=""
+			if record_partner.state_id:
+				state_id=" "+record_partner.state_id.name
+			else:
+				state_id=""
+			if context.get('address_attention'):
+				# kalo ada konteks attention
+				print context,"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+				res_name = "%s"%(record_partner.name)
+				# print res_name,"ase"
+				res.append((index,res_name))
+				# print "--------------------------------------------------------",res_name
+
+			elif context.get('address_delivery'):
+				res_name = "%s"%(record_partner.name)+city+state_id+"\n"+ self._display_address(cr, uid, record_partner, without_company=True, context=context)
+				res_name = res_name.replace('\n\n','\n')
+				res_name = res_name.replace('\n\n','\n')
+				
+				res.append((index,res_name))
+				print context,"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+			elif context.get('address_invoice'):
+				res_name = "%s"%(record_partner.name)+city+state_id
+				res.append((index,res_name))
+			else:
+				print context,"--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+				res.append((index,result))
+
+		print tmp
+		print res,"::::::::::::::::::::::::::::::::::"
+		return res
+
+		
+
+
+		# print res
+		# for record in self.browse(cr, uid, ids, context=context):
+		# 	name = record.name
+		# 	state=""
+		# 	country=""
+		# 	if record.state_id.name:
+		# 		state =record.state_id.name
+		# 	if record.country_id.name:
+		# 		country = record.country_id.name
+		# 	if record.parent_id and not record.is_company:
+		# 		name = "%s %s %s" % (name,state,country)
+
+		# 	if context.get('show_address'):
+		# 		name = name + "\n" + self._display_address(cr, uid, record, without_company=True, context=context)
+		# 		name = name.replace('\n\n','\n')
+		# 		name = name.replace('\n\n','\n')
+		# 	if context.get('invoice'):
+		# 		name = "%s %s %s" % (name,state,country)
+		# 	if context.get('attention'):
+		# 		name ="%s"%(record.name) 
+		# 	if context.get('show_email') and record.email:
+		# 		name = "%s <%s>" % (name, record.email)
+		# 	res.append((record.id, name))
+		# 	print res
+		# return res
+
+	# def name_get(self,cr,uid,ids,context=None):
+	
+	# 	if context is None:
+	# 		context = {}
+	# 	if isinstance(ids, (int, long)):
+	# 		ids = [ids]
+	# 	res = []
+	# 	res = super(res_partner_extention,self).name_get(cr, uid, ids, context)
+	# 	for i in res:
+	# 		res.remove(i)
+		
+	# 	for record in self.browse(cr, uid, ids, context=context):
+	# 		name = record.name
+	# 		state=""
+	# 		country=""
+	# 		if record.state_id.name:
+	# 			state =record.state_id.name
+	# 		if record.country_id.name:
+	# 			country = record.country_id.name
+	# 		if record.parent_id and not record.is_company:
+	# 			name = "%s %s %s" % (name,state,country)
+	# 		if context.get('show_address'):
+	# 			name = name+" "+state+ "\n" + self._display_address(cr, uid, record, without_company=True, context=context)
+	# 			name = name.replace('\n\n','\n')
+	# 			name = name.replace('\n\n','\n')
+	# 		if context.get('invoice'):
+	# 			name = "%s %s %s" % (name,state,country)
+	# 		if context.get('attention'):
+	# 			name ="%s"%(record.name) 
+	# 		if context.get('show_email') and record.email:
+	# 			name = "%s <%s>" % (name, record.email)
+	# 		res.append((record.id, name))
+
+	# 	return res
+
+# 		# result = {}
+# 		# print context
+# 		# print context.get('show_address',"cek")
+# 		# print context.get('default_type',False),"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+# 		# if context.get('default_type',False) == "delivery":
+# 		# 	for partner in self.browse(cr,uid,ids,context=context):
+# 		# 		# print partner.city,"sebelum"
+# 		# 		if partner.city:
+# 		# 			city =" "+partner.city
+# 		# 		else:
+# 		# 			city=""
+
+# 		# 		if partner.street:
+# 		# 			street =partner.street
+# 		# 		else:
+# 		# 			street=""
+# 		# 		if partner.street2:
+# 		# 			street2 =partner.street2
+# 		# 		else:
+# 		# 			street2=""
+# 		# 		if partner.state_id:
+# 		# 			state_id = 
+
+# 		# 		if partner.is_company:
+# 		# 			result[partner.id] = partner.name+city+"\n"+street+street2
+# 		# 		else:
+# 		# 			if partner.parent_id.name:
+# 		# 				is_name =partner.parent_id.name+" "
+# 		# 			else:
+# 		# 				is_name=""
+# 		# 			result[partner.id] = is_name+partner.name
+# 		# 		print result.items(),"+==========+",result[partner.id]
+# 		# 	return result.items()
+			
+# 		# elif context.get('default_type',False) == "invoice":
+# 		# 	for partner in self.browse(cr,uid,ids,context=context):
+
+
+# 		# 		if partner.parent_id.name:
+# 		# 			is_name =partner.parent_id.name
+# 		# 		else:
+# 		# 			is_name=""
+# 		# 		result[partner.id] = is_name+partner.name
+# 		# 	return result.items()
+# 		# elif context.get('default_type',False) == False:
+# 		# 	for partner in self.browse(cr,uid,ids,context=context):
+# 		# 		if partner.city:
+# 		# 			city =" "+partner.city
+# 		# 		else:
+# 		# 			city=""
+
+# 		# 		if partner.street:
+# 		# 			street =partner.street
+# 		# 		else:
+# 		# 			street=""
+# 		# 		if partner.street2:
+# 		# 			street2 =partner.street2
+# 		# 		else:
+# 		# 			street2=""
+
+# 		# 		if partner.is_company:
+# 		# 			result[partner.id] = partner.name+city+"\n"+street+street2
+# 		# 		else:
+# 		# 			if partner.parent_id.name:
+# 		# 				is_name =partner.parent_id.name+" "
+# 		# 			else:
+# 		# 				is_name=""
+# 		# 			result[partner.id] = is_name+partner.name
+
+# 		# 		print result.items(),"+==========+",result[partner.id]
+
+# 			# return result.items()
+# 		test = self.browse(cr,uid,ids,context=context)[0]
+# 		print test.name_get()
+# 		return test.name_get()
+
 class Sale_order(osv.osv):	
 	_name ='sale.order'
 	_inherit =['sale.order','mail.thread']
@@ -24,6 +216,12 @@ class Sale_order(osv.osv):
 	# 	# 	}
 		
 	# 	return res
+	
+	# def name_get(self,cr,uid,ids,context=None):
+	# 	test=self.pool.get('res.partner')
+	# 	# coba = test.name_get(cr, uid,ids, context)
+	# 	print super(Sale_order, test).name_get() , "testtttss"
+	# 	return super(Sale_order, test).name_get(cr, uid,ids, context=context)
 
 	def _check_before_save(self,cr,uid,order_line):
 		for material in order_line:
@@ -175,8 +373,9 @@ class Sale_order(osv.osv):
 		]
 	_defaults={
 		'quotation_no':"/",
-		'quotation_state':'draft'
-	}
+		'quotation_state':'draft',
+		# 'partner_id': lambda self, cr, uid, context: context.get('partner_id', False) and self.pool.get('res.partner').address_get(cr, uid, [context['partner_id']], ['invoice'])['invoice'],
+			}
 	_track={
 		'partner_id':{},
 		'payment_term':{},
@@ -195,15 +394,15 @@ class Sale_order(osv.osv):
 		sale_order = self.browse(cr,uid,ids,context=context)[0]
 		id_report = self.pool.get('ir.actions.report.xml').search(cr, uid, [('report_name','=','quotation.webkit')])
 		datas = {
-                 'model': 'sale.order',
-                 'ids': ids,
-                 'form': self.read(cr, uid, ids[0], context=context),
-        }
+				 'model': 'sale.order',
+				 'ids': ids,
+				 'form': self.read(cr, uid, ids[0], context=context),
+		}
 		# self.pool.get('ir.actions.report.xml').write(cr,uid,id_report,{'name':sale_order.name})
 		return {
 			'type': 'ir.actions.report.xml', 
 			'report_name': 'quotation.webkit',
-			'name': sale_order.name,
+			'name': sale_order.quotation_no,
 			'datas': datas,
 			'nodestroy': True
 		}
@@ -213,10 +412,10 @@ class Sale_order(osv.osv):
 		sale_order = self.browse(cr,uid,ids,context=context)[0]
 		id_report = self.pool.get('ir.actions.report.xml').search(cr, uid, [('report_name','=','quotation.webkit')])
 		datas = {
-                 'model': 'sale.order',
-                 'ids': ids,
-                 'form': self.read(cr, uid, ids[0], context=context),
-        }
+				 'model': 'sale.order',
+				 'ids': ids,
+				 'form': self.read(cr, uid, ids[0], context=context),
+		}
 		# self.pool.get('ir.actions.report.xml').write(cr,uid,id_report,{'name':sale_order.name})
 		return {
 			'type': 'ir.actions.report.xml', 
@@ -264,7 +463,7 @@ class Sale_order(osv.osv):
 	def generate_material(self,cr,uid,ids,context={}):
 		res={}
 		vals = {}
-	 	sale_order = self.browse(cr,uid,ids,context)[0]
+		sale_order = self.browse(cr,uid,ids,context)[0]
 		if sale_order.quotation_state ==False:
 			self.write(cr,uid,ids,{'quotation_state':'win'})
 		for material in sale_order.order_line:
@@ -686,7 +885,7 @@ class sale_order_line(osv.osv):
 		res={}
 		print material_lines_object,"cek------------------------------>"
 		if product_uom_qty == False or product_uom_qty<1:
-			res["warning"]={'title':"Error",'message':'Quantity not null'}
+			res["warning"]={'title':"Error",'message':'Quantity tidak boleh kosong'}
 			res['value'] = {
 								
 								"product_uom_qty":1
