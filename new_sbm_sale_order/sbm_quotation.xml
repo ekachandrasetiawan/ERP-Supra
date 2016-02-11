@@ -763,8 +763,8 @@
 								<field name="state" invisible="1"/>
 								<field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True), ('is_company', '=', True)]" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
 								<field name="partner_shipping_id" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery','search_default_customer':1, 'show_address': 1,'address_delivery':1}" options="{&quot;always_reload&quot;: True}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
-								<field name="attention" context="{'address_attention':1}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
-								<field name="partner_invoice_id" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice','address_invoice':1}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
+								<field name="attention" context="{'address_attention':1,}" options="{&quot;always_reload&quot;: True}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
+								<field name="partner_invoice_id" options="{&quot;always_reload&quot;: True}" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice','default_type':'delivery','search_default_customer':1, 'show_address': 1,'address_invoice':1}" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
 							</group>
 						<group>
 							<field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>>

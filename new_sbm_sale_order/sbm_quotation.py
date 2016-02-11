@@ -14,6 +14,7 @@ class res_partner_extention(osv.osv):
 
 	_inherit = 'res.partner'
 	def name_get(self, cr, uid, ids, context=None):
+		# print context,"CONTEXXXXXXXXXXXXXXX"
 		if context is None:
 			context = {}
 		if isinstance(ids, (int, long)):
@@ -23,8 +24,8 @@ class res_partner_extention(osv.osv):
 		tmp = 0
 		for index, result in results:
 			record_partner = self.browse(cr,uid,index,context=context) #siapin data object
-			print index,"<<<<<<<",result
-			print record_partner
+			# print index,"<<<<<<<",result
+			# print record_partner
 			tmp = index
 			if record_partner.city:
 				city=" "+record_partner.city
@@ -34,13 +35,13 @@ class res_partner_extention(osv.osv):
 				state_id=" "+record_partner.state_id.name
 			else:
 				state_id=""
-			if context.get('address_attention') or context.get('search_default_filter_confirm'):
+			if context.get('address_attention'):
 				# kalo ada konteks attention
-		
+				print context,"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
 				res_name = "%s"%(record_partner.name)
 				# print res_name,"ase"
 				res.append((index,res_name))
-				print "--------------------------------------------------------",res_name
+				# print "--------------------------------------------------------",res_name
 
 			elif context.get('address_delivery'):
 				res_name = "%s"%(record_partner.name)+city+state_id+"\n"+ self._display_address(cr, uid, record_partner, without_company=True, context=context)
@@ -48,15 +49,16 @@ class res_partner_extention(osv.osv):
 				res_name = res_name.replace('\n\n','\n')
 				
 				res.append((index,res_name))
+				print context,"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			elif context.get('address_invoice'):
 				res_name = "%s"%(record_partner.name)+city+state_id
 				res.append((index,res_name))
 			else:
-				print "--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",context
+				print context,"--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
 				res.append((index,result))
 
 		print tmp
-		# print results[0],"<<<<<<<<<<<<<<<<<<<<<<"
+		print res,"::::::::::::::::::::::::::::::::::"
 		return res
 
 		
