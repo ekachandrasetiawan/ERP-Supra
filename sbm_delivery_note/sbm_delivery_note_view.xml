@@ -46,7 +46,7 @@
 							</button>
 
 							<button string="Return Products" position="replace">
-									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done,refunded,torefund" type="action" groups="base.group_user, sbm_order_preparation.group_admin_warehouse"/>
+									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done,refunded,torefund" type="action" groups="base.group_user, sbm_order_preparation.group_admin_warehouse" confirm="Are you sure to Return Delivery Note"/>
 									<button name="print_dn_out_new" type="object" states="done" string="Print Out DN" icon="gtk-dnd-multiple"/>
 							</button>
 
@@ -56,49 +56,48 @@
 							<field name="state" position="replace">
 									<field name="state" widget="statusbar" statusbar_visible="draft,approve,done" statusbar_colors='{"draft":"red","approve":"blue"}'/>
 							</field>
-							
 
 							<field name="note_lines" position="replace">
 									 <field col="4" colspan="4" name="note_lines" nolabel="1" widget="one2many_list">
 												<form>
-												<field name="no"/>
-												<field name="product_id"/>
-												<field name="product_qty"/>
-												<field name="product_uom"/>
-												<field name="product_packaging"/>
-												<field name="name" colspan="4"/>
-																<field name="refunded_item" />
-																<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
-																	<tree>
-																		<field name="name"/>
-																		<field name="prodlot_id"/>
-																		<field name="desc"/>
-																		<field name="qty"/>
-																		<field name="product_uom"/>
-																		<field name="refunded_item"/>
-																	</tree>
-																</field>
-														</form>
-														<tree string="Delviery Note Line" colors="red:state == 'donerefund'">
-																<field name="no"/>
-																<field name="name"/>
+													<field name="no"/>
+													<field name="product_id" on_change="onchange_product_id(product_id,product_uom)"/>
+													<field name="product_qty"/>
+													<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
+													<field name="product_packaging"/>
+													<field name="name" colspan="4"/>
+														<field name="refunded_item" />
+														<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
+																<tree>
+																	<field name="product_id"/>
+																	<field name="prodlot_id"/>
+																	<field name="desc"/>
+																	<field name="qty"/>
+																	<field name="product_uom"/>
+																	<field name="refunded_item"/>
+																</tree>
+															</field>
+												</form>
+												<tree string="Delviery Note Line" colors="red:state == 'donerefund'">
+														<field name="no"/>
+														<field name="name"/>
+														<field name="product_id" on_change="onchange_product_id(product_id,product_uom)"/>
+														<field name="product_qty"/>
+														<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
+														<field name="product_packaging"/>
+														<field name="refunded_item" />
+														<field name="state" invisible="1"/>
+														<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
+															<tree>
 																<field name="product_id"/>
-																<field name="product_qty"/>
+																<field name="prodlot_id"/>
+																<field name="desc"/>
+																<field name="qty"/>
 																<field name="product_uom"/>
-																<field name="product_packaging"/>
-																<field name="refunded_item" />
-																<field name="state" invisible="1"/>
-																<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
-																	<tree>
-																		<field name="name"/>
-																		<field name="prodlot_id"/>
-																		<field name="desc"/>
-																		<field name="qty"/>
-																		<field name="product_uom"/>
-																		<field name="refunded_item"/>
-																	</tree>
-																</field>
-														</tree>
+																<field name="refunded_item"/>
+															</tree>
+														</field>
+												</tree>
 									 </field>
 							</field>
 
