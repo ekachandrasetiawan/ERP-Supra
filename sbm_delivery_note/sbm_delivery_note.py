@@ -144,7 +144,8 @@ class delivery_note(osv.osv):
 					material_line = []
 
 					material_line.append((0,0,{
-						'name':op_line.product_id.id,
+						'name':op_line.name,
+						'product_id':op_line.product_id.id,
 						'desc':op_line.name,
 						'qty':op_line.product_qty,
 						'product_uom':op_line.product_uom.id,
@@ -202,7 +203,8 @@ class delivery_note(osv.osv):
 								# Jika Ada Batch Maka Tampilkan Batch
 								for xbatch in data_batch:
 									material_line.append((0,0,{
-										'name':dopline.product_id.id,
+										'name':xbatch.name,
+										'product_id':dopline.product_id.id,
 										'prodlot_id':xbatch.name.id,
 										'desc':xbatch.desc,
 										'qty':xbatch.qty,
@@ -212,7 +214,8 @@ class delivery_note(osv.osv):
 									}))
 							else:
 								material_line.append((0,0,{
-									'name':dopline.product_id.id,
+									'name':dopline.name,
+									'product_id':dopline.product_id.id,
 									'desc':dopline.name,
 									'qty':dopline.product_qty,
 									'product_uom':dopline.product_uom.id,
@@ -293,10 +296,16 @@ class delivery_note(osv.osv):
 					})
 
 		# Create Stock Move
+
 		for line in val.note_lines:
 			for x in line.note_lines_material:
+				if x.location_id.id:
+					loc_id =x.location_id.id
+				else:
+					loc_id = 12
+
 				move_id = stock_move.create(cr,uid,{
-					'name' : x.name.name,
+					'name' : x.product_id.name,
 					'origin':val.prepare_id.sale_id.name,
 					'product_uos_qty':x.qty,
 					'product_uom':x.product_uom.id,
@@ -304,15 +313,17 @@ class delivery_note(osv.osv):
 					'product_qty':x.qty,
 					'product_uos':x.product_uom.id,
 					'partner_id':val.partner_id.id,
-					'product_id':x.name.id,
+					'product_id':x.product_id.id,
 					'auto_validate':False,
-					'location_id' :x.location_id.id,
+					'location_id' :loc_id,
 					'company_id':1,
 					'picking_id': picking,
 					'state':'draft',
 					'location_dest_id' :id_loc
 					},context=context)
 				
+
+				print '================',move_id
 				# Update DN Line Material Dengan ID Move
 				dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
 
@@ -482,6 +493,7 @@ class delivery_note(osv.osv):
 			self.write(cr, uid, ids, {'state': 'done'})
 		else:
 			self.pool.get('delivery.note').package_validate(cr, uid, ids)
+			self.write(cr, uid, ids, {'picking_id': val.prepare_id.picking_id.id})
 		return True
 		
 
@@ -581,9 +593,29 @@ class delivery_note_line(osv.osv):
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
-		'state': fields.selection([('torefund', 'To Refund'), ('refunded', 'Refunded'),('donerefund', 'Done Refund')], 'State', readonly=True),
+		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 	}
+
+	def onchange_product_id(self, cr, uid, ids, product_id, uom_id):
+		product = self.pool.get('product.template').browse(cr, uid, product_id)
+
+		uom = uom_id
+
+		if product_id:
+			if uom_id == False:
+				uom = product.uom_id.id
+			else:
+				if uom_id == product.uom_id.id:
+					uom = product.uom_id.id
+				elif uom_id == product.uos_id.id:
+					uom = product.uos_id.id
+				elif uom_id <> product.uom_id.id or uom_id <> product.uos_id.id:
+					uom = product.uom_id.id
+				else:
+					uom = False
+					raise openerp.exceptions.Warning('UOM Error')
+		return {'value':{'product_uom':uom}}
 
 delivery_note_line()
 
@@ -605,14 +637,15 @@ class delivery_note_line_material(osv.osv):
 
 	_name = "delivery.note.line.material"
 	_columns = {
-		'name' : fields.many2one('product.product',required=True, string="Product"),
+		'name': fields.text('Description'),
+		'product_id' : fields.many2one('product.product',required=True, string="Product"),
 		'prodlot_id':fields.many2one('stock.production.lot','Serial Number'),
 		'note_line_id': fields.many2one('delivery.note.line', 'Delivery Note Line', required=True, ondelete='cascade'),
 		'qty': fields.float('Qty',required=True),
 		'product_uom': fields.many2one('product.uom',required=True, string='UOM'),
 		'stock_move_id': fields.many2one('stock.move',required=False, string='Stock Move'),
 		'desc': fields.text('Description',required=False),
-		'location_id':fields.many2one('stock.location',required=True),
+		'location_id':fields.many2one('stock.location',required=False),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
 		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
@@ -833,6 +866,7 @@ class stock_return_picking(osv.osv_memory):
 			dn_line = self.pool.get('delivery.note.line')
 			dn_line_material = self.pool.get('delivery.note.line.material')
 
+
 		for v in val_id:
 			data_get = data_obj.browse(cr, uid, v, context=context)
 			mov_id = data_get.move_id.id
@@ -841,7 +875,7 @@ class stock_return_picking(osv.osv_memory):
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 				if val.picking_id.id:
-					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',mov_id)],context=context)
+					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',[mov_id])],context=context)
 					dn_line_id = dn_line.search(cr,uid,[('note_lines_material','=',dn_line_material_id[0])],context=context)[0]
 					id_line_material = dn_line_material_id[0]
 
