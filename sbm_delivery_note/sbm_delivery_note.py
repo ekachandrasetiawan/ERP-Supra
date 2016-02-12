@@ -319,6 +319,8 @@ class delivery_note(osv.osv):
 					'location_dest_id' :id_loc
 					},context=context)
 				
+
+				print '================',move_id
 				# Update DN Line Material Dengan ID Move
 				dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
 
@@ -588,7 +590,7 @@ class delivery_note_line(osv.osv):
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
-		'state': fields.selection([('torefund', 'To Refund'), ('refunded', 'Refunded'),('donerefund', 'Done Refund')], 'State', readonly=True),
+		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 	}
 
@@ -632,7 +634,8 @@ class delivery_note_line_material(osv.osv):
 
 	_name = "delivery.note.line.material"
 	_columns = {
-		'name' : fields.many2one('product.product',required=True, string="Product"),
+		'name': fields.text('Description'),
+		'product_id' : fields.many2one('product.product',required=True, string="Product"),
 		'prodlot_id':fields.many2one('stock.production.lot','Serial Number'),
 		'note_line_id': fields.many2one('delivery.note.line', 'Delivery Note Line', required=True, ondelete='cascade'),
 		'qty': fields.float('Qty',required=True),
@@ -860,6 +863,7 @@ class stock_return_picking(osv.osv_memory):
 			dn_line = self.pool.get('delivery.note.line')
 			dn_line_material = self.pool.get('delivery.note.line.material')
 
+
 		for v in val_id:
 			data_get = data_obj.browse(cr, uid, v, context=context)
 			mov_id = data_get.move_id.id
@@ -868,7 +872,7 @@ class stock_return_picking(osv.osv_memory):
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 				if val.picking_id.id:
-					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',mov_id)],context=context)
+					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',[mov_id])],context=context)
 					dn_line_id = dn_line.search(cr,uid,[('note_lines_material','=',dn_line_material_id[0])],context=context)[0]
 					id_line_material = dn_line_material_id[0]
 
