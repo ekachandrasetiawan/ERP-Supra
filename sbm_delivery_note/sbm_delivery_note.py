@@ -437,7 +437,7 @@ class delivery_note(osv.osv):
 			for line in val.note_lines:
 				for x in line.note_lines_material:
 					move_id = stock_move.create(cr,uid,{
-						'name' : x.name.name,
+						'name' : x.product_id.name,
 						'origin':val.prepare_id.sale_id.name,
 						'product_uos_qty':x.qty,
 						'product_uom':x.product_uom.id,
@@ -445,7 +445,7 @@ class delivery_note(osv.osv):
 						'product_qty':x.qty,
 						'product_uos':x.product_uom.id,
 						'partner_id':val.partner_id.id,
-						'product_id':x.name.id,
+						'product_id':x.product_id.id,
 						'auto_validate':False,
 						'location_id' :12,
 						'company_id':1,
@@ -637,7 +637,6 @@ class delivery_note_line_material(osv.osv):
 
 	_name = "delivery.note.line.material"
 	_columns = {
-		'name': fields.text('Description'),
 		'product_id' : fields.many2one('product.product',required=True, string="Product"),
 		'prodlot_id':fields.many2one('stock.production.lot','Serial Number'),
 		'note_line_id': fields.many2one('delivery.note.line', 'Delivery Note Line', required=True, ondelete='cascade'),
@@ -651,6 +650,8 @@ class delivery_note_line_material(osv.osv):
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
 		'state': fields.related('note_line_id','state', type='many2one', relation='delivery.note.line', string='State'),
 	}
+
+	_rec_name = 'product_id';
 
 delivery_note_line_material()
 
