@@ -14,12 +14,20 @@ class order_preparation(osv.osv):
 	_columns = {
 		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
 		'name': fields.char('Reference', required=True, size=64, select=True, readonly=True, states={'draft': [('readonly', False)]}),
-		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=[('quotation_state','=', 'win')], states={'draft': [('readonly', False)]}),
+		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=['|', ('quotation_state','=','win'),('state','in',['progress','manual'])], states={'draft': [('readonly', False)]}),
 		'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=False, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
 		'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
 		'location_id':fields.many2one('stock.location',required=True,string='Product Location',readonly=True, states={'draft': [('readonly', False)]}),
 
 	}
+
+	def preparation_done(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+
+		for x in val.prepare_lines:
+			if x.sale_line_material_id.id==False:
+				raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
+		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
 	def sale_change(self, cr, uid, ids, sale):
 		so_material_line = self.pool.get('sale.order.material.line')
@@ -40,6 +48,9 @@ class order_preparation(osv.osv):
 
 			location = []
 			for x in data.order_line:
+				if x.material_lines == []:
+					raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
+
 				material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
 				for y in so_material_line.browse(cr, uid, material_lines):
 					# Cek Material Line Dengan OP Line
