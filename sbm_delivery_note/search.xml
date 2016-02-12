@@ -21,8 +21,6 @@
                         <filter icon="terp-stock_effects-object-colorize" name="state" string="State" domain="[]" context="{'group_by':'state'}"/>
                         <filter icon="terp-stock_effects-object-colorize" name="partner_id" string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
 
-                         <filter icon="terp-stock_effects-object-colorize" name="data_years" string="Years" domain="[]" context="{'group_by':'data_years'}"/>
-
 						<field name="name" select="1" string="No Delivery Note"/>
                     	<field name="prepare_id" select="1" string="No Order Preparation"/>
                         <field name="poc" select="1" string="Customer Ref"/>
