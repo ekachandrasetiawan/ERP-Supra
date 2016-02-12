@@ -46,7 +46,7 @@
 							</button>
 
 							<button string="Return Products" position="replace">
-									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done,refunded,torefund" type="action" groups="base.group_user, sbm_order_preparation.group_admin_warehouse"/>
+									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done,refunded,torefund" type="action" groups="base.group_user, sbm_order_preparation.group_admin_warehouse" confirm="Are you sure to Return Delivery Note"/>
 									<button name="print_dn_out_new" type="object" states="done" string="Print Out DN" icon="gtk-dnd-multiple"/>
 							</button>
 

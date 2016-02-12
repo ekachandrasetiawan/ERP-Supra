@@ -144,7 +144,8 @@ class delivery_note(osv.osv):
 					material_line = []
 
 					material_line.append((0,0,{
-						'name':op_line.product_id.id,
+						'name':op_line.name,
+						'product_id':op_line.product_id.id,
 						'desc':op_line.name,
 						'qty':op_line.product_qty,
 						'product_uom':op_line.product_uom.id,
@@ -202,7 +203,8 @@ class delivery_note(osv.osv):
 								# Jika Ada Batch Maka Tampilkan Batch
 								for xbatch in data_batch:
 									material_line.append((0,0,{
-										'name':dopline.product_id.id,
+										'name':xbatch.name,
+										'product_id':dopline.product_id.id,
 										'prodlot_id':xbatch.name.id,
 										'desc':xbatch.desc,
 										'qty':xbatch.qty,
@@ -212,7 +214,8 @@ class delivery_note(osv.osv):
 									}))
 							else:
 								material_line.append((0,0,{
-									'name':dopline.product_id.id,
+									'name':dopline.name,
+									'product_id':dopline.product_id.id,
 									'desc':dopline.name,
 									'qty':dopline.product_qty,
 									'product_uom':dopline.product_uom.id,
@@ -302,7 +305,7 @@ class delivery_note(osv.osv):
 					loc_id = 12
 
 				move_id = stock_move.create(cr,uid,{
-					'name' : x.name.name,
+					'name' : x.product_id.name,
 					'origin':val.prepare_id.sale_id.name,
 					'product_uos_qty':x.qty,
 					'product_uom':x.product_uom.id,
@@ -310,7 +313,7 @@ class delivery_note(osv.osv):
 					'product_qty':x.qty,
 					'product_uos':x.product_uom.id,
 					'partner_id':val.partner_id.id,
-					'product_id':x.name.id,
+					'product_id':x.product_id.id,
 					'auto_validate':False,
 					'location_id' :loc_id,
 					'company_id':1,
