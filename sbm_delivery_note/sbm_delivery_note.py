@@ -570,7 +570,7 @@ packing_list_line()
 class delivery_note_line(osv.osv):
 	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
 
-		return super(delivery_note_line,self)._get_refunded_item(cr,uid,ids,field_name,arg,context={})
+		return False
 
 	_inherit = "delivery.note.line"
 	_columns = {
