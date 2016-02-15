@@ -278,7 +278,7 @@ class delivery_note(osv.osv):
 					'partner_id':val.partner_id.id,
 					'stock_journal_id':1,
 					'move_type':'direct',
-					'invoice_state':'none',
+					'invoice_state':'2binvoiced',
 					'auto_picking':False,
 					'type':picking_type,
 					'sale_id':val.prepare_id.sale_id.id,
