@@ -21,6 +21,8 @@ class order_preparation(osv.osv):
 
 	}
 
+	_order = "id desc"
+	
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 

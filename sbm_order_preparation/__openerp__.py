@@ -14,7 +14,7 @@
     "category": "Order Preparation",
     "description": """ Provide Print Button in Various Format """,
     "init_xml": [],
-    "data":['sbm_order_preparation_view.xml','setting.xml'],
+    "data":['sbm_order_preparation_view.xml','setting.xml','search.xml'],
     'demo_xml': [],
     'installable': True,
     'active': False,
