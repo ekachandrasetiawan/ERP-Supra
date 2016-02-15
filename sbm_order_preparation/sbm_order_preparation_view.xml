@@ -29,7 +29,7 @@
               </field>
 
               <field name="poc" position="after">
-                <field name="location_id" on_change="loc_change(sale_id,location_id)"/>
+                <field name="location_id" on_change="sale_change(sale_id,location_id)"/>
               </field>
               
               <field name="duedate" position="replace"/>
@@ -39,7 +39,7 @@
               </field>
 
               <field name="sale_id" position="replace">
-                <field name="sale_id" on_change="sale_change(sale_id)"/>
+                <field name="sale_id" on_change="sale_change(sale_id, location_id)"/> 
               </field>
 
               <xpath expr="//page[@string='Notes']" position="after">
