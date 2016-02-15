@@ -6,24 +6,27 @@
 			<field name="type">form</field>
 			<field name="inherit_id" ref="new_sbm_sale_order.quotation_form_view"/>
 			<field name="arch" type="xml">
-				<!-- <field name="order_line">
-					<field name="material_lines">
-						<tree editable="buttom">
-							<field name="picking_location" position='before'>
-								<field name="product_id"/>
-							</field>
-						</tree>
-					</field>
-
-				</field> -->
-					
-				<field name="desc" position='after'>
+				<field name="qty" position='after'>
+					<field name="on_process_qty"/>
 					<field name="shipped_qty"/>
 					<field name="returned_qty"/>
-					<field name="on_process_qty"/>
 				</field>
 			</field>
 		</record>	
-		<menuitem></menuitem>
+		
+
+		<record id="inherit_new_order_line_for_sale_order_op_lines" model="ir.ui.view">
+			<field name="name">inherit material line for op lines</field>
+			<field name="model">sale.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref='new_sbm_sale_order.inherit_new_order_line' />
+			<field name="arch" type="xml">
+				<field name="qty" position='after'>
+					<field name="on_process_qty"/>
+					<field name="shipped_qty"/>
+					<field name="returned_qty"/>
+				</field>
+			</field>
+		</record>
 	</data>
 </openerp>

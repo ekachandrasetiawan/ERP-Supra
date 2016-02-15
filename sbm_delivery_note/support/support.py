@@ -45,27 +45,26 @@ class sale_order_material_line(osv.osv):
 
 	def _count_returned_qty(self, cr, uid, ids, name, args, context={}):
 		res={}
-		#Browse ke sale order material line #
+		#perulangan Browse ke sale order material line #
 		for item in self.browse(cr,uid,ids,context=context):
-		
+			# kondisi di mana op_line kosong maka res = 0
 			if item.op_lines ==[]:
 				res[item.id] =0
-				
 			else:
+				#jika ada
 				for op_lines in item.op_lines:
 					#mencari id delivery note line material berdasarkan op_line_id sama dengan op_line di sale order material line #
 					delivery_note_line_material_id = self.pool.get("delivery.note.line.material").search(cr,uid,[('op_line_id','=',op_lines.id)])
 					#browse delivery note line material berdasarkan delivery_note_line_material_id#
 					delivery_note_line_material = self.pool.get("delivery.note.line.material").browse(cr,uid,delivery_note_line_material_id)
 					#perulangan delivery_note_line_material#
-					print delivery_note_line_material,":::::::::::::::::::::::::::::::::"
-					for i in delivery_note_line_material:
-						res[item.id] =i.refunded_item
-						# res[item.id]= 544
-				
-		print res,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-		 #output returned_qty sama dengan refunded_item di delivery note material
-		return res
+					#kondisi jika delivery_note_line_material tidak ada
+					if delivery_note_line_material ==[]:
+						res[item.id] =0
+					else: #kondisi jika ada
+						for i in delivery_note_line_material:
+							res[item.id] =i.refunded_item
+		return res #output returned_qty sama dengan refunded_item di delivery note material
 
 	def _count_process_qty(self,cr,uid,ids,name,args,context={}):
 		res={}
