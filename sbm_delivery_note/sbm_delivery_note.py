@@ -583,7 +583,7 @@ class delivery_note_line(osv.osv):
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
-		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
+		
 		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 	}
