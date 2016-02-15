@@ -771,7 +771,7 @@
 							<field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>>
 							<field name="date_order" on_change="onchange_dateorder(date_order)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
 							<field name="user_id" on_change="getGroupByUser(user_id)" required="True" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" />
-							<field name="group_id" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" />
+							<field name="group_id" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" domain="[('is_main_group','=',True)]"/>
 						</group>
 						
 						</group>
