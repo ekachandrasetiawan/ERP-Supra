@@ -526,20 +526,24 @@ class Sale_order(osv.osv):
 			raise osv.except_osv(_('Warning'),_('Order Cant be Cancel'))
 
 		return res
-		
+
 	def cek_so(self,cr,uid,ids,context={}):
 		res =False
 		sale_order = self.browse(cr,uid,ids,context=context)[0]
-		
 		invoice_in_picking=False
 		invoice_in_invoice=False
 
 		#cek invoice di picking_ids 
 		if sale_order.picking_ids:
+			#menghitung total amount di invoice
+			for hitung in sale_order.picking_ids:
+				amount_total+=hitung.invoice_id.amount_total
+
 			for picking in sale_order.picking_ids:
-				#kondisi di mana state = paid maka invoice_in_picking = True
-				if picking.invoice_id.state=='paid':
+				#kondisi di mana state = paid maka invoice_in_picking = True dan cek amount_total di invoice sama dengan amount_total di sale order
+				if picking.invoice_id.state=='paid' and amount_total==sale_order.amount_total:
 					invoice_in_picking =True
+					
 		#cek invoice di invoice_ids 
 		if sale_order.invoice_ids:
 			for invoice in sale_order.invoice_ids:
@@ -553,8 +557,8 @@ class Sale_order(osv.osv):
 			if sale_order.order_line[0].material_lines:
 
 				for material_so in sale_order.order_line[0].material_lines:
-					#cek apakah quantity sama shipped_qty
-					if material_so.qty == material_so.shipped_qty:
+					#cek apakah quantity sama shipped_qty atau type productnya = service
+					if material_so.qty == material_so.shipped_qty or material_so.product_id.type=="service":
 						cek_data=True
 						
 					# for material_so in sale_order.order_line[0].material_lines:
