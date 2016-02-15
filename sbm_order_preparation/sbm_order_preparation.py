@@ -24,6 +24,29 @@ class order_preparation(osv.osv):
 
 	_order = "id desc"
 
+	def _set_followers(self, cr, uid, ids, partner_id, context=None):
+		mail_followers = self.pool.get('mail.followers')
+		mail_id = mail_followers.create(cr, uid, {
+			'res_model': 'order.preparation',
+			'res_id': ids,
+			'partner_id': partner_id,
+		}, context=context)
+
+		return True
+
+	def create(self, cr, uid, vals, context=None):
+		res = super(order_preparation, self).create(cr, uid, vals, context=context)
+
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		for x in user_group.users:
+			if x.id <> uid:
+				if x.partner_id.id:
+					self._set_followers(cr, uid, res, x.partner_id.id, context=None)
+		return res
+
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 
