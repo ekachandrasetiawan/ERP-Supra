@@ -548,6 +548,7 @@
             <field name="arch" type="xml">
                 <header> 
                     <button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}"/>
+                    <button name="cek_so" type="object" string="Cek Sale order"/>
                 </header>
               
               <page string="Other Information" position="before">
