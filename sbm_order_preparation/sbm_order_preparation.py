@@ -7,6 +7,7 @@ from tools.translate import _
 from osv import fields, osv
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
+from openerp.addons.mail.tests.test_mail_base import TestMailBase
 
 class order_preparation(osv.osv):
 	_inherit = "order.preparation"
@@ -22,7 +23,7 @@ class order_preparation(osv.osv):
 	}
 
 	_order = "id desc"
-	
+
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 
@@ -63,6 +64,7 @@ class order_preparation(osv.osv):
 					# Cek Material Line Dengan OP Line
 					nilai= 0
 					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id)])
+
 					for l in obj_op_line.browse(cr, uid, op_line):
 						# Cek Status OP 
 						op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
@@ -77,17 +79,16 @@ class order_preparation(osv.osv):
 
 						if op.state <> 'cancel':
 							nilai += l.product_qty - product_return
-					if nilai < y.qty:
-
-						location += [y.picking_location.id]
-
-						line.append({
-									 'product_id' : y.product_id.id,
-									 'product_qty': y.qty - nilai,
-									 'product_uom': y.uom.id,
-									 'name': y.desc,
-									 'sale_line_material_id':y.id
-						})
+					if y.product_id.type <> 'service':
+						if nilai < y.qty:
+							location += [y.picking_location.id]
+							line.append({
+										 'product_id' : y.product_id.id,
+										 'product_qty': y.qty - nilai,
+										 'product_uom': y.uom.id,
+										 'name': y.desc,
+										 'sale_line_material_id':y.id
+							})
 			res['prepare_lines'] = line
 			return  {'value': res,'domain': {'location_id': [('id','in',tuple(location))]}}
 
