@@ -24,25 +24,54 @@ class order_preparation(osv.osv):
 
 	_order = "id desc"
 
-	def _set_followers(self, cr, uid, ids, context=None):
+	def _set_message_unread(self, cr, uid, ids, context=None):
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+		for x in user_group.users:
+			if x.id:
+				cr.execute('''
+					UPDATE mail_notification SET
+						read=false
+					WHERE
+						message_id IN (SELECT id from mail_message where res_id=any(%s) and model=%s) and
+						partner_id = %s
+				''', (ids, 'order.preparation', x.partner_id.id))
+		return True
+
+	def _set_mail_notification(self, cr, uid, ids, partner_id, context=None):
+		# search Mail Message yang sudah Terbentuk saat create
+		mail_message = self.pool.get('mail.message').search(cr, uid, [('res_id', '=',ids),('model', '=', 'order.preparation'),('parent_id', '=', False)])
+		mail_id = self.pool.get('mail.message').browse(cr, uid, mail_message)
+
+		for x in mail_id:
+			id_notif = self.pool.get('mail.notification').create(cr, uid, {
+						'read': False,
+						'message_id': x.id,
+						'partner_id': partner_id,
+					}, context=context)
+
+		return True
+
+	def _set_op_followers(self, cr, uid, ids, context=None):
 		m  = self.pool.get('ir.model.data')
 		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
 
 		for x in user_group.users:
+			# Create By Mail Followers
 			if x.id <> uid:
 				if x.partner_id.id:
-					mail_followers = self.pool.get('mail.followers')
-					mail_id = mail_followers.create(cr, uid, {
-						'res_model': 'order.preparation',
-						'res_id': ids,
-						'partner_id': x.partner_id.id,
-					}, context=context)
+					id_mail = self.message_subscribe(cr, uid, [ids], [x.partner_id.id], subtype_ids=None, context=context)
+
+			# Create By Mail Notification
+			if x.partner_id.id:
+				self._set_mail_notification(cr, uid, ids, x.partner_id.id, context=None)
 		return True
 
 	def create(self, cr, uid, vals, context=None):
 		res = super(order_preparation, self).create(cr, uid, vals, context=context)
-		self._set_followers(cr, uid, res, context=None)
+		self._set_op_followers(cr, uid, res, context=None)
 		return res
 
 	def preparation_done(self, cr, uid, ids, context=None):
@@ -51,10 +80,10 @@ class order_preparation(osv.osv):
 		for x in val.prepare_lines:
 			if x.sale_line_material_id.id==False:
 				raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
+		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
 	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
-
 		so_material_line = self.pool.get('sale.order.material.line')
 		obj_op_line = self.pool.get('order.preparation.line')
 		obj_op = self.pool.get('order.preparation')
@@ -152,6 +181,7 @@ class order_preparation(osv.osv):
 				if nilai > so_material_line.qty:
 					raise openerp.exceptions.Warning(msg)
 
+		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
 		
 order_preparation()
