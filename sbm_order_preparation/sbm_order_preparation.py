@@ -40,16 +40,22 @@ class order_preparation(osv.osv):
 		return True
 
 	def _set_mail_notification(self, cr, uid, ids, partner_id, context=None):
-		# search Mail Message yang sudah Terbentuk saat create
-		mail_message = self.pool.get('mail.message').search(cr, uid, [('res_id', '=',ids),('model', '=', 'order.preparation'),('parent_id', '=', False)])
-		mail_id = self.pool.get('mail.message').browse(cr, uid, mail_message)
+		message = self.pool.get('mail.message')
+
+		mail_message = message.search(cr, uid, [('res_id', '=',ids),('model', '=', 'order.preparation')])
+		mail_id = message.browse(cr, uid, mail_message)
 
 		for x in mail_id:
-			id_notif = self.pool.get('mail.notification').create(cr, uid, {
-						'read': False,
-						'message_id': x.id,
-						'partner_id': partner_id,
-					}, context=context)
+			if x.parent_id.id == False:
+				id_notif = self.pool.get('mail.notification').create(cr, uid, {
+							'read': False,
+							'message_id': x.id,
+							'partner_id': partner_id,
+						}, context=context)
+
+			# Delete Message Post Message
+			if x.body=='<p>Post Message</p>':
+				message.unlink(cr,uid,[x.id],context)
 
 		return True
 
@@ -57,6 +63,10 @@ class order_preparation(osv.osv):
 		m  = self.pool.get('ir.model.data')
 		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		# Create Mail Post
+		msg = _("Post Message")
+		self.message_post(cr, uid, [ids], body=msg, context=context)
 
 		for x in user_group.users:
 			# Create By Mail Followers
@@ -67,6 +77,8 @@ class order_preparation(osv.osv):
 			# Create By Mail Notification
 			if x.partner_id.id:
 				self._set_mail_notification(cr, uid, ids, x.partner_id.id, context=None)
+
+
 		return True
 
 	def create(self, cr, uid, vals, context=None):
@@ -183,6 +195,14 @@ class order_preparation(osv.osv):
 
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
+
+	def preparation_draft(self, cr, uid, ids, context=None):
+		self._set_message_unread(cr, uid, ids, context=None)
+		return super(order_preparation, self).preparation_draft(cr, uid, ids, context=context)
+
+	def preparation_cancel(self, cr, uid, ids, context=None):
+		self._set_message_unread(cr, uid, ids, context=None)
+		return super(order_preparation, self).preparation_cancel(cr, uid, ids, context=context)
 		
 order_preparation()
 

@@ -27,7 +27,6 @@
 
 		<!-- Setting Access Rigths	 -->
 
-    	<!-- Order Requisition Delivery  -->
 	    <record model="ir.model.access" id="ir_access_order_preparation_warehouse">
 	        <field name="name">Access Order Preparation User Warehouse</field>
 	        <field name="model_id" ref="model_order_preparation"/>
@@ -59,5 +58,40 @@
 	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
 	    </record>
+
+
+	     <!-- delivery.note.line.material.return -->
+	   	<record model="ir.model.access" id="ir_access_delivery_note_line_material_return_warehouse">
+	        <field name="name">Access Delivery Note Line Material Return Warehouse</field>
+	        <field name="model_id" ref="sbm_delivery_note.model_delivery_note_line_material_return"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_warehouse'))]"/>
+	    </record>
+
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_line_material_return_manager_warehouse">
+	        <field name="name">Access Order Preparation Manager Warehouse</field>
+	        <field name="model_id" ref="sbm_delivery_note.model_delivery_note_line_material_return"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('stock.group_stock_manager'))]"/>
+	    </record>
+
+
+	    <record model="ir.model.access" id="ir_access_delivery_note_line_material_return_admin_ho">
+	        <field name="name">Access Sale Order Material Line Admin HO</field>
+	        <field name="model_id" ref="sbm_delivery_note.model_delivery_note_line_material_return"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+	   
     </data>
 </openerp>
