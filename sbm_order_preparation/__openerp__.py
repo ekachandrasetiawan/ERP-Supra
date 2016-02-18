@@ -9,6 +9,7 @@
                 "sbm_inherit",
                 "ad_delivery_note",
                 "new_sbm_sale_order",
+                "mail",
                 ],
     "author": "PT.Suprabakti Mandiri",
     "category": "Order Preparation",

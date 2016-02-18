@@ -7,6 +7,7 @@ from tools.translate import _
 from osv import fields, osv
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
+from openerp.addons.mail.tests.test_mail_base import TestMailBase
 
 class order_preparation(osv.osv):
 	_inherit = "order.preparation"
@@ -22,17 +23,79 @@ class order_preparation(osv.osv):
 	}
 
 	_order = "id desc"
-	
+
+	def _set_message_unread(self, cr, uid, ids, context=None):
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+		for x in user_group.users:
+			if x.id:
+				cr.execute('''
+					UPDATE mail_notification SET
+						read=false
+					WHERE
+						message_id IN (SELECT id from mail_message where res_id=any(%s) and model=%s) and
+						partner_id = %s
+				''', (ids, 'order.preparation', x.partner_id.id))
+		return True
+
+	def _set_mail_notification(self, cr, uid, ids, partner_id, context=None):
+		message = self.pool.get('mail.message')
+
+		mail_message = message.search(cr, uid, [('res_id', '=',ids),('model', '=', 'order.preparation')])
+		mail_id = message.browse(cr, uid, mail_message)
+
+		for x in mail_id:
+			if x.parent_id.id == False:
+				id_notif = self.pool.get('mail.notification').create(cr, uid, {
+							'read': False,
+							'message_id': x.id,
+							'partner_id': partner_id,
+						}, context=context)
+
+			# Delete Message Post Message
+			if x.body=='<p>Post Message</p>':
+				message.unlink(cr,uid,[x.id],context)
+
+		return True
+
+	def _set_op_followers(self, cr, uid, ids, context=None):
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		# Create Mail Post
+		msg = _("Post Message")
+		self.message_post(cr, uid, [ids], body=msg, context=context)
+
+		for x in user_group.users:
+			# Create By Mail Followers
+			if x.id <> uid:
+				if x.partner_id.id:
+					id_mail = self.message_subscribe(cr, uid, [ids], [x.partner_id.id], subtype_ids=None, context=context)
+
+			# Create By Mail Notification
+			if x.partner_id.id:
+				self._set_mail_notification(cr, uid, ids, x.partner_id.id, context=None)
+
+
+		return True
+
+	def create(self, cr, uid, vals, context=None):
+		res = super(order_preparation, self).create(cr, uid, vals, context=context)
+		self._set_op_followers(cr, uid, res, context=None)
+		return res
+
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 
 		for x in val.prepare_lines:
 			if x.sale_line_material_id.id==False:
 				raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
+		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
 	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
-
 		so_material_line = self.pool.get('sale.order.material.line')
 		obj_op_line = self.pool.get('order.preparation.line')
 		obj_op = self.pool.get('order.preparation')
@@ -63,6 +126,7 @@ class order_preparation(osv.osv):
 					# Cek Material Line Dengan OP Line
 					nilai= 0
 					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id)])
+
 					for l in obj_op_line.browse(cr, uid, op_line):
 						# Cek Status OP 
 						op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
@@ -77,17 +141,16 @@ class order_preparation(osv.osv):
 
 						if op.state <> 'cancel':
 							nilai += l.product_qty - product_return
-					if nilai < y.qty:
-
-						location += [y.picking_location.id]
-
-						line.append({
-									 'product_id' : y.product_id.id,
-									 'product_qty': y.qty - nilai,
-									 'product_uom': y.uom.id,
-									 'name': y.desc,
-									 'sale_line_material_id':y.id
-						})
+					if y.product_id.type <> 'service':
+						if nilai < y.qty:
+							location += [y.picking_location.id]
+							line.append({
+										 'product_id' : y.product_id.id,
+										 'product_qty': y.qty - nilai,
+										 'product_uom': y.uom.id,
+										 'name': y.desc,
+										 'sale_line_material_id':y.id
+							})
 			res['prepare_lines'] = line
 			return  {'value': res,'domain': {'location_id': [('id','in',tuple(location))]}}
 
@@ -130,7 +193,16 @@ class order_preparation(osv.osv):
 				if nilai > so_material_line.qty:
 					raise openerp.exceptions.Warning(msg)
 
+		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
+
+	def preparation_draft(self, cr, uid, ids, context=None):
+		self._set_message_unread(cr, uid, ids, context=None)
+		return super(order_preparation, self).preparation_draft(cr, uid, ids, context=context)
+
+	def preparation_cancel(self, cr, uid, ids, context=None):
+		self._set_message_unread(cr, uid, ids, context=None)
+		return super(order_preparation, self).preparation_cancel(cr, uid, ids, context=context)
 		
 order_preparation()
 

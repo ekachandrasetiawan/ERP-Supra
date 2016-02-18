@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
                 <search string="Order Preparation">
                     <group expand="!" string="Filter By">
+                        <filter icon="terp-mail-message-new" string="Unread Messages" name="message_unread" domain="[('message_unread','=',True)]"/>
                         <filter string="Draft" name="draft" icon="terp-check" domain="[('state','=','draft')]"/>
                         <filter string="Approve" name="approve" icon="terp-check" domain="[('state','=','approve')]"/>
                         <filter string="Done" name="done" icon="terp-check" domain="[('state','=','done')]"/>
