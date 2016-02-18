@@ -79,8 +79,6 @@ class delivery_note(osv.osv):
 
 	_order = "id desc"
 
-
-
 	def print_dn_out_new(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
@@ -104,7 +102,6 @@ class delivery_note(osv.osv):
 			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
 		vals['name'] ='/'
 
-
 		for lines in vals['note_lines']:
 			if lines[2]:
 				if lines[2]['product_qty'] == 0:
@@ -114,13 +111,10 @@ class delivery_note(osv.osv):
 					raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
-
-
 	def prepare_change(self, cr, uid, ids, pre):
 		res = super(delivery_note,self).prepare_change(cr, uid, ids, pre)
 		if pre :
 			res = {}; line = []
-			
 
 			data = self.pool.get('order.preparation').browse(cr, uid, pre)
 			dnid = self.pool.get('delivery.note').search(cr, uid, [('prepare_id', '=', pre), ('state', '=', 'done')])
@@ -128,7 +122,7 @@ class delivery_note(osv.osv):
 			product =[x.sale_line_material_id.sale_order_line_id.id for x in data.prepare_lines if x.sale_line_material_id]
 
 			if product == []:
-				# Jika OP merupakan OP Lama
+				# Jika OP merupakan OP Lama, OP tidak memilliki Sale Order Material Line
 				line_op = self.pool.get('order.preparation.line').search(cr, uid, [('preparation_id', '=', pre)])
 				for op_line in self.pool.get('order.preparation.line').browse(cr,uid,line_op):
 					
@@ -151,8 +145,6 @@ class delivery_note(osv.osv):
 						'name': op_line.name,
 						'note_lines_material': material_line
 					})
-
-				# raise openerp.exceptions.Warning("Order Preparation Tidak Memiliki Material Lines")
 
 			order_line = self.pool.get('sale.order.line').search(cr, uid, [('id', 'in', product)])
 			data_order_line = self.pool.get('sale.order.line').browse(cr, uid, order_line)
@@ -177,11 +169,9 @@ class delivery_note(osv.osv):
 							# Set Product Qty yang bukan Set
 							qty_dn_line = qty_op.product_qty
 
-
 				for dline in data_material_line:
 					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', '=', [dline.id]), ('preparation_id', '=', [pre])])
 					data_op_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
-
 					
 					if data_op_line:
 						for dopline in data_op_line:
@@ -287,7 +277,6 @@ class delivery_note(osv.osv):
 					})
 
 		# Create Stock Move
-
 		for line in val.note_lines:
 			for x in line.note_lines_material:
 				if x.location_id.id:
@@ -312,9 +301,7 @@ class delivery_note(osv.osv):
 					'state':'draft',
 					'location_dest_id' :id_loc
 					},context=context)
-				
 
-				print '================',move_id
 				# Update DN Line Material Dengan ID Move
 				dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
 
@@ -566,7 +553,6 @@ class packing_list_line(osv.osv):
 
 packing_list_line()
 
-
 class delivery_note_line(osv.osv):
 	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
 
@@ -590,9 +576,7 @@ class delivery_note_line(osv.osv):
 
 	def onchange_product_id(self, cr, uid, ids, product_id, uom_id):
 		product = self.pool.get('product.template').browse(cr, uid, product_id)
-
 		uom = uom_id
-
 		if product_id:
 			if uom_id == False:
 				uom = product.uom_id.id
@@ -624,7 +608,6 @@ class delivery_note_line_material(osv.osv):
 			res[item.id] = refunded_total
 		return res
 
-
 	_name = "delivery.note.line.material"
 	_columns = {
 		'product_id' : fields.many2one('product.product',required=True, string="Product"),
@@ -645,8 +628,6 @@ class delivery_note_line_material(osv.osv):
 
 delivery_note_line_material()
 
-
-
 class order_preparation_line(osv.osv):
 	_inherit = "order.preparation.line"
 	_columns = {
@@ -654,7 +635,6 @@ class order_preparation_line(osv.osv):
 	}
 
 order_preparation_line()
-
 
 
 class delivery_note_line_material_return(osv.osv):
@@ -669,8 +649,6 @@ class delivery_note_line_material_return(osv.osv):
 	}
 
 delivery_note_line_material_return()
-
-
 
 class stock_picking(osv.osv):
 	_name = 'stock.picking'
@@ -706,7 +684,6 @@ class stock_return_picking(osv.osv_memory):
 				record_id = val.picking_id.id
 			else:
 				record_id = val.prepare_id.picking_id.id
-				
 
 		pick_obj = self.pool.get('stock.picking')
 		pick = pick_obj.browse(cr, uid, record_id, context=context)
@@ -729,7 +706,6 @@ class stock_return_picking(osv.osv_memory):
 
 
 	def view_init(self, cr, uid, fields_list, context=None):
-
 		res ={}
 		if context is None:
 			context = {}

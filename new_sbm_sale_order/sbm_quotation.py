@@ -37,7 +37,7 @@ class res_partner_extention(osv.osv):
 				state_id=""
 			if context.get('address_attention'):
 				# kalo ada konteks attention
-				print context,"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+				# print context,"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
 				res_name = "%s"%(record_partner.name)
 				# print res_name,"ase"
 				res.append((index,res_name))
@@ -49,16 +49,16 @@ class res_partner_extention(osv.osv):
 				res_name = res_name.replace('\n\n','\n')
 				
 				res.append((index,res_name))
-				print context,"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				# print context,"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			elif context.get('address_invoice'):
 				res_name = "%s"%(record_partner.name)+city+state_id
 				res.append((index,res_name))
 			else:
-				print context,"--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+				# print context,"--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
 				res.append((index,result))
 
-		print tmp
-		print res,"::::::::::::::::::::::::::::::::::"
+		# print tmp
+		# print res,"::::::::::::::::::::::::::::::::::"
 		return res
 
 		
@@ -449,8 +449,8 @@ class Sale_order(osv.osv):
 
 	def loadBomLine(self,cr,uid,bom_line,product_uom_qty,product_uom,seq_id,is_loaded_from_change=True):
 		res = {}
-		print bom_line, 
-		print bom_line.product_id.id, "iddd" 
+		# print bom_line, 
+		# print bom_line.product_id.id, "iddd" 
 		res = {
 				'product_id':bom_line.product_id.id,
 				'uom':bom_line.product_uom.id,
@@ -496,7 +496,7 @@ class Sale_order(osv.osv):
 						],
 					
 					}
-				print material.product_uom.id,"<<<<<<<<<<<"
+				# print material.product_uom.id,"<<<<<<<<<<<"
 				this_material.write(cr,uid,material.id,vals,context)
 			else:
 				raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
@@ -608,7 +608,7 @@ class sale_order_material_line(osv.osv):
 			"uom":product.uom_id.id
 			}
 
-		print res 
+		# print res 
 		return res
 
 	def onchange_product_uom(self,cr,uid,ids,product_id,uom,context={}):
@@ -661,7 +661,7 @@ class sale_order_line(osv.osv):
 		return amount_tax_total
 
 	def _count_amount_line(self, cr, uid, ids, name, args, context={}):
-		print "PANGGIL _count_amount_line"
+		# print "PANGGIL _count_amount_line"
 		res = {}
 		order_lines = self.browse(cr,uid,ids,context=context)
 		
@@ -756,8 +756,8 @@ class sale_order_line(osv.osv):
 
 	def loadBomLine(self,cr,uid,bom_line,product_uom_qty,product_uom,seq_id,is_loaded_from_change=True):
 		res = {}
-		print bom_line, 
-		print bom_line.product_id.id, "iddd" 
+		# print bom_line, 
+		# print bom_line.product_id.id, "iddd" 
 		res = {
 				'product_id':bom_line.product_id.id,
 				'uom':bom_line.product_uom.id,
@@ -789,7 +789,7 @@ class sale_order_line(osv.osv):
 			for material in line.material_lines:
 				old_material_ids.append(material.id)
 
-		print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
+		# print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 		if product_id:
 			seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
@@ -813,10 +813,10 @@ class sale_order_line(osv.osv):
 					mtr_lines = res['value']['material_lines']
 
 					for old_mtr in old_material_ids:
-						print "-------------------->>>>>>>>>>>>>>",mtr_lines
+						# print "-------------------->>>>>>>>>>>>>>",mtr_lines
 						lr = (2,old_mtr)
 						mtr_lines.append(lr)
-						print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
+						# print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 					res['value']['material_lines'] = mtr_lines
 
 			else:
@@ -832,10 +832,10 @@ class sale_order_line(osv.osv):
 				mtr_lines = res['value']['material_lines']
 
 				for old_mtr in old_material_ids:
-					print "-------------------->>>>>>>>>>>>>>",mtr_lines
+					# print "-------------------->>>>>>>>>>>>>>",mtr_lines
 					lr = (2,old_mtr)
 					mtr_lines.append(lr)
-					print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
+					# print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 				res['value']['material_lines'] = mtr_lines
 			if product.description_sale:
 				res['value']['name']=product.description_sale
@@ -846,7 +846,7 @@ class sale_order_line(osv.osv):
 				for i in product.supplier_taxes_id:
 					print i.id
 					tax.append(i.id)
-				print tax,"++++++++++++++++++++++++++++++++++"
+				# print tax,"++++++++++++++++++++++++++++++++++"
 				res['value']['tax_id']=tax
 			else:
 				res['value']['tax_id']=False
@@ -863,7 +863,7 @@ class sale_order_line(osv.osv):
 		if product_id:
 				
 			product = self.pool.get("product.product").browse(cr,uid,product_id,context=context)
-			print "LLLLLLLLLLLLLl"
+			# print "LLLLLLLLLLLLLl"
 			kategori_uom_product = product.uom_id.category_id.id
 			
 			# print Kategori_uom	,"<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -883,7 +883,7 @@ class sale_order_line(osv.osv):
 	
 	def onchange_product_quotation_qty(self,cr,uid,ids,product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines_object,context={}):
 		res={}
-		print material_lines_object,"cek------------------------------>"
+		# print material_lines_object,"cek------------------------------>"
 		if product_uom_qty == False or product_uom_qty<1:
 			res["warning"]={'title':"Error",'message':'Quantity tidak boleh kosong'}
 			res['value'] = {
