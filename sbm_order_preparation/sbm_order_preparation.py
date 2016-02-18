@@ -194,8 +194,76 @@ class order_preparation(osv.osv):
 					raise openerp.exceptions.Warning(msg)
 
 		self._set_message_unread(cr, uid, ids, context=None)
-		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
+		self.check_validasi_confirm(cr, uid, ids, context=None)
 
+		return True
+		# return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
+
+
+	def product_qty_by_location(self, cr, uid, product_id, warehouse_stock_location, context=None):
+
+		sql = """select ((select sum(product_qty) from stock_move where product_id = %s and state in ('done') and location_dest_id = %s group by product_id) - (select sum(product_qty) from stock_move where product_id = %s and state in ('done') and location_id = %s group by product_id) ) as total;""" % (product_id, warehouse_stock_location, product_id, warehouse_stock_location)
+		cr.execute(sql)
+		
+		return cr.fetchall()[0][0]
+
+	
+	def check_validasi_confirm(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		notActiveProducts = []
+		for x in val.prepare_lines:
+			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+
+			if not product.active:
+				if not re.match(r'service',product.categ_id.name,re.M|re.I):
+					notActiveProducts.append(product.default_code)
+				
+			if product.not_stock == False:
+
+				if context is None:
+					context = {}
+				context.update({
+					'states': ['done'],
+					'what': ('in', 'out'),
+					'location': [val.location_id.id]
+				})
+
+
+				check_loc = self.pool.get('stock.location').browse(cr, uid, val.location_id.id, context=None)
+
+				# Jika Location ID adalah Head Office
+				if val.location_id.id==12:
+					qty = product.qty_available
+				# Jika Parent Location ID adalah Head Office
+				elif check_loc.location_id.id ==12: 
+					qty = product.qty_available
+				# Jika Location Merupakan selain Head Office
+				else: 
+					new_cek = self.pool.get('product.product').get_product_available(cr, uid, [x.product_id.id], context=context)
+					for t in new_cek.values():
+						qty = float(t)
+					# qty = self.product_qty_by_location(cr, uid, x.product_id.id, val.location_id.id, context=None)
+
+				mm = ' ' + product.default_code + ' '
+				stock = ' ' + str(qty) + ' '
+				msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+
+				if x.product_qty > qty:
+					raise openerp.exceptions.Warning(msg)
+					return False
+
+
+		if len(notActiveProducts) > 0:
+			m_p_error = ""
+			for pNon in notActiveProducts:
+				m_p_error+=pNon+",\r\n"
+			m_p_error+="\r\n is non active product, please activate product first."
+
+			raise osv.except_osv(_('Error!'),_(m_p_error))
+		self.write(cr, uid, ids, {'state': 'approve'})
+		# self.write(cr, uid, ids, {'state': 'draft'})
+		return True
+		
 	def preparation_draft(self, cr, uid, ids, context=None):
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_draft(cr, uid, ids, context=context)
