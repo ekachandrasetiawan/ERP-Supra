@@ -36,6 +36,22 @@ class purchase_order(osv.osv):
     #     order =  super(purchase_order, self).create(cr, uid, vals, context=context)
     #     return order
 
+
+    def print_po_import_out(self,cr,uid,ids,context=None):
+        searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+        browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+        urlTo = str(browseConf.value)+"purchase-order/printpoimport&id="+str(ids[0])+"&uid="+str(uid)
+
+        return {
+            'type'  : 'ir.actions.client',
+            'target': 'new',
+            'tag'   : 'print.out.po.import',
+            'params': {
+                # 'id'  : ids[0],
+                'redir' : urlTo,
+                'uid':uid
+            },
+        }
     _defaults ={
         'total_price':'TOTAL PRICE CIF JAKARTA',
         'shipment_to':'PT.SUPRABAKTI MANDIRI, Destination : JAKARTA PORT',
