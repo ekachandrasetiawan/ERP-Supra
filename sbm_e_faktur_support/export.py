@@ -53,7 +53,7 @@ class acount_invoice(osv.osv):
 				num = d.faktur_pajak_no.split('.')
 				fp = num[2]
 				# search same number
-				sameFP = self.search(cr,uid,[('faktur_pajak_no','like',fp),('state','!=','cancel'),('id','!=',d.id)])
+				sameFP = self.search(cr,uid,[('faktur_pajak_no','like',fp),('state','!=','cancel'),('id','!=',d.id),('type','=','out_invoice')])
 				# print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",sameFP
 				if len(sameFP) > 0:
 					# if exist

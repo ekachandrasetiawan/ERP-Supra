@@ -13,14 +13,6 @@ from openerp.tools.float_utils import float_compare
 
 class delivery_note(osv.osv):
 
-	def _is_filter_years(self,cr,uid,ids,field_name,arg,context={}):
-		res = {}
-		for item in self.browse(cr,uid,ids,context=context):
-			if item.name <> '/':
-				dn_no = item.name[-2:]
-				res[item.id] = {'data_years':float(dn_no)}
-		return res
-
 	def _get_years(self,cr,uid,ids,field_name,arg,context={}):
 
 		return True
@@ -81,7 +73,6 @@ class delivery_note(osv.osv):
 		'work_order_id': fields.many2one('perintah.kerja',string="SPK",store=True,required=False,readonly=True, states={'draft': [('readonly', False)]}),
 		'work_order_in': fields.many2one('perintah.kerja.internal',string="SPK Internal",readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
-		'data_years':fields.function(_is_filter_years, store=True, string="Years Delivery Note", multi="data_years"),
 		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
 		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
 	}
@@ -277,7 +268,7 @@ class delivery_note(osv.osv):
 					'partner_id':val.partner_id.id,
 					'stock_journal_id':1,
 					'move_type':'direct',
-					'invoice_state':'none',
+					'invoice_state':'2binvoiced',
 					'auto_picking':False,
 					'type':picking_type,
 					'sale_id':val.prepare_id.sale_id.id,
@@ -565,7 +556,7 @@ packing_list_line()
 class delivery_note_line(osv.osv):
 	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
 
-		return super(delivery_note_line,self)._get_refunded_item(cr,uid,ids,field_name,arg,context={})
+		return False
 
 	_inherit = "delivery.note.line"
 	_columns = {
@@ -578,7 +569,7 @@ class delivery_note_line(osv.osv):
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
-		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
+		
 		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 	}
@@ -613,8 +604,7 @@ class delivery_note_line_material(osv.osv):
 			for refund in item.note_line_material_return_ids:
 				refunded_total += refund.product_qty
 
-			if item.qty == refunded_total:
-				self.write(cr,uid,[item.id],{'state':'donerefund'})
+			
 			res[item.id] = refunded_total
 		return res
 

@@ -137,7 +137,7 @@ class hr_employee(osv.osv):
 
 
 		machine_obj = self.pool.get('hr.attendance.machine')
-		machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0)])
+		machine_ids = machine_obj._get_online_list(cr,uid)
 
 		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
 		for emp in emps:
@@ -159,33 +159,33 @@ class hr_employee(osv.osv):
 		}
 
 		for machine in machines:
-			if machine.id == 6:
+			
+			context['att_pin'] = pin
+			machine_obj.stream_data_http(cr,uid,[machine.id],context=context)
+
+
+			xml = """<DeleteUser>
+				<ArgComKey Xsi:type="xsd:integer">{machine_key}</ArgComKey>
+				<Arg>
+					<PIN>{Pin}</PIN>
+				</Arg>
+			</DeleteUser>""".format(machine_key=machine.key,Pin=pin)
+
+			response = machine_obj._request_to_machine(cr, uid, machine.ip, headers, xml, context=context)
+			
+			log_tree = ET.fromstring(response)
+			dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
+
+			
+			dictRowsResponse = dictResponse['DeleteUserResponse']['Row']['Result']
+			print "DELETEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ",dictRowsResponse
+
+			res = True
+			if dictRowsResponse != '1':
+				res=False
+				raise osv.except_osv(_('Error'),_('Error to delete User Info on Machine !, Please Contact system administrator'))
+
 				
-				context['att_pin'] = pin
-				machine_obj.stream_data_http(cr,uid,[machine.id],context=context)
-
-
-				xml = """<DeleteUser>
-					<ArgComKey Xsi:type="xsd:integer">{machine_key}</ArgComKey>
-					<Arg>
-						<PIN>{Pin}</PIN>
-					</Arg>
-				</DeleteUser>""".format(machine_key=machine.key,Pin=pin)
-
-				response = machine_obj._request_to_machine(cr, uid, machine.ip, headers, xml, context=context)
-				
-				log_tree = ET.fromstring(response)
-				dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
-
-				
-				dictRowsResponse = dictResponse['DeleteUserResponse']['Row']['Result']
-				print "DELETEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ",dictRowsResponse
-
-				if dictRowsResponse != '1':
-					res=False
-					raise osv.except_osv(_('Error'),_('Error to delete User Info on Machine !, Please Contact system administrator'))
-
-				res = True
 
 
 		return res
@@ -224,6 +224,10 @@ class hr_attendance_machine(osv.osv):
 	_sql_constraints = [
 		('unique_machine_id', 'unique(machine_id)', "Machine ID already defined on other machine, Machine ID must be Unique"),
 	]
+
+	def _get_online_list(self,cr,uid):
+		# res = []
+		return self.search(cr,uid,[('machine_id','!=','0'),('online','=',True)])
 
 	def init_socket(self,cr,uid,ids,context={}):
 		return socket.socket(socket.AF_INET,socket.SOCK_STREAM) #tcp socket

@@ -1,0 +1,17 @@
+<openerp>
+	<data>
+		<record id="inherit_new_order_line_for_sale_order_op_lines" model="ir.ui.view">
+			<field name="name">inherit material line for op lines</field>
+			<field name="model">sale.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref='new_sbm_sale_order.inherit_new_order_line' />
+			<field name="arch" type="xml">
+				<field name="qty" position='after'>
+					<field name="on_process_qty"/>
+					<field name="shipped_qty"/>
+					<field name="returned_qty"/>
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>
