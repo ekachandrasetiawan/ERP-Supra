@@ -212,6 +212,7 @@ class order_preparation(osv.osv):
 		val = self.browse(cr, uid, ids)[0]
 		notActiveProducts = []
 		for x in val.prepare_lines:
+
 			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
 
 			if not product.active:
@@ -219,15 +220,6 @@ class order_preparation(osv.osv):
 					notActiveProducts.append(product.default_code)
 				
 			if product.not_stock == False:
-
-				if context is None:
-					context = {}
-				context.update({
-					'states': ['done'],
-					'what': ('in', 'out'),
-					'location': [val.location_id.id]
-				})
-
 
 				check_loc = self.pool.get('stock.location').browse(cr, uid, val.location_id.id, context=None)
 
@@ -239,10 +231,12 @@ class order_preparation(osv.osv):
 					qty = product.qty_available
 				# Jika Location Merupakan selain Head Office
 				else: 
-					new_cek = self.pool.get('product.product').get_product_available(cr, uid, [x.product_id.id], context=context)
-					for t in new_cek.values():
-						qty = float(t)
-					# qty = self.product_qty_by_location(cr, uid, x.product_id.id, val.location_id.id, context=None)
+					if not context:
+						context = {}
+					context['location'] = val.location_id.id
+					
+					product_context =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
+					qty = product_context.qty_available
 
 				mm = ' ' + product.default_code + ' '
 				stock = ' ' + str(qty) + ' '
