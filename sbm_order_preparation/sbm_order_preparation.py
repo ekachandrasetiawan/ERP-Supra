@@ -197,56 +197,28 @@ class order_preparation(osv.osv):
 		self.check_validasi_confirm(cr, uid, ids, context=None)
 
 		return True
-		# return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
 
-
-	def product_qty_by_location(self, cr, uid, product_id, warehouse_stock_location, context=None):
-
-		sql = """select ((select sum(product_qty) from stock_move where product_id = %s and state in ('done') and location_dest_id = %s group by product_id) - (select sum(product_qty) from stock_move where product_id = %s and state in ('done') and location_id = %s group by product_id) ) as total;""" % (product_id, warehouse_stock_location, product_id, warehouse_stock_location)
-		cr.execute(sql)
-		
-		return cr.fetchall()[0][0]
-
-	
 	def check_validasi_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		notActiveProducts = []
 		for x in val.prepare_lines:
-
-			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
-
+			if not context:
+				context = {}
+			context['location'] = val.location_id.id
+			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 			if not product.active:
 				if not re.match(r'service',product.categ_id.name,re.M|re.I):
-					notActiveProducts.append(product.default_code)
-				
+					notActiveProducts.append(product.default_code)	
+
 			if product.not_stock == False:
-
-				check_loc = self.pool.get('stock.location').browse(cr, uid, val.location_id.id, context=None)
-
-				# Jika Location ID adalah Head Office
-				if val.location_id.id==12:
-					qty = product.qty_available
-				# Jika Parent Location ID adalah Head Office
-				elif check_loc.location_id.id ==12: 
-					qty = product.qty_available
-				# Jika Location Merupakan selain Head Office
-				else: 
-					if not context:
-						context = {}
-					context['location'] = val.location_id.id
-					
-					product_context =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
-					qty = product_context.qty_available
-
 				mm = ' ' + product.default_code + ' '
-				stock = ' ' + str(qty) + ' '
+				stock = ' ' + str(product.qty_available) + ' '
 				msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
-				if x.product_qty > qty:
+				if x.product_qty > product.qty_available:
 					raise openerp.exceptions.Warning(msg)
 					return False
-
-
+					
 		if len(notActiveProducts) > 0:
 			m_p_error = ""
 			for pNon in notActiveProducts:
