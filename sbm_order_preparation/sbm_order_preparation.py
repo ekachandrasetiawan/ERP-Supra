@@ -194,11 +194,14 @@ class order_preparation(osv.osv):
 					raise openerp.exceptions.Warning(msg)
 
 		self._set_message_unread(cr, uid, ids, context=None)
-		self.check_validasi_confirm(cr, uid, ids, context=None)
+		validasi = self.validasi(cr, uid, ids, context=None)
 
-		return True
+		if validasi == True:
+			self.write(cr, uid, ids, {'state': 'approve'})
+			
+		return False
 
-	def check_validasi_confirm(self, cr, uid, ids, context=None):
+	def validasi(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		notActiveProducts = []
 		for x in val.prepare_lines:
@@ -226,8 +229,6 @@ class order_preparation(osv.osv):
 			m_p_error+="\r\n is non active product, please activate product first."
 
 			raise osv.except_osv(_('Error!'),_(m_p_error))
-		self.write(cr, uid, ids, {'state': 'approve'})
-		# self.write(cr, uid, ids, {'state': 'draft'})
 		return True
 		
 	def preparation_draft(self, cr, uid, ids, context=None):
