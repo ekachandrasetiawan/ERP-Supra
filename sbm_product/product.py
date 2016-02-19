@@ -151,7 +151,7 @@ class WizardWizardStockByLocLine(osv.osv_memory):
 		'location_id':fields.many2one('stock.location','Product Location'),
 		'product_id':fields.many2one('product.product','Product'),
 		'qty_available': fields.float(string='On Hand'),
-		'virtual_available': fields.float(string='Available'),
+		'virtual_available': fields.float(string='Forecasted Qty'),
 		'incoming_qty': fields.float(string='Incoming'),
 		'outgoing_qty': fields.float(string='Outgoing'), 
 	}
