@@ -115,9 +115,8 @@ class WizardStockByLocation(osv.osv_memory):
 				context['location'] = x.id
 				product =self.pool.get('product.product').browse(cr, uid, product_id, context=context)
 
-				
-
-				if product.qty_available <> 0.0:
+				# Menampilkan Location SITE saja
+				if x.location_id.id == 49:
 					linesData.append({
 						'location_id' : x.id,
 						'qty_available':product.qty_available,
