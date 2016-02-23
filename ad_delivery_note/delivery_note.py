@@ -1180,9 +1180,9 @@ class delivery_note(osv.osv):
 					# return False
 					line = [x.product_id.id for x in val.note_lines]
 					err = [x for x in line if x not in move]
-					if err:
-						v = self.pool.get('product.product').browse(cr, uid, err)[0].default_code
-						raise osv.except_osv(('Invalid action !'), ('Product \'%s\' tidak ada didalam daftar order !') % (v,))
+					# if err:
+					# 	v = self.pool.get('product.product').browse(cr, uid, err)[0].default_code
+					# 	raise osv.except_osv(('Invalid action !'), ('Product \'%s\' tidak ada didalam daftar order !') % (v,))
 					   
 					for x in val.note_lines:
 						if x.product_qty <= 0:
