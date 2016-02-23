@@ -141,16 +141,16 @@ class hr_employee(osv.osv):
 
 		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
 		for emp in emps:
-			if self.write(cr,uid,emp.id,{'active':False}):
-				if not self.delete_att_pin_machine(cr,uid,emp.att_pin,machine_ids,context=context):
-					raise osv.except_osv(_('Failed!'),_('Failed to delete user on finger!'))
+			if not self.delete_att_pin_machine(cr,uid,emp.att_pin,machine_ids,context=context):
+				raise osv.except_osv(_('Failed!'),_('Failed to delete user on finger!'))
+
+		self.write(cr,uid,ids,{'active':False})
 
 		return True
 
 	def delete_att_pin_machine(self,cr,uid,pin,machine_ids,context={}):
 		res = False
 		machine_obj = self.pool.get('hr.attendance.machine')
-		# machine_ids = machine_obj.search(cr,uid,[('machine_id','!=',0)])
 
 		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
 
@@ -158,11 +158,10 @@ class hr_employee(osv.osv):
 			'Content-Type':'text/xml'
 		}
 
-		for machine in machines:
-			
-			context['att_pin'] = pin
-			machine_obj.stream_data_http(cr,uid,[machine.id],context=context)
+		context['att_pin'] = pin
+		machine_obj.stream_data_http(cr,uid,machine_ids,context=context)
 
+		for machine in machines:
 
 			xml = """<DeleteUser>
 				<ArgComKey Xsi:type="xsd:integer">{machine_key}</ArgComKey>
@@ -179,12 +178,10 @@ class hr_employee(osv.osv):
 			
 			dictRowsResponse = dictResponse['DeleteUserResponse']['Row']['Result']
 			print "DELETEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ",dictRowsResponse
-
 			res = True
 			if dictRowsResponse != '1':
 				res=False
 				raise osv.except_osv(_('Error'),_('Error to delete User Info on Machine !, Please Contact system administrator'))
-
 				
 
 
@@ -394,6 +391,20 @@ class hr_attendance_machine(osv.osv):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"attendance/first-and-last-scan"
+		# user_ids = self.pool.get('res.users').search(cr,uid,uid,context=context)
+		userBrowse = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+
+		employee = userBrowse.employee_ids[0]
+
+		work_addr = employee.address_id.id
+
+		if work_addr:
+
+			searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.'+str(work_addr))], context=context)
+			if searchConfSite:
+				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
+				urlTo = str(browseConf.value)+"attendance/first-and-last-scan&site="+str(work_addr)
+		
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
