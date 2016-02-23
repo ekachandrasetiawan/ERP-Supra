@@ -194,8 +194,43 @@ class order_preparation(osv.osv):
 					raise openerp.exceptions.Warning(msg)
 
 		self._set_message_unread(cr, uid, ids, context=None)
-		return super(order_preparation, self).preparation_confirm(cr, uid, ids, context=context)
+		validasi = self.validasi(cr, uid, ids, context=None)
 
+		if validasi == True:
+			self.write(cr, uid, ids, {'state': 'approve'})
+			
+		return False
+
+	def validasi(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		notActiveProducts = []
+		for x in val.prepare_lines:
+			if not context:
+				context = {}
+			context['location'] = val.location_id.id
+			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
+			if not product.active:
+				if not re.match(r'service',product.categ_id.name,re.M|re.I):
+					notActiveProducts.append(product.default_code)	
+
+			if product.not_stock == False:
+				mm = ' ' + product.default_code + ' '
+				stock = ' ' + str(product.qty_available) + ' '
+				msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+
+				if x.product_qty > product.qty_available:
+					raise openerp.exceptions.Warning(msg)
+					return False
+					
+		if len(notActiveProducts) > 0:
+			m_p_error = ""
+			for pNon in notActiveProducts:
+				m_p_error+=pNon+",\r\n"
+			m_p_error+="\r\n is non active product, please activate product first."
+
+			raise osv.except_osv(_('Error!'),_(m_p_error))
+		return True
+		
 	def preparation_draft(self, cr, uid, ids, context=None):
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_draft(cr, uid, ids, context=context)
