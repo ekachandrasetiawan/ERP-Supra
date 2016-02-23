@@ -597,7 +597,6 @@
     </tr>
     </blockTable>
     </section>
-<!--
     <blockTable colWidths="25.0,60.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">
     <tr>
       <td><para style="terp_default_8"><font color="white">:</font></para></td>
@@ -605,14 +604,13 @@
         <para style="terp_default_8"><font color="white">:</font></para>
       </td>
       <td>
-        <para style="terp_default_8">Discount</para></td>
+        <para style="terp_default_8">Discount 7%</para></td>
       <td>
         <para style="terp_default_8"><font color="white">:</font></para>
       </td>
       <td><para style="terp_default_Bold_Centre_8">[[ koma('%.2f',get_amount(o)['discountamount']) ]]</para></td>
     </tr>
     </blockTable>
--->
     <!-- <para style="terp_default_8"><font color="white">:</font></para> -->
     <para style="terp_default_Right_8"><font color="white"> </font></para>
     <blockTable colWidths="85.0,300.0,80.0,90.0" style="Table_Invoice_General_judul">

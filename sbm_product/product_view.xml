@@ -12,7 +12,44 @@
 					 <xpath expr="//div[@name='buttons']" position="inside">
 	                   <button icon="gtk-ok" type="object" name="exportCSV" string="Export CSV" default_focus="1" class="oe_highlight"/>
 	                </xpath>
+
+	                <xpath expr="//group[@string='Status']" position="before">
+	                		<group string="Stock Product By Location">
+	                			<button name="action_cek_stock_loc" string="View Stock Product By Location" type="object" icon="terp-product"/>
+	                		</group>
+	                </xpath>
 				</field>
+		</record>
+
+
+		<record id="wizard_stock_by_location" model="ir.ui.view">
+			<field name="name">Wizard Stock By Location</field>
+			<field name="model">wizard.stock.by.location</field>
+			<field name="arch" type="xml">
+				<form string="Cancel Item" version="7.0">
+					<group>
+						<field name="product_id" readonly="True" />
+					</group>
+					<field name="lines">
+						<tree editable="bottom" string="Product By location">
+							<field name="location_id"/>
+							<field name="qty_available"/>
+							<field name="virtual_available"/>
+							<field name="incoming_qty"/>
+							<field name="outgoing_qty"/>
+						</tree>
+					</field>
+				</form>
+			</field>
+		</record>
+
+		<record id="wizard_stock_by_loc_action" model="ir.actions.act_window">
+			<field name="name">Action Stock By Location</field>
+			<field name="res_model">wizard.stock.by.location</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="wizard_stock_by_location"/>
 		</record>
 	</data>
 </openerp>

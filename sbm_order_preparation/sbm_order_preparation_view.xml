@@ -61,7 +61,7 @@
          <field name="priority">1</field>
          <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_tree"/>
          <field name="arch" type="xml">
-              <xpath expr="//tree[@string='Order Packaging']" position="attributes">
+              <xpath expr="//tree[@string='Order Preparation']" position="attributes">
                    <attribute name="fonts">bold:message_unread==True;</attribute>
                    <attribute name="colors">grey:state=='cancel';blue:state in ('draft','approve');green:state in ('done')</attribute>
               </xpath>

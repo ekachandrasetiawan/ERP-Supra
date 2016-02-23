@@ -50,7 +50,7 @@
             <field name="type">tree</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
-                <tree string="Order Packaging">
+                <tree string="Order Preparation">
                     <field name="name"/>
                     <field name="sale_id"/>
                     <field name="poc"/>

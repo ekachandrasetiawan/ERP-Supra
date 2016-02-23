@@ -11,5 +11,6 @@
     "demo_xml":[],
     "update_xml":["purchase_import_view.xml"],
     "active":False,
-    "installable":True
+    "installable":True,
+    "js":['static/src/js/purchaseorder.js'],
 }

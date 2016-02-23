@@ -1,7 +1,7 @@
 {
     "name": "SBM Master Product",
     "version": "1.0",
-    "depends": ["product"],
+    "depends": ["product","stock"],
     "author": "Suprabakti Mandiri",
     "category": "SBM Master Product",
     "description": """Modul ini digunakan untuk Menggolah Master Product""",

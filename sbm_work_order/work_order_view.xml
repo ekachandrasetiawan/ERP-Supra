@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+	<record model="ir.ui.view" id="sbm_work_order_tree">
+		<field name="name">sbm.work.order.tree</field>
+		<field name="model">sbm.work.order</field>
+		<field name="type">tree</field>
+		<field name="arch" type="xml">
+			<tree string="ADHOC Order Request">
+				<field name="wo_no"/>
+				<field name="customer_id"/>
+				<field name="customer_site_id"/>
+				<field name="due_date"/>
+				<field name="source_type"/>
+				<field name="sale_order_id"/>
+				<field name="adhoc_order_request_id"/>
+				<field name="state"/>
+			</tree>
+		</field>
+	</record>
+    <record model="ir.ui.view" id="sbm_work_order_form">
+	<field name="name">sbm.work.order.form</field>
+	<field name="model">sbm.work.order</field>
+    <field name="type">form</field>
+    <field name="arch" type="xml">
+    	<form string="WORK ORDER" version="7.0">
+	        <header>
+	            <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,validate,done"/>
+        	</header>
+        	<sheet>
+        		<separator string="WORK ORDER"/>
+        			<group col="4" colspan="4">
+	            	 	<field name="request_no" colspan="4"/>
+	            	 	<field name="wo_no"/>
+	            	 	<field name="work_location"/>
+	            	 	<field name="location_id"/>
+	            	 	<field name="customer_id"/>
+	            	 	<field name="customer_site_id"/>
+	            	 	<field name="due_date"/>
+	            	 	<field name="order_date"/>
+	            	 	<field name="source_type"/>
+	            	 	<field name="sale_order_id"/>
+	            	 	<field name="adhoc_order_request_id"/>
+	            	 	<field name="repeat_ref_id"/>
+	            	</group>
+	            <notebook colspan="4">
+	            	<page string="Output Picking">
+	            		<field name="outputs">
+	            			<form string="Output Picking">
+	            				<field name="no"/>
+	            				<field name="item_id"/>
+	            				<field name="desc"/>
+	            				<field name="qty"/>
+	            				<field name="uom_id"/>
+		            				<notebook colspan="4">
+											<page string="DATA MATERIAL">
+												<field name="raw_materials">
+													<tree string="Material Lines">
+														<field name="item_id"/>
+														<field name="desc"/>
+														<field name="qty"/>
+														<field name="uom_id"/>
+														<field name="customer_material"/>
+														<field name="adhoc_material_id"/>
+													</tree>
+												</field>
+											</page>
+											<page string="OUTPUT PICKING">
+												<field name="output_picking_ids">
+													<form string="Output Picking">
+														<field name="picking_id"/>
+															<notebook colspan="4">
+																<page string="Move">
+																	<field name="raw_material_moves">
+																		<field name="move_id"/>
+																		<field name="wo_raw_material_id"/>
+																	</field>
+																</page>
+															</notebook>
+													</form>
+												</field>
+											</page>
+									</notebook>
+	            			</form>
+	            		</field>
+	            	</page>
+	            </notebook>
+        	</sheet>
+    	</form>
+    </field>
+	</record>
+	<record model="ir.actions.act_window" id="action_sbm_work_order">
+		<field name="name">SBM Work Order</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">sbm.work.order</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+
+	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner"/>
+
+	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2"/>
+
+</data>
+</openerp>
