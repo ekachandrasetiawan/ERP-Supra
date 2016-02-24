@@ -995,7 +995,7 @@ class delivery_note(osv.osv):
 		'attn':fields.many2one('res.partner',string="Attention"),
 		'refund_id':fields.many2one('stock.picking',string="Refund No", domain=[('type','=', 'in')], readonly=True),
 		'note_return_ids': fields.many2many('stock.picking','delivery_note_return','delivery_note_id',string="Note Return",readonly=True),
-		'note_return_ids_proses': fields.many2many('stock.picking','delivery_note_return','delivery_note_id',string="Note Return",readonly=True),
+		'note_return_ids_proses': fields.many2many('stock.picking.in','delivery_note_return','delivery_note_id',string="Note Return",readonly=True,states={'torefund': [('readonly', False)]}),
 	}
 	_defaults = {
 		'name': '/',
