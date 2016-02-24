@@ -283,7 +283,15 @@ class delivery_note(osv.osv):
 					loc_id =x.location_id.id
 				else:
 					loc_id = 12
+				sale_line_id = False
+				# if sale order line with material
+				if x.op_line_id.sale_line_material_id:
+					sale_line_id = x.op_line_id.sale_line_material_id.id #detect via order.preparation.line sale_line_material_id
 
+				elif  x.op_line_id.move_id and x.op_line_id.move_id.sale_line_id:
+					# if old op not has sale_line_material_id on order_preparation_line object
+					sale_line_id = x.op_line_id.move_id.sale_line_id.id
+				
 				move_id = stock_move.create(cr,uid,{
 					'name' : x.product_id.name,
 					'origin':val.prepare_id.sale_id.name,
@@ -299,7 +307,8 @@ class delivery_note(osv.osv):
 					'company_id':1,
 					'picking_id': picking,
 					'state':'draft',
-					'location_dest_id' :id_loc
+					'location_dest_id' :id_loc,
+					'sale_line_id': sale_line_id
 					},context=context)
 
 				# Update DN Line Material Dengan ID Move
@@ -335,8 +344,11 @@ class delivery_note(osv.osv):
 		# Jalankan Fungsi Sequence No
 		dn.get_sequence_no(cr, uid, ids)
 
-		# Jalankan Fungsi Create Picking
-		dn.create_picking(cr, uid, ids)
+		# Jalankan Fungsi Create Picking jika dn baru
+		if not val.prepare_id.picking_id:
+			dn.create_picking(cr, uid, ids)
+		else:
+			self.write(cr,uid,ids,{'picking_id':val.prepare_id.picking_id.id})
 
 		return True
 
@@ -459,19 +471,60 @@ class delivery_note(osv.osv):
 
 	def package_new_validate(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-		if val.picking_id.id:
-			stock_picking = self.pool.get('stock.picking')
-			stock_move = self.pool.get('stock.move')
-			partial_data = {}
-			move = self.pool.get('stock.move').search(cr, uid, [('picking_id', '=', val.picking_id.id)])
-			data_move = self.pool.get('stock.move').browse(cr, uid, move)
-			# Update Done Picking & Move
-			stock_picking.action_move(cr, uid, [val.picking_id.id])
+		stock_picking = self.pool.get('stock.picking')
+		old_picking = False #flag to check if old document
+		if val.prepare_id.picking_id:
+			# print "INNNNNN",val.prepare_id.prepare_lines[0].sale_line_material_id
+			if not val.prepare_id.prepare_lines[0].sale_line_material_id:
+				old_picking = True
+		# jika ada picking_id di dn
 
-			self.write(cr, uid, ids, {'state': 'done'})
+		print old_picking,">>>>>>>>>>>>>>>>>>"
+		if val.picking_id.id:
+			# if 
+			if not old_picking:
+				raise osv.except_osv('Error','EEEE1')
+				
+				stock_move = self.pool.get('stock.move')
+				partial_data = {}
+				move = self.pool.get('stock.move').search(cr, uid, [('picking_id', '=', val.picking_id.id)])
+				data_move = self.pool.get('stock.move').browse(cr, uid, move)
+				# Update Done Picking & Move
+				stock_picking.action_move(cr, uid, [val.picking_id.id])
+
+				self.write(cr, uid, ids, {'state': 'done'})
+			else:
+				# raise osv.except_osv('Error','EEEE2')
+				partial_data = {}
+				for line in val.note_lines:
+					for dn_material in line.note_lines_material:
+						partial_data['move%s' % (dn_material.op_line_id.move_id.id)] = {
+									'product_id': dn_material.product_id.id,
+									'product_qty': dn_material.qty,
+									'product_uom': dn_material.product_uom.id,
+									'prodlot_id': dn_material.prodlot_id.id}
+				
+
+				# call do_partial
+				picking_do = stock_picking.do_partial(cr,uid,[val.prepare_id.picking_id.id],partial_data,context=context)
+				picking_done = picking_do.items()
+				done_picking_id = picking_done[0][1]['delivered_picking'] #get new picking id where new picking_id is transfered
+
+
+				prepare_obj = self.pool.get('order.preparation')
+
+				prepare_obj.write(cr,uid,[val.prepare_id.id],{'picking_id':done_picking_id}) #write into order_preparation_line
+
+				stock_picking.write(cr,uid, [done_picking_id], {'note_id': val.id})
+
+				# self.write(cr, uid, ids, {'state': 'done', 'picking_id': picking_do[0][1]['delivered_picking']})
+				self.write(cr, uid, ids, {'state': 'done', 'picking_id':done_picking_id}) #write done to self
 		else:
+			# jika tidak ada picking_id di dn
+
 			self.pool.get('delivery.note').package_validate(cr, uid, ids)
 			self.write(cr, uid, ids, {'picking_id': val.prepare_id.picking_id.id})
+		# raise osv.except_osv('Error','EEEE')
 		return True
 		
 
