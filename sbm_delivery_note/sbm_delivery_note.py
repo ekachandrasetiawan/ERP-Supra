@@ -285,7 +285,7 @@ class delivery_note(osv.osv):
 					loc_id = 12
 
 				move_id = stock_move.create(cr,uid,{
-					'name' : x.product_id.name,
+					'name' : x.desc,
 					'origin':val.prepare_id.sale_id.name,
 					'product_uos_qty':x.qty,
 					'product_uom':x.product_uom.id,

@@ -11,4 +11,5 @@
     'installable': True,
     'active': False,
     'certificate': '',
+    'js':['static/src/js/work_order.js'],
 }

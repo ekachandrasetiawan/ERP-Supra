@@ -28,10 +28,16 @@
 	            <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,validate,done"/>
         	</header>
         	<sheet>
-        		<separator string="WORK ORDER"/>
+        		<div class="oe_title">
+					<h1>
+						<label string="WORK ORDER"/>
+						<separator string=""/>
+						<field name="request_no" class="oe_inline" colspan="4"/>
+					</h1>
+				</div>
+
         			<group col="4" colspan="4">
-	            	 	<field name="request_no" colspan="4"/>
-	            	 	<field name="wo_no"/>
+	            	 	<field name="wo_no" colspan="4"/>
 	            	 	<field name="work_location"/>
 	            	 	<field name="location_id"/>
 	            	 	<field name="customer_id"/>
@@ -46,6 +52,13 @@
 	            <notebook colspan="4">
 	            	<page string="Output Picking">
 	            		<field name="outputs">
+	            			<tree>
+	            				<field name="no"/>
+	            				<field name="item_id"/>
+	            				<field name="desc"/>
+	            				<field name="qty"/>
+	            				<field name="uom_id"/>
+	            			</tree>
 	            			<form string="Output Picking">
 	            				<field name="no"/>
 	            				<field name="item_id"/>
@@ -54,10 +67,10 @@
 	            				<field name="uom_id"/>
 		            				<notebook colspan="4">
 											<page string="DATA MATERIAL">
-												<field name="raw_materials">
+												<field name="raw_materials" colspan="4" nolabel="1" widget="one2many_list">
 													<tree string="Material Lines">
 														<field name="item_id"/>
-														<field name="desc"/>
+														<field name="desc" colspan="4"/>
 														<field name="qty"/>
 														<field name="uom_id"/>
 														<field name="customer_material"/>
@@ -66,12 +79,19 @@
 												</field>
 											</page>
 											<page string="OUTPUT PICKING">
-												<field name="output_picking_ids">
-													<form string="Output Picking">
+												<field name="output_picking_ids" colspan="4" nolabel="1" widget="one2many_list">
+													<tree>
+														<field name="work_order_output_id"/>
+														<field name="work_order_id"/>
+														<field name="picking_id"/>
+													</tree>
+													<form string="OUTPUT PICKING">
+														<field name="work_order_output_id"/>
+														<field name="work_order_id"/>
 														<field name="picking_id"/>
 															<notebook colspan="4">
 																<page string="Move">
-																	<field name="raw_material_moves">
+																	<field name="raw_material_moves" colspan="4" nolabel="1" widget="one2many_list">
 																		<field name="move_id"/>
 																		<field name="wo_raw_material_id"/>
 																	</field>
