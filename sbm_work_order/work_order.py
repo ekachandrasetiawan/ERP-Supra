@@ -136,18 +136,41 @@ SBM_Adhoc_Order_Request_Output_Material()
 
 
 class SBM_Work_Order(osv.osv):
+
+	def _getRequestNo(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+
+			res[item.id] = 'a'
+		return res
+	
+	def _getRequestWoNo(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+
+			res[item.id] = 'b'
+		return res
+
 	_name = 'sbm.work.order'
 	_columns = {
-		'request_no':fields.char(string='WO Request No', required=True),
-		'wo_no':fields.char(string='Order No'),
+		'request_no': fields.function(_getRequestNo,method=True,string="Request No",type="char",
+			store={
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
+			}),
+		'wo_no': fields.function(_getRequestWoNo,method=True,string="WO NO",type="char",
+			store={
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
+			}),
+		'seq_wo_no':fields.char(string='WO Sequence'),
+		'seq_req_no':fields.char(string='Request Sequence'),
 		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer SITE')], 'Work Location', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=True),
+		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=False),
 		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]}),
 		'due_date':fields.date(string='Due Date', required=True),
 		'order_date':fields.date(string='Order Date'),
 		'source_type': fields.selection([('project', 'Project'),('sale_order', 'Sale Order'), ('adhoc','Adhoc'), ('internal_request', 'Internal Request')], 'Source Type', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False),
+		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False, domain=[('state', 'in', ['progress','manual'])]),
 		'adhoc_order_request_id':fields.many2one('sbm.adhoc.order.request', required=False, domain=[('state','in',['approved','done'])], string='Adhoc Order Request'),
 		'repeat_ref_id':fields.many2one('sbm.work.order',required=False, string='Repeat Ref'),
 		'notes':fields.text(string='Notes'),
@@ -172,14 +195,60 @@ class SBM_Work_Order(osv.osv):
 
 	_rec_name = 'request_no'
 
-	_sql_constraints = [
-		('wi_no_unique', 'unique (wo_no)', 'The Work Order Number must be unique !')
-	]
-
 	_defaults = {
 		'state': 'draft',
 		'request_no':'/',
+		'wo_no':'/',
 	}
+
+	def sale_order_change(self, cr, uid, ids, sale, context=None):
+		so_line = self.pool.get('sale.order.line')
+		so_material_line = self.pool.get('sale.order.material.line')
+		work_order = self.pool.get('sbm.work.order')
+		work_order_output = self.pool.get('sbm.work.order.output')
+		work_order_material = self.pool.get('sbm.work.order.output.raw.material')
+		if sale:
+			res = {}; line = []
+
+			order = self.pool.get('sale.order').browse(cr, uid, sale)
+		
+			no = 1;
+			for x in order.order_line:
+				if x.material_lines == []:
+					raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
+
+				so = so_material_line.search(cr, uid, [('sale_order_line_id', '=', x.id)])
+
+				for m in so_material_line.browse(cr,uid,so):
+					if m.product_id.type <> 'service':
+						if m.product_id.supply_method == 'produce':
+							line.append({
+								'no': no,
+								'item_id' : m.product_id.id,
+								'desc': m.desc,
+								'qty': m.qty,
+								'uom_id': m.uom.id
+							})
+					elif m.product_id.type == 'service':
+						line.append({
+							'no': no,
+							'item_id' : m.product_id.id,
+							'desc': m.desc,
+							'qty': m.qty,
+							'uom_id': m.uom.id
+						})
+
+				no +=1
+
+			res['customer_id'] = order.partner_id.id
+			res['due_date'] = order.due_date
+			res['order_date'] = order.date_order
+			res['outputs'] = line
+
+		return  {'value': res}
+
+
+
 	
 SBM_Work_Order()
 
@@ -188,13 +257,13 @@ class SBM_Work_Order_Output(osv.osv):
 	_name = 'sbm.work.order.output'
 	_columns = {
 		'no':fields.float(string='No', required=False),
-		'work_order_id':fields.many2one('sbm.work.order','Work Order No', required=True),
+		'work_order_id':fields.many2one('sbm.work.order','Work Order No', required=False),
 		'item_id':fields.many2one('product.product', string='Product', domain=[('active', '=', True), ('sale_ok','=',True)], required=True),
 		'desc':fields.text(string='Description', required=False),
 		'qty':fields.float(required=True, string='Qty'),
 		'uom_id':fields.many2one('product.uom', required=True, string='UOM'),
 		'raw_materials':fields.one2many('sbm.work.order.output.raw.material', 'work_order_output_id', string='Raw Materials'),
-		'raw_files':fields.one2many('sbm.work.order.line.files','work_order_output_id', string='Raw Files'),
+		'attachment_ids': fields.many2many('ir.attachment', 'work_order_rel','work_order_id', 'attachment_id', 'Attachments'),
 		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking'),
 		'adhoc_output_ids':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
 

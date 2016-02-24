@@ -32,22 +32,24 @@
 					<h1>
 						<label string="WORK ORDER"/>
 						<separator string=""/>
-						<field name="request_no" class="oe_inline" colspan="4"/>
+						<field name="request_no" class="oe_inline" colspan="2"/>
+						<field name="wo_no" class="oe_inline" colspan="2"/>
 					</h1>
 				</div>
-
         			<group col="4" colspan="4">
-	            	 	<field name="wo_no" colspan="4"/>
-	            	 	<field name="work_location"/>
-	            	 	<field name="location_id"/>
-	            	 	<field name="customer_id"/>
-	            	 	<field name="customer_site_id"/>
-	            	 	<field name="due_date"/>
-	            	 	<field name="order_date"/>
-	            	 	<field name="source_type"/>
-	            	 	<field name="sale_order_id"/>
-	            	 	<field name="adhoc_order_request_id"/>
-	            	 	<field name="repeat_ref_id"/>
+        				<group colspan="2">
+        					<field name="source_type"/>
+		            	 	<field name="sale_order_id" attrs="{'invisible':[('source_type', 'in', ['adhoc','internal_request'])], 'required':[('source_type', 'in', ['project','sale_order'])]}" on_change="sale_order_change(sale_order_id)"/>
+		            	 	<field name="adhoc_order_request_id" attrs="{'invisible':[('source_type', '!=', 'adhoc')], 'required':[('source_type', '=', 'adhoc')]}"/>
+		            	 	<field name="customer_id" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
+		            	 	<field name="customer_site_id" domain="[('parent_id', '=', customer_id)]" attrs="{'invisible':[('work_location', '!=', 'customersite')], 'required':[('work_location', '=', 'customersite')]}" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
+		            	 	<field name="location_id" attrs="{'invisible':[('work_location', '!=', 'workshop')], 'required':[('work_location', '=', 'workshop')]}"/>
+        				</group>
+        				<group colspan="2">
+		            		<field name="work_location"/>
+		            	 	<field name="due_date"/>
+		            	 	<field name="order_date"/>
+	            		</group>
 	            	</group>
 	            <notebook colspan="4">
 	            	<page string="Output Picking">
@@ -60,11 +62,11 @@
 	            				<field name="uom_id"/>
 	            			</tree>
 	            			<form string="Output Picking">
-	            				<field name="no"/>
-	            				<field name="item_id"/>
-	            				<field name="desc"/>
+	            				<field name="item_id" colspan="4"/>
+	            				<field name="desc" colspan="4"/>
 	            				<field name="qty"/>
 	            				<field name="uom_id"/>
+	            				<field name="attachment_ids" colspan="4"  widget="many2many_binary" string="Attach a file"/>
 		            				<notebook colspan="4">
 											<page string="DATA MATERIAL">
 												<field name="raw_materials" colspan="4" nolabel="1" widget="one2many_list">
@@ -104,6 +106,11 @@
 	            			</form>
 	            		</field>
 	            	</page>
+	            	<page string="Others">
+	            		<group>
+	            			<field name="repeat_ref_id"/>
+	            		</group>
+	            	</page>
 	            </notebook>
         	</sheet>
     	</form>
@@ -116,6 +123,30 @@
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
 	</record>
+
+
+	<record id="seq_request_no" model="ir.sequence.type">
+		<field name="name">Work Order Request No</field>
+		<field name="code">sbm.work.order</field>
+	</record>
+
+	<record id="seq_sbm_work_order_req_no" model="ir.sequence">
+		<field name="name">Work Order Request No</field>
+		<field name="code">sbm.work.order</field>
+		<!-- <field name="suffix">/</field> -->
+		<field name="padding">5</field>
+	</record>
+
+<!-- 	<record id="seq_wo_no" model="ir.sequence.type">
+		<field name="name">Work Order WO No</field>
+		<field name="code">sbm.work.order</field>
+	</record>
+
+	<record id="seq_sbm_work_order_wo_no" model="ir.sequence">
+		<field name="name">Work Order WO No</field>
+		<field name="code">sbm.work.order</field>
+		<field name="padding">5</field>
+	</record> -->
 
 	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner"/>
 
