@@ -414,6 +414,37 @@ class Sale_order(osv.osv):
 			'nodestroy': True
 		}
 		
+	def print_rfq_web(self,cr,uid,ids,context={}):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'print.local_reza')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"print-sale-order/rfq&id="+str(ids[0])
+		
+		return {
+			'type'  : 'ir.actions.client',
+			# 'target': 'new',
+			'tag'   : 'print.out.op',
+			'params': {
+				# 'id'  : ids[0],
+			'redir' : urlTo,
+			'uid':uid
+			},
+		}
+
+	def print_so_web(self,cr,uid,ids,context={}):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'print.local_reza')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"print-sale-order/saleorder&id="+str(ids[0])
+		
+		return {
+			'type'  : 'ir.actions.client',
+			# 'target': 'new',
+			'tag'   : 'print.out.op',
+			'params': {
+				# 'id'  : ids[0],
+			'redir' : urlTo,
+			'uid':uid
+			},
+		}
 	def print_so(self,cr,uid,ids,context={}):
 		res={}
 		sale_order = self.browse(cr,uid,ids,context=context)[0]
@@ -532,16 +563,17 @@ class Sale_order(osv.osv):
 		sale_order = self.browse(cr,uid,ids,context=context)[0]
 		invoice_in_picking=False
 		invoice_in_invoice=False
-
+		amount_total = 0
 		#cek invoice di picking_ids 
 		if sale_order.picking_ids:
 			#menghitung total amount di invoice
 			for hitung in sale_order.picking_ids:
-				amount_total+=hitung.invoice_id.amount_total
+				if hitung.invoice_id.amount_total and hitung.invoice_id.state=='paid':
+					amount_total+=hitung.invoice_id.amount_total
 
 			for picking in sale_order.picking_ids:
 				#kondisi di mana state = paid maka invoice_in_picking = True dan cek amount_total di invoice sama dengan amount_total di sale order
-				if picking.invoice_id.state=='paid' and amount_total==sale_order.amount_total:
+				if picking.invoice_id.state=='paid' and amount_total>=sale_order.amount_total:
 					invoice_in_picking =True
 					
 		#cek invoice di invoice_ids 
@@ -589,6 +621,7 @@ class Sale_order(osv.osv):
 				
 		else:
 			raise osv.except_osv(_('Warning'),_('invoice belum terbentuk'))
+
 		return  res
 
 # <record model='ir.actions.act_window' id="wizard_lost_quotation_form">
