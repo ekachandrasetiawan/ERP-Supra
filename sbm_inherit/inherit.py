@@ -1452,8 +1452,10 @@ class InternalMoveRequest(osv.osv):
 		data = self.browse(cr,uid,ids,context)[0]
 		prefix = self._validateStorage(data.source,data.destination)
 
-
-		sequence=prefix+'/'+self.pool.get('ir.sequence').get(cr, uid, 'internal.move.request')
+		if data.name == '/':
+			sequence=prefix+'/'+self.pool.get('ir.sequence').get(cr, uid, 'internal.move.request')
+		else:
+			sequence=data.name
 
 		return sequence
 
@@ -2370,7 +2372,7 @@ class sale_advance_payment_inv(osv.osv_memory):
 
 		result = []
 		for sale in sale_obj.browse(cr, uid, sale_ids, context=context):
-			self._check_is_invoice_by_delivery_note_exist(ce,uid,ids,sale)
+			self._check_is_invoice_by_delivery_note_exist(cr,uid,ids,sale)
 			val = inv_line_obj.product_id_change(cr, uid, [], wizard.product_id.id,
 					uom_id=False, partner_id=sale.partner_id.id, fposition_id=sale.fiscal_position.id)
 			res = val['value']
