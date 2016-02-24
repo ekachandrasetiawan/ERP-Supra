@@ -548,6 +548,8 @@
             <field name="arch" type="xml">
                 <header> 
                     <button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}"/>
+                    <button name="cek_so" type="object" string="Cek Sale order"/>
+                     <button name="print_so_web" type="object" string="Print SO"/>
                 </header>
               
               <page string="Other Information" position="before">
@@ -716,7 +718,8 @@
                     <filter icon="terp-dolar_ok!" string="Win" domain="[('quotation_state','=','win')]" help="Quotation Order Win" name="filter_win"/>
                     <filter icon="terp-dolar_ok!" string="Lost" domain="[('quotation_state','=','lost')]" help="Quotation Order Lost" name="filter_lost"/>
                      <filter icon="terp-dolar_ok!" string="Cancel" domain="[('quotation_state','=','cancel')]" help="Quotation Order Cancel" name="filter_cancel"/>
-
+                    <field name="quotation_no" filter_domain="[('quotation_no','ilike',self)]"/>
+                    <field name="name" filter_domain="[('name','ilike',self)]"/>
                     <field name="doc_year" filter_domain="[('doc_year','=',self)]"/>
                     <field name="doc_month" filter_domain="[('doc_month','=',self)]"/>
                     <field name="partner_id" filter_domain="[('partner_id','=',self)]"/>
@@ -770,7 +773,7 @@
 							<field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>>
 							<field name="date_order" on_change="onchange_dateorder(date_order)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
 							<field name="user_id" on_change="getGroupByUser(user_id)" required="True" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" />
-							<field name="group_id" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" />
+							<field name="group_id" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" domain="[('is_main_group','=',True)]"/>
 						</group>
 						
 						</group>

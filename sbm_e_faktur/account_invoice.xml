@@ -1,34 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-
-		<record id='customer_invoice_supra' model='ir.ui.view'>
-			<field name="name">customer.invoice.supra</field>
-			<field name='model'>account.invoice</field>
-			<field name='type'>form</field>
-			<field name='inherit_id' ref='ad_account_finance.customer_invoice_supra'/>
-			<field name='arch' type='xml'>
-				<field name='faktur_pajak_no' position='replace'>
-				</field>
-
-
-				<field name='kwitansi' position='replace'>
-				</field>
-			</field>
-		</record>
-		
-		<!-- <record id='kwitansi2' model='ir.ui.view'>
-			<field name="name">kwitansi2</field>
-			<field name='model'>account.invoice</field>
-			<field name='type'>form</field>
-			<field name='inherit_id' ref='ad_account_finance.faktur_pajak_supplier_form'/>
-			<field name='arch' type='xml'>
-				<field name='kwitansi' position='replace'>
-				</field>
-			</field>
-		</record> -->
-
-
 		<record id='sbm_faktur_inherit' model='ir.ui.view'>
 			<field name="name">sbm.faktur.inherit</field>
 			<field name='model'>account.invoice</field>
@@ -55,6 +26,12 @@
 				<button name='actionInvoiceRefund' position='replace'>
 				</button> -->
 				<!-- </xpath> -->
+				<field name='kwitansi' position='replace'>
+				</field>
+				<field name='faktur_pajak_no' position='replace'>
+				</field>
+				
+
 				<field name='journal_id' position='after'>
 					<field name='tax_transaction_type' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,False)"/>
 					<field name='is_tax_replacement' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'is_tax_replacement')" readonly="True"/>
@@ -102,7 +79,6 @@
 
 			</field>
 		</record>
-
 
 	</data>
 </openerp>

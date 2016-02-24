@@ -8,6 +8,7 @@
 			<field name="arch" type='xml'>
 				<header>
 					<button name="print_rfq" type="object" string="Print Quotation"/>
+					<button name="print_rfq_web" type="object" string="Print Quotation Web"/>
 				</header>
 			</field>
 
@@ -25,7 +26,9 @@
 					<button name="print_so" type="object" string="Print Sale Order"/>
 				</header>
 			</field>
-
+		<!-- <xpath expr="//field[@name='product_id']" position="before">
+					<field name="sequence" string="No"/>
+		</xpath> -->
 		</record>
 		
 	</data>
