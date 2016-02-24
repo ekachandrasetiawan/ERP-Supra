@@ -9,12 +9,16 @@ from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
+class inherit_stock_picking_out(osv.osv):
+	_inherit = "stock.picking.out"
+	_columns = {
+			'invoice_id': fields.many2one('account.invoice','Invoice')
+		}
 
 class res_partner_extention(osv.osv):
 
 	_inherit = 'res.partner'
 	def name_get(self, cr, uid, ids, context=None):
-		# print context,"CONTEXXXXXXXXXXXXXXX"
 		if context is None:
 			context = {}
 		if isinstance(ids, (int, long)):
@@ -35,30 +39,35 @@ class res_partner_extention(osv.osv):
 				state_id=" "+record_partner.state_id.name
 			else:
 				state_id=""
-			if context.get('address_attention'):
+
+			if context.get('address_attention') or context.get('search_default_filter_confirm'):
 				# kalo ada konteks attention
-				# print context,"sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
 				res_name = "%s"%(record_partner.name)
 				# print res_name,"ase"
 				res.append((index,res_name))
 				# print "--------------------------------------------------------",res_name
 
 			elif context.get('address_delivery'):
+				# print context,"delivery address"
 				res_name = "%s"%(record_partner.name)+city+state_id+"\n"+ self._display_address(cr, uid, record_partner, without_company=True, context=context)
 				res_name = res_name.replace('\n\n','\n')
 				res_name = res_name.replace('\n\n','\n')
 				
 				res.append((index,res_name))
-				# print context,"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+
 			elif context.get('address_invoice'):
+				# print context,"delivery address"
 				res_name = "%s"%(record_partner.name)+city+state_id
 				res.append((index,res_name))
 			else:
+
 				# print context,"--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+				res.append((index,result))
+				# print "--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",context
 				res.append((index,result))
 
 		# print tmp
-		# print res,"::::::::::::::::::::::::::::::::::"
+		# print results[0],"<<<<<<<<<<<<<<<<<<<<<<"
 		return res
 
 		
@@ -222,6 +231,7 @@ class Sale_order(osv.osv):
 	# 	# coba = test.name_get(cr, uid,ids, context)
 	# 	print super(Sale_order, test).name_get() , "testtttss"
 	# 	return super(Sale_order, test).name_get(cr, uid,ids, context=context)
+
 
 	def _check_before_save(self,cr,uid,order_line):
 		for material in order_line:
@@ -407,6 +417,37 @@ class Sale_order(osv.osv):
 			'nodestroy': True
 		}
 		
+	def print_rfq_web(self,cr,uid,ids,context={}):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'print.local_reza')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"print-sale-order/rfq&id="+str(ids[0])
+		
+		return {
+			'type'  : 'ir.actions.client',
+			# 'target': 'new',
+			'tag'   : 'print.out.op',
+			'params': {
+				# 'id'  : ids[0],
+			'redir' : urlTo,
+			'uid':uid
+			},
+		}
+
+	def print_so_web(self,cr,uid,ids,context={}):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'print.local_reza')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"print-sale-order/saleorder&id="+str(ids[0])
+		
+		return {
+			'type'  : 'ir.actions.client',
+			# 'target': 'new',
+			'tag'   : 'print.out.op',
+			'params': {
+				# 'id'  : ids[0],
+			'redir' : urlTo,
+			'uid':uid
+			},
+		}
 	def print_so(self,cr,uid,ids,context={}):
 		res={}
 		sale_order = self.browse(cr,uid,ids,context=context)[0]
@@ -520,6 +561,72 @@ class Sale_order(osv.osv):
 
 		return res
 
+	def cek_so(self,cr,uid,ids,context={}):
+		res =False
+		sale_order = self.browse(cr,uid,ids,context=context)[0]
+		invoice_in_picking=False
+		invoice_in_invoice=False
+		amount_total = 0
+		#cek invoice di picking_ids 
+		if sale_order.picking_ids:
+			#menghitung total amount di invoice
+			for hitung in sale_order.picking_ids:
+				if hitung.invoice_id.amount_total and hitung.invoice_id.state=='paid':
+					amount_total+=hitung.invoice_id.amount_total
+
+			for picking in sale_order.picking_ids:
+				#kondisi di mana state = paid maka invoice_in_picking = True dan cek amount_total di invoice sama dengan amount_total di sale order
+				if picking.invoice_id.state=='paid' and amount_total>=sale_order.amount_total:
+					invoice_in_picking =True
+					
+		#cek invoice di invoice_ids 
+		if sale_order.invoice_ids:
+			for invoice in sale_order.invoice_ids:
+				#kondisi di mana state = paid maka invoice_in_invoice = true
+				if invoice.state == 'paid':
+					invoice_in_invoice =True
+		# cek invoice_in_picking atau invoice_in_invoice 
+		if invoice_in_picking or invoice_in_invoice:
+			cek_data = False
+			#cek isi material line apakah ada
+			if sale_order.order_line[0].material_lines:
+
+				for material_so in sale_order.order_line[0].material_lines:
+					#cek apakah quantity sama shipped_qty atau type productnya = service
+					if material_so.qty == material_so.shipped_qty or material_so.product_id.type=="service":
+						cek_data=True
+						
+					# for material_so in sale_order.order_line[0].material_lines:
+					# 	if material_so.op_lines:
+					# 		dn_line_material_id = self.pool.get("delivery.note.line.material").search(cr,uid,[('op_line_id',"=",material_so.op_lines[0].id)])
+					# 		dn_line_material = self.pool.get("delivery.note.line.material").browse(cr,uid,dn_line_material_id)
+					# 		if dn_line_material:
+					# 			cek_data=True
+					# 		else:
+					# 			cek_data=False
+					# 			break
+					# if cek_data:
+					# 	if self.pool.get('sale.order').write(cr,uid,ids,{'state':'done'},context=context):
+					# 		res = True
+					else:
+						cek_data=False
+						break
+				#cek data untuk di eksekusi
+				if cek_data:
+					if self.pool.get('sale.order').write(cr,uid,ids,{'state':'done'},context=context):
+						res = True
+				else:
+					raise osv.except_osv(_('Warning'),_('Material line belum semuanya terkirim'))
+
+			else:
+				raise osv.except_osv(_('Warning'),_('Belum ada material'))
+
+				
+		else:
+			raise osv.except_osv(_('Warning'),_('invoice belum terbentuk'))
+
+		return  res
+
 # <record model='ir.actions.act_window' id="wizard_lost_quotation_form">
 # 			<field name="name">wizard.lost.quotation.form</field>
 # 			<field name="type">ir.actions.act_window</field>
@@ -551,6 +658,11 @@ class sale_order_material_line(osv.osv):
 
 	_name = 'sale.order.material.line'
 	_description = 'Sale order material line'
+
+
+
+
+
 	_columns = {
 		'sale_order_line_id':fields.many2one('sale.order.line',string="Sale Order Line"),
 		'product_id':fields.many2one('product.product',string="Product", required=True, domain=[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')], active=True),
@@ -559,8 +671,17 @@ class sale_order_material_line(osv.osv):
 		'uom':fields.many2one("product.uom",required=True,string="uom"),
 		'picking_location':fields.many2one('stock.location',required=True),
 		'is_loaded_from_change':fields.boolean('Load From Change ?'),
-		}
+		# 'op_lines':fields.one2many('order.preparation.line','sale_line_material_id'),
+		# 'shipped_qty':fields.function(_count_shipped_qty,type="float",store=False)}
+			# # {
+			# # 	'sale.order.line': (lambda self, cr, uid, ids, c={}: ids, ['price_unit','product_uom_qty'], 1),
 
+			# # }
+			# ,
+			# string="Base Total",
+			# multi="line_total"),
+		# }
+				}
 	_defaults = {
 		'is_loaded_from_change':False
 	}
@@ -661,7 +782,6 @@ class sale_order_line(osv.osv):
 		return amount_tax_total
 
 	def _count_amount_line(self, cr, uid, ids, name, args, context={}):
-		# print "PANGGIL _count_amount_line"
 		res = {}
 		order_lines = self.browse(cr,uid,ids,context=context)
 		
