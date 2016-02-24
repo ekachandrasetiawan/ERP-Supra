@@ -24,6 +24,19 @@ class order_preparation(osv.osv):
 
 	_order = "id desc"
 
+	def picking_change(self,cr,uid,ids,picking_id):
+		pick = self.pool.get('stock.picking').browse(cr,uid,picking_id)
+		res = super(order_preparation,self).picking_change(cr,uid,ids,picking_id)
+		if pick:
+			res['value']['partner_id'] = pick.sale_id.partner_id.id
+			res['value']['partner_shipping_id'] = pick.sale_id.partner_shipping_id.id
+			res['value']['poc'] = pick.sale_id.client_order_ref
+
+		
+		print "Change  ===============",res
+		return res
+		
+
 	def _set_message_unread(self, cr, uid, ids, context=None):
 		m  = self.pool.get('ir.model.data')
 		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
@@ -89,9 +102,9 @@ class order_preparation(osv.osv):
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 
-		for x in val.prepare_lines:
-			if x.sale_line_material_id.id==False:
-				raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
+		# for x in val.prepare_lines:
+		# 	if x.sale_line_material_id.id==False:
+		# 		raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
@@ -152,7 +165,7 @@ class order_preparation(osv.osv):
 										 'sale_line_material_id':y.id
 							})
 			res['prepare_lines'] = line
-			return  {'value': res,'domain': {'location_id': [('id','in',tuple(location))]}}
+			return  {'value': res}
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
@@ -165,13 +178,16 @@ class order_preparation(osv.osv):
 
 		for x in val.prepare_lines:
 			nilai= 0
-			op_line=obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,x.sale_line_material_id.id)])
-			
+			op_line = [] #assign default to 0 result
+			if x.sale_line_material_id: #if not old order_preparation_data
+				op_line=obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,x.sale_line_material_id.id)])
+
 			for l in obj_op_line.browse(cr, uid, op_line):
 				op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
 
 				product_return = 0
-				search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', '=' , [l.id])])
+				search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
+				print "-----",l.id
 				if search_dn_lm:
 					search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', '=' , [search_dn_lm])])
 					# Cek DN Line Material Return

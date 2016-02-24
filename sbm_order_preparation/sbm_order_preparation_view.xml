@@ -23,9 +23,8 @@
                 <button name="preparation_done" type="object" states="approve" string="Validate" icon="gtk-apply" confirm="Are you sure to validate Order Preparation" groups="sbm_order_preparation.group_admin_warehouse"/>
               </button>
 
-              <field name="picking_id" position="replace">
-                  <field name="picking_id" invisible="1"/>
-              </field>
+              <field name="picking_id" position="replace" />
+                  
 
               <field name="poc" position="after">
                 <field name="location_id" on_change="sale_change(sale_id,location_id)"/>
@@ -44,9 +43,7 @@
               <xpath expr="//page[@string='Notes']" position="after">
                   <page string="Others">
                       <group>
-                           <field name="picking_id" position="replace">
-                              <field name="picking_id" invisible="0"/>
-                          </field>
+                        <field name="picking_id" on_change="picking_change(picking_id)"/>
                       </group>
                  </page>
               </xpath>
