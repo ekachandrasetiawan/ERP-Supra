@@ -782,11 +782,6 @@ class sale_order_line(osv.osv):
 		return amount_tax_total
 
 	def _count_amount_line(self, cr, uid, ids, name, args, context={}):
-<<<<<<< HEAD
-		# print "PANGGIL _count_amount_line"
-=======
-		print "PANGGIL _count_amount_line ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
->>>>>>> Mohammadrezafah-master
 		res = {}
 		order_lines = self.browse(cr,uid,ids,context=context)
 		
