@@ -25,28 +25,50 @@
     <field name="arch" type="xml">
     	<form string="WORK ORDER" version="7.0">
 	        <header>
-	            <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,validate,done"/>
+	        	<button name="work_order_confirm" states="draft" string="Confirm" type="object"  icon="gtk-apply" confirm="Are you sure to Confirm Work Order"/>
+
+	        	<button name="work_order_set_draft" states="confirmed,approved" string="Set To Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Work Order"/>
+
+	        	<button name="work_order_check" states="confirmed" string="Check WO" type="object"  icon="terp-check" confirm="Are you sure to Check Work Order"/>
+
+	        	<button name="work_order_cancel" states="confirmed,approved,approved2,approved3" string="Cancel" type="object"  icon="STOCK_CANCEL" confirm="Are you sure to Cancel Work Order"/>
+
+	        	<button name="work_order_validate" states="approved" string="Validate WO" type="object"  icon="terp-check" confirm="Are you sure to Validate Work Order"/>
+
+	        	<button name="work_order_process" states="approved2" string="Process WO" type="object"  icon="STOCK_SAVE" confirm="Are you sure to Process Work Order"/>
+
+	        	<button name="work_order_finish" states="approved3" string="Finish WO" type="object"  icon="STOCK_SAVE_AS" confirm="Are you sure to Finish Work Order"/>
+	            <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,approved3,done"/>
         	</header>
         	<sheet>
         		<div class="oe_title">
 					<h1>
 						<label string="WORK ORDER"/>
 						<separator string=""/>
-						<field name="request_no" class="oe_inline" colspan="2"/>
-						<field name="wo_no" class="oe_inline" colspan="2"/>
 					</h1>
+					<h3>
+						<group col="4" colspan="4">
+							<group colspan="2">
+								<field name="request_no" class="oe_inline"/>
+							</group>
+							<group colspan="2">
+								<field name="wo_no" class="oe_inline" colspan="2" attrs="{'invisible':[('state', 'in', ['draft','confirmed'])]}"/>
+							</group>
+						</group>
+					</h3>
 				</div>
         			<group col="4" colspan="4">
         				<group colspan="2">
         					<field name="source_type"/>
 		            	 	<field name="sale_order_id" attrs="{'invisible':[('source_type', 'in', ['adhoc','internal_request'])], 'required':[('source_type', 'in', ['project','sale_order'])]}" on_change="sale_order_change(sale_order_id)"/>
-		            	 	<field name="adhoc_order_request_id" attrs="{'invisible':[('source_type', '!=', 'adhoc')], 'required':[('source_type', '=', 'adhoc')]}"/>
+		            	 	<field name="adhoc_order_request_id" attrs="{'invisible':[('source_type', '!=', 'adhoc')], 'required':[('source_type', '=', 'adhoc')]}" on_change="adhoc_order_change(adhoc_order_request_id)"/>
 		            	 	<field name="customer_id" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
 		            	 	<field name="customer_site_id" domain="[('parent_id', '=', customer_id)]" attrs="{'invisible':[('work_location', '!=', 'customersite')], 'required':[('work_location', '=', 'customersite')]}" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
-		            	 	<field name="location_id" attrs="{'invisible':[('work_location', '!=', 'workshop')], 'required':[('work_location', '=', 'workshop')]}"/>
+		            	 	
         				</group>
         				<group colspan="2">
 		            		<field name="work_location"/>
+		            		<field name="location_id"/>
 		            	 	<field name="due_date"/>
 		            	 	<field name="order_date"/>
 	            		</group>
@@ -55,7 +77,6 @@
 	            	<page string="Output Picking">
 	            		<field name="outputs">
 	            			<tree>
-	            				<field name="no"/>
 	            				<field name="item_id"/>
 	            				<field name="desc"/>
 	            				<field name="qty"/>
@@ -70,13 +91,12 @@
 		            				<notebook colspan="4">
 											<page string="DATA MATERIAL">
 												<field name="raw_materials" colspan="4" nolabel="1" widget="one2many_list">
-													<tree string="Material Lines">
+													<tree string="Material Lines" editable="buttom">
 														<field name="item_id"/>
 														<field name="desc" colspan="4"/>
 														<field name="qty"/>
 														<field name="uom_id"/>
 														<field name="customer_material"/>
-														<field name="adhoc_material_id"/>
 													</tree>
 												</field>
 											</page>
@@ -109,6 +129,9 @@
 	            	<page string="Others">
 	            		<group>
 	            			<field name="repeat_ref_id"/>
+	            			<field name="approver"/>
+	            			<field name="approver2"/>
+	            			<field name="approver3"/>
 	            		</group>
 	            	</page>
 	            </notebook>
@@ -133,7 +156,17 @@
 	<record id="seq_sbm_work_order_req_no" model="ir.sequence">
 		<field name="name">Work Order Request No</field>
 		<field name="code">sbm.work.order</field>
-		<!-- <field name="suffix">/</field> -->
+		<field name="padding">5</field>
+	</record>
+
+	<record id="seq_request_wo_no" model="ir.sequence.type">
+		<field name="name">Work Order Request Wo No</field>
+		<field name="code">sbm.work.order.wo.no</field>
+	</record>
+
+	<record id="seq_sbm_work_order_wo_no" model="ir.sequence">
+		<field name="name">Work Order Request Wo No</field>
+		<field name="code">sbm.work.order.wo.no</field>
 		<field name="padding">5</field>
 	</record>
 
