@@ -13,5 +13,18 @@
 				</field>
 			</field>
 		</record>
+
+		<record id="inherit_delivery_note" model="ir.ui.view">
+			<field name="name">inherit delivery note</field>
+			<field name="model">delivery.note</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form"/>
+			<field name="arch" type="xml">
+				<header>
+					<button name="create_invoice_dn" type="object"  states="done" string="Create Invoice"/>
+				</header>
+			</field>
+		</record>
+
 	</data>
 </openerp>
