@@ -39,6 +39,8 @@
 
 	        	<button name="work_order_finish" states="approved3" string="Finish WO" type="object"  icon="STOCK_SAVE_AS" confirm="Are you sure to Finish Work Order" groups="sbm_work_order.group_admin_workshop"/>
 
+	        	<button name="print_work_order" type="object" states="approved,approved2,approved3,done" string="Print Adhoc Order Request" icon="gtk-dnd-multiple"/>
+
 	            <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,approved3,done"/>
         	</header>
         	<sheet>

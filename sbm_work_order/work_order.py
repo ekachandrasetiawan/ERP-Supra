@@ -455,7 +455,9 @@ class SBM_Work_Order(osv.osv):
 
 	def work_order_check(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-		self.set_wo_no(cr, uid, ids, context=None)
+		if val.seq_wo_no == False:
+			self.set_wo_no(cr, uid, ids, context=None)
+
 		self.set_approved(cr, uid, ids, context=None)
 
 		res = self.write(cr, uid, ids, {'approver': uid})
@@ -587,6 +589,22 @@ class SBM_Work_Order(osv.osv):
 		# Update Done Picking & Move
 		stock_picking.action_move(cr, uid, [picking_id])
 		return True
+
+
+	def print_work_order(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"sbm-work-order/print&id="+str(ids[0])+"&uid="+str(uid)
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.adhoc.order.request',
+			'params': {
+				'redir'	: urlTo,
+				'uid':uid
+			},
+		}
+
 SBM_Work_Order()
 
 
