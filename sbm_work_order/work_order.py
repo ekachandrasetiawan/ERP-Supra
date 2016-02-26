@@ -202,6 +202,7 @@ class SBM_Work_Order(osv.osv):
 			('approved2','Second Approved'),
 			('approved3','Validate'),
 			('done', 'Done'),
+			('cancel', 'Cancel'),
 			], 'Status', readonly=True, select=True, track_visibility='onchange'
 		),
 		'approver':fields.many2one('res.users',string='Approver'),
@@ -437,6 +438,10 @@ class SBM_Work_Order(osv.osv):
 		res = self.write(cr, uid, ids, {'state': 'draft'})
 		return res
 
+	def set_to_cancel(self, cr, uid, ids, context=None):
+		res = self.write(cr, uid, ids, {'state': 'cancel'})
+		return res
+
 	def work_order_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		validasi = self.validate(cr, uid, ids, context=None)
@@ -475,6 +480,27 @@ class SBM_Work_Order(osv.osv):
 		picking = self.transfer_output_picking(cr, uid, ids, context=None)
 		if picking == True:
 			self.set_to_done(cr, uid, ids, context=None)
+		return True
+
+	def work_order_cancel(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		stock_picking = self.pool.get('stock.picking')
+		raw_material = self.pool.get('sbm.work.order.output.picking')
+
+		data = raw_material.search(cr, uid, [('work_order_id', '=', ids)])
+
+		if data:
+			picking_id = raw_material.browse(cr, uid, data)[0].picking_id.id
+			
+			# Cancel Picking
+			stock_picking.action_cancel(cr, uid, [picking_id])
+
+		self.set_to_cancel(cr, uid, ids, context=None)
+
+		return True
+
+	def cancel_output_picking(self, cr, uid, ids, context=None):
+
 		return True
 
 	def create_picking(self, cr, uid, ids, context=None):
