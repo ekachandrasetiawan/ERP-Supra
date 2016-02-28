@@ -418,7 +418,7 @@ class Sale_order(osv.osv):
 		}
 		
 	def print_rfq_web(self,cr,uid,ids,context={}):
-		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'print.local_reza')], context=context)
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"print-sale-order/rfq&id="+str(ids[0])
 		
@@ -434,7 +434,7 @@ class Sale_order(osv.osv):
 		}
 
 	def print_so_web(self,cr,uid,ids,context={}):
-		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'print.local_reza')], context=context)
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"print-sale-order/saleorder&id="+str(ids[0])
 		
