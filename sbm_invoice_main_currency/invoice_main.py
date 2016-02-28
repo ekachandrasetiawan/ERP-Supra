@@ -317,9 +317,10 @@ class account_invoice_line(osv.osv):
 			if not line.invoice_id:
 				# print "Invoice Tidak Ada",line.id
 				continue
-			else:
+			# else:
 				# print "Ada invoice",line.id,' Invoice #',line.invoice_id.id
-			
+
+			print field_name,"<<<<",args
 			if line.invoice_id.currency_id.id  == user.company_id.currency_id.id:
 				unit_price_main = line.price_unit
 
@@ -327,13 +328,13 @@ class account_invoice_line(osv.osv):
 				
 				sub_total_main = line.price_subtotal
 				# print line.sub_total_main,"<<<>>>",line.price_subtotal
-				amount_discount_main = line.amount_discount_main
-
+				amount_discount_main = line.amount_discount
+				# print "AAAAAAAAA",amount_discount_main
 				# sub_total_netto_main = sub_total_main
 			else: 
 				unit_price_main = round(tax_rate*line.price_unit,dec_precision)
 
-				amount_bruto_main = round(unit_price_main*line.quantity,dec_precision)
+				amount_bruot_main = round(unit_price_main*line.quantity,dec_precision)
 				
 				amount_discount_main = 0.00
 				if line.amount_discount:
