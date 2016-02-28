@@ -273,7 +273,9 @@ class account_invoice(osv.osv):
 		return result.keys()
 	_inherit = 'account.invoice'
 	_columns = {
-		'total_discount':fields.function(_get_total_discount,string='Total Discount',required=False,store=False),
+		'total_discount':fields.function(
+			_get_total_discount,string='Total Discount',required=False,store=False
+		),
 		'amount_untaxed': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Subtotal', track_visibility='always',
 			store={
 				'account.invoice': (lambda self, cr, uid, ids, c={}: ids, ['invoice_line'], 99),
@@ -338,6 +340,7 @@ class account_invoice_line(osv.osv):
 	@discount (float) discount in percent
 	"""
 	def _get_count_price_subtotal(self,amount_bruto,amount_discount):
+		print "AAA-----CALLLLLLLLLLLLLLLLLLLLLLLEEEEEEEEEEEEEEEEEEEEED"
 		return round((amount_bruto-amount_discount),2)
 
 	"""
