@@ -1192,7 +1192,7 @@ class Sale_order(osv.osv):
 		res1={}
 		idInvoice = super(Sale_order,self).action_invoice_create(cr,uid,ids,grouped,states,date_invoice,context=context)
 		account_invoice= self.pool.get('account.invoice').browse(cr,uid,idInvoice)
-		sale_order=self.browse(cr,uid,ids)[0]
+		# sale_order=self.browse(cr,uid,ids)[0]
 		for inv_line in account_invoice.invoice_line:
 			material_invoice =[]
 			for order_line in inv_line.sale_order_lines:
