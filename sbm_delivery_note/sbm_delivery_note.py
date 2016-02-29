@@ -143,7 +143,8 @@ class delivery_note(osv.osv):
 						'product_qty': op_line.product_qty,
 						'product_uom': op_line.product_uom.id,
 						'name': op_line.name,
-						'note_lines_material': material_line
+						'note_lines_material': material_line,
+						'sale_line_id': op_line.move_id.sale_line_id.id
 					})
 
 			order_line = self.pool.get('sale.order.line').search(cr, uid, [('id', 'in', product)])
@@ -209,7 +210,8 @@ class delivery_note(osv.osv):
 					'product_qty': qty_dn_line,
 					'product_uom': y.product_uom.id,
 					'name': y.name,
-					'note_lines_material': material_line
+					'note_lines_material': material_line,
+					'sale_line_id': y.id,
 					})
 
 			res['note_lines'] = line
@@ -218,6 +220,7 @@ class delivery_note(osv.osv):
 			res['partner_id'] = data.sale_id.partner_id.id
 			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
 			res['attn'] = data.sale_id.attention.id
+			print res,"++++++++++++++++++"
 		return  {'value': res}
 
 
@@ -293,7 +296,7 @@ class delivery_note(osv.osv):
 					sale_line_id = x.op_line_id.move_id.sale_line_id.id
 				
 				move_id = stock_move.create(cr,uid,{
-					'name' : x.desc,
+					'name' : x.product_id.name,
 					'origin':val.prepare_id.sale_id.name,
 					'product_uos_qty':x.qty,
 					'product_uom':x.product_uom.id,
@@ -625,6 +628,7 @@ class delivery_note_line(osv.osv):
 		
 		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
+		'sale_line_id': fields.many2one('sale.order.line',required=True, string="Sale Line"),
 	}
 
 	def onchange_product_id(self, cr, uid, ids, product_id, uom_id):
