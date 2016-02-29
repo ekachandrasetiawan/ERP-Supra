@@ -296,7 +296,6 @@ class account_invoice_line(osv.osv):
 
 	def _get_convert_main_currency(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
-		
 		print field_name,'_____________________________'
 		
 		dec_precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
