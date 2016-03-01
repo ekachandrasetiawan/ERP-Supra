@@ -9,6 +9,7 @@ from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
+
 class inherit_stock_picking_out(osv.osv):
 	_inherit = "stock.picking.out"
 	_columns = {
@@ -42,6 +43,7 @@ class res_partner_extention(osv.osv):
 
 			if context.get('address_attention') or context.get('search_default_filter_confirm'):
 				# kalo ada konteks attention
+				# print context,"attention"
 				res_name = "%s"%(record_partner.name)
 				# print res_name,"ase"
 				res.append((index,res_name))
@@ -54,15 +56,11 @@ class res_partner_extention(osv.osv):
 				res_name = res_name.replace('\n\n','\n')
 				
 				res.append((index,res_name))
-
 			elif context.get('address_invoice'):
 				# print context,"delivery address"
 				res_name = "%s"%(record_partner.name)+city+state_id
 				res.append((index,res_name))
 			else:
-
-				# print context,"--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
-				res.append((index,result))
 				# print "--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",context
 				res.append((index,result))
 
@@ -210,9 +208,11 @@ class res_partner_extention(osv.osv):
 # 		print test.name_get()
 # 		return test.name_get()
 
+
 class Sale_order(osv.osv):	
 	_name ='sale.order'
 	_inherit =['sale.order','mail.thread']
+
 
 	# def _count_total(self,cr,uid,ids,fields_name,args,context={}):
 	# 	res={}
@@ -250,12 +250,6 @@ class Sale_order(osv.osv):
 			return super(Sale_order, self).create(cr, uid, vals, context=context)
 		else:
 			raise osv.except_osv(_('Warning'),_('Order Line dan Material Line tidak boleh kosong'))
-	
-	def write(self, cr, uid, ids, vals, context=None):
-		print "---------------------------------------",vals
-	# 	print super(Sale_order, self).write(cr, uid, ids, vals, context=context),"cobaaaaa di test save nya"
-	# 	print "---------------------------------------"
-		return super(Sale_order, self).write(cr, uid, ids, vals, context=context)
 
 
 	def _count_total(self, cr, uid, ids, name, args, context={}):
@@ -436,7 +430,7 @@ class Sale_order(osv.osv):
 	def print_so_web(self,cr,uid,ids,context={}):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"print-sale-order/saleorder&id="+str(ids[0])
+		urlTo = str(browseConf.value)+"print-sale-order/sale_order&id="+str(ids[0])
 		
 		return {
 			'type'  : 'ir.actions.client',
@@ -490,8 +484,8 @@ class Sale_order(osv.osv):
 
 	def loadBomLine(self,cr,uid,bom_line,product_uom_qty,product_uom,seq_id,is_loaded_from_change=True):
 		res = {}
-		# print bom_line, 
-		# print bom_line.product_id.id, "iddd" 
+		print bom_line, 
+		print bom_line.product_id.id, "iddd" 
 		res = {
 				'product_id':bom_line.product_id.id,
 				'uom':bom_line.product_uom.id,
@@ -537,7 +531,7 @@ class Sale_order(osv.osv):
 						],
 					
 					}
-				# print material.product_uom.id,"<<<<<<<<<<<"
+				print material.product_uom.id,"<<<<<<<<<<<"
 				this_material.write(cr,uid,material.id,vals,context)
 			else:
 				raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
@@ -623,7 +617,7 @@ class Sale_order(osv.osv):
 
 				
 		else:
-			raise osv.except_osv(_('Warning'),_('invoice belum terbentuk'))
+			raise osv.except_osv(_('Warning'),_('invoice belum selesai'))
 
 		return  res
 
@@ -729,7 +723,7 @@ class sale_order_material_line(osv.osv):
 			"uom":product.uom_id.id
 			}
 
-		# print res 
+		print res 
 		return res
 
 	def onchange_product_uom(self,cr,uid,ids,product_id,uom,context={}):
@@ -782,6 +776,7 @@ class sale_order_line(osv.osv):
 		return amount_tax_total
 
 	def _count_amount_line(self, cr, uid, ids, name, args, context={}):
+		print "PANGGIL _count_amount_line ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 		res = {}
 		order_lines = self.browse(cr,uid,ids,context=context)
 		
@@ -876,8 +871,8 @@ class sale_order_line(osv.osv):
 
 	def loadBomLine(self,cr,uid,bom_line,product_uom_qty,product_uom,seq_id,is_loaded_from_change=True):
 		res = {}
-		# print bom_line, 
-		# print bom_line.product_id.id, "iddd" 
+		print bom_line, 
+		print bom_line.product_id.id, "iddd" 
 		res = {
 				'product_id':bom_line.product_id.id,
 				'uom':bom_line.product_uom.id,
@@ -909,7 +904,7 @@ class sale_order_line(osv.osv):
 			for material in line.material_lines:
 				old_material_ids.append(material.id)
 
-		# print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
+		print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 		if product_id:
 			seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
@@ -933,10 +928,10 @@ class sale_order_line(osv.osv):
 					mtr_lines = res['value']['material_lines']
 
 					for old_mtr in old_material_ids:
-						# print "-------------------->>>>>>>>>>>>>>",mtr_lines
+						print "-------------------->>>>>>>>>>>>>>",mtr_lines
 						lr = (2,old_mtr)
 						mtr_lines.append(lr)
-						# print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
+						print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 					res['value']['material_lines'] = mtr_lines
 
 			else:
@@ -952,10 +947,10 @@ class sale_order_line(osv.osv):
 				mtr_lines = res['value']['material_lines']
 
 				for old_mtr in old_material_ids:
-					# print "-------------------->>>>>>>>>>>>>>",mtr_lines
+					print "-------------------->>>>>>>>>>>>>>",mtr_lines
 					lr = (2,old_mtr)
 					mtr_lines.append(lr)
-					# print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
+					print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 				res['value']['material_lines'] = mtr_lines
 			if product.description_sale:
 				res['value']['name']=product.description_sale
@@ -966,7 +961,7 @@ class sale_order_line(osv.osv):
 				for i in product.supplier_taxes_id:
 					print i.id
 					tax.append(i.id)
-				# print tax,"++++++++++++++++++++++++++++++++++"
+				print tax,"++++++++++++++++++++++++++++++++++"
 				res['value']['tax_id']=tax
 			else:
 				res['value']['tax_id']=False
@@ -983,7 +978,7 @@ class sale_order_line(osv.osv):
 		if product_id:
 				
 			product = self.pool.get("product.product").browse(cr,uid,product_id,context=context)
-			# print "LLLLLLLLLLLLLl"
+			print "LLLLLLLLLLLLLl"
 			kategori_uom_product = product.uom_id.category_id.id
 			
 			# print Kategori_uom	,"<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -1003,7 +998,7 @@ class sale_order_line(osv.osv):
 	
 	def onchange_product_quotation_qty(self,cr,uid,ids,product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines_object,context={}):
 		res={}
-		# print material_lines_object,"cek------------------------------>"
+		print material_lines_object,"cek------------------------------>"
 		if product_uom_qty == False or product_uom_qty<1:
 			res["warning"]={'title':"Error",'message':'Quantity tidak boleh kosong'}
 			res['value'] = {
@@ -1155,5 +1150,75 @@ class sale_order_line(osv.osv):
 					}
 
 		return res
+
+
+
+
+class account_invoice_line(osv.osv):
+	_inherit='account.invoice.line'
+	_columns={
+		'sale_order_lines': fields.many2many('sale.order.line', 'sale_order_line_invoice_rel', 'invoice_id', 'order_line_id', 'Order Lines', readonly=True),
+	}
+
+class Sale_order(osv.osv):	
+	_name ='sale.order'
+	_inherit =['sale.order','mail.thread']
+	# def action_invoice_create(self, cr, uid, ids, grouped=False, states=None, date_invoice = False, context=None):
+	# 	res1={}
+	# 	idInvoice = super(Sale_order,self).action_invoice_create(cr,uid,ids,grouped,states,date_invoice,context=context)
+	# 	acount_invoice= self.pool.get('account.invoice').browse(cr,uid,idInvoice)
+	# 	sale_order=self.browse(cr,uid,ids)[0]
+
+	# 	index_order_line =1 
+	# 	for order_line in sale_order.order_line:
+	# 		index_invoice=1
+		
+	# 		for invoice_line in acount_invoice.invoice_line:
+	# 			material_invoice =[]
+	# 			for material in order_line.material_lines:
+	# 				material_invoice.append("["+material.product_id.default_code+"]"+material.product_id.name)
+	# 			material = "\n".join(material_invoice)
+
+	# 			if index_order_line == index_invoice:
+	# 				# print "///////////>>>>>>>>>>>>>>??????????//",material,"<<<<<<<<<??????////////////////"
+	# 				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,invoice_line.id,{'name':invoice_line.name+'\nConsist Of\n'+material})
+	# 				index_invoice+=1
+	# 			index_invoice+=1
+
+	# 		index_order_line+=1
+	# 	return res1
+
+	def action_invoice_create(self, cr, uid, ids, grouped=False, states=None, date_invoice = False, context=None):
+		res1={}
+		idInvoice = super(Sale_order,self).action_invoice_create(cr,uid,ids,grouped,states,date_invoice,context=context)
+		account_invoice= self.pool.get('account.invoice').browse(cr,uid,idInvoice)
+		sale_order=self.browse(cr,uid,ids)[0]
+		for inv_line in account_invoice.invoice_line:
+			material_invoice =[]
+			for order_line in inv_line.sale_order_lines:
+				for material in order_line.material_lines:
+					if material.desc:
+						description = '\n'+material.desc
+					else:
+						description	=""
+					material_invoice.append(
+						"["
+						+material.product_id.default_code
+						+"]"
+						+material.product_id.name
+						+" ("
+						+str(float(material.qty))
+						+" "
+						+material.uom.name
+						+")"
+						+description)
+				if material_invoice:
+					material ='\nConsist Of\n'+"\n".join(material_invoice)
+				else:
+					material =""
+				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':inv_line.name+material})
+		
+				
+		return res1
 
 	
