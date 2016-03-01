@@ -301,7 +301,10 @@ class account_invoice_line(osv.osv):
 		
 		dec_precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
 		dec_precision_tax_line = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
-		inv_lines = self.browse(cr,uid,ids,context=context)
+
+		search_inv_lines = self.search(cr,uid,[('id','in',ids)]) #make sure ids not deleted
+
+		inv_lines = self.browse(cr,uid,search_inv_lines,context=context)
 		user = self.pool.get('res.users').browse(cr, uid, uid, {})
 
 		for line in inv_lines:
