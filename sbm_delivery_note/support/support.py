@@ -19,11 +19,11 @@ class delivery_note(osv.osv):
 		
 		localtime = time.asctime( time.localtime(time.time()) )#waktu Local
 		local_month = "0"+str(time.localtime(time.time()).tm_mon)
-	
+		
 
 		act_inv = self.pool.get('account.invoice')
 		act_inv_line = self.pool.get('account.invoice.line')
-
+	
 
 
 		#create account invoice
@@ -43,26 +43,28 @@ class delivery_note(osv.osv):
 		}
 		create_invoice =act_inv.create(cr, uid, values_invoice, context=None)
 		#
-		index_note_line = 1
+		# index_note_line = 1
 		for note_lines in dn.note_lines:
-			index_order_line = 1
-			for order_line in so.order_line:
-				if index_note_line == index_order_line:
-					values_invoice_line = {
-					'product_id':note_lines.product_id.id,
-					'quantity':note_lines.product_qty,
-					'price_unit':order_line.product_uom_qty,
-					'uos_id':order_line.product_uom.id,
-					'invoice_id':create_invoice,
-					'name':note_lines.product_id.name
-					}
-					index_order_line += 1
-				index_order_line += 1
-			index_note_line += 1
+			# index_order_line = 1
+			# for order_line in so.order_line:
+			# 	if index_note_line == index_order_line:
+			values_invoice_line = {
+			'product_id':note_lines.product_id.id,
+			'quantity':note_lines.product_qty,
+			'price_unit':note_lines.sale_line_id.product_uom_qty,
+			'uos_id':note_lines.product_uom.id,
+			
+			'invoice_id':create_invoice,
+			'name':note_lines.product_id.name
+			}
+			# 		index_order_line += 1
+			# 	index_order_line += 1
+			# index_note_line += 1
+			print note_lines.sale_line_id,"sale id"
 			create_invoice_line = act_inv_line.create(cr,uid, values_invoice_line , context=None)
 
 
-
+		print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 				
 		# sale_order=self.browse(cr,uid,ids)[0]
 		return {}
