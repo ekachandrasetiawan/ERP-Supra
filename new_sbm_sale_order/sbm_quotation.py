@@ -243,13 +243,14 @@ class Sale_order(osv.osv):
 		return res
 
 	def create(self, cr, uid,vals, context=None):
-	
+		res =None
 		if(self._check_before_save(cr,uid,vals.get('order_line'))):
 			sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
 			vals['quotation_no'] = sequence_no_quotation
-			return super(Sale_order, self).create(cr, uid, vals, context=context)
+			res = super(Sale_order, self).create(cr, uid, vals, context=context)
 		else:
 			raise osv.except_osv(_('Warning'),_('Order Line dan Material Line tidak boleh kosong'))
+		return res
 
 
 	def _count_total(self, cr, uid, ids, name, args, context={}):
@@ -1160,7 +1161,7 @@ class account_invoice_line(osv.osv):
 		'sale_order_lines': fields.many2many('sale.order.line', 'sale_order_line_invoice_rel', 'invoice_id', 'order_line_id', 'Order Lines', readonly=True),
 	}
 
-class Sale_order(osv.osv):	
+class sale_order_invoice(osv.osv):	
 	_name ='sale.order'
 	_inherit =['sale.order','mail.thread']
 	# def action_invoice_create(self, cr, uid, ids, grouped=False, states=None, date_invoice = False, context=None):
@@ -1190,7 +1191,7 @@ class Sale_order(osv.osv):
 
 	def action_invoice_create(self, cr, uid, ids, grouped=False, states=None, date_invoice = False, context=None):
 		res1={}
-		idInvoice = super(Sale_order,self).action_invoice_create(cr,uid,ids,grouped,states,date_invoice,context=context)
+		idInvoice = super(sale_order_invoice,self).action_invoice_create(cr,uid,ids,grouped,states,date_invoice,context=context)
 		account_invoice= self.pool.get('account.invoice').browse(cr,uid,idInvoice)
 		# sale_order=self.browse(cr,uid,ids)[0]
 		for inv_line in account_invoice.invoice_line:
