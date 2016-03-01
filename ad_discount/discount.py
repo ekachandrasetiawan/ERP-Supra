@@ -20,6 +20,7 @@
 
 from osv import fields
 from osv import osv
+import math
 import decimal_precision as dp
 from openerp.tools.float_utils import float_round
 
@@ -45,6 +46,8 @@ class sale_order(osv.osv):
 		return result.keys()
 
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
+		print "AAAAAAAAAAAAAAAAAAAAA---->"
+		user = self.pool.get('res.users').browse(cr, uid, uid, {})
 		cur_obj = self.pool.get('res.currency')
 		res = {}
 		for order in self.browse(cr, uid, ids, context=context):
@@ -66,9 +69,9 @@ class sale_order(osv.osv):
 					val1 += round(line.price_subtotal)
 
 					print "------------------------------------->>>>>>>>>>>>>>>>>>>>"
-					val += round(self._amount_line_tax(cr, uid, line, context=context))
+					val += math.floor(self._amount_line_tax(cr, uid, line, context=context))
 
-				pajak =round((val1*10)/100)
+				# pajak =round((val1*10)/100)
 
 				# if pajak==val:
 				# 	val=val
@@ -83,9 +86,15 @@ class sale_order(osv.osv):
 					val1 += line.price_subtotal
 					val += self._amount_line_tax(cr, uid, line, context=context)
 			print val,"&&&&&&&&&&&&&&&&&",val1
-			res[order.id]['amount_tax'] = cur_obj.round(cr, uid, cur, val)
+			print order.pricelist_id.currency_id.id, "======", user.company_id.currency_id.id
+			if order.pricelist_id.currency_id.id==user.company_id.currency_id.id:
+				res[order.id]['amount_tax'] = math.floor(val)
+			else:
+				res[order.id]['amount_tax'] = cur_obj.round(cr, uid, cur, val)
+
 			res[order.id]['amount_untaxed'] = cur_obj.round(cr, uid, cur, val1)
 			res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] + res[order.id]['amount_tax']
+		print res,"PPPPP"
 		return res
 
 
