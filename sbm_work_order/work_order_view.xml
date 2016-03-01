@@ -50,13 +50,11 @@
 						<separator string=""/>
 					</h1>
 					<h3>
-						<group col="4" colspan="4">
-							<group colspan="2">
+						<group colspan="4">
 								<field name="request_no" class="oe_inline"/>
-							</group>
-							<group colspan="2">
+						</group>
+						<group colspan="4">
 								<field name="wo_no" class="oe_inline" colspan="2" attrs="{'invisible':[('state', 'in', ['draft','confirmed'])]}"/>
-							</group>
 						</group>
 					</h3>
 				</div>
@@ -159,7 +157,7 @@
 	<record id="seq_sbm_work_order_req_no" model="ir.sequence">
 		<field name="name">Work Order Request No</field>
 		<field name="code">sbm.work.order</field>
-		<field name="padding">5</field>
+		<field name="padding">4</field>
 	</record>
 
 	<record id="seq_request_wo_no" model="ir.sequence.type">
@@ -170,7 +168,7 @@
 	<record id="seq_sbm_work_order_wo_no" model="ir.sequence">
 		<field name="name">Work Order Request Wo No</field>
 		<field name="code">sbm.work.order.wo.no</field>
-		<field name="padding">5</field>
+		<field name="padding">4</field>
 	</record>
 
 <!-- 	<record id="seq_wo_no" model="ir.sequence.type">
