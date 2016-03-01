@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    	
+    	<record model="res.groups" id="group_admin_support">
+		<field name="category_id" ref="base.module_category_sales_management"/>
+			<field name="name">Admin Support HO</field>
+		</record>
+
+		<record model="res.groups" id="group_admin_manager">
+		<field name="category_id" ref="base.module_category_sales_management"/>
+			<field name="name">Admin Manager</field>
+		</record>
+
+		<record model="res.groups" id="group_admin_workshop">
+		<field name="category_id" ref="base.module_category_sales_management"/>
+			<field name="name">Admin Workshop</field>
+		</record>
+
+    </data>
+</openerp>
