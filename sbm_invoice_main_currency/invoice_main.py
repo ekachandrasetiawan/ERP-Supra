@@ -302,7 +302,10 @@ class account_invoice_line(osv.osv):
 		
 		dec_precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
 		dec_precision_tax_line = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
-		inv_lines = self.browse(cr,uid,ids,context=context)
+
+		search_inv_lines = self.search(cr,uid,[('id','in',ids)]) #make sure ids not deleted
+
+		inv_lines = self.browse(cr,uid,search_inv_lines,context=context)
 		user = self.pool.get('res.users').browse(cr, uid, uid, {})
 
 		for line in inv_lines:
@@ -335,7 +338,7 @@ class account_invoice_line(osv.osv):
 			else: 
 				unit_price_main = round(tax_rate*line.price_unit,dec_precision)
 
-				amount_bruot_main = round(unit_price_main*line.quantity,dec_precision)
+				amount_bruto_main = round(unit_price_main*line.quantity,dec_precision)
 				
 				amount_discount_main = 0.00
 				if line.amount_discount:
@@ -1097,6 +1100,7 @@ class account_invoice_line_tax_amount(osv.osv):
 		return result.keys()
 
 	def _get_invoice_line_tax_amount(self,cr,uid,ids,field_name,args,context={}):
+		print args,"==========",context
 		dp = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
 		res = {}
 
@@ -1104,22 +1108,31 @@ class account_invoice_line_tax_amount(osv.osv):
 		ail_obj = self.pool.get('account.invoice.line')
 
 		selfObj  = self.browse(cr,uid,ids,context=context)
+		print selfObj
 		for o in selfObj:
+			
 			res[o.id] = 0.0
-			if o.invoice_line_id.invoice_id.currency_id.id == user.company_id.currency_id.id:
-				# if same currecny with main currency then same with tax_amount field in self obj
-				res[o.id] = {
-					'base_amount_main':o.base_amount,
-					'tax_amount_main': o.tax_amount_main
-				}
-			else:
+			search = self.search(cr,uid,[('id','=',o.id)],context=context) #search to make sure no invoice_line_tax_amount deleted cause relational trigger deleting from cascade
+			if search:
+				print 'A000'
+				if o.invoice_line_id.invoice_id.currency_id.id == user.company_id.currency_id.id:
+					# if same currecny with main currency then same with tax_amount field in self obj
+					res[o.id] = {
+						'base_amount_main':o.base_amount,
+						'tax_amount_main': o.tax_amount_main
+					}
+				else:
 
-				main_amount = ail_obj._count_tax_obj(o.tax_id,o.invoice_line_id,o.invoice_line_id.sub_total_main,dp=dp)
+					main_amount = ail_obj._count_tax_obj(o.tax_id,o.invoice_line_id,o.invoice_line_id.sub_total_main,dp=dp)
+					res[o.id] = {
+						'base_amount_main':o.invoice_line_id.sub_total_main,
+						'tax_amount_main': main_amount['tax_amount_main'],
+					}
+			else:
 				res[o.id] = {
-					'base_amount_main':o.invoice_line_id.sub_total_main,
-					'tax_amount_main': main_amount['tax_amount_main'],
-				}
-		# print ">>>>>>>>>>>>>>>>>>>>---->>>>>>>>>>>>>>>>",res
+						'base_amount_main':False,
+						'tax_amount_main': False,
+					}
 		return res
 
 	def _set_tax_amount_main(self, cr, uid, id, field_name, field_value, args=None, context={}):
