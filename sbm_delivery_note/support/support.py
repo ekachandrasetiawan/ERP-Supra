@@ -13,62 +13,98 @@ class delivery_note(osv.osv):
 	_inherit = "delivery.note"
 
 	def create_invoice_dn(self,cr,uid,ids,context={}):
-		dn = self.browse(cr,uid,ids,context)[0] #objek delivery Note
-		op = self.pool.get('order.preparation').browse(cr,uid,dn.prepare_id.id)#objek Order Preparation
-		so = self.pool.get('sale.order').browse(cr,uid,op.sale_id.id)#objek sale order
+		dn = self.browse(cr,uid,ids,context)[0] #objek delivery Note id dari ids
 		
+		op = self.pool.get('order.preparation').browse(cr,uid,dn.prepare_id.id)#browse objek Order Preparation id dari dn.prepare_id.id
+		so = self.pool.get('sale.order').browse(cr,uid,op.sale_id.id)#browse objek sale order id dari op.sale_id.id
 		localtime = time.asctime( time.localtime(time.time()) )#waktu Local
-		local_month = "0"+str(time.localtime(time.time()).tm_mon)
+		local_month = "0"+str(time.localtime(time.time()).tm_mon)#waktu local month
 		
 
-		act_inv = self.pool.get('account.invoice')
-		act_inv_line = self.pool.get('account.invoice.line')
-	
+		act_inv = self.pool.get('account.invoice') #objek account invoice
+		act_inv_line = self.pool.get('account.invoice.line')#objek account invoice line
+		
 
+		if dn.picking_id: # cek apa ada picking_id di delivery note ada 
 
-		#create account invoice
+			sp = self.pool.get('stock.picking').browse(cr,uid,dn.picking_id.id)#browse objek stock.picking dari dn.picking_id.id
+			
+			print "masukkk sini 2 "
+			if sp.invoice_id: # cek apakah ada invoice id di stock picking
+				print "testtt masu2"
+				if sp.invoice_id.state != 'cancel': # cek apakah invoice state tidak sama dengan cancel
+				
+					raise osv.except_osv(_('Warning'),_('Invoice dari Delivery note sudah pernah terbentuk \n'+'Id :'+str(sp.invoice_id.id)+"\nNo Kwitansi :"+str(sp.invoice_id.kwitansi)+"\n No Faktur :"+str(sp.invoice_id.faktur_pajak_no))) #warning
+
+		else: 
+			self.write(cr,uid,ids,{'picking_id':op.picking_id.id}) #mengedit jika picking tidak ada 
+			dn = self.browse(cr,uid,ids,context)[0] #objek delivery Note yang baru id dari ids 
+			sp = self.pool.get('stock.picking').browse(cr,uid,dn.picking_id.id)#browse objek stock.picking dari dn.picking_id.id yang baru
+			print "masukkk sini "
+			if sp.invoice_id: #cek apakah ada invoice id di stock_picking
+				print "testtt masu"
+				if sp.invoice_id.state != 'cancel':  #  
+					raise osv.except_osv(_('Warning'),_('Invoice dari Delivery note sudah pernah terbentuk\n'+'Id :'+str(sp.invoice_id.id)+"\nNo Kwitansi :"+str(sp.invoice_id.kwitansi)+"\n No Faktur :"+str(sp.invoice_id.faktur_pajak_no))) #warning
+
+		#mengecek id invoice di so dan jika ada dan state invoicenya selain cancel muncul warning dan di putus 
+		#{
+		if so.invoice_ids:
+			for this_invoice_so in so.invoice_ids:
+				if this_invoice_so.state != 'cancel':
+					raise osv.except_osv(_('Warning'),_('Invoice dari sale order sudah terbentuk\n'+'Id :'+str(this_invoice_so.id)+"\nNo Kwitansi :"+str(this_invoice_so.kwitansi)+"\n No Faktur :"+str(this_invoice_so.faktur_pajak_no))) #}
+
+		#nilai yang akan di input di invoice
 		values_invoice={ 
-			'partner_id':dn.partner_id.id,
-			'journal_id':1,
-			'account_id':56,
-			'currency_id':so.pricelist_id.id,
-			'date_invoice':localtime,
-			'tax_period':local_month,
-			'company_id':1,
-			'group_id':so.group_id.id,
-			'user_id':so.user_id.id,
-			'origin':dn.name,
-			'name':dn.poc,
+			'partner_id':dn.partner_id.id,# dari dn customer
+			'journal_id':1, #isinya sales journal idr
+			'account_id':56, # isinya 111401 Piutang usaha
+			'currency_id':so.pricelist_id.id, # dari so Currency nya
+			'date_invoice':localtime, # waktu hari ini di local komputer
+			'tax_period':local_month,# waktu bulan ini
+			'company_id':1,# default PT SupraBakti Mandiri
+			'group_id':so.group_id.id,# group sales dari so
+			'user_id':so.user_id.id,#  sales person dari so
+			'origin':dn.name,# delivery note 
+			'name':dn.poc,# Customer Reference dari dn
 
 		}
-		create_invoice =act_inv.create(cr, uid, values_invoice, context=None)
-		#
-		# index_note_line = 1
+		
+		create_invoice =act_inv.create(cr, uid, values_invoice, context=None) # untuk membuat Invoice blm termasuk invoice line
+	
+		#perulangan untuk masuk ke delivery note_lines
 		for note_lines in dn.note_lines:
-			# index_order_line = 1
-			# for order_line in so.order_line:
-			# 	if index_note_line == index_order_line:
+			# nilai yang akan di input ke invoice line
 			values_invoice_line = {
-			'product_id':note_lines.product_id.id,
-			'quantity':note_lines.product_qty,
-			'price_unit':note_lines.sale_line_id.product_uom_qty,
-			'uos_id':note_lines.product_uom.id,
-			
-			'invoice_id':create_invoice,
-			'name':note_lines.product_id.name
+			'product_id':note_lines.product_id.id, #dari product account invoice line
+			'quantity':note_lines.product_qty, #dari qty account invoice line
+			'price_unit':note_lines.sale_line_id.price_unit, #dari price sale order line
+			'uos_id':note_lines.product_uom.id,#dari uom account invoice line
+			'invoice_id':create_invoice,#dari invoice yg di buat sebelumnya
+			'name':note_lines.product_id.name#dari nama  product di note_lines
 			}
-			# 		index_order_line += 1
-			# 	index_order_line += 1
-			# index_note_line += 1
-			print note_lines.sale_line_id,"sale id"
-			create_invoice_line = act_inv_line.create(cr,uid, values_invoice_line , context=None)
+		
+
+			create_invoice_line = act_inv_line.create(cr,uid, values_invoice_line , context=None)# untuk membuat invoice line di invoice yg tadi di buat
 
 
-		print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-				
-		# sale_order=self.browse(cr,uid,ids)[0]
-		return {}
-
+		
+		self.pool.get('stock.picking').write(cr,uid,dn.picking_id.id,{'invoice_id':create_invoice,'invoice_state':'invoiced'})
+		mod_obj = self.pool.get('ir.model.data') #objek ir_model_data
+		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')#mencari view id di objek ir.model.data
+		res_id = res and res[1] or False,
+		return {
+			'name': _('Customer Invoices'),
+			'view_type': 'form',
+			'view_mode': 'form',
+			'view_id': [res_id],
+			'res_model': 'account.invoice',
+			'context': "{'type':'out_invoice'}",
+			'type': 'ir.actions.act_window',
+			'nodestroy': True,
+			'target': 'current',
+			'res_id':create_invoice #id invoice untuk di tampilin
+		
+		}
 class sale_order_material_line(osv.osv):
 
 
