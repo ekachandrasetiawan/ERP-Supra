@@ -1220,6 +1220,6 @@ class sale_order_invoice(osv.osv):
 				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':inv_line.name+material})
 		
 				
-		return res1
+		return idInvoice
 
 	
