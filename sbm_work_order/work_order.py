@@ -143,27 +143,31 @@ class SBM_Work_Order(osv.osv):
 			if item.state == 'draft':
 				RequestNo = '/'
 			else:
-				if item.work_location == 'workshop':
-					location = 'WS'
-				else:
-					location = 'CS'
-
-				RequestNo = 'SBM/'+location+'/'+item.seq_req_no
+				if item.adhoc_order_request_id.id:
+					code_sale = item.adhoc_order_request_id.sales_man_id.initial
+				elif item.sale_order_id.id:
+					code_sale = item.sale_order_id.user_id.initial
+				use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+				rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+				vals = self.pool.get('ir.sequence').get(cr, uid, 'perintah.kerja').split('/')
+				RequestNo = time.strftime('%y')+item.seq_req_no+'A/SBM-'+item.location_id.code+'-ADM/'+code_sale+'-'+use+'/'+rom[int(vals[2])]+'/'+time.strftime('%y')
 			res[item.id] = RequestNo
 		return res
 	
-	def _getRequestWoNo(self,cr,uid,ids,field_name,args,context={}):
+	def _getWoNo(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
 			if item.state in ['draft','confirmed']:
 				RequestNo = '/'
 			else:
-				if item.work_location == 'workshop':
-					location = 'WS'
-				else:
-					location = 'CS'
-
-				RequestNo = 'SBM/'+location+'/'+item.seq_wo_no
+				if item.adhoc_order_request_id.id:
+					code_sale = item.adhoc_order_request_id.sales_man_id.initial
+				elif item.sale_order_id.id:
+					code_sale = item.sale_order_id.user_id.initial
+				use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+				rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+				vals = self.pool.get('ir.sequence').get(cr, uid, 'perintah.kerja').split('/')
+				RequestNo = time.strftime('%y')+item.seq_wo_no+'A/SBM-'+item.location_id.code+'-ADM/'+code_sale+'-'+use+'/'+rom[int(vals[2])]+'/'+time.strftime('%y')
 			res[item.id] = RequestNo
 		return res
 
@@ -172,12 +176,17 @@ class SBM_Work_Order(osv.osv):
 		'request_no': fields.function(_getRequestNo,method=True,string="Request No",type="char",
 			store={
 				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['work_location'], 20),
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['location_id'], 20),
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['sale_order_id'], 20),
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['adhoc_order_request_id'], 20),
 				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
-
 			}),
-		'wo_no': fields.function(_getRequestWoNo,method=True,string="SPK No",type="char",
+		'wo_no': fields.function(_getWoNo,method=True,string="SPK No",type="char",
 			store={
 				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['work_location'], 20),
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['location_id'], 20),
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['sale_order_id'], 20),
+				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['adhoc_order_request_id'], 20),
 				'sbm.work.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
 			}),
 		'seq_wo_no':fields.char(string='WO Sequence'),
