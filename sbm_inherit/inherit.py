@@ -251,6 +251,7 @@ class PurchaseOrderFullInvoice(osv.osv):
 		:return: ID of created invoice.
 		:rtype: int
 		"""
+		print "coba testttttttttttttttttttttttttttttttttttttttttttttttttttttttt"
 		if context is None:
 			context = {}
 		journal_obj = self.pool.get('account.journal')
@@ -2356,7 +2357,7 @@ class sale_advance_payment_inv(osv.osv_memory):
 	_inherit = "sale.advance.payment.inv"
 	_description = "Sales Advance Payment Invoice"
 
-	def _check_is_invoice_by_delivery_note_exist(self,cr,uid,sale_obj):
+	def _check_is_invoice_by_delivery_note_exist(self,cr,uid,ids,sale_obj):
 		
 		return True
 
