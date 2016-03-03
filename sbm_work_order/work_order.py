@@ -68,7 +68,7 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		res = {}
 		if saleman:
 			s_man = self.pool.get('res.users').browse(cr, uid, saleman)
-			res = {'value':{'sale_group_id':s_man.kelompok_id.id}}
+			res = {'value':{'sale_group_id':s_man.kelompok_id.parent_id.id}}
 		return res
 
 	def adhoc_submit(self, cr, uid, ids, context={}):
