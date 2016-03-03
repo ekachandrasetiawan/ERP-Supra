@@ -182,9 +182,9 @@
 		<field name="padding">5</field>
 	</record> -->
 
-	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner"/>
+	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner" groups="sbm_order_preparation.group_admin_ho"/>
 
-	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2"/>
+	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2" groups="sbm_order_preparation.group_admin_ho"/>
 
 </data>
 </openerp>

@@ -17,5 +17,104 @@
 			<field name="name">Admin Workshop</field>
 		</record>
 
+
+		<!-- Adhoc Request -->
+		<record model="ir.model.access" id="ir_access_sbm_adhoc_order_request_admin_ho">
+	        <field name="name">Access SBM Adhoc Order Reuqest Admin HO</field>
+	        <field name="model_id" ref="model_sbm_adhoc_order_request"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+
+	    <record model="ir.model.access" id="ir_access_sbm_adhoc_order_request_output_admin_ho">
+	        <field name="name">Access SBM Adhoc Order Reuqest Output  Admin HO</field>
+	        <field name="model_id" ref="model_sbm_adhoc_order_request_output"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+
+		<record model="ir.model.access" id="ir_access_sbm_adhoc_order_request_output_material_admin_ho">
+	        <field name="name">Access SBM Adhoc Order Reuqest Output Material Admin HO</field>
+	        <field name="model_id" ref="model_sbm_adhoc_order_request_output_material"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+
+
+	    <!-- Work Order -->
+	    <record model="ir.model.access" id="ir_access_sbm_work_order_admin_ho">
+	        <field name="name">Access SBM Work Order Admin HO</field>
+	        <field name="model_id" ref="model_sbm_work_order"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+	   	<record model="ir.model.access" id="ir_access_sbm_work_order_output_admin_ho">
+	        <field name="name">Access SBM Work Order Output Admin HO</field>
+	        <field name="model_id" ref="model_sbm_work_order_output"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+	   	<record model="ir.model.access" id="ir_access_sbm_work_order_output_picking_admin_ho">
+	        <field name="name">Access SBM Work Order Output Picking Admin HO</field>
+	        <field name="model_id" ref="model_sbm_work_order_output_picking"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+
+	   	<record model="ir.model.access" id="ir_access_sbm_work_order_output_move_admin_ho">
+	        <field name="name">Access SBM Work Order Output Move Admin HO</field>
+	        <field name="model_id" ref="model_sbm_work_order_output_move"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+
+	  	<record model="ir.model.access" id="ir_access_sbm_work_order_output_raw_material_admin_ho">
+	        <field name="name">Access SBM Work Order Output Raw Material Admin HO</field>
+	        <field name="model_id" ref="model_sbm_work_order_output_raw_material"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_sbm_work_order_line_files_admin_ho">
+	        <field name="name">Access SBM Work Order Line Files Admin HO</field>
+	        <field name="model_id" ref="model_sbm_work_order_line_files"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+
     </data>
 </openerp>
