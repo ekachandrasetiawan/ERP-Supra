@@ -136,6 +136,7 @@
 	            		</group>
 	            	</page>
 	            </notebook>
+	            <field name="notes" placeholder="Notes" />
         	</sheet>
     	</form>
     </field>
