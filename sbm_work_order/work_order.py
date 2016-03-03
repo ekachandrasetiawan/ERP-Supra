@@ -18,7 +18,7 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		'sales_man_id':fields.many2one('res.users', string='Sales', required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
 		'due_date':fields.date('Due Date', readonly=True, states={'draft':[('readonly',False)]}),
 		'item_ids':fields.one2many('sbm.adhoc.order.request.output','adhoc_order_request_id', 'Detail Item',readonly=True, states={'draft':[('readonly',False)]}),
-		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True,track_visibility='onchange', states={'draft':[('readonly',False)]}),
+		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True,track_visibility='onchange'),
 		'term_of_payment':fields.many2one('account.payment.term','Term Of Payment', required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'notes':fields.text(string='Notes', required=False, readonly=True, states={'draft':[('readonly',False)]}),
 		'scope_of_work':fields.text(string='Scope Of Work', required=False, readonly=True, states={'draft':[('readonly',False)]}),
