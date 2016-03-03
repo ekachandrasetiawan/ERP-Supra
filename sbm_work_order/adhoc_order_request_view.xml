@@ -52,8 +52,8 @@
 					<field name="customer_site_id"/>
 					<field name="cust_ref_type"/>
 					<field name="cust_ref_no"/>
+					<field name="sales_man_id" on_change="change_sales(sales_man_id)"/>
 					<field name="sale_group_id"/>
-					<field name="sales_man_id"/>
 					<field name="due_date"/>
 				</group>
 				<notebook colspan="4">

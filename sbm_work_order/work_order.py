@@ -64,6 +64,13 @@ class SBM_Adhoc_Order_Request(osv.osv):
 
 			return {'domain': {'attention_id': [('id','in',tuple(partner))],'customer_site_id': [('id','in',tuple(partner))]}}
 
+	def change_sales(self, cr, uid, ids, saleman, context={}):
+		res = {}
+		if saleman:
+			s_man = self.pool.get('res.users').browse(cr, uid, saleman)
+			res = {'value':{'sale_group_id':s_man.kelompok_id.id}}
+		return res
+
 	def adhoc_submit(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'submited'},context=context)
 		return res
