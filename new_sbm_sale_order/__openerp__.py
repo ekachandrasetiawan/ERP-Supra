@@ -29,7 +29,8 @@
         "sbm_quotation.xml",
         "print_name_button.xml",
         # "reportview.xml",
-        "file.sql"
+        "file.sql",
+        "wizardcreatepb.xml"
        
     ],
     

@@ -1222,4 +1222,57 @@ class sale_order_invoice(osv.osv):
 				
 		return idInvoice
 
+class WizardCreatePbSo(osv.osv_memory):
+	_inherit='wizard.create.pb'
 	
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: context = {}
+		so_ids = context.get('active_ids', [])
+		active_model = context.get('active_model')
+		# res = super(WizardCreatePbSo, self).default_get(cr, uid, fields, context=context)
+		res = {}
+		if not so_ids or len(so_ids) != 1:
+			return res
+		so_id, = so_ids
+		if so_id:
+			res.update(so_id=so_id)
+			so = self.pool.get('sale.order').browse(cr, uid, so_id, context=context)
+			linesData = []
+
+			for l in so.order_line:
+				for m in l.material_lines:
+					mat = self._load_so_line(cr, uid, m)
+					linesData.append(mat)
+		
+			res['lines'] = linesData
+		return res
+
+
+	def _load_so_line(self, cr, uid,line):
+		print line,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+		res = {
+		'so_material_line_id': line.id,
+		'product_id'		: line.product_id.id,
+		'description'		: line.desc,
+		'uom'				: line.uom.id,
+		'qty'				: line.qty,
+			}
+		return res	
+		# res = super(WizardCreatePbSo,self)._load_so_line(cr, uid,line)
+		
+		# print "aaaaaaaaaaaaaaaaaaaassssssssssssssssssssssssssssspppppppppppppppp"
+
+class WizardCreatePbLineSo(osv.osv_memory):
+	_inherit="wizard.create.pb.line"
+	_columns={
+		
+		'so_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=True),
+	}
+class detail_pb(osv.osv):
+	_inherit="detail.pb"
+	_columns={
+		
+		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=True),
+	}
+		
