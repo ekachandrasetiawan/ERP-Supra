@@ -118,8 +118,6 @@ class SBM_Adhoc_Order_Request_Output(osv.osv):
 	def change_item(self, cr, uid, ids, item, context={}):
 		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
 		return {'value':{'uom_id':product.uom_id.id}}
-
-
 	_rec_name = 'item_id';
 
 SBM_Adhoc_Order_Request_Output()

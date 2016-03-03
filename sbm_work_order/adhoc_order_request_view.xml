@@ -69,7 +69,7 @@
 								<field name="item_id" colspan="4" on_change="change_item(item_id)"/>
 								<field name="desc" colspan="4"/>
 								<field name="qty"/>
-								<field name="uom_id"/>
+								<field name="uom_id" on_change="change_item(item_id)"/>
 									<notebook colspan="4">
 										<page string="DATA MATERIAL">
 											<field name="item_material_ids" colspan="4" nolabel="1" widget="one2many_list">
