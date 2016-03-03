@@ -52,8 +52,8 @@
 					<field name="customer_site_id"/>
 					<field name="cust_ref_type"/>
 					<field name="cust_ref_no"/>
+					<field name="sales_man_id" on_change="change_sales(sales_man_id)"/>
 					<field name="sale_group_id"/>
-					<field name="sales_man_id"/>
 					<field name="due_date"/>
 				</group>
 				<notebook colspan="4">
@@ -69,7 +69,7 @@
 								<field name="item_id" colspan="4" on_change="change_item(item_id)"/>
 								<field name="desc" colspan="4"/>
 								<field name="qty"/>
-								<field name="uom_id"/>
+								<field name="uom_id" on_change="change_item(item_id)"/>
 									<notebook colspan="4">
 										<page string="DATA MATERIAL">
 											<field name="item_material_ids" colspan="4" nolabel="1" widget="one2many_list">
@@ -165,6 +165,6 @@
 		<field name="res_model">sbm.adhoc.order.request</field>
 	</record>
 
-	<menuitem name="ADHOC Order Request" parent="sbm_work_order" id="sbm_adhoc_order_request" action="action_sbm_adhoc_order_request" sequence="1"/>
+	<menuitem name="ADHOC Order Request" parent="sbm_work_order" id="sbm_adhoc_order_request" action="action_sbm_adhoc_order_request" sequence="1" groups="sbm_order_preparation.group_admin_ho"/>
 </data>
 </openerp>
