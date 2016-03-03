@@ -18,7 +18,7 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		'sales_man_id':fields.many2one('res.users', string='Sales', required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
 		'due_date':fields.date('Due Date', readonly=True, states={'draft':[('readonly',False)]}),
 		'item_ids':fields.one2many('sbm.adhoc.order.request.output','adhoc_order_request_id', 'Detail Item',readonly=True, states={'draft':[('readonly',False)]}),
-		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True,track_visibility='onchange', states={'draft':[('readonly',False)]}),
+		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True,track_visibility='onchange'),
 		'term_of_payment':fields.many2one('account.payment.term','Term Of Payment', required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'notes':fields.text(string='Notes', required=False, readonly=True, states={'draft':[('readonly',False)]}),
 		'scope_of_work':fields.text(string='Scope Of Work', required=False, readonly=True, states={'draft':[('readonly',False)]}),
@@ -63,6 +63,13 @@ class SBM_Adhoc_Order_Request(osv.osv):
 			partner =[x.id for x in partners]
 
 			return {'domain': {'attention_id': [('id','in',tuple(partner))],'customer_site_id': [('id','in',tuple(partner))]}}
+
+	def change_sales(self, cr, uid, ids, saleman, context={}):
+		res = {}
+		if saleman:
+			s_man = self.pool.get('res.users').browse(cr, uid, saleman)
+			res = {'value':{'sale_group_id':s_man.kelompok_id.parent_id.id}}
+		return res
 
 	def adhoc_submit(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'submited'},context=context)
@@ -110,9 +117,7 @@ class SBM_Adhoc_Order_Request_Output(osv.osv):
 
 	def change_item(self, cr, uid, ids, item, context={}):
 		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
-		return {'value':{'desc': '[' + product.default_code + ']' + 	product.name, 'uom_id':product.uom_id.id}}
-
-
+		return {'value':{'uom_id':product.uom_id.id}}
 	_rec_name = 'item_id';
 
 SBM_Adhoc_Order_Request_Output()
