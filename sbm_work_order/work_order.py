@@ -16,9 +16,10 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		'cust_ref_no' : fields.char(string='Cust Ref No',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
 		'sale_group_id':fields.many2one('group.sales','Sales Group',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
 		'sales_man_id':fields.many2one('res.users', string='Sales', required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
+		'sale_order_id':fields.many2one('sale.order', string='Sales Order', readonly=True),
 		'due_date':fields.date('Due Date', readonly=True, states={'draft':[('readonly',False)]}),
 		'item_ids':fields.one2many('sbm.adhoc.order.request.output','adhoc_order_request_id', 'Detail Item',readonly=True, states={'draft':[('readonly',False)]}),
-		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True,track_visibility='onchange'),
+		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True),
 		'term_of_payment':fields.many2one('account.payment.term','Term Of Payment', required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'notes':fields.text(string='Notes', required=False, readonly=True, states={'draft':[('readonly',False)]}),
 		'scope_of_work':fields.text(string='Scope Of Work', required=False, readonly=True, states={'draft':[('readonly',False)]}),
@@ -100,6 +101,99 @@ class SBM_Adhoc_Order_Request(osv.osv):
 				'uid':uid
 			},
 		}
+
+
+	def create_adhoc_quotation(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		obj_sale_order = self.pool.get('sale.order')
+		obj_sale_order_line = self.pool.get('sale.order.line')
+		obj_sale_order_materal_line = self.pool.get('sale.order.material.line')
+		obj_sbm_work_order = self.pool.get('sbm.work.order')
+
+		cek_wo=obj_sbm_work_order.search(cr, uid, [('adhoc_order_request_id', '=', ids)])
+
+		location_id=''
+		if cek_wo:
+			wo_id=obj_sbm_work_order.browse(cr, uid, cek_wo)[0]
+			location_id=wo_id.location_id.id
+		else:
+			raise openerp.exceptions.Warning("Adhoc Order Request Belum Ada Work Order")
+
+		res = {};line = []
+
+
+		for adhoc_line in val.item_ids:
+			material_line =[]
+
+			material_line.append((0,0,{
+						'product_id':adhoc_line.item_id.id,
+						'desc':adhoc_line.desc,
+						'qty':adhoc_line.qty,
+						'uom':adhoc_line.uom_id.id,
+						'picking_location':location_id
+					}))
+
+			for adhoc_line_material in adhoc_line.item_material_ids:
+				if adhoc_line_material.item_id.type <> 'consu' or adhoc_line_material.item_id.type <> 'service':
+					material_line.append((0,0,{
+						'product_id':adhoc_line_material.item_id.id,
+						'desc':adhoc_line_material.desc,
+						'qty':adhoc_line_material.qty,
+						'uom':adhoc_line_material.uom_id.id,
+						'picking_location':location_id
+					}))
+			
+			line.append((0,0,{
+					'product_id':adhoc_line.item_id.id,
+					'name':adhoc_line.desc,
+					'product_uom_qty':adhoc_line.qty,
+					'product_uom':adhoc_line.uom_id.id,
+					'material_lines':material_line
+				}))
+
+		# Create Sale Order
+		so_id =obj_sale_order.create(cr, uid, {
+					'quotation_no':self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type'),
+					'partner_id':val.customer_id.id,
+					'attention':val.attention_id.id,
+					'partner_invoice_id':val.customer_id.id,
+					'partner_shipping_id':val.attention_id.id,
+					'user_id':val.sales_man_id.id,
+					'group_id':val.sale_group_id.id,
+					'date':time.strftime('%Y-%m-%d'),
+					'due_date':val.due_date,
+					'client_order_ref':val.cust_ref_no,
+					'from_adhoc':True,
+					'pricelist_id':16,
+					'scope_work_supra_text':val.scope_of_work,
+					'internal_notes':val.term_condition,
+					'payment_term':val.term_of_payment.id,
+					'term_condition':(4,[val.term_of_payment.id]),
+					'order_line':line
+					})
+
+		return so_id
+
+	def create_quotation(self, cr, uid, ids, context=None):
+		so_id=self.create_adhoc_quotation(cr, uid, ids, context=None)
+
+		if so_id:
+			self.write(cr,uid,ids,{'sale_order_id':so_id})
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sale', "view_order_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'sale.order.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'sale.order'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = so_id
+		return action
 
 SBM_Adhoc_Order_Request()
 
@@ -696,3 +790,30 @@ class SBM_Work_Order_Line_Files(osv.osv):
 	}
 
 SBM_Work_Order_Line_Files()
+
+
+
+class Sale_order(osv.osv):	
+	_inherit ='sale.order'
+
+	_columns ={
+		'from_adhoc':fields.boolean('From Adhoc'),
+		'wo_ids':fields.one2many('sbm.work.order','sale_order_id',string='Work Order'),
+		'adhoc_ids':fields.one2many('sbm.adhoc.order.request','sale_order_id', string='Adhoc Order Request'),
+	}
+
+Sale_order()
+
+
+class order_preparation(osv.osv):
+	_inherit = "order.preparation"
+	_description = "Order Packaging"
+	_columns = {
+		'sale_id': fields.many2one('sale.order', 'Sale Order', required=True, readonly=True, domain=[
+			'|','|',('quotation_state','=','win'),('state','in',['progress','manual']) , '&', ('from_adhoc','=',True),'&',('quotation_state','=','confirmed'),('state','=','draft')
+		], states={'draft': [('readonly', False)]}),
+		# 'sale_id': fields.many2one('sale.order', 'Sale Order', required=True, readonly=True, domain=['|',('quotation_state','=','win'),('state','in',['progress','manual']),('&',('from_adhoc','=', True),('quotation_state','=','approved'),('state','=', 'draft'))], states={'draft': [('readonly', False)]}),
+	}
+
+
+order_preparation()
