@@ -35,6 +35,8 @@
 
         		<button name="print_adhoc_order_request" type="object" states="approved, done" string="Print Adhoc Order Request" icon="gtk-dnd-multiple"/>
 
+        		<button name="create_quotation" type="object" states="approved,done" string="Create Quotation" icon="STOCK_ADD" confirm="Are you sure To Create Quotation"/>
+
 				<field name="state" widget="statusbar" statusbar_visible="draft,submited,approved,done"/>
 
 			</header>
@@ -55,6 +57,8 @@
 					<field name="sales_man_id" on_change="change_sales(sales_man_id)"/>
 					<field name="sale_group_id"/>
 					<field name="due_date"/>
+					<!-- <field name="sale_order_id"/> -->
+					<field name="sale_order_id" readonly="1" attrs="{'invisible': [('sale_order_id','=',False)]}"/>
 				</group>
 				<notebook colspan="4">
 					<page string="Detail Item">
@@ -93,6 +97,7 @@
 								<field name="work_location"/>
 								<field name="location_id"/>
 								<field name="customer_id"/>
+								<field name="state"/>
 							</tree>
 						</field>
 					</page>
