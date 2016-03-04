@@ -667,7 +667,7 @@ class sale_order_material_line(osv.osv):
 
 
 	_columns = {
-		'sale_order_line_id':fields.many2one('sale.order.line',string="Sale Order Line"),
+		'sale_order_line_id':fields.many2one('sale.order.line',string="Sale Order Line", onupdate="CASCADE", ondelete="CASCADE"),
 		'product_id':fields.many2one('product.product',string="Product", required=True, domain=[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')], active=True),
 		'desc':fields.text(string="Description"),
 		'qty':fields.float(string="Qty",required=True),
@@ -675,8 +675,7 @@ class sale_order_material_line(osv.osv):
 		'picking_location':fields.many2one('stock.location',required=True),
 		'is_loaded_from_change':fields.boolean('Load From Change ?'),
 		'sale_order_id': fields.related('sale_order_line_id','order_id', type='many2one', relation='sale.order'),
-		'name_so': fields.related('sale_order_id','name', type='string', relation='sale.order'),
-		'status': fields.related('sale_order_id','state', type='string', relation='sale.order'),
+		'status': fields.related('sale_order_line_id','state', type='char', relation='sale.order'),
 		# 'status':fields.function(_state,string="State",type="string",store=False),
 
 
