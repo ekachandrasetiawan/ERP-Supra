@@ -43,15 +43,33 @@
 <!-- 			</field>
 		</record>
  -->
+ <record id="form_so_material_deliverytracking" model="ir.ui.view">
+		<field name='name'>form order material delivery tracking</field>
+		<field name='model'>sale.order.material.line</field>
+		<field name='type'>form</field>
+		<field name='arch' type='xml'>
+			<form string="Material Delivery Tracking" version="7.0">
+				<group>
+				<field name="sale_order_id" readonly="True"/>
+				<field name='product_id' readonly="True"/>
+				<field name='desc' readonly="True"/>
+				<field name='qty' readonly="True"/>
+				<field name="status" readonly="True"/>
+				<field name='uom' readonly="True"/>
+				<field name="shipped_qty" string="Uom Sent" readonly="True"/>
+				<field name="returned_qty" string="Uom Returned" readonly="True"/>
+				</group>
+			</form>
+		</field>
+	</record>
 
- <record id="tree_order_material_delivery_tracking" model="ir.ui.view">
+ 	<record id="tree_order_material_delivery_tracking" model="ir.ui.view">
 			<field name='name'>order material delivery tracking</field>
 			<field name='model'>sale.order.material.line</field>
-
 			<field name='type'>tree</field>
 			<field name='arch' type='xml'>
 				<tree string="Order Material Delivery Tracking">
-					<field name='name_so' string="So No"/>
+					<field name='sale_order_id' string="So No"/>
 					<field name='product_id' width="10"/>
 					<field name='desc'/>
 					<field name='qty'/>
@@ -65,7 +83,10 @@
 					
 				</tree>
 			</field>
-		</record>
+	</record>
+	
+
+
 
 	<!-- 	<record model="ir.actions.act_window" id="action_report_material">
 			<field name="name">Action report material</field>
@@ -80,9 +101,10 @@
 			<field name="name">Report Order Material Delivery Tracking</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">sale.order.material.line</field>
-			<field name="view_type">tree</field>
-			<field name="view_mode">tree</field>
-			<!-- <field name="limit">10</field> -->
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="limit">100</field>
+			<!-- skdhfjdhfkh -->
 		</record>
 
 		<!-- <record model="ir.actions.act_window.view" id="tree_order_material">
@@ -91,7 +113,20 @@
 	    	<field name="view_id" ref="tree_order_material_delivery_tracking"/>
 	    	<field name="act_window_id" ref="action_report_material_line"/>
 		</record> -->
-	
+<!-- 		<record model="ir.actions.act_window.view" id="act_material_tree">
+	    	<field eval="1" name="sequence"/>
+	    	<field name="view_mode">tree</field>
+	    	<field name="view_id" ref="tree_order_material_delivery_tracking"/>
+	    	<field name="act_window_id" ref="action_report_material_line"/>
+		</record>
+		<record model="ir.actions.act_window.view" id="act_material_form">
+		    <field eval="2" name="sequence"/>
+		    <field name="view_mode">form</field>
+		    <field name="view_id" ref="form_so_material_deliverytracking"/>
+		    <field name="act_window_id" ref="action_report_material_line"/>
+
+		</record> -->
+
 
 
 		<menuitem parent="sbm_inherit.sales_report"  name="Order Material Delivery Tracking" id="report_odr_dlv_track" action="action_report_material_line"/>
