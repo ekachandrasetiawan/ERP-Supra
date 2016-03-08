@@ -10,7 +10,7 @@ class SBM_Adhoc_Order_Request(osv.osv):
 	_columns = {
 		'name' : fields.char(string='No',required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_id':fields.many2one('res.partner','Customer', required=True, domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
-		'attention_id':fields.many2one('res.partner','Attention', readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'attention_id':fields.many2one('res.partner','Attention', required=True, readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'customer_site_id':fields.many2one('res.partner','Customer Site', readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'cust_ref_type': fields.selection([('pr', 'Purchase Requisition'),('mail', 'Email Customer')], 'Customer Ref', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
 		'cust_ref_no' : fields.char(string='Cust Ref No',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
