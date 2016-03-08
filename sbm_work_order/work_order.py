@@ -9,14 +9,14 @@ class SBM_Adhoc_Order_Request(osv.osv):
 	_name = "sbm.adhoc.order.request"
 	_columns = {
 		'name' : fields.char(string='No',required=True, readonly=True, states={'draft':[('readonly',False)]}),
-		'customer_id':fields.many2one('res.partner','Customer', required=True, domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]}),
-		'attention_id':fields.many2one('res.partner','Attention', readonly=True, states={'draft':[('readonly',False)]}),
-		'customer_site_id':fields.many2one('res.partner','Customer Site', readonly=True, states={'draft':[('readonly',False)]}),
+		'customer_id':fields.many2one('res.partner','Customer', required=True, domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'attention_id':fields.many2one('res.partner','Attention', readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'customer_site_id':fields.many2one('res.partner','Customer Site', readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'cust_ref_type': fields.selection([('pr', 'Purchase Requisition'),('mail', 'Email Customer')], 'Customer Ref', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
 		'cust_ref_no' : fields.char(string='Cust Ref No',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
 		'sale_group_id':fields.many2one('group.sales','Sales Group',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
 		'sales_man_id':fields.many2one('res.users', string='Sales', required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
-		'sale_order_id':fields.many2one('sale.order', string='Sales Order', readonly=True),
+		'sale_order_id':fields.many2one('sale.order', string='Sales Order', readonly=True,track_visibility='onchange'),
 		'due_date':fields.date('Due Date', readonly=True, states={'draft':[('readonly',False)]}),
 		'item_ids':fields.one2many('sbm.adhoc.order.request.output','adhoc_order_request_id', 'Detail Item',readonly=True, states={'draft':[('readonly',False)]}),
 		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True),
