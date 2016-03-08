@@ -45,7 +45,7 @@ class account_invoice(osv.osv):
 			},
 		}
 	def _amount_all_main(self, cr, uid, ids, field_name, args, context=None):
-		print "Call _amount_all_main---->>>>>>>>",field_name
+		# print "Call _amount_all_main---->>>>>>>>",field_name
 		user = self.pool.get('res.users').browse(cr,uid,uid,context=context)
 		dec_precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
 		res = {}
@@ -117,7 +117,7 @@ class account_invoice(osv.osv):
 			# 	for line in invoice.tax_line:
 			# 		res[invoice.id]['amount_tax_main'] += line.amount*invoice.pajak
 				
-		print "RESSSSSSSSSSS AMOUNT_ALL_MAIN",res
+		# print "RESSSSSSSSSSS AMOUNT_ALL_MAIN",res
 		return res
 	def _get_invoice_by_line(self, cr, uid, ids, context=None):
 		result = {}
@@ -296,12 +296,16 @@ class account_invoice_line(osv.osv):
 
 	def _get_convert_main_currency(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
-		
+
 		print field_name,'_____________________________'
+
 		
 		dec_precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
 		dec_precision_tax_line = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
-		inv_lines = self.browse(cr,uid,ids,context=context)
+
+		search_inv_lines = self.search(cr,uid,[('id','in',ids)]) #make sure ids not deleted
+
+		inv_lines = self.browse(cr,uid,search_inv_lines,context=context)
 		user = self.pool.get('res.users').browse(cr, uid, uid, {})
 
 		for line in inv_lines:
@@ -315,20 +319,21 @@ class account_invoice_line(osv.osv):
 			price_subttoal_netto = 0.00
 			
 			if not line.invoice_id:
-				print "Invoice Tidak Ada",line.id
+				# print "Invoice Tidak Ada",line.id
 				continue
-			else:
-				print "Ada invoice",line.id,' Invoice #',line.invoice_id.id
-			
+			# else:
+				# print "Ada invoice",line.id,' Invoice #',line.invoice_id.id
+
+			print field_name,"<<<<",args
 			if line.invoice_id.currency_id.id  == user.company_id.currency_id.id:
 				unit_price_main = line.price_unit
 
 				amount_bruto_main = line.amount_bruto
 				
 				sub_total_main = line.price_subtotal
-				print line.sub_total_main,"<<<>>>",line.price_subtotal
-				amount_discount_main = line.amount_discount_main
-
+				# print line.sub_total_main,"<<<>>>",line.price_subtotal
+				amount_discount_main = line.amount_discount
+				# print "AAAAAAAAA",amount_discount_main
 				# sub_total_netto_main = sub_total_main
 			else: 
 				unit_price_main = round(tax_rate*line.price_unit,dec_precision)
@@ -365,7 +370,7 @@ class account_invoice_line(osv.osv):
 				if exist_tax_amount_obj:
 
 					if exist_tax_amount_obj.is_manual:
-						print "ADA account invoice line tax amount dan Manual"
+						# print "ADA account invoice line tax amount dan Manual"
 						# write if account.invoice.line.tax.amount is_manual == true
 						tax_amount += exist_tax_amount_obj.tax_amount
 						# tax amount main
@@ -373,17 +378,17 @@ class account_invoice_line(osv.osv):
 					
 						if exp.match(tax.name):
 							ppn_tax_amount_main += tax_amount_main
-						print tax_amount_main,"--<><>--<><>"
+						# print tax_amount_main,"--<><>--<><>"
 					else:
-						print "ADA account invoice line tax amount dan Tidak Manual"
-						print exist_tax_amount_obj.tax_amount_main
+						# print "ADA account invoice line tax amount dan Tidak Manual"
+						# print exist_tax_amount_obj.tax_amount_main
 						countedTax = self._count_tax_obj(tax,line,sub_total_main,dp=dec_precision_tax_line)
 						tax_amount += countedTax['tax_amount']
 						tax_amount_main += countedTax['tax_amount_main']
 						ppn_tax_amount_main += countedTax['ppn_tax_amount_main']
 						
 				else:
-					print "TIDAK ADA account invoice line tax amount------"
+					# print "TIDAK ADA account invoice line tax amount------"
 					# if tax.type=='percentage':
 					# 	tax_amount+=round(line.price_subtotal*tax.amount,dec_precision_tax_line)
 					# 	tax_amount_main += round(sub_total_main*tax.amount,dec_precision_tax_line)
@@ -404,12 +409,12 @@ class account_invoice_line(osv.osv):
 					# 	# if PPN
 					# 	if exp.match(tax.name):
 					# 		ppn_tax_amount_main += round(sub_total_main*tax.amount,dec_precision_tax_line)
-					print '<<<<<<',sub_total_main
+					# print '<<<<<<',sub_total_main
 					countedTax = self._count_tax_obj(tax,line,sub_total_main,dp=dec_precision_tax_line)
 					tax_amount += countedTax['tax_amount']
 					tax_amount_main += countedTax['tax_amount_main']
 					ppn_tax_amount_main += countedTax['ppn_tax_amount_main']
-					print 'Counted Tax--->>>>',countedTax
+					# print 'Counted Tax--->>>>',countedTax
 				# end if
 			
 			# count price_subtotal_netto
@@ -433,7 +438,7 @@ class account_invoice_line(osv.osv):
 				'sub_total_netto_main': sub_total_netto_main,
 			}
 
-		print "Result OF _get_convert_main_currency_________________________________________",field_name,res
+		# print "Result OF _get_convert_main_currency_________________________________________",field_name,res
 		return res
 	def _get_invoice_line_by_invoice(self, cr, uid, ids, context=None):
 		
@@ -704,7 +709,7 @@ account_invoice_line()
 class account_invoice_tax(osv.osv):
 
 	def _get_tax_main(self,cr,uid,ids,field_name,args,context={}):
-		print "Calling _get_tax_main-----___--____--_--___--__---_-_-_--____",field_name
+		# print "Calling _get_tax_main-----___--____--_--___--__---_-_-_--____",field_name
 		# recs = self.browse(cr,uid,ids,context=context)
 		dp = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
 		res = {}
@@ -725,7 +730,7 @@ class account_invoice_tax(osv.osv):
 				}
 
 		
-		print res,"---____"
+		# print res,"---____"
 		return res
 
 	
@@ -1045,8 +1050,8 @@ class account_invoice_line_tax_amount(osv.osv):
 				if rec.is_manual_main:
 					is_manual_main=True
 
-				print is_manual
-				print is_tax_amount,vals
+				# print is_manual
+				# print is_tax_amount,vals
 				if is_manual and is_tax_amount:
 					# print "AAAAAA--->>>"
 					vals['base_amount_main'] = rec.base_amount
@@ -1056,7 +1061,7 @@ class account_invoice_line_tax_amount(osv.osv):
 			else:
 				if is_manual and not is_tax_amount_main:
 					raise osv.except_osv(_('Error'),_('Error to write account.invoice.line.tax.amount, please contact system administrator, Ref: is_manual and not is_tax_amount_main'))
-		print "END Call Write in account_invoice_line_tax_amount in invoice main-----------------"
+		# print "END Call Write in account_invoice_line_tax_amount in invoice main-----------------"
 		return super(account_invoice_line_tax_amount,self).write(cr,uid,ids,vals,context=context)
 
 
@@ -1069,7 +1074,7 @@ class account_invoice_line_tax_amount(osv.osv):
 		
 		# replace with re compute
 		getRecompute = ail_obj._get_convert_main_currency(cr,uid,[inv_line_id],['tax_amount_main'],None,context=context)
-		print getRecompute,"-------XOXOXXOXOXO-------"
+		# print getRecompute,"-------XOXOXXOXOXO-------"
 		vals['base_amount_main'] = getRecompute[inv_line_id]['price_subtotal']
 		vals['tax_amount_main'] = getRecompute[inv_line_id]['tax_amount_main']
 
@@ -1095,6 +1100,7 @@ class account_invoice_line_tax_amount(osv.osv):
 		return result.keys()
 
 	def _get_invoice_line_tax_amount(self,cr,uid,ids,field_name,args,context={}):
+		print args,"==========",context
 		dp = self.pool.get('decimal.precision').precision_get(cr, uid, 'TaxLine')
 		res = {}
 
@@ -1102,22 +1108,31 @@ class account_invoice_line_tax_amount(osv.osv):
 		ail_obj = self.pool.get('account.invoice.line')
 
 		selfObj  = self.browse(cr,uid,ids,context=context)
+		print selfObj
 		for o in selfObj:
+			
 			res[o.id] = 0.0
-			if o.invoice_line_id.invoice_id.currency_id.id == user.company_id.currency_id.id:
-				# if same currecny with main currency then same with tax_amount field in self obj
-				res[o.id] = {
-					'base_amount_main':o.base_amount,
-					'tax_amount_main': o.tax_amount_main
-				}
-			else:
+			search = self.search(cr,uid,[('id','=',o.id)],context=context) #search to make sure no invoice_line_tax_amount deleted cause relational trigger deleting from cascade
+			if search:
+				print 'A000'
+				if o.invoice_line_id.invoice_id.currency_id.id == user.company_id.currency_id.id:
+					# if same currecny with main currency then same with tax_amount field in self obj
+					res[o.id] = {
+						'base_amount_main':o.base_amount,
+						'tax_amount_main': o.tax_amount_main
+					}
+				else:
 
-				main_amount = ail_obj._count_tax_obj(o.tax_id,o.invoice_line_id,o.invoice_line_id.sub_total_main,dp=dp)
+					main_amount = ail_obj._count_tax_obj(o.tax_id,o.invoice_line_id,o.invoice_line_id.sub_total_main,dp=dp)
+					res[o.id] = {
+						'base_amount_main':o.invoice_line_id.sub_total_main,
+						'tax_amount_main': main_amount['tax_amount_main'],
+					}
+			else:
 				res[o.id] = {
-					'base_amount_main':o.invoice_line_id.sub_total_main,
-					'tax_amount_main': main_amount['tax_amount_main'],
-				}
-		print ">>>>>>>>>>>>>>>>>>>>---->>>>>>>>>>>>>>>>",res
+						'base_amount_main':False,
+						'tax_amount_main': False,
+					}
 		return res
 
 	def _set_tax_amount_main(self, cr, uid, id, field_name, field_value, args=None, context={}):

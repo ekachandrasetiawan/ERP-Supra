@@ -17,7 +17,6 @@
 			<field name="name">Admin Workshop</field>
 		</record>
 
-
 		<!-- Adhoc Request -->
 		<record model="ir.model.access" id="ir_access_sbm_adhoc_order_request_admin_ho">
 	        <field name="name">Access SBM Adhoc Order Reuqest Admin HO</field>
@@ -374,7 +373,5 @@
 	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_workshop'))]"/>
 	    </record>
-
-
     </data>
 </openerp>

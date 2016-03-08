@@ -384,20 +384,31 @@ class stock_picking(osv.osv):
 						  delivery moves with product_id, product_qty, uom
 		@return: Dictionary of values
 		"""
+
+		print partial_datas
+		
 		if context is None:
 			context = {}
 		else:
 			# chandra function for return picking
-			active_id=context.get('active_id')
+			active_id=context.get('active_id',ids)
+			print "(((((((((((",active_id
 			cekpicking = self.pool.get('stock.picking').browse(cr, uid, active_id, context=context)
 
 			# update Delivery Note State Refunded
-			x = cekpicking.name
+			active_picking = False
+			if isinstance(cekpicking, list):
+				x = cekpicking[0].name
+				active_picking = cekpicking[0]
+			else:
+				x = cekpicking.name
+				active_picking = cekpicking
+
 			name_seq=x[-6:]
 
 			# Cek apakah Note ID ada dan Picking Name Return atau tidak
-			if cekpicking.note_id.id:
-				self.pool.get('delivery.note').write(cr, uid, cekpicking.note_id.id, {'state':'refunded'}, context=context)
+			if active_picking.note_id.id:
+				self.pool.get('delivery.note').write(cr, uid, active_picking.note_id.id, {'state':'refunded'}, context=context)
 				
 			# chandra function for return picking
 			context = dict(context)
@@ -532,7 +543,7 @@ class stock_picking(osv.osv):
 
 			if new_picking:
 				move_obj.write(cr, uid, [c.id for c in complete], {'picking_id': new_picking})
-
+				# print "======================="
 			for move in complete:
 				defaults = {'product_uom': product_uoms[move.id], 'product_qty': move_product_qty[move.id],'move_dest_id':move.move_dest_id.id or False}
 				if prodlot_ids.get(move.id):
@@ -1250,7 +1261,7 @@ class delivery_note(osv.osv):
 					self.write(cr, uid, ids, {'state': 'done'})
 
 					print "OP PICKING TO BE",id_done[0][1]['delivered_picking']
-
+					raise osv.except_osv('errr','eerrr')
 					# raise osv.except_osv(_("TEST"),_("TEST"))
 
 
