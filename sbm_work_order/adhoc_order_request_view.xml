@@ -81,7 +81,7 @@
 													<field name="item_id" on_change="change_item(item_id)"/>
 													<field name="desc"/>
 													<field name="qty"/>
-													<field name="uom_id"/>
+													<field name="uom_id" on_change="change_item(item_id)"/>
 												</tree>
 											</field>
 										</page>
