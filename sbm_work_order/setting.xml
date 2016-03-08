@@ -183,14 +183,14 @@
 
 
 	    <!-- Work Order Admin Support-->
-	    <!-- <record model="ir.model.access" id="ir_access_sbm_work_order_admin_support">
+	    <record model="ir.model.access" id="ir_access_sbm_work_order_admin_support">
 	        <field name="name">Access SBM Work Order Admin Support</field>
 	        <field name="model_id" ref="model_sbm_work_order"/>
 	        <field name="perm_read" eval="True"/>
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support_ho'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support'))]"/>
 	    </record>
 
 	   	<record model="ir.model.access" id="ir_access_sbm_work_order_output_admin_support">
@@ -200,7 +200,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support_ho'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support'))]"/>
 	    </record>
 
 	   	<record model="ir.model.access" id="ir_access_sbm_work_order_output_picking_admin_support">
@@ -210,7 +210,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support_ho'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support'))]"/>
 	    </record>
 
 
@@ -221,7 +221,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support_ho'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support'))]"/>
 	    </record>
 
 
@@ -232,7 +232,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support_ho'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support'))]"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_sbm_work_order_line_files_admin_support">
@@ -242,8 +242,8 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support_ho'))]"/>
-	    </record> -->
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support'))]"/>
+	    </record>
 
 
 
@@ -373,5 +373,54 @@
 	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_workshop'))]"/>
 	    </record>
+
+
+
+
+	    <!-- Setting Rules -->
+	    <record model="ir.rule" id="ir_sbm_work_order_all_rule_admin_ho">
+	        <field name="name">All SBM WORK ORDER ADMIN HO</field>
+	        <field name="model_id" ref="sbm_work_order.model_sbm_work_order"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_preparation.group_admin_ho'))]"/>
+	    </record>
+	    <record model="ir.rule" id="ir_sbm_work_order_all_rule_admin_spv">
+	        <field name="name">All SBM WORK ORDER ADMIN SPV</field>
+	        <field name="model_id" ref="sbm_work_order.model_sbm_work_order"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_delivery_note.group_admin_spv'))]"/>
+	    </record>
+
+	    <record model="ir.rule" id="ir_sbm_work_order_all_rule_admin_manager">
+	        <field name="name">All SBM WORK ORDER ADMIN MANAGER</field>
+	        <field name="model_id" ref="sbm_work_order.model_sbm_work_order"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_manager'))]"/>
+	    </record>
+
+	    <record model="ir.rule" id="ir_sbm_work_order_admin_support">
+	        <field name="name">SBM WORK ORDER ADMIN SUPPORT</field>
+	        <field name="model_id" ref="sbm_work_order.model_sbm_work_order"/>
+	        <field name="domain_force">['|',('create_uid','=',user.id),('message_follower_ids','in',[user.partner_id.id])]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_work_order.group_admin_support'))]"/>
+	    </record>
+
+
     </data>
 </openerp>
