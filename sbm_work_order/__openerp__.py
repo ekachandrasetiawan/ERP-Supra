@@ -1,7 +1,7 @@
 {
     "name": "SBM WORK ORDER",
     "version": "1.0",
-    "depends": ["base","mrp","sale","product","stock","sbm_order_preparation","sbm_delivery_note"],
+    "depends": ["base","mrp","sale","product","stock","sbm_order_preparation","sbm_delivery_note","new_sbm_sale_order"],
     "author": "PT.SUPRABAKTI MANDIRI",
     "category": "WORK ORDER",
     "description": """Modul ini digunakan untuk Menggolah SPK PT.Suprabakti Mandiri""",

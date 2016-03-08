@@ -28,7 +28,7 @@
 			<field name="perm_write" eval="False"/>
 			<field name="perm_unlink" eval="False"/>
 			<field name="perm_create" eval="True"/>
-			<field name="groups" eval="[(4, 61)]"/>
+			<field name="groups" eval="[(4, 6)]"/>
 		</record>
 
 
