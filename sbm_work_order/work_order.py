@@ -230,6 +230,10 @@ class SBM_Adhoc_Order_Request_Output_Material(osv.osv):
 
 	_rec_name = 'item_id'
 
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'uom_id':product.uom_id.id}}
+
 SBM_Adhoc_Order_Request_Output_Material()
 
 
@@ -363,11 +367,10 @@ class SBM_Work_Order(osv.osv):
 		work_order = self.pool.get('sbm.work.order')
 		work_order_output = self.pool.get('sbm.work.order.output')
 		work_order_material = self.pool.get('sbm.work.order.output.raw.material')
-		if sale:
-			res = {}; line = []
 
+		res = {}; line = []
+		if sale:
 			order = self.pool.get('sale.order').browse(cr, uid, sale)
-		
 			
 			for x in order.order_line:
 				if x.material_lines == []:
@@ -400,6 +403,11 @@ class SBM_Work_Order(osv.osv):
 			res['due_date'] = order.due_date
 			res['order_date'] = order.date_order
 			res['outputs'] = line
+		else:
+			res['customer_id'] = False
+			res['due_date'] = False
+			res['order_date'] = False
+			res['outputs'] = False
 
 		return  {'value': res}
 
@@ -407,63 +415,45 @@ class SBM_Work_Order(osv.osv):
 		adhoc_request = self.pool.get('sbm.adhoc.order.request')
 		adhoc_request_line = self.pool.get('sbm.adhoc.order.request.output')
 		adhoc_request_material = self.pool.get('sbm.adhoc.order.request.output.material')
+		res = {}; line = []
 		if adhoc_id:
-			res = {}; line = []
 			adhoc = adhoc_request.browse(cr, uid, adhoc_id)
 			no_line=1
 			for x in adhoc.item_ids:
 				adhoc_material = adhoc_request_material.search(cr, uid, [('adhoc_order_request_output_id', '=', x.id)])
 				material_line = []
 				no_material = 1
+
 				for m in adhoc_request_material.browse(cr,uid,adhoc_material):
-					if m.item_id.type <> 'service':
-						if m.item_id.supply_method == 'produce':
-							material_line.append((0,0,{
-								'no': no_material,
-								'item_id' : m.item_id.id,
-								'desc': m.desc,
-								'qty': m.qty,
-								'uom_id': m.uom_id.id,
-								'adhoc_material_id':m.id
-							}))
-					elif m.item_id.type == 'service':
-						material_line.append((0,0,{
-							'no': no_material,
-							'item_id' : m.item_id.id,
-							'desc': m.desc,
-							'qty': m.qty,
-							'uom_id': m.uom_id.id,
-							'adhoc_material_id':m.id
-						}))
+					material_line.append((0,0,{
+						'no': no_material,
+						'item_id' : m.item_id.id,
+						'desc': m.desc,
+						'qty': m.qty,
+						'uom_id': m.uom_id.id,
+						'adhoc_material_id':m.id
+					}))
 
 					no_material+=1
 
-				# Prepare Data Work Order Line
-				if x.item_id.type <> 'service':
-					if x.item_id.supply_method == 'produce':
-						line.append({
-							'no': no_line,
-							'item_id' : x.item_id.id,
-							'desc': x.desc,
-							'qty': x.qty,
-							'uom_id': x.uom_id.id,
-							'adhoc_output_ids':x.id,
-							'raw_materials': material_line
-						})
-				elif x.item_id.type == 'service':
-					line.append({
-						'no': no_line,
-						'item_id' : x.item_id.id,
-						'desc': x.desc,
-						'qty': x.qty,
-						'uom_id': x.uom_id.id,
-						'adhoc_output_ids':x.id,
-						'raw_materials': material_line
-					})
+				line.append({
+					'no': no_line,
+					'item_id' : x.item_id.id,
+					'desc': x.desc,
+					'qty': x.qty,
+					'uom_id': x.uom_id.id,
+					'adhoc_output_ids':x.id,
+					'raw_materials': material_line
+				})
+
 				no_line +=1
 
 			res['customer_id'] = adhoc.customer_id.id
 			res['outputs'] = line
+		else:
+			res['customer_id'] = False
+			res['outputs'] = False
+
 		return {'value': res}
 
 	def validate(self, cr, uid, ids, context=None):
@@ -798,9 +788,8 @@ class SBM_Work_Order_Output_Raw_Material(osv.osv):
 		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
 		return {'value':{'uom_id':product.uom_id.id}}
 
-		
-SBM_Work_Order_Output_Raw_Material()
 
+SBM_Work_Order_Output_Raw_Material()
 
 
 class SBM_Work_Order_Line_Files(osv.osv):
@@ -812,7 +801,6 @@ class SBM_Work_Order_Line_Files(osv.osv):
 	}
 
 SBM_Work_Order_Line_Files()
-
 
 
 class Sale_order(osv.osv):	
@@ -834,7 +822,6 @@ class order_preparation(osv.osv):
 		'sale_id': fields.many2one('sale.order', 'Sale Order', required=True, readonly=True, domain=[
 			'|','|',('quotation_state','=','win'),('state','in',['progress','manual']) , '&', ('from_adhoc','=',True),'&',('quotation_state','=','confirmed'),('state','=','draft')
 		], states={'draft': [('readonly', False)]}),
-		# 'sale_id': fields.many2one('sale.order', 'Sale Order', required=True, readonly=True, domain=['|',('quotation_state','=','win'),('state','in',['progress','manual']),('&',('from_adhoc','=', True),('quotation_state','=','approved'),('state','=', 'draft'))], states={'draft': [('readonly', False)]}),
 	}
 
 
