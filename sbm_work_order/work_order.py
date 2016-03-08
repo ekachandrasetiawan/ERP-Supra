@@ -291,15 +291,15 @@ class SBM_Work_Order(osv.osv):
 		'seq_wo_no':fields.char(string='WO Sequence'),
 		'seq_req_no':fields.char(string='Request Sequence'),
 		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer SITE')], 'Work Location', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=True),
-		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]}),
-		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]}),
+		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=True,track_visibility='onchange'),
+		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'due_date':fields.date(string='Due Date', required=True),
 		'order_date':fields.date(string='Order Date'),
 		'source_type': fields.selection([('project', 'Project'),('sale_order', 'Sale Order'), ('adhoc','Adhoc'), ('internal_request', 'Internal Request')], 'Source Type', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False, domain=[('state', 'in', ['progress','manual'])]),
+		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False, domain=[('state', 'in', ['progress','manual'])],track_visibility='onchange'),
 		'adhoc_order_request_id':fields.many2one('sbm.adhoc.order.request', required=False, domain=[('state','in',['approved','done'])], string='Adhoc Order Request'),
-		'repeat_ref_id':fields.many2one('sbm.work.order',required=False, string='Repeat Ref'),
+		'repeat_ref_id':fields.many2one('sbm.work.order',required=False, string='Repeat Ref',track_visibility='onchange'),
 		'notes':fields.text(string='Notes'),
 		'outputs':fields.one2many('sbm.work.order.output', 'work_order_id',string='RAW Materials'),
 		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_id', string='Output Picking'),
@@ -327,6 +327,17 @@ class SBM_Work_Order(osv.osv):
 		'state': 'draft',
 		'request_no':'/',
 		'wo_no':'/',
+	}
+
+	_track = {
+		'state':{
+			'SBM_Work_Order.spk_pack_confirmed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirmed',
+			'SBM_Work_Order.spk_pack_approved': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved',
+			'SBM_Work_Order.spk_pack_approved2': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved2',
+			'SBM_Work_Order.spk_pack_approved3': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved3',
+			'SBM_Work_Order.spk_pack_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
+			'SBM_Work_Order.spk_pack_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+		},
 	}
 
 	def set_request_no(self, cr, uid, ids, context=None):

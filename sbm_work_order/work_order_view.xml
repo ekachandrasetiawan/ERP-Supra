@@ -138,6 +138,10 @@
 	            </notebook>
 	            <field name="notes" placeholder="Notes" />
         	</sheet>
+        	<div class="oe_chatter">
+				<field name="message_follower_ids" widget="mail_followers"/>
+				<field name="message_ids" widget="mail_thread"/>
+			</div>
     	</form>
     </field>
 	</record>
@@ -170,6 +174,38 @@
 		<field name="name">Work Order Request Wo No</field>
 		<field name="code">sbm.work.order.wo.no</field>
 		<field name="padding">4</field>
+	</record>
+
+	<!-- Log History Button -->
+	<record id="spk_pack_confirmed" model="mail.message.subtype">
+		<field name="name">SPK Confirm</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.work.order</field>
+	</record>
+	<record id="spk_pack_approved" model="mail.message.subtype">
+		<field name="name">SPK Approved</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.work.order</field>
+	</record>
+	<record id="spk_pack_approved2" model="mail.message.subtype">
+		<field name="name">SPK Second Approved</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.work.order</field>
+	</record>
+	<record id="spk_pack_approved3" model="mail.message.subtype">
+		<field name="name">SPK Validate</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.work.order</field>
+	</record>
+	<record id="spk_pack_done" model="mail.message.subtype">
+		<field name="name">SPK Done</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.work.order</field>
+	</record>
+	<record id="spk_pack_draft" model="mail.message.subtype">
+		<field name="name">SPK Set to Draft</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.work.order</field>
 	</record>
 
 
