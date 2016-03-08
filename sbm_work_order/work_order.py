@@ -482,18 +482,10 @@ class SBM_Work_Order(osv.osv):
 				if c.qty == 0.00:
 					raise openerp.exceptions.Warning("Work Order Line Tidak Boleh 0")
 
-				if c.item_id.type <> 'service':
-					if c.item_id.supply_method == 'buy':
-						raise openerp.exceptions.Warning("Item " + c.item_id.default_code + ' No Process')
-
 				# Cek Material
 				for m in c.raw_materials:
 					if m.qty == 0.00:
 						raise openerp.exceptions.Warning("Work Order Line Material Tidak Boleh 0")
-
-					if m.item_id.type <> 'service':
-						if m.item_id.supply_method == 'buy':
-							raise openerp.exceptions.Warning("Item " + m.item_id.default_code + ' No Process')
 
 		# Validasi Sales Order
 		if val.sale_order_id.id:
