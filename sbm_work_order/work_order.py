@@ -745,6 +745,11 @@ class SBM_Work_Order_Output(osv.osv):
 
 	_rec_name = 'item_id'
 
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'uom_id':product.uom_id.id}}
+
+
 SBM_Work_Order_Output()	
 
 
@@ -788,6 +793,12 @@ class SBM_Work_Order_Output_Raw_Material(osv.osv):
 		'adhoc_material_id':fields.many2one('sbm.adhoc.order.request.output.material', string='Adhoc Materials', required=False),
 	}
 
+
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'uom_id':product.uom_id.id}}
+
+		
 SBM_Work_Order_Output_Raw_Material()
 
 
