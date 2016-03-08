@@ -743,23 +743,10 @@ class SBM_Work_Order_Output_Picking(osv.osv):
 		'work_order_id':fields.many2one('sbm.work.order', string='Work Order'),
 		'picking_id':fields.many2one('stock.picking', string='Picking'),
 		'move_id':fields.many2one('stock.move', string='Move'),
-		'raw_material_moves':fields.one2many('sbm.work.order.output.move', 'work_order_output_picking_id',string='Materials'),
 	}
 
 
 SBM_Work_Order_Output_Picking()	
-
-
-class SBM_Work_Order_Output_Move(osv.osv):
-	_name = 'sbm.work.order.output.move'
-	_columns = {
-		'work_order_output_picking_id':fields.many2one('sbm.work.order.output.picking', required=True, string='WO Output Picking'),
-		'move_id':fields.many2one('stock.move', string='Move'),
-		'wo_raw_material_id':fields.many2one('sbm.work.order.output.raw.material', required=True, string='Raw Materials'),
-	}
-
-
-SBM_Work_Order_Output_Move()
 
 
 

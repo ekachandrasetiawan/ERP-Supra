@@ -103,24 +103,12 @@
 											</page>
 											<page string="OUTPUT PICKING">
 												<field name="output_picking_ids" colspan="4" nolabel="1" widget="one2many_list">
-													<tree>
+													<tree editable="buttom">
 														<field name="work_order_output_id"/>
 														<field name="work_order_id"/>
 														<field name="picking_id"/>
+														<field name="move_id"/>
 													</tree>
-													<form string="OUTPUT PICKING">
-														<field name="work_order_output_id"/>
-														<field name="work_order_id"/>
-														<field name="picking_id"/>
-															<notebook colspan="4">
-																<page string="Move">
-																	<field name="raw_material_moves" colspan="4" nolabel="1" widget="one2many_list">
-																		<field name="move_id"/>
-																		<field name="wo_raw_material_id"/>
-																	</field>
-																</page>
-															</notebook>
-													</form>
 												</field>
 											</page>
 									</notebook>
