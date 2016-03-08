@@ -170,6 +170,6 @@
 		<field name="res_model">sbm.adhoc.order.request</field>
 	</record>
 
-	<menuitem name="ADHOC Order Request" parent="sbm_work_order" id="sbm_adhoc_order_request" action="action_sbm_adhoc_order_request" sequence="1" groups="sbm_order_preparation.group_admin_ho"/>
+	<menuitem name="ADHOC Order Request" parent="sbm_work_order" id="sbm_adhoc_order_request" action="action_sbm_adhoc_order_request" sequence="1" groups="sbm_order_preparation.group_admin_ho,group_admin_support"/>
 </data>
 </openerp>

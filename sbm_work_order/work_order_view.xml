@@ -173,9 +173,9 @@
 	</record>
 
 
-	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner" groups="sbm_order_preparation.group_admin_ho,sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager,sbm_work_order.group_admin_workshop"/>
+	<menuitem id="sbm_work_order" name="SBM Work Order" parent="base.menu_base_partner" groups="sbm_order_preparation.group_admin_ho,sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager,sbm_work_order.group_admin_workshop,group_admin_support"/>
 
-	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2" groups="sbm_order_preparation.group_admin_ho,sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager,sbm_work_order.group_admin_workshop"/>
+	<menuitem name="Work Order / SPK" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2" groups="sbm_order_preparation.group_admin_ho,sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager,sbm_work_order.group_admin_workshop,group_admin_support"/>
 
 </data>
 </openerp>
