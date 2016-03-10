@@ -50,15 +50,35 @@
 		<field name='arch' type='xml'>
 			<form string="Material Delivery Tracking" version="7.0">
 				<group>
-				<field name="sale_order_id" readonly="True"/>
-				<field name='product_id' readonly="True"/>
-				<field name='desc' readonly="True"/>
-				<field name='qty' readonly="True"/>
-				<field name="status" readonly="True"/>
-				<field name='uom' readonly="True"/>
-				<field name="shipped_qty" string="Uom Sent" readonly="True"/>
-				<field name="returned_qty" string="Uom Returned" readonly="True"/>
+					<field name="sale_order_id" readonly="True" string="SO No"/>
+					<field name='product_id' readonly="True"/>
+					<field name='desc' readonly="True"/>
+					<field name='qty' readonly="True"/>
+					<field name="status" readonly="True" string="status"/>
+					<field name='uom' readonly="True"/>
+					<field name="shipped_qty" string="Uom Sent" readonly="True"/>
+					<field name="returned_qty" string="Uom Returned" readonly="True"/>
+					<field name="date_order"/>
+					<field name="due_date"/>
 				</group>
+				<notebook>
+					<page string="Order Preparation Line">
+						<field name='op_lines' readonly="True">
+							<tree editable="buttom" >
+								<field name="no_op" />
+								<field name="product_id" string="Item"/>
+								<field name="product_qty" string="Qty"/>
+								<field name="status" />
+							</tree>
+						</field>
+					</page>
+
+					<page string="Delivery Note">
+						<field name="delivery_note">
+							
+						</field>
+					</page>
+				</notebook>
 			</form>
 		</field>
 	</record>
@@ -77,7 +97,8 @@
 					<field name='uom'/>
 					<field name="shipped_qty" string="Uom Sent"/>
 					<field name="returned_qty" string="Uom Returned"/>
-					<!-- <field name="shipped_qty"/> -->
+					<field name="date_order"/>
+					<field name="due_date"/>
 					<!-- <field name="returned_qty"/> -->
 					
 					
@@ -85,7 +106,24 @@
 			</field>
 	</record>
 	
-
+	<record id="material_tracking_filter" model="ir.ui.view">
+		<field name='name'>material tracking filter</field>
+		<field name="model">sale.order.material.line</field>
+		<field name="type">search</field>
+		<field name="arch" type='xml'>
+			<search string=" Order Material tracking filter">
+				  <field name="sale_order_id" filter_domain="[('sale_order_id','ilike',self)]" string="No So"/>
+				  <field name="product_id" filter_domain="[('product_id','ilike',self)]"/>
+				   <field name="status" filter_domain="[('status','ilike',self)]" string="Status"/>
+				  
+				  <!-- <group expand="0" string="Group By...">
+                     
+                        <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'status'}"/>
+                        
+                    </group> -->
+			</search>
+		</field>
+	</record>
 
 
 	<!-- 	<record model="ir.actions.act_window" id="action_report_material">
