@@ -32,8 +32,6 @@ class order_preparation(osv.osv):
 			res['value']['partner_shipping_id'] = pick.sale_id.partner_shipping_id.id
 			res['value']['poc'] = pick.sale_id.client_order_ref
 
-		
-		print "Change  ===============",res
 		return res
 		
 
@@ -263,13 +261,46 @@ order_preparation()
 class order_preparation_line(osv.osv):
 	_inherit = "order.preparation.line"
 	_columns = {
-		'sale_line_id': fields.many2one('sale.order.line', "Sale Item"),
-		'sale_line_material_id': fields.many2one('sale.order.material.line', 'Material Ref'),
+		'product_id': fields.many2one('product.product', 'Product',track_visibility='always'),
+		'product_uom': fields.many2one('product.uom', 'UoM'),
+		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=True),
+		'sale_line_material_id': fields.many2one('sale.order.material.line', 'Material Ref', required=True),
 	}
+
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'product_uom':product.uom_id.id}}
+
+	def check_item_material(self, cr, uid, ids, item, context={}):
+
+		return {'value':{'sale_line_material_id':False}}
+
 
 order_preparation_line()
 
 
 class sale_order_line(osv.osv):
+
 	_inherit = 'sale.order.line'
-	_rec_name = 'product_id'
+
+	_columns = {
+		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
+		'product_ref': fields.related('product_id','name',string='Product',readonly=True,type='char', help = 'The product part number'),
+	}
+	_rec_name = 'product_ref'
+
+sale_order_line()
+
+
+class sale_order_material_line(osv.osv):
+	_inherit = 'sale.order.material.line'
+	_description = 'Sale order material line'
+
+	_columns = {
+		'product_id':fields.many2one('product.product',string="Product", required=True, domain=[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')], active=True),
+		'product_ref': fields.related('product_id','name',string='Product',readonly=True,type='char', help = 'The product part number'),
+	}
+
+	_rec_name = 'product_ref'
+	
+sale_order_material_line()	
