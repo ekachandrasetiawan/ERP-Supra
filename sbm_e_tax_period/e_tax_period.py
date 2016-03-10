@@ -78,7 +78,7 @@ class account_invoice(osv.osv):
 			res_order = order_obj.search(cr,uid,[('invoice_ids','in',[inv.id])])
 			if res_order:
 				order_obj.browse(cr,uid,res_order)
-			raise osv.except_osv(_('Error'),_('ERROR'))
+			# raise osv.except_osv(_('Error'),_('ERROR'))
 
 		mod_obj = self.pool.get('ir.model.data')
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')

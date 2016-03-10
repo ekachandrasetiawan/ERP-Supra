@@ -25,7 +25,7 @@
     <field name="arch" type="xml">
     	<form string="WORK ORDER" version="7.0">
 	        <header>
-	        	<button name="work_order_confirm" states="draft" string="Confirm" type="object"  icon="gtk-apply" confirm="Are you sure to Confirm Work Order" groups="sbm_order_preparation.group_admin_ho,sbm_work_order.group_admin_support"/>
+	        	<button name="work_order_confirm" states="draft" string="Confirm" type="object"  icon="gtk-apply" confirm="Are you sure to Confirm Work Order" groups="sbm_order_preparation.group_admin_ho"/>
 
 	        	<button name="work_order_set_draft" states="confirmed,approved" string="Set To Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Work Order" groups="sbm_delivery_note.group_admin_spv"/>
 
@@ -39,7 +39,7 @@
 
 	        	<button name="work_order_finish" states="approved3" string="Finish WO" type="object"  icon="STOCK_SAVE_AS" confirm="Are you sure to Finish Work Order" groups="sbm_work_order.group_admin_workshop"/>
 
-	        	<button name="print_work_order" type="object" states="approved,approved2,approved3,done" string="Print Adhoc Order Request" icon="gtk-dnd-multiple"/>
+	        	<button name="print_work_order" type="object" states="approved,approved2,approved3,done" string="Print Work Order" icon="gtk-dnd-multiple"/>
 
 	            <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,approved3,done"/>
         	</header>
@@ -50,13 +50,11 @@
 						<separator string=""/>
 					</h1>
 					<h3>
-						<group col="4" colspan="4">
-							<group colspan="2">
+						<group colspan="4">
 								<field name="request_no" class="oe_inline"/>
-							</group>
-							<group colspan="2">
+						</group>
+						<group colspan="4">
 								<field name="wo_no" class="oe_inline" colspan="2" attrs="{'invisible':[('state', 'in', ['draft','confirmed'])]}"/>
-							</group>
 						</group>
 					</h3>
 				</div>
@@ -138,6 +136,7 @@
 	            		</group>
 	            	</page>
 	            </notebook>
+	            <field name="notes" placeholder="Notes" />
         	</sheet>
     	</form>
     </field>
@@ -159,7 +158,7 @@
 	<record id="seq_sbm_work_order_req_no" model="ir.sequence">
 		<field name="name">Work Order Request No</field>
 		<field name="code">sbm.work.order</field>
-		<field name="padding">5</field>
+		<field name="padding">4</field>
 	</record>
 
 	<record id="seq_request_wo_no" model="ir.sequence.type">
@@ -170,23 +169,13 @@
 	<record id="seq_sbm_work_order_wo_no" model="ir.sequence">
 		<field name="name">Work Order Request Wo No</field>
 		<field name="code">sbm.work.order.wo.no</field>
-		<field name="padding">5</field>
+		<field name="padding">4</field>
 	</record>
 
-<!-- 	<record id="seq_wo_no" model="ir.sequence.type">
-		<field name="name">Work Order WO No</field>
-		<field name="code">sbm.work.order</field>
-	</record>
 
-	<record id="seq_sbm_work_order_wo_no" model="ir.sequence">
-		<field name="name">Work Order WO No</field>
-		<field name="code">sbm.work.order</field>
-		<field name="padding">5</field>
-	</record> -->
+	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner" groups="sbm_order_preparation.group_admin_ho,sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager,sbm_work_order.group_admin_workshop"/>
 
-	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner"/>
-
-	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2"/>
+	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2" groups="sbm_order_preparation.group_admin_ho,sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager,sbm_work_order.group_admin_workshop"/>
 
 </data>
 </openerp>
