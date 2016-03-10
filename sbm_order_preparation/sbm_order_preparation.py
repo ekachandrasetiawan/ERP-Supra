@@ -269,5 +269,27 @@ order_preparation_line()
 
 
 class sale_order_line(osv.osv):
+
 	_inherit = 'sale.order.line'
-	_rec_name = 'product_id'
+
+	_columns = {
+		'product_id': fields.many2one('product.product', 'Product', domain=[('sale_ok', '=', True)], change_default=True, required=True),
+		'product_ref': fields.related('product_id','name',string='Product',readonly=True,type='char', help = 'The product part number'),
+	}
+	_rec_name = 'product_ref'
+
+sale_order_line()
+
+
+class sale_order_material_line(osv.osv):
+	_inherit = 'sale.order.material.line'
+	_description = 'Sale order material line'
+
+	_columns = {
+		'product_id':fields.many2one('product.product',string="Product", required=True, domain=[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')], active=True),
+		'product_ref': fields.related('product_id','name',string='Product',readonly=True,type='char', help = 'The product part number'),
+	}
+
+	_rec_name = 'product_ref'
+	
+sale_order_material_line()	
