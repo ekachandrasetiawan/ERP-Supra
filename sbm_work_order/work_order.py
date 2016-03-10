@@ -409,6 +409,9 @@ class SBM_Work_Order(osv.osv):
 
 					no +=1
 
+			if line == []:
+				raise openerp.exceptions.Warning("Item Sales Order Tidak Ditemukan")
+
 			res['customer_id'] = order.partner_id.id
 			res['due_date'] = order.due_date
 			res['order_date'] = order.date_order
@@ -479,6 +482,9 @@ class SBM_Work_Order(osv.osv):
 					})
 
 					no_line +=1
+
+			if line == []:
+				raise openerp.exceptions.Warning("Item Adhoc Order Tidak Ditemukan")
 
 			res['customer_id'] = adhoc.customer_id.id
 			res['outputs'] = line
