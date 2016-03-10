@@ -47,6 +47,25 @@
                       </group>
                  </page>
               </xpath>
+
+              <xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_id']" position="attributes">
+                  <attribute name="required">True</attribute>
+              </xpath>
+
+              <xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_uom']" position="attributes">
+                  <attribute name="required">True</attribute>
+              </xpath>
+
+              <xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_qty']" position="attributes">
+                  <attribute name="required">True</attribute>
+              </xpath>
+
+              <xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form" position="inside">
+                <field name="sale_line_id" />
+                <field name="sale_line_material_id" />
+              </xpath>
+
+
            </field>
     </record>
 

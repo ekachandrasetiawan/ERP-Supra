@@ -155,14 +155,17 @@ class order_preparation(osv.osv):
 					if y.product_id.type <> 'service':
 						if nilai < y.qty:
 							location += [y.picking_location.id]
+
 							line.append({
 										 'product_id' : y.product_id.id,
 										 'product_qty': y.qty - nilai,
 										 'product_uom': y.uom.id,
 										 'name': y.desc,
-										 'sale_line_material_id':y.id
+										 'sale_line_material_id':y.id,
+										 'sale_line_id':y.sale_order_line_id.id
 							})
 			res['prepare_lines'] = line
+			print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",line
 			return  {'value': res}
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
@@ -258,7 +261,13 @@ order_preparation()
 class order_preparation_line(osv.osv):
 	_inherit = "order.preparation.line"
 	_columns = {
+		'sale_line_id': fields.many2one('sale.order.line', "Sale Item"),
 		'sale_line_material_id': fields.many2one('sale.order.material.line', 'Material Ref'),
 	}
 
 order_preparation_line()
+
+
+class sale_order_line(osv.osv):
+	_inherit = 'sale.order.line'
+	_rec_name = 'product_id'
