@@ -9,6 +9,14 @@ from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
+class order_preparation_line(osv.osv):
+	_inherit = "order.preparation.line"
+
+	_columns ={
+	'no_op': fields.related('preparation_id','name', type='char',string="No OP" ,relation='order.preparation'),
+	'status': fields.related('preparation_id','state', type='char',string="Status" ,relation='order.preparation'),
+	}
+
 class delivery_note(osv.osv):
 	_inherit = "delivery.note"
 
@@ -198,12 +206,56 @@ class sale_order_material_line(osv.osv):
 		
 		return res
 
+	def _date_order(self,cr,uid,ids,name,args,context={}):
+		res={}
+		for material in self.browse(cr,uid,ids):
+			
+			res[material.id]=material.sale_order_id.date_order
+		return res
+
+	def _due_date(self,cr,uid,ids,name,args,context={}):
+		res={}
+		for material in self.browse(cr,uid,ids):
+			
+			res[material.id]=material.sale_order_id.due_date
+	
+		return res
+
+	def _delivery_note(self,cr,uid,ids,name,args,context={}):
+		
+		id_dn=[] # untuk menampung id dn 
+		#browse data material
+		material = self.browse(cr,uid,ids)[0]
+		
+		#kondisi untuk mengecek Op_lines
+		if material.op_lines:
+			#perulangan op_lines
+			for loop_lines in material.op_lines:
+				#mencari id order preparation berdasarkan 'prepare_lines','=',loop_lines.id
+				order_preparation_id = self.pool.get("order.preparation").search(cr,uid,[('prepare_lines','=',loop_lines.id)])
+				#browse order preparation berdasarka order_preparation_id
+				order_preparation = self.pool.get("order.preparation").browse(cr,uid,order_preparation_id)
+				for op in order_preparation:
+					#mencari id dari delivery note
+					delivery_note_id = self.pool.get("delivery.note").search(cr,uid,[('prepare_id','=',op.id)])
+					
+					#menambahkan data ke id_dn
+					id_dn.append(delivery_note_id[0])
+		res = dict([(id, id_dn) for id in ids])
+	
+	
+		return res
 
 	_columns = {
 		'op_lines':fields.one2many('order.preparation.line','sale_line_material_id',string="Order Preparation Lines"),
 		'shipped_qty':fields.function(_count_shipped_qty,string="Shipped Qty",store=False),
 		'returned_qty':fields.function(_count_returned_qty, string="Returned Qty", store=False),
-		'on_process_qty':fields.function(_count_process_qty, string="On process Qty", store=False)
+		'on_process_qty':fields.function(_count_process_qty, string="On process Qty", store=False),
+		'date_order':fields.function(_date_order, string="Date Order",type="date", store=False),
+		'due_date':fields.function(_due_date, string="Due Date",type="date", store=False),
+		'delivery_note':fields.function(_delivery_note,string="Delivery Note",type="one2many",relation="delivery.note", store=False)
+	
+
 		}
 
 sale_order_material_line()
