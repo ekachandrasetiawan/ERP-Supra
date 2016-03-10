@@ -261,9 +261,20 @@ order_preparation()
 class order_preparation_line(osv.osv):
 	_inherit = "order.preparation.line"
 	_columns = {
-		'sale_line_id': fields.many2one('sale.order.line', "Sale Item"),
-		'sale_line_material_id': fields.many2one('sale.order.material.line', 'Material Ref'),
+		'product_id': fields.many2one('product.product', 'Product',track_visibility='always'),
+		'product_uom': fields.many2one('product.uom', 'UoM'),
+		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=True),
+		'sale_line_material_id': fields.many2one('sale.order.material.line', 'Material Ref', required=True),
 	}
+
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'product_uom':product.uom_id.id}}
+
+	def check_item_material(self, cr, uid, ids, item, context={}):
+
+		return {'value':{'sale_line_material_id':False}}
+
 
 order_preparation_line()
 
