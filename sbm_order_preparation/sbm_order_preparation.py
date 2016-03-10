@@ -32,8 +32,6 @@ class order_preparation(osv.osv):
 			res['value']['partner_shipping_id'] = pick.sale_id.partner_shipping_id.id
 			res['value']['poc'] = pick.sale_id.client_order_ref
 
-		
-		print "Change  ===============",res
 		return res
 		
 
