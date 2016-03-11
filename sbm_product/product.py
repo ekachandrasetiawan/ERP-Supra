@@ -12,6 +12,12 @@ class product_product(osv.osv):
 		'product_by_location': fields.one2many('stock.product.by.location','product_id'),
 	}
 
+	def disable_product(self,cr,uid,ids,context={}):
+		return self.write(cr,uid,ids,{'active':False},context=context)
+
+	def enable_product(self,cr,uid,ids,context={}):
+		return self.write(cr,uid,ids,{'active':True},context=context)
+
 	def code_change(self, cr, uid, ids, code):
 		cekspace=code.replace(" ", "")
 		return {'value': {'default_code': cekspace}}

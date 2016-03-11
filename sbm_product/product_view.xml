@@ -6,11 +6,15 @@
 				<field name="type">form</field>
 				<field name="inherit_id" ref="product.product_normal_form_view"/>
 				<field name="arch" type="xml">
+
 					<field name="default_code" position="replace">
 						<field name="default_code" on_change="code_change(default_code)"/>
 					</field>
 					 <xpath expr="//div[@name='buttons']" position="inside">
+					 	<button type="object" name="disable_product" string="Disable Product"  groups="sbm_product.group_product_admin" attrs="{'invisible':[('active','=',False)]}"/>
+					 	<button type="object" name="enable_product" string="Enable Product"  groups="sbm_product.group_product_admin" attrs="{'invisible':[('active','=',True)]}"/>
 	                   <button icon="gtk-ok" type="object" name="exportCSV" string="Export CSV" default_focus="1" class="oe_highlight"/>
+
 	                </xpath>
 
 	                <xpath expr="//group[@string='Status']" position="before">
@@ -51,5 +55,44 @@
 			<field name="view_mode">form</field>
 			<field name="view_id" ref="wizard_stock_by_location"/>
 		</record>
+
+		<record model="ir.module.category" id="category_master_data">
+	
+			<field name="name">Master Data</field>
+		</record>
+
+		<record model="res.groups" id="group_product_admin">
+			<field name="category_id" ref='category_master_data'/>
+			<field name="name">Product Admin</field>
+		</record>
+
+		<record model="res.groups" id="sbm_work_order.group_admin_support">
+			
+			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
+		</record>
+
+		<record model="res.groups" id="base.group_sale_manager">
+			
+			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
+		</record>
+
+		<record model="res.groups" id="sbm_inherit.group_customer_invoice_admin_supervisor">
+			
+			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
+		</record>
+
+		<record model="res.groups" id="group_rmpsm">
+			<field name="name">RMPSM</field>
+			<field name="category_id" ref="base.module_category_sales_management"/>
+			
+		</record>
+
+		<record model="res.groups" id="group_rmpsm">
+			
+			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
+		</record>
+
+
+		
 	</data>
 </openerp>
