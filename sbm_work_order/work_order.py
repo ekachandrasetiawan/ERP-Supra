@@ -9,17 +9,17 @@ class SBM_Adhoc_Order_Request(osv.osv):
 	_name = "sbm.adhoc.order.request"
 	_columns = {
 		'name' : fields.char(string='No',required=True, readonly=True, states={'draft':[('readonly',False)]}),
-		'customer_id':fields.many2one('res.partner','Customer', required=True, domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]}),
-		'attention_id':fields.many2one('res.partner','Attention', readonly=True, states={'draft':[('readonly',False)]}),
-		'customer_site_id':fields.many2one('res.partner','Customer Site', readonly=True, states={'draft':[('readonly',False)]}),
+		'customer_id':fields.many2one('res.partner','Customer', required=True, domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'attention_id':fields.many2one('res.partner','Attention', required=True, readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'customer_site_id':fields.many2one('res.partner','Customer Site', readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'cust_ref_type': fields.selection([('pr', 'Purchase Requisition'),('mail', 'Email Customer')], 'Customer Ref', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
 		'cust_ref_no' : fields.char(string='Cust Ref No',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
-		'sale_group_id':fields.many2one('group.sales','Sales Group',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
+		'sale_group_id':fields.many2one('group.sales','Sales Group',required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}, domain=[('is_main_group','=',True)]),
 		'sales_man_id':fields.many2one('res.users', string='Sales', required=True,track_visibility='onchange', readonly=True, states={'draft':[('readonly',False)]}),
-		'sale_order_id':fields.many2one('sale.order', string='Sales Order', readonly=True),
-		'due_date':fields.date('Due Date', readonly=True, states={'draft':[('readonly',False)]}),
-		'item_ids':fields.one2many('sbm.adhoc.order.request.output','adhoc_order_request_id', 'Detail Item',readonly=True, states={'draft':[('readonly',False)]}),
-		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True),
+		'sale_order_id':fields.many2one('sale.order', string='Sales Order', readonly=True,track_visibility='onchange'),
+		'due_date':fields.date('Due Date', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'item_ids':fields.one2many('sbm.adhoc.order.request.output','adhoc_order_request_id', 'Detail Item',readonly=True, states={'draft':[('readonly',False)]},ondelete='cascade'),
+		'wo_ids':fields.one2many('sbm.work.order','adhoc_order_request_id', 'Work Order ID',readonly=True,ondelete='cascade'),
 		'term_of_payment':fields.many2one('account.payment.term','Term Of Payment', required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'notes':fields.text(string='Notes', required=False, readonly=True, states={'draft':[('readonly',False)]}),
 		'scope_of_work':fields.text(string='Scope Of Work', required=False, readonly=True, states={'draft':[('readonly',False)]}),
@@ -206,7 +206,7 @@ class SBM_Adhoc_Order_Request_Output(osv.osv):
 		'desc':fields.text(string='Description', required=False),
 		'qty':fields.float(string='Qty', required=True),
 		'uom_id':fields.many2one('product.uom', string='UOM', required=True),
-		'item_material_ids':fields.one2many('sbm.adhoc.order.request.output.material', 'adhoc_order_request_output_id',string='Material Lines')
+		'item_material_ids':fields.one2many('sbm.adhoc.order.request.output.material', 'adhoc_order_request_output_id',string='Material Lines',ondelete='cascade'),
 	}
 
 	def change_item(self, cr, uid, ids, item, context={}):
@@ -229,6 +229,10 @@ class SBM_Adhoc_Order_Request_Output_Material(osv.osv):
 
 
 	_rec_name = 'item_id'
+
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'uom_id':product.uom_id.id}}
 
 SBM_Adhoc_Order_Request_Output_Material()
 
@@ -291,18 +295,18 @@ class SBM_Work_Order(osv.osv):
 		'seq_wo_no':fields.char(string='WO Sequence'),
 		'seq_req_no':fields.char(string='Request Sequence'),
 		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer SITE')], 'Work Location', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=True),
-		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]}),
-		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]}),
-		'due_date':fields.date(string='Due Date', required=True),
-		'order_date':fields.date(string='Order Date'),
+		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=True,track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
+		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'due_date':fields.date(string='Due Date', required=True,readonly=True, states={'draft':[('readonly',False)]}),
+		'order_date':fields.date(string='Order Date',readonly=True, states={'draft':[('readonly',False)]}),
 		'source_type': fields.selection([('project', 'Project'),('sale_order', 'Sale Order'), ('adhoc','Adhoc'), ('internal_request', 'Internal Request')], 'Source Type', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False, domain=[('state', 'in', ['progress','manual'])]),
-		'adhoc_order_request_id':fields.many2one('sbm.adhoc.order.request', required=False, domain=[('state','in',['approved','done'])], string='Adhoc Order Request'),
-		'repeat_ref_id':fields.many2one('sbm.work.order',required=False, string='Repeat Ref'),
+		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False, domain=[('state', 'in', ['progress','manual'])],track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
+		'adhoc_order_request_id':fields.many2one('sbm.adhoc.order.request', required=False, domain=[('state','in',['approved','done'])], string='Adhoc Order Request',readonly=True, states={'draft':[('readonly',False)]}),
+		'repeat_ref_id':fields.many2one('sbm.work.order',required=False, string='Repeat Ref',track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
 		'notes':fields.text(string='Notes'),
-		'outputs':fields.one2many('sbm.work.order.output', 'work_order_id',string='RAW Materials'),
-		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_id', string='Output Picking'),
+		'outputs':fields.one2many('sbm.work.order.output', 'work_order_id',string='RAW Materials',ondelete='cascade',readonly=True, states={'draft':[('readonly',False)]}),
+		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_id', string='Output Picking',ondelete='cascade',readonly=True, states={'draft':[('readonly',False)]}),
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('confirmed','Confirmed'),
@@ -329,6 +333,17 @@ class SBM_Work_Order(osv.osv):
 		'wo_no':'/',
 	}
 
+	_track = {
+		'state':{
+			'SBM_Work_Order.spk_pack_confirmed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'confirmed',
+			'SBM_Work_Order.spk_pack_approved': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved',
+			'SBM_Work_Order.spk_pack_approved2': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved2',
+			'SBM_Work_Order.spk_pack_approved3': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved3',
+			'SBM_Work_Order.spk_pack_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
+			'SBM_Work_Order.spk_pack_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+		},
+	}
+
 	def set_request_no(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 
@@ -352,11 +367,10 @@ class SBM_Work_Order(osv.osv):
 		work_order = self.pool.get('sbm.work.order')
 		work_order_output = self.pool.get('sbm.work.order.output')
 		work_order_material = self.pool.get('sbm.work.order.output.raw.material')
-		if sale:
-			res = {}; line = []
 
+		res = {}; line = []
+		if sale:
 			order = self.pool.get('sale.order').browse(cr, uid, sale)
-		
 			
 			for x in order.order_line:
 				if x.material_lines == []:
@@ -365,30 +379,48 @@ class SBM_Work_Order(osv.osv):
 				so = so_material_line.search(cr, uid, [('sale_order_line_id', '=', x.id)])
 				no = 1;
 				for m in so_material_line.browse(cr,uid,so):
-					if m.product_id.type <> 'service':
-						if m.product_id.supply_method == 'produce':
+					
+					nilai=0
+					cek_wo=work_order_output.search(cr, uid, [('sale_order_material_line', '=', m.id)])
+					for n_material in work_order_output.browse(cr, uid, cek_wo):
+						if n_material.work_order_id.state <> 'cancel':
+							nilai += n_material.qty
+
+					if m.qty > nilai:
+						if m.product_id.type <> 'service':
+							if m.product_id.supply_method == 'produce':
+								line.append({
+									'no': no,
+									'item_id' : m.product_id.id,
+									'desc': m.desc,
+									'qty': m.qty-nilai,
+									'uom_id': m.uom.id,
+									'sale_order_material_line': m.id
+								})
+						elif m.product_id.type == 'service':
 							line.append({
 								'no': no,
 								'item_id' : m.product_id.id,
 								'desc': m.desc,
-								'qty': m.qty,
-								'uom_id': m.uom.id
+								'qty': m.qty-nilai,
+								'uom_id': m.uom.id,
+								'sale_order_material_line': m.id
 							})
-					elif m.product_id.type == 'service':
-						line.append({
-							'no': no,
-							'item_id' : m.product_id.id,
-							'desc': m.desc,
-							'qty': m.qty,
-							'uom_id': m.uom.id
-						})
 
 					no +=1
+
+			if line == []:
+				raise openerp.exceptions.Warning("Item Sales Order Tidak Ditemukan")
 
 			res['customer_id'] = order.partner_id.id
 			res['due_date'] = order.due_date
 			res['order_date'] = order.date_order
 			res['outputs'] = line
+		else:
+			res['customer_id'] = False
+			res['due_date'] = False
+			res['order_date'] = False
+			res['outputs'] = False
 
 		return  {'value': res}
 
@@ -396,63 +428,70 @@ class SBM_Work_Order(osv.osv):
 		adhoc_request = self.pool.get('sbm.adhoc.order.request')
 		adhoc_request_line = self.pool.get('sbm.adhoc.order.request.output')
 		adhoc_request_material = self.pool.get('sbm.adhoc.order.request.output.material')
+		
+		work_order = self.pool.get('sbm.work.order')
+		work_order_output = self.pool.get('sbm.work.order.output')
+		work_order_material = self.pool.get('sbm.work.order.output.raw.material')
+
+		res = {}; line = []
 		if adhoc_id:
-			res = {}; line = []
 			adhoc = adhoc_request.browse(cr, uid, adhoc_id)
 			no_line=1
+
 			for x in adhoc.item_ids:
 				adhoc_material = adhoc_request_material.search(cr, uid, [('adhoc_order_request_output_id', '=', x.id)])
 				material_line = []
 				no_material = 1
+				nilai_line = 0
+
 				for m in adhoc_request_material.browse(cr,uid,adhoc_material):
-					if m.item_id.type <> 'service':
-						if m.item_id.supply_method == 'produce':
-							material_line.append((0,0,{
-								'no': no_material,
-								'item_id' : m.item_id.id,
-								'desc': m.desc,
-								'qty': m.qty,
-								'uom_id': m.uom_id.id,
-								'adhoc_material_id':m.id
-							}))
-					elif m.item_id.type == 'service':
+					
+					nilai_material = 0	
+
+					ceK_n_material = work_order_material.search(cr, uid, [('adhoc_material_id', '=', m.id)])
+
+					for n_material in work_order_material.browse(cr, uid, ceK_n_material):
+						nilai_material += n_material.qty
+
+					if m.qty > nilai_material:
 						material_line.append((0,0,{
 							'no': no_material,
 							'item_id' : m.item_id.id,
 							'desc': m.desc,
-							'qty': m.qty,
+							'qty': m.qty - nilai_material,
 							'uom_id': m.uom_id.id,
 							'adhoc_material_id':m.id
 						}))
 
-					no_material+=1
+						no_material+=1
 
-				# Prepare Data Work Order Line
-				if x.item_id.type <> 'service':
-					if x.item_id.supply_method == 'produce':
-						line.append({
-							'no': no_line,
-							'item_id' : x.item_id.id,
-							'desc': x.desc,
-							'qty': x.qty,
-							'uom_id': x.uom_id.id,
-							'adhoc_output_ids':x.id,
-							'raw_materials': material_line
-						})
-				elif x.item_id.type == 'service':
+				cek_n_line = work_order_output.search(cr, uid, [('adhoc_output_ids', '=', x.id)])
+
+				for n_line in work_order_output.browse(cr, uid, cek_n_line):
+					nilai_line += n_line.qty
+
+				if x.qty > nilai_line:
 					line.append({
 						'no': no_line,
 						'item_id' : x.item_id.id,
 						'desc': x.desc,
-						'qty': x.qty,
+						'qty': x.qty - nilai_line,
 						'uom_id': x.uom_id.id,
 						'adhoc_output_ids':x.id,
 						'raw_materials': material_line
 					})
-				no_line +=1
+
+					no_line +=1
+
+			if line == []:
+				raise openerp.exceptions.Warning("Item Adhoc Order Tidak Ditemukan")
 
 			res['customer_id'] = adhoc.customer_id.id
 			res['outputs'] = line
+		else:
+			res['customer_id'] = False
+			res['outputs'] = False
+
 		return {'value': res}
 
 	def validate(self, cr, uid, ids, context=None):
@@ -481,18 +520,10 @@ class SBM_Work_Order(osv.osv):
 				if c.qty == 0.00:
 					raise openerp.exceptions.Warning("Work Order Line Tidak Boleh 0")
 
-				if c.item_id.type <> 'service':
-					if c.item_id.supply_method == 'buy':
-						raise openerp.exceptions.Warning("Item " + c.item_id.default_code + ' No Process')
-
 				# Cek Material
 				for m in c.raw_materials:
 					if m.qty == 0.00:
 						raise openerp.exceptions.Warning("Work Order Line Material Tidak Boleh 0")
-
-					if m.item_id.type <> 'service':
-						if m.item_id.supply_method == 'buy':
-							raise openerp.exceptions.Warning("Item " + m.item_id.default_code + ' No Process')
 
 		# Validasi Sales Order
 		if val.sale_order_id.id:
@@ -725,14 +756,20 @@ class SBM_Work_Order_Output(osv.osv):
 		'desc':fields.text(string='Description', required=False),
 		'qty':fields.float(required=True, string='Qty'),
 		'uom_id':fields.many2one('product.uom', required=True, string='UOM'),
-		'raw_materials':fields.one2many('sbm.work.order.output.raw.material', 'work_order_output_id', string='Raw Materials'),
+		'raw_materials':fields.one2many('sbm.work.order.output.raw.material', 'work_order_output_id', string='Raw Materials',ondelete='cascade'),
 		'attachment_ids': fields.many2many('ir.attachment', 'work_order_rel','work_order_id', 'attachment_id', 'Attachments'),
-		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking'),
+		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking',ondelete='cascade'),
 		'adhoc_output_ids':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
+		'sale_order_material_line':fields.many2one('sale.order.material.line',string='SO Line Materials', required=False),
 
 	}
 
 	_rec_name = 'item_id'
+
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'uom_id':product.uom_id.id}}
+
 
 SBM_Work_Order_Output()	
 
@@ -745,23 +782,10 @@ class SBM_Work_Order_Output_Picking(osv.osv):
 		'work_order_id':fields.many2one('sbm.work.order', string='Work Order'),
 		'picking_id':fields.many2one('stock.picking', string='Picking'),
 		'move_id':fields.many2one('stock.move', string='Move'),
-		'raw_material_moves':fields.one2many('sbm.work.order.output.move', 'work_order_output_picking_id',string='Materials'),
 	}
 
 
 SBM_Work_Order_Output_Picking()	
-
-
-class SBM_Work_Order_Output_Move(osv.osv):
-	_name = 'sbm.work.order.output.move'
-	_columns = {
-		'work_order_output_picking_id':fields.many2one('sbm.work.order.output.picking', required=True, string='WO Output Picking'),
-		'move_id':fields.many2one('stock.move', string='Move'),
-		'wo_raw_material_id':fields.many2one('sbm.work.order.output.raw.material', required=True, string='Raw Materials'),
-	}
-
-
-SBM_Work_Order_Output_Move()
 
 
 
@@ -777,8 +801,13 @@ class SBM_Work_Order_Output_Raw_Material(osv.osv):
 		'adhoc_material_id':fields.many2one('sbm.adhoc.order.request.output.material', string='Adhoc Materials', required=False),
 	}
 
-SBM_Work_Order_Output_Raw_Material()
 
+	def change_item(self, cr, uid, ids, item, context={}):
+		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+		return {'value':{'uom_id':product.uom_id.id}}
+
+
+SBM_Work_Order_Output_Raw_Material()
 
 
 class SBM_Work_Order_Line_Files(osv.osv):
@@ -790,7 +819,6 @@ class SBM_Work_Order_Line_Files(osv.osv):
 	}
 
 SBM_Work_Order_Line_Files()
-
 
 
 class Sale_order(osv.osv):	
@@ -812,7 +840,6 @@ class order_preparation(osv.osv):
 		'sale_id': fields.many2one('sale.order', 'Sale Order', required=True, readonly=True, domain=[
 			'|','|',('quotation_state','=','win'),('state','in',['progress','manual']) , '&', ('from_adhoc','=',True),'&',('quotation_state','=','confirmed'),('state','=','draft')
 		], states={'draft': [('readonly', False)]}),
-		# 'sale_id': fields.many2one('sale.order', 'Sale Order', required=True, readonly=True, domain=['|',('quotation_state','=','win'),('state','in',['progress','manual']),('&',('from_adhoc','=', True),('quotation_state','=','approved'),('state','=', 'draft'))], states={'draft': [('readonly', False)]}),
 	}
 
 

@@ -288,12 +288,15 @@ class delivery_note(osv.osv):
 					loc_id = 12
 				sale_line_id = False
 				# if sale order line with material
-				if x.op_line_id.sale_line_material_id:
-					sale_line_id = x.op_line_id.sale_line_material_id.id #detect via order.preparation.line sale_line_material_id
+				# if x.op_line_id.sale_line_material_id:
+				# 	sale_line_id = x.op_line_id.sale_line_material_id.id #detect via order.preparation.line sale_line_material_id
 
-				elif  x.op_line_id.move_id and x.op_line_id.move_id.sale_line_id:
-					# if old op not has sale_line_material_id on order_preparation_line object
-					sale_line_id = x.op_line_id.move_id.sale_line_id.id
+				# elif  x.op_line_id.move_id and x.op_line_id.move_id.sale_line_id:
+				# 	# if old op not has sale_line_material_id on order_preparation_line object
+				# 	sale_line_id = x.op_line_id.move_id.sale_line_id.id
+
+
+				sale_line_id = x.op_line_id.sale_line_id.id
 				
 				move_id = stock_move.create(cr,uid,{
 					'name' : x.product_id.name,

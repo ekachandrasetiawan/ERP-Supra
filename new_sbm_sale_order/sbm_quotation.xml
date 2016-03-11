@@ -885,7 +885,7 @@
 							<form string="Form order line " version="7.0">
 								<field name="payment_term"/>
 								<field name="order_policy"/>
-								<field name="term_condition"/>
+								<field name="internal_notes" string="Terms And Conditions"/>
 								<field name="note" string="Note"/>
 							</form>
 						</group>
