@@ -112,6 +112,8 @@
 		<field name="type">search</field>
 		<field name="arch" type='xml'>
 			<search string=" Order Material tracking filter">
+				   <filter icon="terp-dolar_ok!" string="Posted" domain="[('status','not in',['draft','cancel'])]" help="Posted" name="filter_posted"/>
+				    <filter icon="terp-dolar_ok!" string="Non Posted" domain="[('status','in',['draft','cancel'])]" help="Non Posted" name="filter_nonposted"/>
 				  <field name="sale_order_id" filter_domain="[('sale_order_id','ilike',self)]" string="No So"/>
 				  <field name="product_id" filter_domain="[('product_id','ilike',self)]"/>
 				   <field name="status" filter_domain="[('status','ilike',self)]" string="Status"/>
@@ -138,10 +140,11 @@
 		<record model="ir.actions.act_window" id="action_report_material_line">
 			<field name="name">Report Order Material Delivery Tracking</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">sale.order.material.line</field>
+			<field name="res_model">sale.order.material.line</field> 
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="limit">100</field>
+			<field name="limit">50</field>
+			 <field name="context">{"search_default_filter_posted":1,"search_default_filter_nonposted":1}</field>
 			<!-- skdhfjdhfkh -->
 		</record>
 
