@@ -489,7 +489,7 @@ class delivery_note(osv.osv):
 		if val.picking_id.id:
 			# if 
 			if not old_picking:
-				raise osv.except_osv('Error','EEEE1')
+				# raise osv.except_osv('Error','EEEE1')
 				
 				stock_move = self.pool.get('stock.move')
 				partial_data = {}
