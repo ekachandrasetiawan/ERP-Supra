@@ -22,7 +22,7 @@ class delivery_note(osv.osv):
 
 	def create_invoice_dn(self,cr,uid,ids,context={}):
 		dn = self.browse(cr,uid,ids,context)[0] #objek delivery Note id dari ids
-		
+		isi_noteline=[]
 		op = self.pool.get('order.preparation').browse(cr,uid,dn.prepare_id.id)#browse objek Order Preparation id dari dn.prepare_id.id
 		so = self.pool.get('sale.order').browse(cr,uid,op.sale_id.id)#browse objek sale order id dari op.sale_id.id
 		localtime = time.asctime( time.localtime(time.time()) )#waktu Local
@@ -62,6 +62,16 @@ class delivery_note(osv.osv):
 					raise osv.except_osv(_('Warning'),_('Invoice dari sale order sudah terbentuk\n'+'Id :'+str(this_invoice_so.id)+"\nNo Kwitansi :"+str(this_invoice_so.kwitansi)+"\n No Faktur :"+str(this_invoice_so.faktur_pajak_no))) #}
 
 		#nilai yang akan di input di invoice
+		for note_lines in dn.note_lines:
+			# nilai yang akan di input ke invoice line
+			isi_noteline.append((0,0,{
+			'product_id':note_lines.product_id.id, #dari product account invoice line
+			'quantity':note_lines.product_qty, #dari qty account invoice line
+			'price_unit':note_lines.sale_line_id.price_unit, #dari price sale order line
+			'uos_id':note_lines.product_uom.id,#dari uom account invoice line
+			
+			'name':note_lines.product_id.name#dari nama  product di note_lines
+			})) 
 		values_invoice={ 
 			'partner_id':dn.partner_id.id,# dari dn customer
 			'journal_id':1, #isinya sales journal idr
@@ -74,25 +84,15 @@ class delivery_note(osv.osv):
 			'user_id':so.user_id.id,#  sales person dari so
 			'origin':dn.name,# delivery note 
 			'name':dn.poc,# Customer Reference dari dn
-
+			'invoice_line':isi_noteline
 		}
 		
 		create_invoice =act_inv.create(cr, uid, values_invoice, context=None) # untuk membuat Invoice blm termasuk invoice line
 	
 		#perulangan untuk masuk ke delivery note_lines
-		for note_lines in dn.note_lines:
-			# nilai yang akan di input ke invoice line
-			values_invoice_line = {
-			'product_id':note_lines.product_id.id, #dari product account invoice line
-			'quantity':note_lines.product_qty, #dari qty account invoice line
-			'price_unit':note_lines.sale_line_id.price_unit, #dari price sale order line
-			'uos_id':note_lines.product_uom.id,#dari uom account invoice line
-			'invoice_id':create_invoice,#dari invoice yg di buat sebelumnya
-			'name':note_lines.product_id.name#dari nama  product di note_lines
-			}
+		
 		
 
-			create_invoice_line = act_inv_line.create(cr,uid, values_invoice_line , context=None)# untuk membuat invoice line di invoice yg tadi di buat
 
 
 		

@@ -234,7 +234,39 @@ class Sale_order(osv.osv):
 	def copy_pure_quotation(self,cr,uid,ids,context=None):
 		# print "CALLEDDD",ids;
 		rec = self.browse(cr,uid,ids,context)[0]
-		
+		isi_line = []
+		isi_tax = []
+		isi_material=[]
+
+
+		for line in rec.order_line:
+			for taxid in line.tax_id:
+				isi_tax.append((taxid.id))
+			print isi_tax
+			for material in line.material_lines:
+				isi_material.append((0,0,
+					{
+					'product_id':material.product_id.id,
+					'desc':material.desc,
+					'qty':material.qty,
+					'uom':material.uom.id,
+					'picking_location':material.picking_location.id
+					}))
+			isi_line.append((0,0,
+				{
+				'product_id':line.product_id.id,
+				'name':line.name,
+				'product_uom_qty':line.product_uom_qty,
+				'price_unit':line.price_unit,
+				'discount':line.discount,
+				'base_total':line.base_total,
+				'price_subtotal':line.price_subtotal,
+				'tax_id':isi_tax,
+				'amount_tax':line.amount_tax,
+				'material_lines':isi_material
+				}))
+
+			# print isi_line,"ini isiiiiiiiiiiiiiiiiiiiiiiiiiii lineeeeeeeeeeeeeeeeee"
 		prepareNewSO = {
 			'origin':rec.origin,
 			'order_policy':rec.order_policy,
@@ -259,9 +291,14 @@ class Sale_order(osv.osv):
 			'project_id':rec.project_id.id,
 			'pricelist_id':rec.pricelist_id.id,
 			'partner_invoice_id':rec.partner_invoice_id.id,
-			'group_id':rec.group_id.id
+			'group_id':rec.group_id.id,
+			'order_line':isi_line
 
 		}
+
+
+
+			
 		ListScope1 = []
 		ListScope2 = []
 		ListTerms = []
@@ -280,41 +317,6 @@ class Sale_order(osv.osv):
 		newOrderId = self.create(cr,uid,prepareNewSO,context)
 		print prepareNewSO
 
-		for line in rec.order_line:
-			prepareTax = []
-			for tax in line.tax_id:
-				prepareTax.append(tax.id)
-			newLineObj = self.pool.get('sale.order.line')
-			newLine = {
-				'product_uos_qty':line.product_uos_qty,
-				'product_uom':line.product_uom.id,
-				'product_uom_qty':line.product_uom_qty,
-				# 'discount':line.discount,
-				'product_uos':line.product_uos.id,
-				'sequence':line.sequence,
-				'order_id':newOrderId,
-				# 'price_unit':line.price_unit,
-				'name':line.name,
-				'company_id':line.company_id.id,
-				'salesman_id':line.salesman_id.id,
-				'state':'draft',
-				'product_id':line.product_id.id,
-				'order_partner_id':line.order_partner_id.id,
-				'th_weight':line.th_weight,
-				'type':line.type,
-				'address_allotment_id':line.address_allotment_id.id,
-				'procurement_id':line.procurement_id.id,
-				'delay':line.delay,
-				'product_onhand':line.product_onhand,
-				'product_future':line.product_future,
-				'discount_nominal':line.discount_nominal,
-				'tax_id':[(6,0,prepareTax)]
-			}
-			# print "NEW LINE ",newLine
-			newLineObj.create(cr,uid,newLine,context)
-
-		# print "NEW ID    ",newOrderId
-		
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')
 		return {
@@ -330,8 +332,9 @@ class Sale_order(osv.osv):
 		}
 
 	def _check_before_save(self,cr,uid,order_line):
-		print order_line, "<.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.>"
+		# print order_line, "<.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.>"
 		for material in order_line:
+			print material,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 			material_lines = material[2]['material_lines']
 		if order_line and material_lines:
 			res = True
@@ -341,7 +344,7 @@ class Sale_order(osv.osv):
 
 	def create(self, cr, uid,vals, context=None):
 		res =None
-		print vals, "*****-----*****-----*****-----*****-----*****-----*****-----"
+		# print vals, "*****-----*****-----*****-----*****-----*****-----*****-----"
 		if(self._check_before_save(cr,uid,vals.get('order_line'))):
 			sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
 			vals['quotation_no'] = sequence_no_quotation
@@ -889,7 +892,7 @@ class sale_order_line(osv.osv):
 		return amount_tax_total
 
 	def _count_amount_line(self, cr, uid, ids, name, args, context={}):
-		print "PANGGIL _count_amount_line ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+		# print "PANGGIL _count_amount_line ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 		res = {}
 		order_lines = self.browse(cr,uid,ids,context=context)
 		
