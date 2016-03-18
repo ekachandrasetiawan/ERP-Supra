@@ -128,10 +128,12 @@ class order_preparation(osv.osv):
 				if x.material_lines == []:
 					raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
 
-				if loc:
-					material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
-				else:
-					material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
+				# if loc:
+				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
+				# else:
+				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
+
+				material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
 
 				for y in so_material_line.browse(cr, uid, material_lines):
 					# Cek Material Line Dengan OP Line
@@ -190,7 +192,8 @@ class order_preparation(osv.osv):
 				search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
 				print "-----",l.id
 				if search_dn_lm:
-					search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', '=' , [search_dn_lm])])
+					search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , search_dn_lm)])
+					print 'AAAAAAAAAAAA ',search_cek_return
 					# Cek DN Line Material Return
 					for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
 						if rn.stock_move_id.state == 'done':
@@ -200,8 +203,6 @@ class order_preparation(osv.osv):
 					nilai += l.product_qty - product_return
 
 			if x.sale_line_material_id.id:
-				if val.location_id.id <> x.sale_line_material_id.picking_location.id:
-					raise openerp.exceptions.Warning("Product Location Tidak Sama")
 
 				so_material_line=self.pool.get('sale.order.material.line').browse(cr, uid, [x.sale_line_material_id.id])[0]
 				mm = ' ' + so_material_line.product_id.default_code + ' '
