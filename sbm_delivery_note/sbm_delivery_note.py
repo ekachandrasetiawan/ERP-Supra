@@ -75,9 +75,26 @@ class delivery_note(osv.osv):
 		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
 		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
 		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
+		'name': fields.char('No#',required=False,track_visibility='onchange'),
+
 	}
 
 	_order = "id desc"
+
+	def package_repack(self,cr,uid,ids,context={}):
+		vals = self.browse(cr,uid,ids,context=context)
+		op = self.pool.get('order.preparation')
+		log_message = self.pool.get('')
+		for val in vals:
+			# op
+			if not val.prepare_id:
+				raise osv.except_osv(_('Error'),_('Cant Re Packing Package, Order Preparation False'))
+
+
+			op.write(cr,uid,val.prepare_id.id,{'state':'draft'})
+			op.log(cr,uid,val.prepare_id.id,_('Repacking Package !'))
+			self.package_draft(cr,uid,ids,context=context)
+		return True
 
 	def print_dn_out_new(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
@@ -111,6 +128,7 @@ class delivery_note(osv.osv):
 					raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
+	""""Event On Change Order Packaging"""
 	def prepare_change(self, cr, uid, ids, pre):
 		res = super(delivery_note,self).prepare_change(cr, uid, ids, pre)
 		if pre :
@@ -153,32 +171,43 @@ class delivery_note(osv.osv):
 			qty_dn_line = 0
 
 			for y in data_order_line:
-				so_material_line = self.pool.get('sale.order.material.line').search(cr, uid, [('sale_order_line_id', '=', [y.id])])
+				so_material_line = self.pool.get('sale.order.material.line').search(cr, uid, [('sale_order_line_id', 'in', [y.id])])
 				data_material_line = self.pool.get('sale.order.material.line').browse(cr, uid, so_material_line)					
 
 				material_line = []
 
 				# Cek Jumlah Line Material
+				# need check
 				if len(data_material_line) == 1:
 
 					for qty_dn in data_material_line:
 						
 						if qty_dn.product_id.id == y.product_id.id:
-							op_qty = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', '=', [qty_dn.id]), ('preparation_id', '=', [pre])])
+							op_qty = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', 'in', [qty_dn.id]), ('preparation_id', '=', [pre])])
 							qty_op = self.pool.get('order.preparation.line').browse(cr, uid, op_qty)[0]
 							
 							# Set Product Qty yang bukan Set
 							qty_dn_line = qty_op.product_qty
+				# else:
+					
+				# 	fullorder = y.product_uom_qty #prepare full order
+				# 	avgList = []
+				# 	for material in data.note_lines_material:
+				# 		avgM = (material.qty/material.op_line_id.sale_line_material_id.qty)*100.00
+				# 		avgList.append(avgM)
+				# 	avg = (sum(avgList)/len(avgList))
+				# 	qty_dn_line] = fullorder/(avg*100)
+					
 
 				for dline in data_material_line:
-					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', '=', [dline.id]), ('preparation_id', '=', [pre])])
+					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', 'in', [dline.id]), ('preparation_id', '=', [pre])])
 					data_op_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
 					
 					if data_op_line:
 						for dopline in data_op_line:
 
 							# Cek Batch
-							batch = self.pool.get('order.preparation.batch').search(cr, uid, [('batch_id', '=', [dopline.id])])
+							batch = self.pool.get('order.preparation.batch').search(cr, uid, [('batch_id', 'in', [dopline.id])])
 							data_batch = self.pool.get('order.preparation.batch').browse(cr, uid, batch)
 
 							if data_batch:
@@ -213,6 +242,9 @@ class delivery_note(osv.osv):
 					'note_lines_material': material_line,
 					'sale_line_id': y.id,
 					})
+			print line , "77777777777777777777777777777777777777777"
+
+			self._qty_recount(cr,uid,ids,line,{})
 
 			res['note_lines'] = line
 			res['poc'] = data.sale_id.client_order_ref
@@ -220,11 +252,48 @@ class delivery_note(osv.osv):
 			res['partner_id'] = data.sale_id.partner_id.id
 			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
 			res['attn'] = data.sale_id.attention.id
-			print res,"++++++++++++++++++"
+			# print res,"++++++++++++++++++"
+
 		return  {'value': res}
 
 
-	def get_sequence_no(self, cr, uid, ids, context=None):
+	"""
+		Will re write tuple of line data of delivery note line material
+		It will re count delivery note line material -> product_qty to count line set/lot qty from formula
+	"""
+	def _qty_recount(self,cr,uid,ids,line,context={}):
+		res = {}
+		
+		for data in line:
+			# print "<<<<<<<<<<<<<<<<--------\n",data,"\n-------->>>>>>>>>>>>>>"
+			sale_line = self.pool.get('sale.order.line').browse(cr,uid,data['sale_line_id'],context=context) #get sale line object
+
+
+			fullorder = sale_line.product_uom_qty #prepare full order
+
+
+			avgList = []
+			for materialTuple in data['note_lines_material']:
+				material = materialTuple[2]
+				# material.op_line_id.sale_line_material_id
+
+				op_line = self.pool.get('order.preparation.line').browse(cr,uid,material['op_line_id'],context=context) #non list browse
+				if not op_line.sale_line_material_id.id:
+					avgM = 100.0
+					# raise osv.except_osv(_('Error'),_('Sale Material Is FALSE\nPlease tell your System Administrator'))
+				else:
+					avgM = (material['qty']/op_line.sale_line_material_id.qty)*100.00
+				avgList.append(avgM)
+
+			avg = (sum(avgList)/len(avgList))
+			data['product_qty'] = fullorder*(avg/100.00)
+		return True
+
+	"""
+	Return String 
+	delivery note sequence no
+	"""
+	def get_new_sequence_no(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		dn = self.pool.get('delivery.note')
 		# Create No Delivery Note
@@ -242,12 +311,18 @@ class delivery_note(osv.osv):
 			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
 			dn_no =time.strftime('%y')+ vals[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(vals[2])]+'/'+vals[1]
 
-		return dn.write(cr,uid,val.id,{'name':dn_no})
+		return dn_no
 
 
-	def generate_no(self, cr, uid, ids, context=None):
+	def set_sequence_no(self, cr, uid, ids, force=False,context=None):
+		vals = self.browse(cr,uid,ids,context=context)
+		for val in vals:
+			if not val.name or force or val.name == '/': #if name is None / False OR if allow to write new sequence no
+				self.write(cr, uid, ids,{'name':self.get_new_sequence_no(cr,uid,ids,context=context)},context=context) #write name into new sequence
+		return True
 
-		return self.pool.get('delivery.note').get_sequence_no(cr, uid, ids)
+	def set_new_sequence_no(self,cr,uid,ids,context={}):
+		return self.set_sequence_no(cr,uid,ids,force=True,context=context)
 
 
 	def create_picking(self, cr, uid, ids, context=None):
@@ -336,6 +411,9 @@ class delivery_note(osv.osv):
 		stock_picking = self.pool.get('stock.picking')
 		stock_move = self.pool.get('stock.move')
 
+		if val.prepare_id.state != 'done':
+			raise osv.except_osv(_('Error'),_('Error to Approve Delivery Note\nOrder Preparation Document state not Ready / Done yet.\n Maybe order in Re Packing\n'))
+
 
 		cek = dn_line.search(cr,uid, [('note_id','=', ids)])
 		hasil = dn_line.browse(cr, uid, cek)
@@ -348,7 +426,7 @@ class delivery_note(osv.osv):
 		dn.package_confirm(cr,uid, ids)
 
 		# Jalankan Fungsi Sequence No
-		dn.get_sequence_no(cr, uid, ids)
+		dn.set_sequence_no(cr, uid, ids, False, context=context)
 
 		# Jalankan Fungsi Create Picking jika dn baru
 		if not val.prepare_id.picking_id:
@@ -428,6 +506,9 @@ class delivery_note(osv.osv):
 
 			# Create Stock Move
 			location = self.pool.get('stock.location').search(cr, uid, [('code', '=', 'PRTS')])
+			if not location:
+				raise osv.except_osv(_('Error'),_('Location Not Found, Please Contact System Administrator')) #rasie warning that location postpone not found
+
 			data_location = self.pool.get('stock.location').browse(cr, uid, location)[0]
 
 			for line in val.note_lines:
@@ -613,6 +694,30 @@ class packing_list_line(osv.osv):
 packing_list_line()
 
 class delivery_note_line(osv.osv):
+
+
+	"""Count Sale Item Qty from ORder Preparation
+		Example: 
+		On SO 1 Item Sale On sale line is 10 Set and consist of 10 ea material X and 10 ea material Y
+	"""
+	def _count_sale_item(self,cr,uid,ids,context={}):
+		res = {}
+		
+		browse = self.browse(cr,uid,ids,context=context)
+		for data in browse:
+			
+			fullorder = data.sale_line_id.product_uom_qty #prepare full order
+			avgList = []
+			for material in data.note_lines_material:
+				avgM = (material.qty/material.op_line_id.sale_line_material_id.qty)*100.00
+				avgList.append(avgM)
+			avg = (sum(avgList)/len(avgList))
+			res[data.id] = fullorder/(avg*100)
+
+		print res,"++++++++++++++++++++++>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
+		return res
+
 	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
 
 		return False
@@ -677,7 +782,7 @@ class delivery_note_line_material(osv.osv):
 		'product_uom': fields.many2one('product.uom',required=True, string='UOM'),
 		'stock_move_id': fields.many2one('stock.move',required=False, string='Stock Move'),
 		'desc': fields.text('Description',required=False),
-		'location_id':fields.many2one('stock.location',required=False),
+		'location_id':fields.many2one('stock.location',required=False,readonly=True,strin="Warehouse Location"),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
 		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
