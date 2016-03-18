@@ -797,34 +797,9 @@ class sale_order_material_line(osv.osv):
 	}
 
 	def _get_ho_location(self,cr,uid,ids,context={}):
-		test_obj = self.pool.get("sale.order")
+		objname, location_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'stock_location_stock')
 		
-		# print ["file.sql",],"aaaaaaaaaaaaaa"
-		# return False
-		
-# def default_get(self, cr, uid, picking_location, context=None):
-#    		 data = super(sale_order_material_line, self).default_get(cr, uid, picking_location, context=context)
-#    		 data['picking_location']=64
-#    		 return data
-
-	# 	# product_obj = cr.execute('SELECT "id" FROM "stock_location" where "name" like "HO" ')
-
-	# 	# args=["HO"]
-	# 	# sql='SELECT id FROM stock_location WHERE name IN (%s)' 
-	# 	# in_p=', '.join(list(map(lambda x: '%s', args)))
-	# 	# sql = sql % in_p
-	# 	# product_obj = cr.execute(sql, args)
-	# 	# print product_obj,"aaaaaaaaaaaaaaaaaaaaaaaaaa"
-		
-		# args=['%HO%']
-		# sql='SELECT id FROM stock_location WHERE name like (%s)' 
-		# # name=', '.join(map(lambda x: '%s', args))
-		# # sql = sql % name
-		# product_obj = cr.execute(sql, args)
-
-		# cari id dari stock.location where name like 'HO'
-		seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')]) 
-		return seq_id
+		return location_id
 	_defaults={
 		
 		'picking_location':_get_ho_location,
