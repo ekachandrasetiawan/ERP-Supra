@@ -190,14 +190,6 @@ class delivery_note(osv.osv):
 							qty_dn_line = qty_op.product_qty
 				# else:
 					
-				# 	fullorder = y.product_uom_qty #prepare full order
-				# 	avgList = []
-				# 	for material in data.note_lines_material:
-				# 		avgM = (material.qty/material.op_line_id.sale_line_material_id.qty)*100.00
-				# 		avgList.append(avgM)
-				# 	avg = (sum(avgList)/len(avgList))
-				# 	qty_dn_line] = fullorder/(avg*100)
-					
 
 				for dline in data_material_line:
 					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', 'in', [dline.id]), ('preparation_id', '=', [pre])])
@@ -214,7 +206,6 @@ class delivery_note(osv.osv):
 								# Jika Ada Batch Maka Tampilkan Batch
 								for xbatch in data_batch:
 									material_line.append((0,0,{
-										'name':xbatch.name,
 										'product_id':dopline.product_id.id,
 										'prodlot_id':xbatch.name.id,
 										'desc':xbatch.desc,
@@ -252,7 +243,7 @@ class delivery_note(osv.osv):
 			res['partner_id'] = data.sale_id.partner_id.id
 			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
 			res['attn'] = data.sale_id.attention.id
-			# print res,"++++++++++++++++++"
+			print res,"++++++++++++++++++9999999999999999999999999"
 
 		return  {'value': res}
 
@@ -775,18 +766,18 @@ class delivery_note_line_material(osv.osv):
 
 	_name = "delivery.note.line.material"
 	_columns = {
-		'product_id' : fields.many2one('product.product',required=True, string="Product"),
-		'prodlot_id':fields.many2one('stock.production.lot','Serial Number'),
+		'product_id' : fields.many2one('product.product', required=True, string="Product"),
+		'prodlot_id':fields.many2one('stock.production.lot', string='Serial Number', onupdate='cascade', ondelete='cascade',select=True),
 		'note_line_id': fields.many2one('delivery.note.line', 'Delivery Note Line', required=True, ondelete='cascade'),
 		'qty': fields.float('Qty',required=True),
 		'product_uom': fields.many2one('product.uom',required=True, string='UOM'),
 		'stock_move_id': fields.many2one('stock.move',required=False, string='Stock Move'),
 		'desc': fields.text('Description',required=False),
-		'location_id':fields.many2one('stock.location',required=False,readonly=True,strin="Warehouse Location"),
+		'location_id':fields.many2one('stock.location',required=False,readonly=True,string="Warehouse Location"),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
 		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
-		'state': fields.related('note_line_id','state', type='many2one', relation='delivery.note.line', string='State'),
+		'state': fields.related('note_line_id','state', type='selection', relation='delivery.note.line', string='State'),
 	}
 
 	_rec_name = 'product_id';
