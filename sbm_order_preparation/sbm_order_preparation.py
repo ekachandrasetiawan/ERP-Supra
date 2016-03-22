@@ -138,15 +138,15 @@ class order_preparation(osv.osv):
 				for y in so_material_line.browse(cr, uid, material_lines):
 					# Cek Material Line Dengan OP Line
 					nilai= 0
-					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id)])
+					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','!=',ids)])
 
 					for l in obj_op_line.browse(cr, uid, op_line):
 						# Cek Status OP 
 						op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
 						product_return = 0
-						search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', '=' , [l.id])])
+						search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
 						if search_dn_lm:
-							search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', '=' , [search_dn_lm])])
+							search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , [search_dn_lm])])
 							# Cek DN Line Material Return
 							for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
 								if rn.stock_move_id.state == 'done':
@@ -167,7 +167,7 @@ class order_preparation(osv.osv):
 										 'sale_line_id':y.sale_order_line_id.id
 							})
 			res['prepare_lines'] = line
-			print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",line
+
 			return  {'value': res}
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
