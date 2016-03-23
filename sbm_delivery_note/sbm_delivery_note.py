@@ -724,7 +724,6 @@ class delivery_note_line(osv.osv):
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
-		
 		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 		'sale_line_id': fields.many2one('sale.order.line',required=True, string="Sale Line"),
@@ -759,8 +758,6 @@ class delivery_note_line_material(osv.osv):
 			refunded_total = 0
 			for refund in item.note_line_material_return_ids:
 				refunded_total += refund.product_qty
-
-			
 			res[item.id] = refunded_total
 		return res
 
@@ -781,6 +778,26 @@ class delivery_note_line_material(osv.osv):
 	}
 
 	_rec_name = 'product_id';
+
+
+	def onchange_product_id(self, cr, uid, ids, product_id, uom_id):
+		product = self.pool.get('product.template').browse(cr, uid, product_id)
+		uom = uom_id
+		if product_id:
+			if uom_id == False:
+				uom = product.uom_id.id
+			else:
+				if uom_id == product.uom_id.id:
+					uom = product.uom_id.id
+				elif uom_id == product.uos_id.id:
+					uom = product.uom_id.id
+				elif uom_id <> product.uom_id.id or uom_id <> product.uos_id.id:
+					uom = product.uom_id.id
+				else:
+					uom = False
+					raise openerp.exceptions.Warning('UOM Error')
+		return {'value':{'product_uom':uom}}
+
 
 delivery_note_line_material()
 

@@ -63,29 +63,38 @@
 									 <field col="4" colspan="4" name="note_lines" nolabel="1" widget="one2many_list">
 												<form>
 													<field name="no"/>
-													<field name="product_id" on_change="onchange_product_id(product_id,product_uom)"/>
+													<field name="product_id" on_change="onchange_product_id(product_id,product_uom)" attrs="{'required':True}" />
 													<field name="product_qty"/>
-													<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
+													<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)" attrs="{'required':True}" />
 													<field name="product_packaging"/>
+													<field name="refunded_item" />
 													<field name="name" colspan="4"/>
-														<field name="refunded_item" />
+														
 														<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
 																<tree>
 																	<field name="product_id"/>
 																	<field name="prodlot_id"/>
 																	<field name="desc"/>
 																	<field name="qty"/>
-																	<field name="product_uom"/>
+																	<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
 																	<field name="refunded_item"/>
 																</tree>
+																<form>
+																	<field name="product_id"/>
+																	<field name="prodlot_id"/>
+																	<field name="desc"/>
+																	<field name="qty"/>
+																	<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
+																	<field name="refunded_item"/>
+																</form>
 															</field>
 												</form>
 												<tree string="Delviery Note Line" colors="red:state == 'donerefund'">
 														<field name="no"/>
 														<field name="name"/>
-														<field name="product_id" on_change="onchange_product_id(product_id,product_uom)"/>
+														<field name="product_id" on_change="onchange_product_id(product_id,product_uom)" attrs="{'required':True}" />
 														<field name="product_qty"/>
-														<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
+														<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)" attrs="{'required':True}" />
 														<field name="product_packaging"/>
 														<field name="refunded_item" />
 														<field name="state" invisible="1"/>
@@ -95,9 +104,17 @@
 																<field name="prodlot_id"/>
 																<field name="desc"/>
 																<field name="qty"/>
-																<field name="product_uom"/>
+																<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
 																<field name="refunded_item"/>
 															</tree>
+															<form>
+																<field name="product_id"/>
+																<field name="prodlot_id"/>
+																<field name="desc"/>
+																<field name="qty"/>
+																<field name="product_uom" on_change="onchange_product_id(product_id,product_uom)"/>
+																<field name="refunded_item"/>
+															</form>
 														</field>
 												</tree>
 									 </field>
