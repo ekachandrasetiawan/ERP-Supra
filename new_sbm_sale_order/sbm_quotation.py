@@ -798,7 +798,8 @@ class sale_order_material_line(osv.osv):
 
 	def _get_ho_location(self,cr,uid,ids,context={}):
 		objname, location_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'stock_location_stock')
-		
+		if not location_id:
+			raise osv.except_osv(_('Error'),_('Please Define Default Stock Location'))
 		return location_id
 	_defaults={
 		
@@ -998,10 +999,7 @@ class sale_order_line(osv.osv):
 		print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 		if product_id:
-			seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
-
-			if len(seq_id):
-				seq_id = seq_id[0]
+			seq_id = self.pool.get('sale.order.material.line')._get_ho_location(cr,uid,ids,context={})
 
 			product= self.pool.get('product.product').browse(cr,uid,product_id,{})
 			
