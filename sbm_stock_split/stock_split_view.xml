@@ -69,6 +69,10 @@
 
 					<button name="stock_split_approved" states="submited" string="Approved" type="object"  icon="gtk-apply" confirm="Are you sure to Approved" groups="sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager"/>
 
+					<button name="stock_split_cancel" states="submited" string="Cancel" type="object"  icon="STOCK_CANCEL" confirm="Are you sure to Cancel Stock Split" groups="sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager"/>
+
+	        		<button name="stock_split_set_draft" states="submited" string="Set To Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Stock Split" groups="sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager"/>
+
 					<button name="stock_split_processed" states="approved" string="Processed" type="object"  icon="gtk-apply" confirm="Are you sure to Processed" groups="stock.group_stock_user,stock.group_stock_manager,sbm_order_preparation.group_admin_warehouse"/>
 
 					<button name="stock_split_validate" states="processed" string="Validate" type="object"  icon="gtk-apply" confirm="Are you sure to Validate" groups="stock.group_stock_user,stock.group_stock_manager,sbm_order_preparation.group_admin_warehouse"/>
@@ -80,7 +84,7 @@
 						<h1>
 							<label string="STOCK SPLIT"/>
 							<separator string=""/>
-							<field name="no" class="oe_inline" colspan="4"/>
+							<field name="stock_split_no" class="oe_inline" colspan="4"/>
 						</h1>
 					</div>
 					<group col="4" colspan="4">
@@ -100,26 +104,23 @@
 									<field name="prodlot_id"/>
 								</tree>
 								<form string="Detail Item">
-									<field name="product_split_id" colspan="4"/>
+									<field name="product_split_id" colspan="4" on_change="cek_product_split(product_split_id)"/>
+									<field name="item_to_split_id"/>
 									<field name="qty"/>
-									<field name="uom_id"/>
+									<field name="uom_id" on_change="cek_product_split(product_split_id)"/>
 									<field name="convert_type"/>
 									<field name="prodlot_id"/>
-									<field name="item_to_split_id"/>
-									<field name="move_id"/>
 									<field name="qty_on_results"/>
 										<notebook colspan="4">
 											<page string="Child">
 												<field name="child_ids" nolabel="1">
-													<tree>
-														<field name="parent_id"/>
+													<tree string="Child" editable="buttom">
+														<field name="item_to_split_id"/>
 														<field name="item_splited_to_id"/>
+														<field name="prodlot_id"/>
 														<field name="qty"/>
+														<field name="uom_id"/>
 													</tree>
-													<form>
-														<field name="parent_id"/>
-														<field name="item_splited_to_id"/>
-													</form>
 												</field>
 											</page>
 										</notebook>
@@ -186,7 +187,11 @@
 		<field name="default" eval="False"/>
 		<field name="res_model">stock.split</field>
 	</record>
-
+	<record id="stock_split_cancel" model="mail.message.subtype">
+		<field name="name">Stock Split Cancel</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">stock.split</field>
+	</record>
 
 	<menuitem name="Stock Split" parent="stock.menu_stock_root" id="menu_stock_split" sequence="3" />
 
