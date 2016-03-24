@@ -19,7 +19,7 @@ class product_split(osv.osv):
 	_columns = {
 		'item_to_split':fields.many2one('product.product',string="Product", required=True, ondelete='restrict'),
 		'name':fields.related('item_to_split','name_template', type='char', string='Name'),
-		'item_splited_to':fields.many2one('product.product',string="Item To Split", required=True, ondelete='restrict'),
+		'item_splited_to':fields.many2one('product.product',string="Item Splited To", required=True, ondelete='restrict'),
 		'result_qty_fix':fields.boolean(string='Qty Splited Basen On Result After Processing'),
 		'split_into_batch':fields.boolean(string='Is Must Splited Into Batch No'),
 		'state': fields.selection([
@@ -34,6 +34,16 @@ class product_split(osv.osv):
 	_defaults = {
 		'state': 'draft',
 		}
+
+	def name_get(self, cr, uid, ids, context=None):
+		if not ids:
+			return []
+		reads = self.read(cr, uid, ids, ['name','item_to_split','item_splited_to'], context=context)
+		res = []
+		for record in reads:
+			name = record['item_to_split'][1] + ' -----To----- ' + record['item_splited_to'][1]
+			res.append((record['id'],name ))
+		return res
 
 product_split()
 
@@ -50,7 +60,7 @@ class stock_split(osv.osv):
 				use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
 				rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 				vals = self.pool.get('ir.sequence').get(cr, uid, 'stock.split').split('/')
-				StockSplitNo = time.strftime('%y')+item.no+'A/SBM-'+item.location_id.code+'-ADM/-'+use+'/'+rom[int(vals[2])]+'/'+time.strftime('%y')
+				StockSplitNo = time.strftime('%y')+item.no+'/SBM-'+item.location.code+'-ADM'
 			res[item.id] = StockSplitNo
 		return res
 
@@ -74,6 +84,7 @@ class stock_split(osv.osv):
 			('approved','Approved'),
 			('processed','Processed'),
 			('done','Done'),
+			('cancel','Cancel'),
 			], 'Status', readonly=True, select=True, track_visibility='onchange'),	
 	}
 
@@ -85,6 +96,7 @@ class stock_split(osv.osv):
 			'stock_split.stock_split_processed': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'processed',
 			'stock_split.stock_split_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
 			'stock_split.stock_split_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+			'stock_split.stock_split_cancel': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
 		},
 	}
 	_rec_name = 'no'
@@ -94,7 +106,6 @@ class stock_split(osv.osv):
 		'no':'/',
 		'date_order':time.strftime('%Y-%m-%d'),
 		}
-
 
 	def set_request_no(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
@@ -125,27 +136,145 @@ class stock_split(osv.osv):
 		res = self.write(cr, uid, ids, {'state': 'done'})
 		return res
 
+	def set_cancel(self, cr, uid, ids, context=None):
+		res = self.write(cr, uid, ids, {'state': 'cancel'})
+		return res
+
+	def stock_split_set_draft(self, cr, uid, ids, context=None):
+		self.set_draft(cr, uid, ids, context=None)
+		return True
+
+	def stock_split_cancel(self, cr, uid, ids, context=None):
+		self.set_cancel(cr, uid, ids, context=None)
+		return True
 
 	def stock_split_submited(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
 
+		if val.no==False:
+			self.set_request_no(cr, uid, ids, context=None)
 
+		self.set_submited(cr, uid, ids, context=None)
 		return True
 
 	def stock_split_approved(self, cr, uid, ids, context=None):
-
-
+		self.set_approved(cr, uid, ids, context=None)
 		return True
 
 	def stock_split_processed(self, cr, uid, ids, context=None):
+		picking = self.create_picking(cr, uid, ids, context=None)
+		self.set_processed(cr, uid, ids, context=None)
+		if picking:
+			self.write(cr,uid,ids,{'picking_id':picking},context=None)
+		return True
 
-
+	def validasi(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		for x in val.item_output:
+			if x.qty==0:
+				raise openerp.exceptions.Warning("Line Qty Tidak Boleh 0")
+			for y in x.child_ids:
+				if y.qty==0:
+					raise openerp.exceptions.Warning("Child Qty Tidak Boleh 0")
 		return True
 
 	def stock_split_validate(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		stock_picking = self.pool.get('stock.picking')
+		# Cek Validasi
+		validasi = self.validasi(cr, uid, ids, context=None)
 
+		if validasi==True:
+			picking = stock_picking.action_move(cr, uid, [val.picking_id.id])
+			if picking:
+				self.set_done(cr, uid, ids, context=None)
 
 		return True
 
+	def create_picking(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		stock_picking = self.pool.get('stock.picking')
+		stock_location = self.pool.get('stock.location')
+		stock_move = self.pool.get('stock.move')
+		work_order = self.pool.get('sbm.work.order')
+		work_order_line = self.pool.get('sbm.work.order.output')
+
+		picking_type = 'internal'
+		seq_obj_name =  'stock.picking.' + picking_type
+
+		set_loc_in = stock_location.search(cr, uid, [('name','=', 'POTONGAN IN')])
+		set_loc_out = stock_location.search(cr, uid, [('name','=', 'POTONGAN OUT')])
+		
+		loc_id_in = stock_location.browse(cr, uid, ids, set_loc_in)[0].id
+		loc_id_out = stock_location.browse(cr, uid, ids, set_loc_out)[0].id
+
+		origin = val.stock_split_no
+
+		# Create Stock Picking 
+		picking = stock_picking.create(cr, uid, {
+					# 'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+					'name':'INT/SP/'+val.no,
+					'origin':origin,
+					'stock_journal_id':1,
+					'move_type':'direct',
+					'invoice_state':'none',
+					'auto_picking':False,
+					'type':picking_type,
+					'state':'draft'
+					})
+
+		# Create Stock Move
+		for line in val.item_output:
+			move_id = stock_move.create(cr,uid,{
+				'name' : line.product_split_id.name,
+				'origin':origin,
+				'product_uos_qty':line.qty,
+				'product_uom':line.uom_id.id,
+				'product_qty':line.qty,
+				'product_uos':line.uom_id.id,
+				'product_id':line.item_to_split_id.id,
+				'auto_validate':False,
+				'location_id' :val.location.id,
+				'company_id':1,
+				'picking_id': picking,
+				'state':'draft',
+				'location_dest_id' :47
+				},context=context)
+
+			# Create Move By Child
+			for child in line.child_ids:
+				move_id = stock_move.create(cr,uid,{
+					'name' : line.product_split_id.name,
+					'origin':origin,
+					'product_uos_qty':child.qty,
+					'product_uom':child.uom_id.id,
+					'product_qty':child.qty,
+					'product_uos':child.uom_id.id,
+					'product_id':child.item_splited_to_id.id,
+					'auto_validate':False,
+					'location_id' :48,
+					'company_id':1,
+					'picking_id': picking,
+					'state':'draft',
+					'location_dest_id' :val.location.id
+				},context=context)
+				# Update Move ID Child
+				self.update_split_item(cr, uid, ids, picking, move_id, child.id, context=None)
+
+			# Update Move ID By Line
+			self.update_split_item(cr, uid, ids, picking, move_id, line.id, context=None)
+
+		stock_picking.action_assign(cr, uid, [picking])
+
+		return picking
+
+
+	def update_split_item(self, cr, uid, ids, picking, move, output_id, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		output_picking = self.pool.get('stock.split.item')
+		res = output_picking.write(cr,uid,output_id,{'move_id':move},context=context)
+		return res
 
 stock_split()
 
@@ -161,13 +290,38 @@ class stock_split_item(osv.osv):
 		'notes':fields.text('Notes'),
 		'prodlot_id':fields.many2one('stock.production.lot', string='Batch No'),
 		'child_ids':fields.one2many('stock.split.item.output','parent_id',string='Input'),
-		'item_to_split_id':fields.related('product.split','item_to_split', type='many2one', store=False, string='Item Split'),
+		'item_to_split_id':fields.related('product_split_id','item_to_split', type='many2one', relation='product.product', store=False, string='Item Split'),
 		'move_id':fields.many2one('stock.move', string='Move'),
 		'qty_on_results':fields.boolean('Qty On Result'),
 
 	}
 
 	_rec_name = 'stock_split_id'
+
+	def cek_product_split(self, cr, uid, ids, product_split_id, context=None):
+		res = {}
+		line = []
+		obj_product_split = self.pool.get('product.split')
+		obj_product = self.pool.get('product.product')
+
+		product_split = obj_product_split.browse(cr, uid, product_split_id)
+		product = obj_product.browse(cr, uid, product_split.item_to_split.id)
+
+		res['uom_id'] = product.uom_id.id
+		res['qty_on_results'] = product_split.result_qty_fix
+
+		for x in product.split_product_ids:
+			line.append((0,0,{
+				'product_split_id':product_split_id,
+				'item_to_split_id':x.item_to_split.id,
+				'item_splited_to_id':x.item_splited_to.id,
+				'qty': 0,
+				'uom_id': x.item_splited_to.uom_id.id
+				}))
+
+		res['child_ids'] = line
+
+		return {'value': res}
 
 stock_split_item()
 
@@ -179,9 +333,10 @@ class stock_split_item_output(osv.osv):
 	_description = "Stock Split Item Output"
 	_columns = {
 		'parent_id':fields.many2one('stock.split.item', string='Parent'),
-		'item_splited_to_id':fields.related('product.split','item_splited_to', type='many2one', store=False, string='Product Split'),
+		'item_splited_to_id':fields.related('product_split_id','item_splited_to', type='many2one', relation='product.product', store=False, string='Product Split'),
 	}
 
 stock_split_item_output()
+
 
 
