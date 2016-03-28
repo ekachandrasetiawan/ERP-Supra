@@ -772,7 +772,6 @@ class account_voucher(osv.osv):
         return res
 
     def onchange_partner_id(self, cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=None):
-        
         if not journal_id:
             return {}
         if context is None:
@@ -785,6 +784,8 @@ class account_voucher(osv.osv):
         # not passing the payment_rate currency and the payment_rate in the context but it's ok because they are reset in recompute_payment_rate
         ctx.update({'date': date})
         vals = self.recompute_voucher_lines(cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=ctx)
+
+        print '==================',vals
         vals2 = self.recompute_payment_rate(cr, uid, ids, vals, currency_id, date, ttype, journal_id, amount, context=context)
         for key in vals.keys():
             res[key].update(vals[key])
