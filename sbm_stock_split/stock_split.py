@@ -60,7 +60,7 @@ class stock_split(osv.osv):
 				use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
 				rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 				vals = self.pool.get('ir.sequence').get(cr, uid, 'stock.split').split('/')
-				StockSplitNo = time.strftime('%y')+item.no+'/SBM-'+item.location.code+'-ADM'
+				StockSplitNo = item.location.code+'/WHS/SPL'+time.strftime('%y')+'/'+item.no
 			res[item.id] = StockSplitNo
 		return res
 
@@ -275,6 +275,22 @@ class stock_split(osv.osv):
 		output_picking = self.pool.get('stock.split.item')
 		res = output_picking.write(cr,uid,output_id,{'move_id':move},context=context)
 		return res
+
+
+	def print_stock_split(self,cr,uid,ids,context=None):
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"stock-split/print&id="+str(ids[0])+"&uid="+str(uid)
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.stock.split',
+			'params': {
+				'redir'	: urlTo,
+				'uid':uid
+			},
+		}
+
 
 stock_split()
 

@@ -77,6 +77,8 @@
 
 					<button name="stock_split_validate" states="processed" string="Validate" type="object"  icon="gtk-apply" confirm="Are you sure to Validate" groups="stock.group_stock_user,stock.group_stock_manager,sbm_order_preparation.group_admin_warehouse"/>
 
+					<button name="print_stock_split" type="object" states="approved,processed,done" string="Print Stock Split" icon="gtk-dnd-multiple"/>
+
 					<field name="state" widget="statusbar" statusbar_visible="draft,submited,approved,processed,done"/>
 				</header>
 				<sheet>
