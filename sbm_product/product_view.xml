@@ -82,9 +82,8 @@
 		</record>
 
 		<record model="res.groups" id="group_rmpsm">
-			<field name="name">RMPSM NEW</field>
+			<field name="name">RMPSM</field>
 			<field name="category_id" ref="base.module_category_sales_management"/>
-			
 		</record>
 
 		<record model="res.groups" id="group_rmpsm">
