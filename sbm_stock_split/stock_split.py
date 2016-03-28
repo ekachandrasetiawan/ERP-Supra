@@ -60,7 +60,7 @@ class stock_split(osv.osv):
 				use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
 				rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 				vals = self.pool.get('ir.sequence').get(cr, uid, 'stock.split').split('/')
-				StockSplitNo = item.location.code+'/WHS/SPL'+time.strftime('%y')+'/'+item.no
+				StockSplitNo = item.location.code+'/WHS/SPL/'+time.strftime('%y')+'/'+item.no
 			res[item.id] = StockSplitNo
 		return res
 
@@ -71,13 +71,13 @@ class stock_split(osv.osv):
 				'stock.split': (lambda self, cr, uid, ids, c={}: ids, ['location'], 20),
 				'stock.split': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
 			}),
-		'no':fields.char(string='No', required=True),
-		'notes':fields.text(string='Notes'),
-		'date_order':fields.date(string='Date Order'),
-		'date_done':fields.date(string='Date Done'),
-		'picking_id':fields.many2one('stock.picking', string='Stock Picking'),
-		'item_output':fields.one2many('stock.split.item','stock_split_id', string='Item Output'),
-		'location':fields.many2one('stock.location',required=True, string='location'),
+		'no':fields.char(string='No', required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'notes':fields.text(string='Notes',readonly=True, states={'draft':[('readonly',False)]}),
+		'date_order':fields.date(string='Date Order',readonly=True, states={'draft':[('readonly',False)]}),
+		'date_done':fields.date(string='Date Done',readonly=True, states={'draft':[('readonly',False)]}),
+		'picking_id':fields.many2one('stock.picking', string='Stock Picking',readonly=True),
+		'item_output':fields.one2many('stock.split.item','stock_split_id', string='Item Output',readonly=True, states={'draft':[('readonly',False)]}),
+		'location':fields.many2one('stock.location',required=True, string='location',readonly=True, states={'draft':[('readonly',False)]}),
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('submited','Submited'),
@@ -99,7 +99,7 @@ class stock_split(osv.osv):
 			'stock_split.stock_split_cancel': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
 		},
 	}
-	_rec_name = 'no'
+	_rec_name = 'stock_split_no'
 
 	_defaults = {
 		'state': 'draft',
@@ -150,11 +150,12 @@ class stock_split(osv.osv):
 
 	def stock_split_submited(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-
-		if val.no==False:
-			self.set_request_no(cr, uid, ids, context=None)
-
-		self.set_submited(cr, uid, ids, context=None)
+		validasi = self.validasi(cr, uid, ids, context=None)
+		if validasi==True:
+			if val.no=='/':
+				self.set_request_no(cr, uid, ids, context=None)
+			
+			self.set_submited(cr, uid, ids, context=None)
 		return True
 
 	def stock_split_approved(self, cr, uid, ids, context=None):
@@ -170,12 +171,20 @@ class stock_split(osv.osv):
 
 	def validasi(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-		for x in val.item_output:
-			if x.qty==0:
-				raise openerp.exceptions.Warning("Line Qty Tidak Boleh 0")
-			for y in x.child_ids:
-				if y.qty==0:
-					raise openerp.exceptions.Warning("Child Qty Tidak Boleh 0")
+		if val.state=='processed':
+			for x in val.item_output:
+				if x.qty==0:
+					raise openerp.exceptions.Warning("Line Qty Tidak Boleh 0")
+				for y in x.child_ids:
+					if y.qty==0:
+						raise openerp.exceptions.Warning("Child Qty Tidak Boleh 0")
+		elif val.state=='draft':
+			for x in val.item_output:
+				for y in x.child_ids:
+					if y.item_splited_to_id.track_production==True and y.item_splited_to_id.track_incoming==True and y.item_splited_to_id.track_outgoing:
+						if y.prodlot_id.id==False:
+							raise openerp.exceptions.Warning("Batch Number Not Found")
+
 		return True
 
 	def stock_split_validate(self, cr, uid, ids, context=None):
@@ -256,6 +265,7 @@ class stock_split(osv.osv):
 					'location_id' :48,
 					'company_id':1,
 					'picking_id': picking,
+					'prodlot_id':child.prodlot_id.id,
 					'state':'draft',
 					'location_dest_id' :val.location.id
 				},context=context)
