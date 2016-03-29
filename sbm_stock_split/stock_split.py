@@ -106,6 +106,36 @@ class stock_split(osv.osv):
 		'date_order':time.strftime('%Y-%m-%d'),
 		}
 
+
+	def create(self, cr, uid, vals, context={}):
+		validasi = self.validasi_create(cr, uid, vals, context={})
+		if validasi==True:
+			return super(stock_split, self).create(cr, uid, vals, context=context)
+
+	def validasi_create(self, cr, uid, vals, context={}):
+		obj_product_split = self.pool.get('product.split')
+		if vals['item_output']:
+			for x in vals['item_output']:
+				if x[2]:
+					if x[2]['product_split_id']:
+						product_split = obj_product_split.browse(cr, uid, x[2]['product_split_id'])
+
+					if x[2]['qty']==0:
+						raise openerp.exceptions.Warning("Product ["+product_split.item_to_split.default_code+"] Qty Tidak Boleh 0")
+					if x[2]['qty_on_results']==False:
+						for y in x[2]['child_ids']:
+							if y[2]:
+								if y[2]['qty'] ==False or y[2]['qty'] ==0:
+									raise openerp.exceptions.Warning("Detail Line Product ["+product_split.item_to_split.default_code+"] Qty Tidak Boleh 0")
+
+					if product_split.split_into_batch==True:
+						for y in x[2]['child_ids']:
+							if y[2]['prodlot_id']:
+								print 'ADA PRODLOT'
+							else:
+								raise openerp.exceptions.Warning("Please Select Batch Number Product ["+product_split.item_to_split.default_code+"]")							
+		return True
+
 	def set_request_no(self, cr, uid, ids, context=None):
 		stock_split = self.pool.get('stock.split')
 		seq_no = self.pool.get('ir.sequence').get(cr, uid, 'stock.split.no')
@@ -147,7 +177,6 @@ class stock_split(osv.osv):
 	def stock_split_submited(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		validasi = self.validasi(cr, uid, ids, context=None)
-		self.set_request_no(cr, uid, ids, context=None)
 		if validasi==True:
 			if val.no=='/':
 				self.set_request_no(cr, uid, ids, context=None)
@@ -176,6 +205,26 @@ class stock_split(osv.osv):
 						raise openerp.exceptions.Warning("Child Qty Tidak Boleh 0")
 		elif val.state=='draft':
 			for x in val.item_output:
+				if not context:
+					context = {}
+
+				context['location'] = val.location.id
+				product =self.pool.get('product.product').browse(cr, uid, x.product_split_id.item_to_split.id, context=context)
+
+				# Validasi Stock
+				if x.qty > product.qty_available:
+					mm = ' [' + product.default_code + '] '
+					stock = ' ' + str(product.qty_available) + ' '
+					msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+
+					raise openerp.exceptions.Warning(msg)
+
+				# Validasi Product Batch
+				if x.product_split_id.split_into_batch==True:
+					for z in x.child_ids:
+						if z.prodlot_id.id==False:
+							raise openerp.exceptions.Warning("Please Select Batch Number Product ["+ x.product_split_id.item_to_split.default_code +"]")
+
 				for y in x.child_ids:
 					if y.item_splited_to_id.track_production==True and y.item_splited_to_id.track_incoming==True and y.item_splited_to_id.track_outgoing:
 						if y.prodlot_id.id==False:
@@ -340,6 +389,7 @@ class stock_split_item(osv.osv):
 				'item_to_split_id':x.item_to_split.id,
 				'item_splited_to_id':x.item_splited_to.id,
 				'qty': False,
+				'prodlot_id':False,
 				'uom_id': x.item_splited_to.uom_id.id,
 				'state_child':'draft'
 				}))
