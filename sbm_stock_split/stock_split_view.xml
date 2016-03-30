@@ -106,22 +106,24 @@
 									<field name="prodlot_id"/>
 								</tree>
 								<form string="Detail Item">
-									<field name="product_split_id" colspan="4" on_change="cek_product_split(product_split_id)"/>
-									<field name="item_to_split_id"/>
-									<field name="qty"/>
-									<field name="uom_id" on_change="cek_product_split(product_split_id)"/>
-									<field name="convert_type"/>
-									<field name="prodlot_id"/>
-									<field name="qty_on_results"/>
+									<field name="product_split_id" colspan="4" on_change="change_product_split(product_split_id)" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="item_to_split_id" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="qty" attrs="{'required':True, 'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="uom_id" on_change="change_product_split(product_split_id)" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="convert_type" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="qty_on_results" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="state" invisible="1"/>
 										<notebook colspan="4">
 											<page string="Child">
 												<field name="child_ids" nolabel="1">
 													<tree string="Child" editable="buttom">
-														<field name="item_to_split_id"/>
-														<field name="item_splited_to_id"/>
-														<field name="prodlot_id" domain="[('product_id', '=', item_splited_to_id)]"/>
-														<field name="qty"/>
-														<field name="uom_id"/>
+														<field name="state_child" invisible="1"/>
+														<field name="qty_on_results" invisible="1"/>
+														<field name="item_to_split_id" attrs="{'readonly':[('state_child', 'in', ['submited','processed','done','draft'])]}"/>
+														<field name="item_splited_to_id" attrs="{'readonly':[('state_child', 'in', ['submited','processed','done','draft'])]}"/>
+														<field name="prodlot_id" domain="[('product_id', '=', item_splited_to_id)]" attrs="{'readonly':[('state_child', 'in', ['submited','processed','done'])]}"/>
+														<field name="qty" attrs="{'invisible':[('qty_on_results', '=', True),('state_child', '=', 'draft')], 'required':[('qty_on_results', '=', False)]}"/>
+														<field name="uom_id" attrs="{'readonly':[('state_child', 'in', ['draft','approved'])]}"/>
 													</tree>
 												</field>
 											</page>
@@ -150,16 +152,18 @@
 		<field name="view_mode">tree,form</field>
 	</record>
 	
-	<record id="seq_stock_split_no" model="ir.sequence.type">
+	<record id="seq_type_stock_split_no_req" model="ir.sequence.type">
 		<field name="name">Stock Split No</field>
-		<field name="code">stock.split</field>
+		<field name="code">stock.split.no</field>
 	</record>
 
-	<record id="seq_stock_split_req_no" model="ir.sequence">
+	<record id="seq_stock_split_no_req" model="ir.sequence">
 		<field name="name">Stock Split No</field>
-		<field name="code">stock.split</field>
+		<field name="code">stock.split.no</field>
 		<field name="padding">4</field>
 	</record>
+
+
 
 	<!-- Log History Button -->
 	<record id="stock_split_submited" model="mail.message.subtype">
