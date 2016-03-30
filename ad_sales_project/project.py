@@ -604,7 +604,7 @@ class sales_activity(osv.osv):
 		'end' : fields.date('End', readonly=True),        
 		'name': fields.char('Refference', required=True, size=64, readonly=True, states={'draft': [('readonly', False)]}),
 		'user_id': fields.many2one('res.users', 'PIC', readonly=True),
-
+		'write_date':fields.datetime('write date',readonly=True),
 		'beforeplansenin': fields.one2many('before.plan.senin', 'activity_id', 'Plan', readonly=True),
 		'afterplansenin': fields.one2many('after.plan.senin', 'activity_id', 'Plan', readonly=True),
 		'beforeactualsenin': fields.one2many('before.actual.senin', 'activity_id', 'Actual', states={'done': [('readonly', True)]}),
