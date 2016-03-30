@@ -23,6 +23,26 @@
         auto="False" menu="False"/>
 
 
+
+        <!-- TAMBAH XML ID GROUP WAREHOUSE/DELIVERY NOTE - ADMIN -->
+        <record id="data_group_ws_dn_admin_model_data" model="ir.model.data">
+            <field name="module">base</field>
+            <field name="name">group_ws_dn_admin</field>
+            <field name="display_name">group_ws_dn_admin</field>
+            <field name="model">res.groups</field>
+            <field name="res_id">106</field>
+        </record>
+
+        <!-- TAMBAH XML ID GROUP SALES/Delivery Note - Admin -->
+        <record id="data_group_sales_dn_admin_model_data" model="ir.model.data">
+            <field name="module">base</field>
+            <field name="name">group_sales_dn_admin</field>
+            <field name="display_name">group_sales_dn_admin</field>
+            <field name="model">res.groups</field>
+            <field name="res_id">78</field>
+        </record>
+
+
     	<record model="ir.ui.view" id="view_inherit_sale_order">
 			<field name="name">sale.order.inherit</field>
 			<field name="model">sale.order</field>
@@ -113,8 +133,8 @@
 
 <!--                     <button name="action_process" states="torefund" string="Confirm &amp; Transfer" groups="stock.group_stock_user" type="object" class="oe_highlight"/>
  -->
-
-                    <button name="cancel_dn_all" type="object" states="done" string="Cancel Delivery Note" icon="terp-stock_effects-object-colorize"/>
+                    <!-- Yang dapat cancel jika sudah Done adalah Warehouse -->
+                    <button name="cancel_dn_all" type="object" states="done" groups="base.group_ws_dn_admin" string="Cancel Delivery Note" icon="terp-stock_effects-object-colorize"/>
 
                     <!-- <button name="cancel_dn_all" type="object" states="done" string="Cancel Delivery Note" icon="terp-stock_effects-object-colorize" confirm="Are you sure to Cancel Delivery Note"/> -->
 
@@ -122,10 +142,18 @@
 
                     <button name="%(stock.action_stock_invoice_onshipping)d" string="Create Invoice/Refund" states="refunded" type="action" class="oe_highlight" groups="base.group_user"/>
 
-                    <button name="package_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize"/>
-           			<button name="package_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
-           			<button name="package_confirm" type="object" states="draft" string="Approve" icon="gtk-apply"/>
-                    <button name="package_validate" type="object" states="approve" string="Validate" icon="gtk-apply"/>
+
+                    <!-- Yang dapat approve adalah Admin Ho Delivery Note Admin dan warehouse delivery note admin-->
+                    <button name="package_cancel" groups="base.group_sales_dn_admin,base.group_ws_dn_admin" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize"/>
+
+                    <!-- Yang dapat set draft adalah admin ho - delivery note admin -->
+           			<button name="package_draft" groups="base.group_sales_dn_admin" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize"/>
+
+                    <!-- Yang dapat approve adalah Admin HO / Group Sales/Delivery Note Admin  groups="base.group_sales_dn_admin" -->
+           			<button name="package_confirm" groups="base.group_sales_dn_admin" type="object" states="draft" string="Approve" icon="gtk-apply"/>
+
+                    <!-- Yang dapat approve adalah Warehouse / Group Warehouse/Delivery Note Admin -->
+                    <button name="package_validate" groups="base.group_ws_dn_admin" type="object" states="approve" string="Validate" icon="gtk-apply"/>
            			<field name="state" widget="statusbar" statusbar_visible="draft,approve,done" statusbar_colors='{"draft":"red","approve":"blue"}'/>
                 </header>
 				<sheet>
