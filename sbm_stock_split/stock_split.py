@@ -75,7 +75,7 @@ class stock_split(osv.osv):
 		'date_order':fields.date(string='Date Order',readonly=True, states={'draft':[('readonly',False)]}),
 		'date_done':fields.date(string='Date Done',readonly=True, states={'draft':[('readonly',False)]}),
 		'picking_id':fields.many2one('stock.picking', string='Stock Picking',readonly=True),
-		'item_output':fields.one2many('stock.split.item','stock_split_id', string='Item Output',readonly=True, states={'draft':[('readonly',False)],'approved':[('readonly',False)]}),
+		'item_output':fields.one2many('stock.split.item','stock_split_id', string='Item Output',readonly=True, states={'draft':[('readonly',False)],'processed':[('readonly',False)]}),
 		'location':fields.many2one('stock.location',required=True, string='location',readonly=True, states={'draft':[('readonly',False)]}),
 		'state': fields.selection([
 			('draft', 'Draft'),
@@ -201,8 +201,9 @@ class stock_split(osv.osv):
 				if x.qty==0:
 					raise openerp.exceptions.Warning("Line Qty Tidak Boleh 0")
 				for y in x.child_ids:
+					product =self.pool.get('product.product').browse(cr, uid, y.product_split_id.item_to_split.id, context={})
 					if y.qty==0:
-						raise openerp.exceptions.Warning("Child Qty Tidak Boleh 0")
+						raise openerp.exceptions.Warning("Detail Split Product ["+product.default_code+"] Qty Tidak Boleh 0")
 		elif val.state=='draft':
 			for x in val.item_output:
 				if not context:
@@ -210,6 +211,9 @@ class stock_split(osv.osv):
 
 				context['location'] = val.location.id
 				product =self.pool.get('product.product').browse(cr, uid, x.product_split_id.item_to_split.id, context=context)
+				
+				if x.qty==0:
+					raise openerp.exceptions.Warning("Line Qty Tidak Boleh 0")
 
 				# Validasi Stock
 				if x.qty > product.qty_available:
@@ -239,9 +243,23 @@ class stock_split(osv.osv):
 		validasi = self.validasi(cr, uid, ids, context=None)
 
 		if validasi==True:
-			picking = stock_picking.action_move(cr, uid, [val.picking_id.id])
-			if picking:
-				self.set_done(cr, uid, ids, context=None)
+			
+			validasi_update_move=self.validasi_update_move(cr, uid, ids, context=None)
+
+			if validasi_update_move==True:
+				picking = stock_picking.action_move(cr, uid, [val.picking_id.id])
+				if picking:
+					self.set_done(cr, uid, ids, context=None)
+		return True
+
+	def validasi_update_move(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		obj_stock_move = self.pool.get('stock.move')
+
+		for x in val.item_output:
+			obj_stock_move.write(cr,uid,x.move_id.id,{'product_qty':x.qty,'product_uos_qty':x.qty},context=context)
+			for y in x.child_ids:
+				obj_stock_move.write(cr,uid,y.move_id.id,{'product_qty':y.qty,'product_uos_qty':y.qty},context=context)
 
 		return True
 
@@ -298,7 +316,7 @@ class stock_split(osv.osv):
 
 			# Create Move By Child
 			for child in line.child_ids:
-				move_id = stock_move.create(cr,uid,{
+				child_move_id = stock_move.create(cr,uid,{
 					'name' : line.product_split_id.name,
 					'origin':origin,
 					'product_uos_qty':child.qty,
@@ -315,7 +333,7 @@ class stock_split(osv.osv):
 					'location_dest_id' :val.location.id
 				},context=context)
 				# Update Move ID Child
-				self.update_split_item(cr, uid, ids, picking, move_id, child.id, context=None)
+				self.update_split_item(cr, uid, ids, picking, child_move_id, child.id, context=None)
 
 			# Update Move ID By Line
 			self.update_split_item(cr, uid, ids, picking, move_id, line.id, context=None)
@@ -370,6 +388,7 @@ class stock_split_item(osv.osv):
 
 	_rec_name = 'stock_split_id'
 
+
 	def change_product_split(self, cr, uid, ids, product_split_id, context=None):
 		res = {}
 		line = []
@@ -398,6 +417,44 @@ class stock_split_item(osv.osv):
 
 		return {'value': res}
 
+
+	def change_child(self, cr, uid, ids, child_ids, product_split_id,context={}):
+		res = {}
+		line = []
+
+		if product_split_id:
+			if child_ids:
+				for x in child_ids:
+					if x[2]:
+						line.append({
+							'qty_on_results':x[2]['qty_on_results'],
+							'product_split_id':x[2]['product_split_id'],
+							'item_to_split_id':x[2]['item_to_split_id'],
+							'item_splited_to_id':x[2]['item_splited_to_id'],
+							'qty': x[2]['qty'],
+							'prodlot_id':x[2]['prodlot_id'],
+							'uom_id': x[2]['uom_id'],
+							'state_child':'draft'
+						})
+
+				product_split = self.pool.get('product.split').browse(cr, uid, product_split_id)
+
+				line.append({
+					'qty_on_results':product_split.result_qty_fix,
+					'product_split_id':product_split_id,
+					'item_to_split_id':product_split.item_to_split.id,
+					'item_splited_to_id':product_split.item_splited_to.id,
+					'qty': False,
+					'prodlot_id':False,
+					'uom_id': product_split.item_splited_to.uom_id.id,
+					'state_child':'draft'
+				})
+
+		res['child_ids'] = line
+
+		return {'value':res}
+
+
 stock_split_item()
 
 
@@ -411,6 +468,22 @@ class stock_split_item_output(osv.osv):
 		'item_splited_to_id':fields.related('product_split_id','item_splited_to', type='many2one', relation='product.product', store=False, string='Product Split'),
 		'state_child':fields.related('parent_id','state', type='char', store=False, string='State Child'),
 	}
+
+
+	def default_get(self, cr, uid, fields, context=None):
+
+		res = super(stock_split_item_output, self).default_get(cr, uid, fields,context=context)
+
+		# if 'product_split_id' in fields:
+		# print '=-=============++CEK CEK CEK==============',fields
+		# res.update({'qty_on_results': 13785})
+		# res.update({'product_split_id': 13785})
+		# res.update({'item_to_split_id': 13785})
+		# res.update({'item_splited_to_id': 13785})
+		# res.update({'uom_id': 13785})
+		# res.update({'state_child': 'draft'})
+		return res
+
 
 stock_split_item_output()
 
