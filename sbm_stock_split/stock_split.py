@@ -372,7 +372,7 @@ class stock_split_item(osv.osv):
 	_name = "stock.split.item"
 	_columns = {
 		'stock_split_id':fields.many2one('stock.split',string='Stock Split'),
-		'product_split_id':fields.many2one('product.split',string='Split', required=True),
+		'product_split_id':fields.many2one('product.split',string='Split'),
 		'qty':fields.float(string='Qty'),
 		'uom_id':fields.many2one('product.uom',string='UOM', required=True),
 		'convert_type':fields.selection([('tochange','To Change'),('tomake','To Make')], string='Convert Type'),
@@ -400,7 +400,7 @@ class stock_split_item(osv.osv):
 
 		res['uom_id'] = product.uom_id.id
 		res['qty_on_results'] = product_split.result_qty_fix
-
+		res['item_to_split_id'] =product_split.item_to_split.id
 		for x in product.split_product_ids:
 			line.append((0,0,{
 				'qty_on_results':x.result_qty_fix,
@@ -418,10 +418,9 @@ class stock_split_item(osv.osv):
 		return {'value': res}
 
 
-	def change_child(self, cr, uid, ids, child_ids, product_split_id,context={}):
+	def change_child(self, cr, uid, ids, child_ids, product_split_id, qty=False, uom_id=False, context={}):
 		res = {}
 		line = []
-
 		if product_split_id:
 			if child_ids:
 				for x in child_ids:
@@ -438,7 +437,7 @@ class stock_split_item(osv.osv):
 						})
 
 				product_split = self.pool.get('product.split').browse(cr, uid, product_split_id)
-
+				
 				line.append({
 					'qty_on_results':product_split.result_qty_fix,
 					'product_split_id':product_split_id,
@@ -470,18 +469,22 @@ class stock_split_item_output(osv.osv):
 	}
 
 
-	def default_get(self, cr, uid, fields, context=None):
-
+	def default_get(self, cr, uid, fields, context={}):
+		if context is None:
+			context = {}
+	
 		res = super(stock_split_item_output, self).default_get(cr, uid, fields,context=context)
+		product = self.pool.get('product.split').browse(cr, uid, context.get('item_to_split_id'))
 
-		# if 'product_split_id' in fields:
-		# print '=-=============++CEK CEK CEK==============',fields
-		# res.update({'qty_on_results': 13785})
-		# res.update({'product_split_id': 13785})
-		# res.update({'item_to_split_id': 13785})
-		# res.update({'item_splited_to_id': 13785})
-		# res.update({'uom_id': 13785})
-		# res.update({'state_child': 'draft'})
+		
+		if product:
+			print '===============',product.item_to_split.id
+			res.update({'qty_on_results': product.result_qty_fix})
+			res.update({'product_split_id': product.id})
+			res.update({'item_to_split_id': product.item_to_split.id})
+			res.update({'item_splited_to_id': product.item_splited_to.id})
+			res.update({'uom_id': product.item_splited_to.uom_id.id})
+			res.update({'state_child': 'draft'})
 		return res
 
 
