@@ -236,13 +236,12 @@ class Sale_order(osv.osv):
 		rec = self.browse(cr,uid,ids,context)[0]
 		isi_line = []
 		isi_tax = []
-		isi_material=[]
-
-
+		
 		for line in rec.order_line:
 			for taxid in line.tax_id:
 				isi_tax.append((taxid.id))
 			print isi_tax
+			isi_material=[]	
 			for material in line.material_lines:
 				isi_material.append((0,0,
 					{
@@ -296,9 +295,6 @@ class Sale_order(osv.osv):
 
 		}
 
-
-
-			
 		ListScope1 = []
 		ListScope2 = []
 		ListTerms = []
