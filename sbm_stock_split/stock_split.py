@@ -286,7 +286,7 @@ class stock_split(osv.osv):
 		# Create Stock Picking 
 		picking = stock_picking.create(cr, uid, {
 					# 'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
-					'name':'INT/SP/'+val.no,
+					'name':'INT/SS/'+val.no,
 					'origin':origin,
 					'stock_journal_id':1,
 					'move_type':'direct',
