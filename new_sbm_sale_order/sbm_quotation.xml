@@ -552,7 +552,7 @@
                      <button name="print_so_web" type="object" string="Print SO"/>
                 </header>
               
-              <page string="Other Information" position="before">
+                <page string="Other Information" position="before">
                             <field name="order_line" attrs="{'readonly':[('quotation_state','not in',['draft'])]}">
                                 <form string="Form order line " version="7.0">
                                 <!-- <header>
@@ -774,6 +774,8 @@
 							<field name="date_order" on_change="onchange_dateorder(date_order)" attrs="{'readonly':[('quotation_state','not in',['draft'])]}"/>
 							<field name="user_id" on_change="getGroupByUser(user_id)" required="True" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" />
 							<field name="group_id" attrs="{'readonly':[('quotation_state','not in',['draft'])]}" domain="[('is_main_group','=',True)]"/>
+
+                            <field name="repeat_so_id" readonly="1" attrs="{'invisible':[('repeat_so_id','=',False)]}" />
 						</group>
 						
 						</group>
@@ -870,14 +872,15 @@
 
 						</page>
 						<page string="Scope of Work">
-                        <separator string="PT. Supra Bakti Mandiri"/>
+                            <separator string="PT. Supra Bakti Mandiri"/>
                             <!-- <field name="scope_work_supra" nolabel="1"/> -->
                             <field name="scope_work_supra_text"/>
-	                     <separator string="Customer"/>
+	                        <separator string="Customer"/>
 	                     	<!-- <field name="scope_work_customer" nolabel="1"/> -->
 	                     	<field name="scope_work_customer_text"/>
 	                     	<!-- <field name="payment_term"/> -->
-                    </page>
+                        </page>
+                        
 
 					</notebook>
 					<group>
