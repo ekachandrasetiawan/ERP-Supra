@@ -72,7 +72,7 @@ class delivery_note(osv.osv):
 		'postpone_picking': fields.many2one('stock.picking', 'Postpone Picking', required=False,readonly=True, states={'draft': [('readonly', False)]}),
 		'work_order_id': fields.many2one('perintah.kerja',string="SPK",store=True,required=False,readonly=True, states={'draft': [('readonly', False)]}),
 		'work_order_in': fields.many2one('perintah.kerja.internal',string="SPK Internal",readonly=True, states={'draft': [('readonly', False)]}),
-		'state': fields.selection([('draft', 'Draft'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
+		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
 		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
 		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
 		'name': fields.char('No#',required=False,track_visibility='onchange'),
@@ -81,6 +81,19 @@ class delivery_note(osv.osv):
 
 	_order = "id desc"
 
+	"""
+	:return boolean True or False
+	It wil raise an exception if abnormal / false function data
+	"""
+	def validate(self,cr,uid,ids,context={}):
+		# check if item pass by order preparation
+		# to do
+		return True
+
+	"""
+	Action to repackage Delivery Note
+	This action will trigerring set DN state to draft and set Order Preparation to Draft
+	"""
 	def package_repack(self,cr,uid,ids,context={}):
 		vals = self.browse(cr,uid,ids,context=context)
 		op = self.pool.get('order.preparation')
@@ -394,7 +407,7 @@ class delivery_note(osv.osv):
 		return True
 
 
-	def approve_note(self, cr, uid, ids, context=None):
+	def submit(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		dn = self.pool.get('delivery.note')
 		dn_line = self.pool.get('delivery.note.line')
@@ -412,12 +425,10 @@ class delivery_note(osv.osv):
 			product =[x.id for x in data.note_lines_material if x.id]
 			if product == []:
 				raise openerp.exceptions.Warning("Delivery Note Line Tidak Memiliki Material Lines")
-
 		# Jalankan Fungsi Asli Package Confirm
-		dn.package_confirm(cr,uid, ids)
-
-		# Jalankan Fungsi Sequence No
-		dn.set_sequence_no(cr, uid, ids, False, context=context)
+		dn.package_confirm(cr,uid, ids,context=context)
+		self.validate(cr,uid,ids,context=context)
+		
 
 		# Jalankan Fungsi Create Picking jika dn baru
 		if not val.prepare_id.picking_id:
@@ -425,7 +436,33 @@ class delivery_note(osv.osv):
 		else:
 			self.write(cr,uid,ids,{'picking_id':val.prepare_id.picking_id.id})
 
+		# Jalankan Fungsi Sequence No
+		dn.set_sequence_no(cr, uid, ids, False, context=context)
+
+		self.write(cr, uid, ids, {'state':'submited'}, context=context)
+
 		return True
+
+	def approve_note(self, cr, uid, ids, context={}):
+
+		return self.write(cr, uid, ids, {'state':'approve'},context=context)
+
+	"""OVERRIDE package_confirm on module ad_delivery_note"""
+	def package_confirm(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
+			raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
+
+
+		for x in val.note_lines:
+			if x.product_qty <= 0:
+				raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
+		return True
+
+	def package_approve(self,cr,uid,ids,context={}):
+		
+		return self.write(cr,uid,ids,{"state":"apporove"})
 
 	def package_draft(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
@@ -724,6 +761,7 @@ class delivery_note_line(osv.osv):
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
+		
 		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 		'sale_line_id': fields.many2one('sale.order.line',required=True, string="Sale Line"),
@@ -758,6 +796,8 @@ class delivery_note_line_material(osv.osv):
 			refunded_total = 0
 			for refund in item.note_line_material_return_ids:
 				refunded_total += refund.product_qty
+
+			
 			res[item.id] = refunded_total
 		return res
 
@@ -778,26 +818,6 @@ class delivery_note_line_material(osv.osv):
 	}
 
 	_rec_name = 'product_id';
-
-
-	def onchange_product_id(self, cr, uid, ids, product_id, uom_id):
-		product = self.pool.get('product.template').browse(cr, uid, product_id)
-		uom = uom_id
-		if product_id:
-			if uom_id == False:
-				uom = product.uom_id.id
-			else:
-				if uom_id == product.uom_id.id:
-					uom = product.uom_id.id
-				elif uom_id == product.uos_id.id:
-					uom = product.uom_id.id
-				elif uom_id <> product.uom_id.id or uom_id <> product.uos_id.id:
-					uom = product.uom_id.id
-				else:
-					uom = False
-					raise openerp.exceptions.Warning('UOM Error')
-		return {'value':{'product_uom':uom}}
-
 
 delivery_note_line_material()
 
