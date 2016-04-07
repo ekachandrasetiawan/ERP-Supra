@@ -1,0 +1,1 @@
+SELECT id FROM stock_location where name like 'HO'

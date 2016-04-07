@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="lost_quotation_wizard" model='ir.ui.view'>
+			<field name='name'>lost.quotation.wizard</field>
+			<field name='model'>wizard.lost.quotation</field>
+			<field name='type'>form</field>
+
+			<field name='arch' type='xml'>
+					<form string='Lost Quotation' version='7.0'>
+						
+						<sheet>
+							<group>
+								<field name='reason' required="True"/>
+							</group>
+						</sheet>
+						<footer>
+							<button name='confirm' type='object' string='Confirm' />
+						</footer>
+					</form>
+			</field>
+		</record>
+
+		<record model='ir.actions.act_window' id="wizard_lost_quotation_form">
+			<field name="name">wizard.lost.quotation.form</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">wizard.lost.quotation</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="lost_quotation_wizard"/>
+			<field name="target">new</field>
+		</record>
+
+
+		<record id="wizard_lost_quotation_form_view" model="ir.ui.view">
+			<field name="name">quotation.form</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="quotation_form_view"/>
+			<field name="arch" type="xml">
+				<header position="inside">
+					<button name='%(wizard_lost_quotation_form)d' type='action' string='Lost' groups="new_sbm_sale_order.new_sales_supra,new_sbm_sale_order.new_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}"/>
+				</header>
+			</field>
+		</record>
+		
+		
+	</data>
+</openerp>

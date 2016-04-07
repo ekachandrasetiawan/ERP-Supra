@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<record id="revise_quotation_wizard" model='ir.ui.view'>
+			<field name='name'>revise.quotation.wizard</field>
+			<field name='model'>wizard.revise.quotation</field>
+			<field name='type'>form</field>
+
+			<field name='arch' type='xml'>
+					<form string='Revise Quotation' version='7.0'>
+						<sheet>
+							<group>
+								<field name='reason' required="True"/>
+							</group>
+						</sheet>
+						<footer>
+							<button name='confirm' type='object' string='Confirm' />
+						</footer>
+					</form>
+			</field>
+		</record>
+		
+		<record model='ir.actions.act_window' id="wizard_revise_quotation_form">
+			<field name="name">wizard.revise.quotation.form</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">wizard.revise.quotation</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="revise_quotation_wizard"/>
+			<field name="target">new</field>
+		</record>
+
+
+		<record id="quotation_count_revised_form_view" model="ir.ui.view">
+			<field name="name">quotation.form</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="quotation_form_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//page[@string='Revision History']/field[@name='revised_histories']" position="before">
+					<field name="count_revised"/>
+				</xpath>
+				<header position="inside">
+					<button name='%(wizard_revise_quotation_form)d' type='action' string='Revise' groups="sbm_order_handler.new_sales_supra,sbm_order_handler.new_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}" confirm="Sure want to revise quotation?"/>
+				</header>
+				
+
+			</field>
+		</record>
+		
+		
+	</data>
+</openerp>
