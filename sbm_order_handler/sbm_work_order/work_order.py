@@ -102,7 +102,6 @@ class SBM_Adhoc_Order_Request(osv.osv):
 			},
 		}
 
-
 	def create_adhoc_quotation(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		obj_sale_order = self.pool.get('sale.order')

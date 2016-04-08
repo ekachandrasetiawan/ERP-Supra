@@ -37,7 +37,7 @@ class order_preparation(osv.osv):
 
 	def _set_message_unread(self, cr, uid, ids, context=None):
 		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
+		id_group = m.get_object(cr, uid, 'sbm_order_handler', 'group_admin_ho').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
 		for x in user_group.users:
 			if x.id:
@@ -72,7 +72,7 @@ class order_preparation(osv.osv):
 
 	def _set_op_followers(self, cr, uid, ids, context=None):
 		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
+		id_group = m.get_object(cr, uid, 'sbm_order_handler', 'group_admin_ho').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
 
 		# Create Mail Post
