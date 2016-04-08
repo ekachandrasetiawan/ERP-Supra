@@ -1,0 +1,177 @@
+<openerp>
+	<data>
+		<record id="inherit_new_order_line_for_sale_order_op_lines" model="ir.ui.view">
+			<field name="name">inherit material line for op lines</field>
+			<field name="model">sale.order</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref='sbm_order_handler.inherit_new_order_line' />
+			<field name="arch" type="xml">
+				<field name="qty" position='after'>
+					<field name="on_process_qty"/>
+					<field name="shipped_qty"/>
+					<field name="returned_qty"/>
+				</field>
+			</field>
+		</record>
+
+		<record id="inherit_delivery_note" model="ir.ui.view">
+			<field name="name">inherit delivery note</field>
+			<field name="model">delivery.note</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form"/>
+			<field name="arch" type="xml">
+				<header>
+					<button name="create_invoice_dn" type="object"  states="done" string="Create Invoice"/>
+				</header>
+			</field>
+		</record>
+
+	<!-- 	<record id="inherit_report_material" model="ir.ui.view">
+			<field name="name">report material</field>
+			<field name="model">sale.order.material</field>
+			<field name="inherit_id" ref="new_sbm_sale_order.tree_order_material_delivery_tracking"/>
+			<field name="arch" type="xml">
+				<field name="qty" position='after'>
+					<field name="on_process_qty"/>
+					<field name="shipped_qty"/>
+					<field name="returned_qty"/>
+				</field> -->
+				<!-- <xpath expr="//tree[@string='Order Material Delivery Tracking']/field[@name='sale_order_id']" position="after">
+					<field name="shipped_qty"/>
+					<field name="returned_qty"/>
+				</xpath> -->
+<!-- 			</field>
+		</record>
+ -->
+ <record id="form_so_material_deliverytracking" model="ir.ui.view">
+		<field name='name'>form order material delivery tracking</field>
+		<field name='model'>sale.order.material.line</field>
+		<field name='type'>form</field>
+		<field name='arch' type='xml'>
+			<form string="Material Delivery Tracking" version="7.0">
+				<group>
+					<field name="sale_order_id" readonly="True" string="SO No"/>
+					<field name='product_id' readonly="True"/>
+					<field name='desc' readonly="True"/>
+					<field name='qty' readonly="True"/>
+					<field name="status" readonly="True" string="status"/>
+					<field name='uom' readonly="True"/>
+					<field name="shipped_qty" string="Uom Sent" readonly="True"/>
+					<field name="returned_qty" string="Uom Returned" readonly="True"/>
+					<field name="date_order"/>
+					<field name="due_date"/>
+				</group>
+				<notebook>
+					<page string="Order Preparation Line">
+						<field name='op_lines' readonly="True">
+							<tree editable="buttom" >
+								<field name="no_op" />
+								<field name="product_id" string="Item"/>
+								<field name="product_qty" string="Qty"/>
+								<field name="status" />
+							</tree>
+						</field>
+					</page>
+
+					<page string="Delivery Note">
+						<field name="delivery_note">
+							
+						</field>
+					</page>
+				</notebook>
+			</form>
+		</field>
+	</record>
+
+ 	<record id="tree_order_material_delivery_tracking" model="ir.ui.view">
+			<field name='name'>order material delivery tracking</field>
+			<field name='model'>sale.order.material.line</field>
+			<field name='type'>tree</field>
+			<field name='arch' type='xml'>
+				<tree string="Order Material Delivery Tracking">
+					<field name='sale_order_id' string="So No"/>
+					<field name='product_id' width="10"/>
+					<field name='desc'/>
+					<field name='qty'/>
+					<field name='status' string='Status'/>
+					<field name='uom'/>
+					<field name="shipped_qty" string="Uom Sent"/>
+					<field name="returned_qty" string="Uom Returned"/>
+					<field name="date_order"/>
+					<field name="due_date"/>
+					<!-- <field name="returned_qty"/> -->
+					
+					
+				</tree>
+			</field>
+	</record>
+	
+	<record id="material_tracking_filter" model="ir.ui.view">
+		<field name='name'>material tracking filter</field>
+		<field name="model">sale.order.material.line</field>
+		<field name="type">search</field>
+		<field name="arch" type='xml'>
+			<search string=" Order Material tracking filter">
+				   <filter icon="terp-dolar_ok!" string="Posted" domain="[('status','not in',['draft','cancel'])]" help="Posted" name="filter_posted"/>
+				    <filter icon="terp-dolar_ok!" string="Non Posted" domain="[('status','in',['draft','cancel'])]" help="Non Posted" name="filter_nonposted"/>
+				  <field name="sale_order_id" filter_domain="[('sale_order_id','ilike',self)]" string="No So"/>
+				  <field name="product_id" filter_domain="[('product_id','ilike',self)]"/>
+				   <field name="status" filter_domain="[('status','ilike',self)]" string="Status"/>
+				  
+				  <!-- <group expand="0" string="Group By...">
+                     
+                        <filter string="Status" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'status'}"/>
+                        
+                    </group> -->
+			</search>
+		</field>
+	</record>
+
+
+	<!-- 	<record model="ir.actions.act_window" id="action_report_material">
+			<field name="name">Action report material</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">sale.order.material.line</field>
+			<field name="view_type">tree</field>
+			<field name="view_mode">tree</field>
+		</record> -->
+
+
+		<record model="ir.actions.act_window" id="action_report_material_line">
+			<field name="name">Report Order Material Delivery Tracking</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">sale.order.material.line</field> 
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="limit">50</field>
+			 <field name="context">{"search_default_filter_posted":1,"search_default_filter_nonposted":1}</field>
+			<!-- skdhfjdhfkh -->
+		</record>
+
+		<!-- <record model="ir.actions.act_window.view" id="tree_order_material">
+	    	<field eval="1" name="sequence"/>
+	    	<field name="view_mode">tree</field>
+	    	<field name="view_id" ref="tree_order_material_delivery_tracking"/>
+	    	<field name="act_window_id" ref="action_report_material_line"/>
+		</record> -->
+<!-- 		<record model="ir.actions.act_window.view" id="act_material_tree">
+	    	<field eval="1" name="sequence"/>
+	    	<field name="view_mode">tree</field>
+	    	<field name="view_id" ref="tree_order_material_delivery_tracking"/>
+	    	<field name="act_window_id" ref="action_report_material_line"/>
+		</record>
+		<record model="ir.actions.act_window.view" id="act_material_form">
+		    <field eval="2" name="sequence"/>
+		    <field name="view_mode">form</field>
+		    <field name="view_id" ref="form_so_material_deliverytracking"/>
+		    <field name="act_window_id" ref="action_report_material_line"/>
+
+		</record> -->
+
+
+
+		<menuitem parent="sbm_inherit.sales_report"  name="Order Material Delivery Tracking" id="report_odr_dlv_track" action="action_report_material_line"/>
+			
+	
+	</data>
+</openerp>

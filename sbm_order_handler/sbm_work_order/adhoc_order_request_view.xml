@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+	<record model="ir.ui.view" id="action_sbm_adhoc_order_request_tree">
+		<field name="name">sbm.adhoc.order.request.tree</field>
+		<field name="model">sbm.adhoc.order.request</field>
+		<field name="type">tree</field>
+		<field name="arch" type="xml">
+			<tree string="ADHOC ORDER REQUEST">
+				<field name="name"/>
+				<field name="customer_id"/>
+				<field name="cust_ref_type"/>
+				<field name="cust_ref_no"/>
+				<field name="sale_group_id"/>
+				<field name="sales_man_id"/>
+				<field name="state"/>
+			</tree>
+		</field>
+	</record>
+	<record model="ir.ui.view" id="action_sbm_adhoc_order_request_form">
+	<field name="name">sbm.adhoc.order.request.form</field>
+	<field name="model">sbm.adhoc.order.request</field>
+	<field name="type">form</field>
+	<field name="arch" type="xml">
+		<form string="ADHOC ORDER REQUEST" version="7.0">
+			<header>
+
+				<button name="adhoc_submit" states="draft" string="Submit" type="object"  icon="gtk-apply" confirm="Are you sure to Submit Adhoc Order Request"/>
+
+        		<button name="adhoc_setdraft" states="submited" string="Set to Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Adhoc Order Request"/>
+
+        		<button name="adhoc_approve" states="submited" string="Approve" type="object"  icon="gtk-apply" confirm="Are you sure to Approve Adhoc Order Request"/>
+
+        		<button name="adhoc_validate" states="approved" string="Validate" type="object"  icon="gtk-apply" confirm="Are you sure to Validate Adhoc Order Request"/>
+
+        		<button name="print_adhoc_order_request" type="object" states="approved, done" string="Print Adhoc Order Request" icon="gtk-dnd-multiple"/>
+
+        		<button name="create_quotation" type="object" states="approved,done" string="Create Quotation" icon="STOCK_ADD" confirm="Are you sure To Create Quotation"/>
+
+				<field name="state" widget="statusbar" statusbar_visible="draft,submited,approved,done"/>
+
+			</header>
+			<sheet>
+				<div class="oe_title">
+					<h1>
+						<label string="ADHOC ORDER REQUEST"/>
+						<separator string=""/>
+						<field name="name" class="oe_inline" colspan="4"/>
+					</h1>
+				</div>
+				<group col="4" colspan="4">
+					<field name="customer_id" on_change="change_customer(customer_id)" colspan="4"/>
+					<field name="attention_id"/>
+					<field name="customer_site_id"/>
+					<field name="cust_ref_type"/>
+					<field name="cust_ref_no"/>
+					<field name="sales_man_id" on_change="change_sales(sales_man_id)"/>
+					<field name="sale_group_id"/>
+					<field name="due_date"/>
+					<!-- <field name="sale_order_id"/> -->
+					<field name="sale_order_id" readonly="1" attrs="{'invisible': [('sale_order_id','=',False)]}"/>
+				</group>
+				<notebook colspan="4">
+					<page string="Detail Item">
+						<field name="item_ids">
+							<tree string="Detail ITEM">
+								<field name="item_id"/>
+								<field name="desc"/>
+								<field name="qty"/>
+								<field name="uom_id"/>
+							</tree>
+							<form string="Detail ITEM">
+								<field name="item_id" colspan="4" on_change="change_item(item_id)"/>
+								<field name="desc" colspan="4"/>
+								<field name="qty"/>
+								<field name="uom_id" on_change="change_item(item_id)"/>
+									<notebook colspan="4">
+										<page string="DATA MATERIAL">
+											<field name="item_material_ids" colspan="4" nolabel="1" widget="one2many_list">
+												<tree string="Material Lines" editable="buttom">
+													<field name="item_id" on_change="change_item(item_id)"/>
+													<field name="desc"/>
+													<field name="qty"/>
+													<field name="uom_id" on_change="change_item(item_id)"/>
+												</tree>
+											</field>
+										</page>
+									</notebook>
+							</form>
+						</field>
+					</page>
+					<page string="Work Order">
+						<field name="wo_ids">
+							<tree>
+								<field name="request_no"/>
+								<field name="wo_no"/>
+								<field name="work_location"/>
+								<field name="location_id"/>
+								<field name="customer_id"/>
+								<field name="state"/>
+							</tree>
+						</field>
+					</page>
+
+					<page string="Term Of Payment">
+						<group>
+							<field name="term_of_payment"/>
+						</group>
+					</page>
+					<page string="Scope Of Work">
+						<group>
+							<field name="scope_of_work"/>
+						</group>
+					</page>
+					<page string="Term Condition">
+						<group>
+							<field name="term_condition"/>
+						</group>
+					</page>
+				</notebook>
+				<div class="oe_clear"/>
+				<field name="notes" class="oe_inline" placeholder="Notes..."/>
+			</sheet>
+			<div class="oe_chatter">
+				<field name="message_follower_ids" widget="mail_followers"/>
+				<field name="message_ids" widget="mail_thread"/>
+			</div>
+		</form>
+	</field>
+	</record>
+	<record model="ir.actions.act_window" id="action_sbm_adhoc_order_request">
+		<field name="name">ADHOC Order Request</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">sbm.adhoc.order.request</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+
+	<record id="seq_pb_new" model="ir.sequence.type">
+		<field name="name">Adhoc Order Request</field>
+		<field name="code">sbm.adhoc.order.request</field>
+	</record>
+
+	<record id="seq_sbm_adhoc_order_request" model="ir.sequence">
+		<field name="name">Adhoc Order Request</field>
+		<field name="code">sbm.adhoc.order.request</field>
+		<!-- <field name="suffix">/</field> -->
+		<field name="padding">5</field>
+	</record>
+
+	<!-- Log History Button -->
+	<record id="adhoc_pack_submited" model="mail.message.subtype">
+		<field name="name">Adhoc Order Request Submited</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.adhoc.order.request</field>
+	</record>
+	<record id="adhoc_pack_approved" model="mail.message.subtype">
+		<field name="name">Adhoc Order Request Approved</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.adhoc.order.request</field>
+	</record>
+	<record id="adhoc_pack_done" model="mail.message.subtype">
+		<field name="name">Adhon Order Request Done</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.adhoc.order.request</field>
+	</record>
+	<record id="adhoc_pack_draft" model="mail.message.subtype">
+		<field name="name">Adhon Order Request Set to Draft</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">sbm.adhoc.order.request</field>
+	</record>
+
+	<menuitem name="ADHOC Order Request" parent="sbm_work_order" id="sbm_adhoc_order_request" action="action_sbm_adhoc_order_request" sequence="1" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_support"/>
+</data>
+</openerp>

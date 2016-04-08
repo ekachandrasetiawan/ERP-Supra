@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="account_wizard" model='ir.ui.view'>
+			<field name='name'>account wizard</field>
+			<field name='model'>wizard.account.invoice.cancel.stage</field>
+			<field name='type'>form</field>
+
+			<field name='arch' type='xml'>
+					<form string='Account Wizard Cancel' version='7.0'>
+						<sheet>
+							<group>
+								<field name='cancel_reason' required="True"/>
+								<field name='cancel_stage' required="True" domain="[('model_id.model','=','account.invoice')]"/>
+							</group>
+						</sheet>
+						<footer>
+							<button name='confirm_cancel' type='object' string='Confirm' />
+						</footer>
+					</form>
+			</field>
+		</record>
+
+
+		
+	</data>
+</openerp>
