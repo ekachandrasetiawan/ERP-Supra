@@ -531,8 +531,8 @@
                       </record>
 
 
-		<record model="res.groups" id="new_sales_supra">
-			<field name="name">New Sales Supra</field>
+		<record model="res.groups" id="group_sales_supra">
+			<field name="name">Sales Supra</field>
 			<field name="category_id" ref="base.module_category_sales_management"/>
 			<field name="menu_access" eval="[(6,0,[ref('sale.menu_sale_order'),ref('base.menu_base_partner')])]" />
 		</record>
@@ -624,22 +624,48 @@
                         </page>
             </field>
         </record>
-		<record model="res.groups" id="new_sales_admin">
-			<field name="name">New Sales Admin</field>
+
+
+        <record id="data_group_sales_admin_model_data" model="ir.model.data">
+            <field name="module">base</field>
+            <field name="name">group_sales_admin</field>
+            <field name="display_name">group_sales_admin</field>
+            <field name="model">res.groups</field>
+            <field name="res_id">84</field>
+        </record>
+
+		<record model="res.groups" id="group_sales_admin">
+			<field name="name">Admin</field>
 			<field name="category_id" ref="base.module_category_sales_management"/>
 			<field name="menu_access" eval="[(6,0,[529,531,ref('sbm_inherit.mr_menu_sales'),ref('base.menu_sales'),ref('sale.menu_sale_order'),ref('base.menu_base_partner'),ref('product.menu_products'),ref('stock.menu_action_picking_tree4'),ref('sbm_inherit.mr_menu_ws'),ref('stock.menu_action_picking_tree'),ref('sbm_inherit.internal_move_req_sales_menu'),ref('ad_delivery_note.sale_minta_barang'),ref('sbm_inherit.speial_work_order_menu'),ref('sbm_inherit.speial_dn_menu'),ref('ad_perintah_kerja.sale_perintah_kerja'),ref('sbm_inherit.internal_move_sales_menu'),ref('ad_delivery_note.sale_delivery_note'),ref('base.menu_product')])]" />
 
 			<!-- <field name="menu_access" eval="[(6,0,[76])]"/> -->
 		</record>
 <!-- [ref('ir_ui_menu_id.id=529'), -->
-		<record model="res.groups" id="new_rmpsm">
-			<field name="name">New Sales RMPSM</field>
+        <record id="data_group_rmpsm_model_data" model="ir.model.data">
+            <field name="module">base</field>
+            <field name="name">group_rmpsm</field>
+            <field name="display_name">group_rmpsm</field>
+            <field name="model">res.groups</field>
+            <field name="res_id">58</field>
+        </record>
+
+		<record model="res.groups" id="group_rmpsm">
+			<field name="name">RMPSM</field>
 			<field name="category_id" ref="base.module_category_sales_management"/>
-			
 		</record>
 
-		<record model="res.groups" id="new_direksi">
-			<field name="name">New Sales Direksi</field>
+
+        <record id="data_group_direksi_model_data" model="ir.model.data">
+            <field name="module">base</field>
+            <field name="name">group_direksi</field>
+            <field name="display_name">group_direksi</field>
+            <field name="model">res.groups</field>
+            <field name="res_id">55</field>
+        </record>
+
+		<record model="res.groups" id="group_direksi">
+			<field name="name">Direksi</field>
 			<field name="category_id" ref="base.module_category_sales_management"/>
 			
 		</record>
@@ -718,9 +744,9 @@
 			<field name="arch" type="xml">
 				<form string="quotation" version="7.0">
 					<header>
-						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="sbm_order_handler.new_sales_supra,sbm_order_handler.new_sales_admin,base.group_system" />
+						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="sbm_order_handler.sales_supra,sbm_order_handler.group_sales_admin,base.group_system" />
 					
-						<button name="cancel_quotation" type="object" string="Cancel" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="sbm_order_handler.new_sales_supra,sbm_order_handler.new_sales_admin,base.group_system" />
+						<button name="cancel_quotation" type="object" string="Cancel" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="sbm_order_handler.sales_supra,sbm_order_handler.group_sales_admin,base.group_system" />
 
 	                    <field name="quotation_state" widget="statusbar" />
                		</header>
@@ -903,7 +929,7 @@
 
        
 		
-		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="sbm_order_handler.new_sales_supra,sbm_order_handler.new_sales_admin,base.group_system" sequence="1"/>
+		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="sbm_order_handler.sales_supra,sbm_order_handler.group_sales_admin,base.group_system" sequence="1"/>
 
 	</data>
 	 <data>
