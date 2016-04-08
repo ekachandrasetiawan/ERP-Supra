@@ -196,9 +196,9 @@
 		<field name="res_model">sbm.work.order</field>
 	</record>
 
-	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop,sbm_order_handler.group_admin_support"/>
+	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop,base.group_admin_support"/>
 
-	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop,sbm_order_handler.group_admin_support"/>
+	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop,base.group_admin_support"/>
 
 </data>
 </openerp>

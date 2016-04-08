@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-
 		<record id="win_quotation_wizard" model='ir.ui.view'>
 			<field name='name'>win.quotation.wizard</field>
 			<field name='model'>wizard.win.quotation</field>
@@ -22,8 +21,6 @@
 					</form>
 			</field>
 		</record>
-
-
 		<record model='ir.actions.act_window' id="wizard_win_quotation_form">
 			<field name="name">wizard.win.quotation.form</field>
 			<field name="type">ir.actions.act_window</field>
@@ -33,8 +30,6 @@
 			<field name="view_id" ref="win_quotation_wizard"/>
 			<field name="target">new</field>
 		</record>
-
-
 		<record id="wizard_quotation_win_form_view" model="ir.ui.view">
 			<field name="name">quotation.form</field>
 			<field name="model">sale.order</field>

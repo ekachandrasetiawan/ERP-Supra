@@ -535,7 +535,7 @@ class delivery_note(osv.osv):
 			# Create Stock Move
 			location = self.pool.get('stock.location').search(cr, uid, [('code', '=', 'PRTS')])
 			if not location:
-				raise osv.except_osv(_('Error'),_('Location Not Found, Please Contact System Administrator')) #rasie warning that location postpone not found
+				raise osv.except_osv(_('Error'),_('Location Not Found, Please Contact System Administrator. Code PRTS')) #rasie warning that location postpone not found
 
 			data_location = self.pool.get('stock.location').browse(cr, uid, location)[0]
 
