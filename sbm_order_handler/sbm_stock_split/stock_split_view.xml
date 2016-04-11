@@ -201,8 +201,8 @@
 		<field name="res_model">stock.split</field>
 	</record>
 
-	<menuitem name="Stock Split" parent="stock.menu_stock_root" id="menu_stock_split" sequence="3" />
+	<menuitem name="Stock Split" parent="stock.menu_stock_root" id="menu_stock_split" sequence="3" groups="sbm_order_handler.group_admin_warehouse,sbm_order_handler.group_admin_spv,stock.group_stock_user"/>
 
-	<menuitem name="Stock Split" parent="menu_stock_split" id="menu_stock_split_menu" action="action_stock_split" />
+	<menuitem name="Stock Split" parent="menu_stock_split" id="menu_stock_split_menu" action="action_stock_split" groups="sbm_order_handler.group_admin_warehouse,sbm_order_handler.group_admin_spv,stock.group_stock_user"/>
 </data>
 </openerp>

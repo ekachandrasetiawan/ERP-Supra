@@ -26,16 +26,26 @@
 
 		<!-- Setting Access Rigths	 -->
 
+		<!-- Order Preparation -->
 	    <record model="ir.model.access" id="ir_access_order_preparation_warehouse">
 	        <field name="name">Access Order Preparation User Warehouse</field>
 	        <field name="model_id" ref="model_order_preparation"/>
 	        <field name="perm_read" eval="True"/>
-	        <field name="perm_write" eval="False"/>
+	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
+	        <field name="group_id" eval="group_admin_warehouse"/>
 	    </record>
 
+	    <record model="ir.model.access" id="ir_access_order_preparation_admin_ho">
+	        <field name="name">Access Order Preparation User Admin HO</field>
+	        <field name="model_id" ref="model_order_preparation"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_admin_ho"/>
+	    </record>
 
 	    <record model="ir.model.access" id="ir_access_order_preparation_manager_warehouse">
 	        <field name="name">Access Order Preparation Manager Warehouse</field>
@@ -44,8 +54,75 @@
 	        <field name="perm_write" eval="False"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('stock.group_stock_manager'))]"/>
+	        <field name="group_id" eval="ref('stock.group_stock_manager')"/>
 	    </record>
+
+
+	    <!-- Order Preparation Line -->
+	    <record model="ir.model.access" id="ir_access_order_preparation_line_warehouse">
+	        <field name="name">Access Order Preparation Line User Warehouse</field>
+	        <field name="model_id" ref="model_order_preparation_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_admin_warehouse"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_order_preparation_line_admin_ho">
+	        <field name="name">Access Order Preparation Line User Admin HO</field>
+	        <field name="model_id" ref="model_order_preparation_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_admin_ho"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_order_preparation_line_manager_warehouse">
+	        <field name="name">Access Order Preparation Line Manager Warehouse</field>
+	        <field name="model_id" ref="model_order_preparation_line"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="ref('stock.group_stock_manager')"/>
+	    </record>
+
+
+	    <!-- Order Preparation Batch -->
+	    <record model="ir.model.access" id="ir_access_order_preparation_batch_warehouse">
+	        <field name="name">Access Order Preparation Batch User Warehouse</field>
+	        <field name="model_id" ref="ad_order_preparation.model_order_preparation_batch"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_admin_warehouse"/>
+	    </record>
+
+
+	    <record model="ir.model.access" id="ir_access_order_preparation_batch_admin_ho">
+	        <field name="name">Access Order Preparation Batch User Admin HO</field>
+	        <field name="model_id" ref="ad_order_preparation.model_order_preparation_batch"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="group_admin_ho"/>
+	    </record>
+
+
+	    <record model="ir.model.access" id="ir_access_order_preparation_batch_manager_warehouse">
+	        <field name="name">Access Order Preparation Batch Manager Warehouse</field>
+	        <field name="model_id" ref="ad_order_preparation.model_order_preparation_batch"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="group_id" eval="ref('stock.group_stock_manager')"/>
+	    </record>
+
 
 
 	    <record model="ir.model.access" id="ir_access_sale_order_material_line_admin_ho">
@@ -55,7 +132,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_ho'))]"/>
+	        <field name="group_id" eval="group_admin_ho"/>
 	    </record>
 
 
@@ -67,7 +144,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
+	        <field name="group_id" eval="group_admin_warehouse"/>
 	    </record>
 
 
@@ -78,7 +155,7 @@
 	        <field name="perm_write" eval="False"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('stock.group_stock_manager'))]"/>
+	        <field name="group_id" eval="ref('stock.group_stock_manager')"/>
 	    </record>
 
 
@@ -89,7 +166,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_ho'))]"/>
+	        <field name="group_id" eval="group_admin_ho"/>
 	    </record>
 	   
     </data>
