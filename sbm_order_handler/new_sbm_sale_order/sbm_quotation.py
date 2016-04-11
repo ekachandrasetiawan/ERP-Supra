@@ -462,7 +462,7 @@ class Sale_order(osv.osv):
 	def generate_material(self,cr,uid,ids,context={}):
 		res={}
 		vals = {}
-		if ids != list:
+		if type(ids) != list:
 			ids = [ids]
 		
 		sale_orders = self.browse(cr,uid,ids,context)
