@@ -11,7 +11,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
+	        <field name="group_id" eval="group_admin_warehouse"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_stock_split_item_admin_warehouse">
@@ -21,7 +21,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
+	        <field name="group_id" eval="group_admin_warehouse"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_stock_split_item_output_admin_warehouse">
@@ -31,7 +31,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
+	        <field name="group_id" eval="group_admin_warehouse"/>
 	    </record>
 
 
@@ -43,7 +43,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_spv'))]"/>
+	        <field name="group_id" eval="group_admin_spv"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_stock_split_item_admin_spv">
@@ -53,7 +53,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_spv'))]"/>
+	        <field name="group_id" eval="group_admin_spv"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_stock_split_item_output_admin_spv">
@@ -63,7 +63,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_spv'))]"/>
+	        <field name="group_id" eval="group_admin_spv"/>
 	    </record>
 
 
@@ -75,7 +75,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_manager'))]"/>
+	        <field name="group_id" eval="group_admin_manager"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_stock_split_item_admin_manager">
@@ -85,7 +85,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_manager'))]"/>
+	        <field name="group_id" eval="group_admin_manager"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_stock_split_item_output_admin_manager">
@@ -95,7 +95,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_manager'))]"/>
+	        <field name="group_id" eval="group_admin_manager"/>
 	    </record>
 
 

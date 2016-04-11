@@ -79,6 +79,8 @@
 					 </field>
 		</record>
 
+		<menuitem name="Order Preparation" parent="base.menu_sales" id="sale_order_preparation" action="ad_order_preparation.action_order_preparation_form" groups="sbm_order_handler.group_admin_warehouse,sbm_order_handler.group_admin_ho"/>
+
 		<record id="view_order_preparation_tree_new" model="ir.ui.view">
 				 <field name="name">order.preparation.tree</field>
 				 <field name="model">order.preparation</field>
