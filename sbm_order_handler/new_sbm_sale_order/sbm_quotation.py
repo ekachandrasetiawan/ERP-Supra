@@ -428,20 +428,21 @@ class Sale_order(osv.osv):
 		res = False
 		quotation_obj = self.pool.get("sale.order")
 		data_sekarang = self.browse(cr,uid,ids,context=context)[0]
+
 		if data_sekarang.order_line	==[]:
 			quotation_obj.write(cr,uid,ids,{'quotation_state':'draft'},context=context)
-			raise osv.except_osv(_('Warning'),_('Order Cant be confirmed'))
+			raise osv.except_osv(_('Warning'),_('Order Cant be confirmed, Order Line is Empty, Please Check Order Lines'))
 		else:
 			for line in data_sekarang.order_line:
 				if line.material_lines==[]:
 					quotation_obj.write(cr,uid,ids,{'quotation_state':'draft'},context=context)
-					raise osv.except_osv(_('Warning'),_('Order Cant be confirmed'))
+					raise osv.except_osv(_('Warning'),_('Order Cant be confirmed, Sale Order Material is Empty, Please Reload'))
 		if data_sekarang.quotation_state == 'draft':
 			# sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
 			if quotation_obj.write(cr,uid,ids,{'quotation_state':'confirmed'},context=context):
 				res = True
 		else:
-			raise osv.except_osv(_('Warning'),_('Order Cant be confirmed'))
+			raise osv.except_osv(_('Warning'),_('Order Cant be confirmed, Only Draft Qotation State can be confirmed!'))
 
 		return res
 
@@ -461,44 +462,49 @@ class Sale_order(osv.osv):
 	def generate_material(self,cr,uid,ids,context={}):
 		res={}
 		vals = {}
-		sale_order = self.browse(cr,uid,ids,context)[0]
-		if sale_order.quotation_state ==False:
-			self.write(cr,uid,ids,{'quotation_state':'win'})
-		for material in sale_order.order_line:
-
-			if material.material_lines ==[]:
-				product=self.pool.get('product.product').browse(cr,uid,material.product_id.id,context)
-				this_material = self.pool.get('sale.order.line')
-
-				seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
-
-				if len(seq_id):
-					seq_id = seq_id[0]
-				if product.bom_ids:
-					bom_line_set = self.pool.get('mrp.bom').browse(cr,uid,product.bom_ids[0].id)
-
-					vals= {
-					'material_lines':[(0,0,self.loadBomLine(cr,uid,bom_line,material.product_uom_qty,material.product_uom,seq_id)) for bom_line in bom_line_set.bom_lines],
-					
-					}
-				else:
-					vals={
-					'material_lines': [
-							(0,0,{
-								'product_id':material.product_id.id,
-								'qty':material.product_uom_qty,
-								'uom':material.product_uom.id,
-								'picking_location':seq_id,
-								'is_loaded_from_change':True
-								} )
-						],
-					
-					}
-				print material.product_uom.id,"<<<<<<<<<<<"
-				this_material.write(cr,uid,material.id,vals,context)
-			else:
-				raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
+		if ids != list:
+			ids = [ids]
 		
+		sale_orders = self.browse(cr,uid,ids,context)
+		print sale_orders,"------------------------------------------->>>>>>>>>>>>>>>>>>"
+		for sale_order in sale_orders:
+			if sale_order.quotation_state ==False:
+				self.write(cr,uid,ids,{'quotation_state':'win'})
+			for material in sale_order.order_line:
+
+				if material.material_lines ==[]:
+					product=self.pool.get('product.product').browse(cr,uid,material.product_id.id,context)
+					this_material = self.pool.get('sale.order.line')
+
+					seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
+
+					if len(seq_id):
+						seq_id = seq_id[0]
+					if product.bom_ids:
+						bom_line_set = self.pool.get('mrp.bom').browse(cr,uid,product.bom_ids[0].id)
+
+						vals= {
+						'material_lines':[(0,0,self.loadBomLine(cr,uid,bom_line,material.product_uom_qty,material.product_uom,seq_id)) for bom_line in bom_line_set.bom_lines],
+						
+						}
+					else:
+						vals={
+						'material_lines': [
+								(0,0,{
+									'product_id':material.product_id.id,
+									'qty':material.product_uom_qty,
+									'uom':material.product_uom.id,
+									'picking_location':seq_id,
+									'is_loaded_from_change':True
+									} )
+							],
+						
+						}
+					print material.product_uom.id,"<<<<<<<<<<<"
+					this_material.write(cr,uid,material.id,vals,context)
+				else:
+					raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
+			
 
 
 		
