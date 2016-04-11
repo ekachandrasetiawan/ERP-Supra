@@ -6,6 +6,7 @@
 	'description' : """ ALL SBM ORDER HANDLER """,
 	'depends': [
 		'sale',
+		'sbm_saleorder',
 		'sbm_inherit',
 		'ad_delivery_note',
 		'web',
