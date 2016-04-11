@@ -107,6 +107,14 @@ class order_preparation(osv.osv):
 		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
 	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
+
+		# default 
+		res = {}
+
+		res['picking_id'] = False
+
+
+
 		so_material_line = self.pool.get('sale.order.material.line')
 		obj_op_line = self.pool.get('order.preparation.line')
 		obj_op = self.pool.get('order.preparation')
@@ -114,8 +122,10 @@ class order_preparation(osv.osv):
 		obj_dn_line_mat_ret = self.pool.get('delivery.note.line.material.return')
 		obj_move = self.pool.get('stock.move')
 
+		so = self.pool.get('sale.order')
+
 		if sale:
-			res = {}; line = []
+			line = []
 			data = self.pool.get('sale.order').browse(cr, uid, sale)
 			
 			res['poc'] = data.client_order_ref
@@ -126,7 +136,10 @@ class order_preparation(osv.osv):
 			location = []
 			for x in data.order_line:
 				if x.material_lines == []:
-					raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
+					# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
+					so.generate_material(cr,uid,x.order_id.id,context=context)
+					so.log(cr,uid,x.order_id.id,_('Automatic Generate Material by OP Sale Change!'))
+					self.log(cr,uid,ids,_('Automatic Generate Order Line Material'))
 
 				# if loc:
 				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
@@ -167,6 +180,24 @@ class order_preparation(osv.osv):
 										 'sale_line_id':y.sale_order_line_id.id
 							})
 			res['prepare_lines'] = line
+
+
+			# check if picking exist on Sale.Order object
+			if data.picking_ids:
+				# if picking ids then we need to check state
+				for picking in data.picking_ids:
+					active = [] #list of browse record
+					if picking.state != 'cancel' or picking.state !='done':
+						print "Has active picking",picking
+						active.append(picking)
+
+				if len(active)==1:
+					# if only 1 active picking
+					# then wee need to add picking_id into order preparation
+					res['picking_id'] = active[0].id
+				
+
+			
 
 			return  {'value': res}
 

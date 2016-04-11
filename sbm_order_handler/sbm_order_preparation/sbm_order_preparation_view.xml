@@ -8,7 +8,7 @@
 					 <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_form"/>
 					 <field name="arch" type="xml">
 							<button name="preparation_confirm" position="replace">
-								<button name="preparation_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation" groups="sbm_order_handler.group_admin_ho"/>
+								<button name="preparation_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
 							</button>
 
 							<button name="preparation_cancel" position="replace">
