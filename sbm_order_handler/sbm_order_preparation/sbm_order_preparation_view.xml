@@ -16,7 +16,7 @@
 							</button>
 							
 							<button name="preparation_draft" position="replace">
-								<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="sbm_order_handler.group_admin_ho" confirm="Are you sure to Back To Draft Order Preparation"/>
+								<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="sbm_order_handler.group_admin_warehouse" confirm="Are you sure to Back To Draft Order Preparation"/>
 							</button>
 
 							<button name="preparation_done" position="replace">

@@ -134,12 +134,18 @@ class order_preparation(osv.osv):
 			res['partner_shipping_id'] = data.partner_shipping_id.id
 
 			location = []
+			old_so_doc_ids = []
 			for x in data.order_line:
 				if x.material_lines == []:
 					# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
-					so.generate_material(cr,uid,x.order_id.id,context=context)
-					so.log(cr,uid,x.order_id.id,_('Automatic Generate Material by OP Sale Change!'))
-					self.log(cr,uid,ids,_('Automatic Generate Order Line Material'))
+					old_so_doc_ids.append(x.order_id.id)
+
+			for old_id in old_so_doc_ids:
+				so.generate_material(cr,uid,old_id,context=context)
+				so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
+
+			for x in data.order_line:
+				
 
 				# if loc:
 				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
@@ -281,6 +287,7 @@ class order_preparation(osv.osv):
 		return True
 		
 	def preparation_draft(self, cr, uid, ids, context=None):
+
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_draft(cr, uid, ids, context=context)
 
