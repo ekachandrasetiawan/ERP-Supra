@@ -24,7 +24,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('group_admin_spv'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_spv'))]"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_delivery_note_admin_warehouse">
@@ -58,7 +58,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('group_admin_spv'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_spv'))]"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_delivery_note_line_admin_warehouse">
@@ -90,7 +90,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('group_admin_spv'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_spv'))]"/>
 	    </record>
 
 	    <record model="ir.model.access" id="ir_access_delivery_note_line_material_admin_warehouse">

@@ -20,7 +20,7 @@
 	        <field name="perm_write" eval="False"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('group_admin_warehouse'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
 	    </record>
 
 
@@ -33,7 +33,7 @@
 	        <field name="perm_write" eval="False"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('group_admin_warehouse'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
 	    </record>
 
 
@@ -55,7 +55,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('group_admin_ho'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_ho'))]"/>
 	    </record>
 
 
@@ -67,7 +67,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="False"/>
-	        <field name="groups" eval="[(4, ref('group_admin_warehouse'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_warehouse'))]"/>
 	    </record>
 
 
@@ -89,7 +89,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('group_admin_ho'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_order_handler.group_admin_ho'))]"/>
 	    </record>
 	   
     </data>
