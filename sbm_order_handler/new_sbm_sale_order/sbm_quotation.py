@@ -204,7 +204,6 @@ class Sale_order(osv.osv):
 
 	def create(self, cr, uid,vals, context=None):
 		res =None
-		# print vals, "*****-----*****-----*****-----*****-----*****-----*****-----"
 		if(self._check_before_save(cr,uid,vals.get('order_line'))):
 			sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
 			vals['quotation_no'] = sequence_no_quotation
@@ -215,12 +214,9 @@ class Sale_order(osv.osv):
 
 
 	def _count_total(self, cr, uid, ids, name, args, context={}):
-		print "PANGGIL _COUNT_TOTAL"
 		res = {}
-		print "cobaaa di baca"
-		print res,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<==============================================="
 		sale_order = self.browse(cr,uid,ids,context=context)
-		print sale_order
+		# print sale_order
 		total_base_total=0
 		for i in sale_order:
 			for r in i.order_line:
@@ -243,10 +239,7 @@ class Sale_order(osv.osv):
 			res[line.order_id.id]=True
 		return res.keys()
 	def _get_total_discount(self, cr, uid, ids, name, args, context={}):
-		print "PANGGIL _COUNT_TOTAL"
 		res = {}
-		print "cobaaa di baca"
-		print res,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<==============================================="
 		sale_order = self.browse(cr,uid,ids,context=context)
 		print sale_order
 		total_discount_nominal=0

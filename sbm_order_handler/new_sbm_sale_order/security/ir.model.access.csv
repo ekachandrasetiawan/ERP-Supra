@@ -54,7 +54,6 @@ wizard_after_actual_rabu_sales_supra,wizard.after.actual.rabu,ad_sales_project.m
 wizard_after_actual_selasa_sales_supra,wizard.after.actual.selasa,ad_sales_project.model_wizard_after_actual_selasa,base.group_sales_supra,1,1,1,1
 wizard_after_actual_senin_sales_supra,wizard.after.actual.senin,ad_sales_project.model_wizard_after_actual_senin,base.group_sales_supra,1,1,1,1
 wizard_before_actual_ahad_sales_supra,wizard.before.actual.ahad,ad_sales_project.model_wizard_before_actual_ahad,base.group_sales_supra,1,1,1,1
-wizard_before_actual_sabtu_sales_supra,wizard.before.actual.sabtu,ad_sales_project.model_wizard_before_actual_sabtu,base.group_sales_supra,1,1,1,1
 wizard_before_actual_jumat_sales_supra,wizard.before.actual.jumat,ad_sales_project.model_wizard_before_actual_jumat,base.group_sales_supra,1,1,1,1
 wizard_before_actual_kamis_sales_supra,wizard.before.actual.kamis,ad_sales_project.model_wizard_before_actual_kamis,base.group_sales_supra,1,1,1,1
 wizard_before_actual_rabu_sales_supra,wizard.before.actual.rabu,ad_sales_project.model_wizard_before_actual_rabu,base.group_sales_supra,1,1,1,1
