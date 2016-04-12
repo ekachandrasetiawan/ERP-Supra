@@ -116,7 +116,7 @@
 					 </field>
 				 </record>
 
-				<menuitem name="Delivery Note" parent="base.menu_sales" id="sale_delivery_note" action="ad_delivery_note.action_delivery_note_form" groups="sbm_order_handler.group_admin_ho"/>
+				<menuitem name="Delivery Note" parent="base.menu_sales" id="sale_delivery_note" action="ad_delivery_note.action_delivery_note_form" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_warehouse"/>
 				 
 	</data>
 </openerp>
