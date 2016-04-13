@@ -14,19 +14,105 @@ import re
 class acount_invoice(osv.osv):
 	_inherit = 'account.invoice'
 	_columns = {
-		'tax_transaction_type':fields.selection([('01','01 - Tot Non Tax Collector'),('02','02 - To Treasurer Collector'),('03','03 -To Non Treasurer Collector'),('04','04 - Other Base Tax Amount'),('06','06 - Other Referral'),('07','07 - Non Paid Referral'),('08','08 - Free Tax Referral'),('09','09 - Activa Referral')],string="Tax Transaction Type"),
+		'tax_transaction_type':fields.selection([('01','01 - To Non Tax Collector'),('02','02 - To Treasurer Collector'),('03','03 -To Non Treasurer Collector'),('04','04 - Other Base Tax Amount'),('06','06 - Other Referral'),('07','07 - Non Paid Referral'),('08','08 - Free Tax Referral'),('09','09 - Activa Referral')],string="Tax Transaction Type"),
 		'is_tax_replacement':fields.boolean('Is a Tax Replacement'),
 		'tax_no_1':fields.char('Tax No 1',size=3),
 		'tax_year':fields.char('Year',size=4),
 		'tax_no_2':fields.char('Tax No 2',size=8),
-		# 'partner_id':fields.many2one('res.partner','Customer',domain=['|','|',('customer','=', True),('is_company','=','True'),('child_ids.type','=','Invoice')])
+		# 'partner_id':fields.many2one('res.partner','Custo mer',domain=['|','|',('customer','=', True),('is_company','=','True'),('child_ids.type','=','Invoice')])
 	}
+
+	def _get_default_tax_no_1(self,cr,uid,ids,context=None):
+		res = False
+		print context
+		print "+"*200
+		# browsed = self.browse(cr, uid, ids, context=context)
+		
+		# if browsed:
+		# 	if type(browsed) == list:
+		# 		res = {}
+		# 		for s in browsed:
+		# 			# 010.031-16.1914197
+		# 			if s.faktur_pajak_no:
+		# 				res[s.id] = s.faktur_pajak_no[4:3]
+		# 			else:
+		# 				res[s.id] = None
+		# 	else:
+		# 		res = browsed.faktur_pajak_no[4:3]
+		
+		return res
+
+	def _get_default_tax_year(self, cr, uid, context=None):
+		res = False
+		print context
+		print "="*200
+		# browsed = self.browse(cr, uid, ids, context=context)
+		
+		# if browsed:
+		# 	if type(browsed) == list:
+		# 		res = {}
+		# 		for s in browsed:
+		# 			if s.date_invoice:
+		# 				date_invoice = datetime.strptime(s.date_invoice,'%Y-%m-%d')
+		# 				res[s.id] = date_invoice.year
+		# 	else:
+		# 		if date_invoice:
+
+		# 			date_invoice = datetime.strptime(browsed.date_invoice,'%Y-%m-%d')
+		# 			res = date_invoice.year
+		
+		return res
+
+	def _get_default_tax_no_2(self, cr, uid, context=None):
+		res = False
+		print context
+		print "-"*200
+		# browsed = self.browse(cr, uid, ids, context=context)
+		
+		# if browsed:
+		# 	if type(browsed) == list:
+		# 		res = {}
+		# 		for s in browsed:
+		# 			res[s.id] = None
+		# 			# 010.031-16.19141977
+		# 			if s.faktur_pajak_no:
+		# 				res[s.id] = s.faktur_pajak_no[11:8]
+		# 	else:
+		# 		res = browsed.faktur_pajak_no[4:3]
+		
+		return res
+
+
+	def _get_default_is_tax_replacement(self, cr, uid, context=None):
+		print context
+		print "."*200
+		res = False
+		# browsed = self.browse(cr, uid, ids, context=context)
+		
+		# if browsed:
+		# 	if type(browsed) == list:
+		# 		res = {}
+		# 		for s in browsed:
+		# 			# 010.031-16.19141977
+		# 			if s.faktur_pajak_no:
+		# 				if s.faktur_pajak_no[3:1]==1:
+		# 					res[s.id] = True
+		# 				else:
+		# 					res[s.id] = False
+					
+		# 	else:
+		# 		if browsed.faktur_pajak_no:
+		# 			if browsed.faktur_pajak_no[3:1]==1:
+		# 				res = True
+		return res
 
 	_defaults={
 		
 		'tax_transaction_type':'01',
-		# 'is_tax_replacement':False,	
-		# 'tax_year':time.strftime('%Y')
+		'tax_no_1':_get_default_tax_no_1,
+		'tax_no_2':_get_default_tax_no_2,
+		'is_tax_replacement':_get_default_is_tax_replacement,
+		'tax_year':_get_default_tax_year,
 	}
 
 
