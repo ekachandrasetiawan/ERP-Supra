@@ -912,6 +912,7 @@
 		
 		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="base.group_sales_supra,base.group_sales_admin,base.group_system" sequence="1"/>
 
+        
 	</data>
 	 <data>
 					  <report auto="False"
