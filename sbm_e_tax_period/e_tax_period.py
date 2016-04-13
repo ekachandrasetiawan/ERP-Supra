@@ -50,7 +50,7 @@ class account_invoice(osv.osv):
 		for inv in invs:
 			picking_ids = [(6,0, [pick.id]) for pick in inv.picking_ids]
 			# res = [(0,0,self._im_line_preparation(cr,uid,line)) for line in request.lines if (line.qty-line.processed_item_qty) > 0]
-			invoice_lines =  [(0, 0, self.pool.get('account.invoice.line').copy_data(cr,uid,line.id,{'invoice_id':False},context=context)) for line in inv.invoice_line]
+			invoice_lines =  [(0, 0, self.pool.get('account.invoice.line').copy_data(cr,uid,line.id,{'invoice_id':None},context=context)) for line in inv.invoice_line]
 
 			
 			# print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<----",res_order
