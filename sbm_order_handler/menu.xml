@@ -3,8 +3,6 @@
 	<data>
 		<!-- deleting old quotation menu -->
         <delete model="ir.ui.menu" id="sale.menu_sale_quotations"/>
-
-
         <!-- deleting old quotation menu -->
         <delete model="ir.ui.menu" id="sale.menu_sale_quotations"/>
     </data>
