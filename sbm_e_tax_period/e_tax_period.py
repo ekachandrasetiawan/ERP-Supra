@@ -174,13 +174,19 @@ class account_invoice(osv.osv):
 					'total_discount_main':val.total_discount_main,
 					'invoice_line':line
 					})
-		
-
 		return invoice_id
 
 
 	def create_invoice_replace_tax(self, cr, uid, ids, context=None):
 		invoice_id=self.create_invoice(cr, uid, ids, context=None)
+
+		cr.execute("SELECT order_id FROM sale_order_invoice_rel WHERE invoice_id = %s", ids)
+		order = map(lambda x: x[0], cr.fetchall())
+
+		# Daftarkan Ke Many2Many 
+		if order:
+			cr.execute('insert into sale_order_invoice_rel (order_id,invoice_id) values (%s,%s)', (order[0], invoice_id))
+
 		if invoice_id:
 			
 			pool_data=self.pool.get("ir.model.data")
