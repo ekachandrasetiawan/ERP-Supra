@@ -49,8 +49,6 @@ wizard_after_actual_kamis_group_rmpsm,wizard.after.actual.kamis,ad_sales_project
 wizard_after_actual_rabu_group_rmpsm,wizard.after.actual.rabu,ad_sales_project.model_wizard_after_actual_rabu,base.group_rmpsm,1,1,1,1
 wizard_after_actual_selasa_group_rmpsm,wizard.after.actual.selasa,ad_sales_project.model_wizard_after_actual_selasa,base.group_rmpsm,1,1,1,1
 wizard_after_actual_senin_group_rmpsm,wizard.after.actual.senin,ad_sales_project.model_wizard_after_actual_senin,base.group_rmpsm,1,1,1,1
-wizard_before_actual_ahad_group_rmpsm,wizard.before.actual.ahad,ad_sales_project.model_wizard_before_actual_ahad,base.group_rmpsm,1,1,1,1
-wizard_before_actual_sabtu_group_rmpsm,wizard.before.actual.sabtu,ad_sales_project.model_wizard_before_actual_sabtu,base.group_rmpsm,1,1,1,1
 wizard_before_actual_jumat_group_rmpsm,wizard.before.actual.jumat,ad_sales_project.model_wizard_before_actual_jumat,base.group_rmpsm,1,1,1,1
 wizard_before_actual_kamis_group_rmpsm,wizard.before.actual.kamis,ad_sales_project.model_wizard_before_actual_kamis,base.group_rmpsm,1,1,1,1
 wizard_before_actual_rabu_group_rmpsm,wizard.before.actual.rabu,ad_sales_project.model_wizard_before_actual_rabu,base.group_rmpsm,1,1,1,1

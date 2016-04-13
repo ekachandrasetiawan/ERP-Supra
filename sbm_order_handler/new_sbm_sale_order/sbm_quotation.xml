@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-
-			   <record id="quatation_rep_webk_head" model="ir.header_webkit">
+		<delete model="workflow.transition" id="sale_stock.trans_router_wait_ship" />
+		
+        <record id="quatation_rep_webk_head" model="ir.header_webkit">
 						   <field name="footer_html"><![CDATA[
 		 ]]>
 			</field>
@@ -907,23 +908,22 @@
 			<field name="act_window_id" ref="action_quotation"/>
 
 		</record>
-
-	   
-		
+        
+        <!-- add new quotation menu named RFQ -->
 		<menuitem parent="base.menu_sales" id="new_quotation" action="action_quotation" groups="base.group_sales_supra,base.group_sales_admin,base.group_system" sequence="1"/>
 
         
 	</data>
 	 <data>
-					  <report auto="False"
-						id="quotation_webkit_view_id" 
-						model="sale.order" 
-						name="quotation.webkit" 
-						file="new_sbm_sale_order/report/quotation_webkit.mako"
-						string="Print Quotation"
-						report_type="webkit"
-					   webkit_header ="quatation_rep_webk_head" 
-					   />
+		  <report auto="False"
+			id="quotation_webkit_view_id" 
+			model="sale.order" 
+			name="quotation.webkit" 
+			file="new_sbm_sale_order/report/quotation_webkit.mako"
+			string="Print Quotation"
+			report_type="webkit"
+		   webkit_header ="quatation_rep_webk_head" 
+		   />
 	</data>
 	<data>
 						 <report auto="False"
