@@ -53,6 +53,7 @@
 		'sbm_account_invoice_cancel/account_invoice_cancel.xml',
 		'sbm_invoice_multi_po/invoice_multi_po_view.xml',
 		'sbm_e_faktur/account_invoice.xml',
+		'menu.xml',
 	],
 	'js': [
 		'sbm_delivery_note/static/src/js/delivery_note.js',
