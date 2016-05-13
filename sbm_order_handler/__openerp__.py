@@ -24,7 +24,8 @@
 		'ad_account_finance',
 		],
 	'data': [
-		'new_sbm_sale_order/file.sql',
+		# 'new_sbm_sale_order/file.sql',
+		'ir_model_data.xml',
 		'new_sbm_sale_order/security/ir.model.access.csv',
 		'new_sbm_sale_order/security_rmpsm/ir.model.access.csv',
 	],
