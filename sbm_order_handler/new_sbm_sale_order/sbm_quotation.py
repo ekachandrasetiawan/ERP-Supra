@@ -461,8 +461,10 @@ class Sale_order(osv.osv):
 		sale_orders = self.browse(cr,uid,ids,context)
 		print sale_orders,"------------------------------------------->>>>>>>>>>>>>>>>>>"
 		for sale_order in sale_orders:
-			if sale_order.quotation_state ==False:
+			if sale_order.quotation_state ==False and sale_order.state != 'draft' and sale_order.state != 'cancel':
+				# automatic set quotation state into win
 				self.write(cr,uid,ids,{'quotation_state':'win'})
+
 			for material in sale_order.order_line:
 
 				if material.material_lines ==[]:
@@ -473,6 +475,7 @@ class Sale_order(osv.osv):
 
 					if len(seq_id):
 						seq_id = seq_id[0]
+					# if product has bill of materials
 					if product.bom_ids:
 						bom_line_set = self.pool.get('mrp.bom').browse(cr,uid,product.bom_ids[0].id)
 
@@ -485,6 +488,7 @@ class Sale_order(osv.osv):
 						'material_lines': [
 								(0,0,{
 									'product_id':material.product_id.id,
+									'desc': material.name,
 									'qty':material.product_uom_qty,
 									'uom':material.product_uom.id,
 									'picking_location':seq_id,
@@ -493,7 +497,7 @@ class Sale_order(osv.osv):
 							],
 						
 						}
-					print material.product_uom.id,"<<<<<<<<<<<"
+					# print material.product_uom.id,"<<<<<<<<<<<"
 					this_material.write(cr,uid,material.id,vals,context)
 				else:
 					raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
