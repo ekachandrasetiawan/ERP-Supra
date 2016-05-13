@@ -1,7 +1,5 @@
 <openerp>
 	<data>
-		<delete model="ir.ui.view" id="ad_account_finance.customer_invoice_supra" />
-
 		<record id='sbm_faktur_inherit' model='ir.ui.view'>
 			<field name="name">sbm.faktur.inherit</field>
 			<field name='model'>account.invoice</field>
