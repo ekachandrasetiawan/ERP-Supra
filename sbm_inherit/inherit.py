@@ -88,8 +88,12 @@ class PurchaseOrder(osv.osv):
 		
 		orders= self.browse(cr, uid, ids, context=context)
 		for order in orders:
-			dis[order.id]=order.amount_bruto-order.amount_untaxed
-		
+			discount = order.amount_bruto-order.amount_untaxed
+			# if rupiah and discount < 999
+			if discount < 999 and order.pricelist_id.id==2:
+				discount = 0.00
+			dis[order.id]=discount
+			
 		return dis
 
 
@@ -99,7 +103,10 @@ class PurchaseOrder(osv.osv):
 		for order in orders:
 			total[order.id] = 0
 			for line in order.order_line:
-				subtotal = line.product_qty*line.price_unit
+				if line.product_qty==1 and order.pricelist_id.id==2:
+					subtotal = line.price_subtotal
+				else:
+					subtotal = line.product_qty*line.price_unit
 				total[order.id] = total[order.id]+subtotal
 
 		return total
