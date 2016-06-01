@@ -147,9 +147,10 @@ class hr_employee(osv.osv):
 				raise osv.except_osv(_('Failed!'),_('Failed to delete user on finger!'))
 			if emp.user_id:
 				uids.append(emp.user_id.id)
-
+		#set as non active employee
 		self.write(cr,uid,ids,{'active':False}, context=context)
 		
+		#set as non active users
 		self.pool.get('res.users').write(cr, uid, uids, {'active':False}, context=context)
 
 		return True
