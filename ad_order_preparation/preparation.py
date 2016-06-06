@@ -197,7 +197,9 @@ class order_preparation(osv.osv):
         val = self.browse(cr, uid, ids)[0]
         notActiveProducts = []
         for x in val.prepare_lines:
-            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+            context['location'] = x.move_id.location_id.id
+
+            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id,context=context)
 
             # if product is not active then register in list
             if not product.active:
@@ -208,6 +210,7 @@ class order_preparation(osv.osv):
 
             if product.not_stock == False:
                  # print '=========================',product.qty_available
+
                 mm = ' ' + product.default_code + ' '
                 stock = ' ' + str(product.qty_available) + ' '
                 msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
