@@ -40,8 +40,8 @@ class perintah_kerja(osv.osv):
 		'note': '-',
 		'type': 'pabrikasi',
 		'state': 'draft',
-		'location_src_id': 12,
-		'location_dest_id': 12,
+		'location_src_id': 14,
+		'location_dest_id': 14,
 		'date': time.strftime('%Y-%m-%d'),
 		'kontrakdate': time.strftime('%Y-%m-%d'), 
 	}
@@ -122,22 +122,22 @@ class perintah_kerja(osv.osv):
 		val = self.browse(cr, uid, ids, context={})[0]
 		if val.type == 'pabrikasi' :
 			material_id = self.pool.get('stock.picking').create(cr,uid, {
-									'name': self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.internal'),
+									'name': self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.out.manufacture'),
 									'origin': val.name,
 									'type': 'internal',
 									'move_type': 'one',
-									'state': 'auto',
+									'state': 'draft',
 									'date': val.date,
 									'auto_picking': True,
 									'company_id': 1,
 								})
 			
 			goods_id = self.pool.get('stock.picking').create(cr,uid, {
-									'name': self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.internal'),
+									'name': self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.from.manufacture'),
 									'origin': val.name,
 									'type': 'internal',
 									'move_type': 'one',
-									'state': 'auto',
+									'state': 'draft',
 									'date': val.date,
 									'auto_picking': True,
 									'company_id': 1,
@@ -172,6 +172,8 @@ class perintah_kerja(osv.osv):
 			wf_service = netsvc.LocalService("workflow")
 			wf_service.trg_validate(uid, 'stock.picking', goods_id, 'button_confirm', cr)
 			wf_service.trg_validate(uid, 'stock.picking', material_id, 'button_confirm', cr)
+
+			self.pool.get('stock.picking').force_assign(cr, uid, [goods_id, material_id], context)
 							
 		self.write(cr, uid, ids, {'state': 'done', 'approver': self.pool.get('res.users').browse(cr, uid, uid).id})
 		return True
