@@ -408,5 +408,11 @@
 	    </record>
 
 
+	    <record model="res.groups" id="base.group_admin_support">
+			
+			<field name="implied_ids" eval="[(6,0,[ref('sbm_product.group_product_admin')])]" />
+		</record>
+
+
     </data>
 </openerp>
