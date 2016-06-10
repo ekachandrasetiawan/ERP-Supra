@@ -174,7 +174,7 @@ class Sale_order(osv.osv):
 		self._set_repeat_so_id(cr,uid,newOrderId,rec.id,context=context)
 
 		
-		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'new_sbm_sale_order', 'quotation_form_view')
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_order_handler', 'quotation_form_view')
 		return {
 			'view_mode': 'form',
 			'view_id': view_id,
