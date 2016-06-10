@@ -8,15 +8,30 @@
 					 <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_form"/>
 					 <field name="arch" type="xml">
 							<button name="preparation_confirm" position="replace">
-								<button name="preparation_confirm" type="object" states="draft" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
+								<button name="preparation_confirm" type="object" states="submited" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
+
+
+								<button name="preparation_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are you sure to Submit Order Preparation ?" groups="sbm_order_handler.group_admin_ho" />
+							</button>
+							<field name="state" position="replace">
+								<field name="state" widget="statusbar" statusbar_visible="draft,submited,approve,done"/>
+							</field>
+
+							<button name="print_op_out" position="replace">
+								<button name="print_op_out" type="object" states="submited,approve,done" string="Print" icon="gtk-print"/>
 							</button>
 
 							<button name="preparation_cancel" position="replace">
-								<button name="preparation_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize" confirm="Are you sure to ancel Order Preparation" groups="sbm_order_handler.group_admin_ho"/>
+								<button name="preparation_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize" confirm="Are you sure to ancel Order Preparation ?" groups="sbm_order_handler.group_admin_ho"/>
 							</button>
 							
 							<button name="preparation_draft" position="replace">
-								<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="sbm_order_handler.group_admin_warehouse" confirm="Are you sure to Back To Draft Order Preparation"/>
+								<button name="preparation_draft" type="object" states="submited" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="sbm_order_handler.group_admin_warehouse" confirm="Are you sure to Back To Draft Order Preparation ?"/>
+
+								<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="stock.group_stock_user" confirm="Are you sure to Back To Draft Order Preparation ?"/>
+
+								<button name="set_delivery_notes" type="object" states="done" string="Set Delivery Notes" icon="gtk-dnd" groups="stock.group_stock_user" confirm="Create DN Document?"/>
+
 							</button>
 
 							<button name="preparation_done" position="replace">
