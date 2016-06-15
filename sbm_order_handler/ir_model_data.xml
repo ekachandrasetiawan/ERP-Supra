@@ -3,6 +3,6 @@
 	<data>
 		<delete model="workflow.transition" id="sale_stock.trans_router_wait_ship" />
 		<delete model="ir.ui.menu" id="sale.menu_sale_quotations"/>
-		<delete model="ir.ui.view" id="ad_account_finance.customer_invoice_supra" />
+		
 	</data>
 </openerp>
