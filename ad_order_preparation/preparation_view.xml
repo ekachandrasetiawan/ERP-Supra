@@ -142,7 +142,7 @@
                                     <field name="detail" colspan="4"/>
                                     <field name="prodlot_id" colspan="4" nolabel="1" widget="one2many_list">
                                         <tree string="Detail Batch" editable="buttom">
-                                            <field name="name" domain="[('product_id','=',parent.product_id),('stock_available','>','0')]" on_change="product_batch(name,qty)"/>
+                                            <field name="name" domain="['|','&',('product_id','=',parent.product_id),('stock_available','>','0'),'&',('product_id','=',parent.product_id),('name','=like','%-WS')]" on_change="product_batch(name,qty)"/>
                                             <field name="desc" on_change="product_batch(name,qty)"/>
                                             <field name="exp_date" on_change="product_batch(name,qty)"/>
                                             <field name="stock_available" on_change="product_batch(name,qty)"/>
