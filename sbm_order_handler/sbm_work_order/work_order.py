@@ -736,7 +736,7 @@ class SBM_Work_Order(osv.osv):
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
-			'tag'	: 'print.adhoc.order.request',
+			'tag'	: 'print.out.op',
 			'params': {
 				'redir'	: urlTo,
 				'uid':uid

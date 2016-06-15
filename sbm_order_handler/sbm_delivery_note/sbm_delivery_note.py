@@ -129,16 +129,22 @@ class delivery_note(osv.osv):
 			no = ""
 			for nt in self.browse(cr,uid,prepareExists,context):
 				no += "["+nt.name+"]\n"
-			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
+			raise osv.except_osv(_("Error!!!"),_("Delivery Notes Already Exist. DN Doc. No = "+no))
 		vals['name'] ='/'
-
+		print vals['note_lines'],"MMMMMMMMMMMMMMMMMMMMMMMMMMM"
 		for lines in vals['note_lines']:
-			if lines[2]:
-				if lines[2]['product_qty'] == 0:
-					# Cek Part Number Value
-					product = self.pool.get('product.product').browse(cr, uid, [lines[2]['product_id']])[0]
+			if(type(lines)==tuple):
+				got_line = lines[2]
+				
+			else:
+				got_line = lines
 
-					raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
+			if got_line['product_qty'] == 0:
+				# Cek Part Number Value
+				product = self.pool.get('product.product').browse(cr, uid, [got_line['product_id']])[0]
+
+				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
+
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 	""""Event On Change Order Packaging"""
@@ -237,7 +243,7 @@ class delivery_note(osv.osv):
 									'location_id':dline.picking_location.id,
 									'op_line_id':dopline.id
 									}))
-				line.append({
+				line.append((0,0,{
 					'no': y.sequence,
 					'product_id' : y.product_id.id,
 					'product_qty': qty_dn_line,
@@ -245,7 +251,7 @@ class delivery_note(osv.osv):
 					'name': y.name,
 					'note_lines_material': material_line,
 					'sale_line_id': y.id,
-					})
+					}))
 			print line , "77777777777777777777777777777777777777777"
 
 			self._qty_recount(cr,uid,ids,line,{})
@@ -265,10 +271,14 @@ class delivery_note(osv.osv):
 		Will re write tuple of line data of delivery note line material
 		It will re count delivery note line material -> product_qty to count line set/lot qty from formula
 	"""
-	def _qty_recount(self,cr,uid,ids,line,context={}):
+	def _qty_recount(self,cr,uid,ids,lines,context={}):
 		res = {}
 		
-		for data in line:
+		for line in lines:
+			if type(line)==tuple:
+				data = line[2]
+			else:
+				data=line
 			# print "<<<<<<<<<<<<<<<<--------\n",data,"\n-------->>>>>>>>>>>>>>"
 			sale_line = self.pool.get('sale.order.line').browse(cr,uid,data['sale_line_id'],context=context) #get sale line object
 

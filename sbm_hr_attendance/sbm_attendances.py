@@ -140,11 +140,18 @@ class hr_employee(osv.osv):
 		machine_ids = machine_obj._get_online_list(cr,uid)
 
 		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
+
+		uids = []
 		for emp in emps:
 			if not self.delete_att_pin_machine(cr,uid,emp.att_pin,machine_ids,context=context):
 				raise osv.except_osv(_('Failed!'),_('Failed to delete user on finger!'))
-
-		self.write(cr,uid,ids,{'active':False})
+			if emp.user_id:
+				uids.append(emp.user_id.id)
+		#set as non active employee
+		self.write(cr,uid,ids,{'active':False}, context=context)
+		
+		#set as non active users
+		self.pool.get('res.users').write(cr, uid, uids, {'active':False}, context=context)
 
 		return True
 
@@ -293,91 +300,98 @@ class hr_attendance_machine(osv.osv):
 			log_tree = ET.fromstring(response)
 			dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
 
-			dictRowsResponse = dictResponse['GetAttLogResponse']['Row'] #[0]['PIN']
-			uniq_eid = list(set(int(row['PIN']) for row in dictRowsResponse))
-			
-			
 
-			check_existance_employee = hr_employee.check_employee_ids_on_machine(cr,uid,uniq_eid,context)
+			GetAttLogResponse = dictResponse.get('GetAttLogResponse',False)
+			dictRowsResponse = False
+			if GetAttLogResponse:
+				dictRowsResponse = GetAttLogResponse.get('Row',False)
 
-			flag_to_act = False # to flag is this request will be action to insert log data into OpenERP Database ?
+			# dictRowsResponse = dictResponse['GetAttLogResponse']['Row'] #[0]['PIN']
+			if dictRowsResponse:
+				uniq_eid = list(set(int(row['PIN']) for row in dictRowsResponse))
+				
+				
 
-			if not check_existance_employee['not_available']:
-				# print 'All Employee is Match on OpenERP System'
-				flag_to_act = True
-			else:
-				# if some data not sync between machine and db
-				err_msg = ""
-				xml_pin = ""
-				for not_av in check_existance_employee['not_available']:
-					xml_pin += """<Arg><PIN xsi:type="xsd:integer">{pin}</PIN></Arg>""".format(pin=not_av)
-				flag_to_act = False
-				xml_get_user = """<GetUserInfo>
-						<ArgComKey xsi:type="xsd:integer">{machine_key}</ArgComKey>
-						{PINS}
-					</GetUserInfo>""".format(machine_key=mac.key,PINS=xml_pin)
-				res_get_user = self._request_to_machine(cr,uid, mac.ip, headers, xml_get_user,context=context)
-				dictResponseUser = xmltodict.parse(res_get_user) # JSON Formatted User INfo from machine
+				check_existance_employee = hr_employee.check_employee_ids_on_machine(cr,uid,uniq_eid,context)
 
-				if dictResponseUser['GetUserInfoResponse']:
-					flag_to_act = False
-					dictRowsResponseUser = dictResponseUser['GetUserInfoResponse']['Row']
+				flag_to_act = False # to flag is this request will be action to insert log data into OpenERP Database ?
+
+				if not check_existance_employee['not_available']:
+					# print 'All Employee is Match on OpenERP System'
+					flag_to_act = True
 				else:
-					# user not exist on machine too
-					dictRowsResponseUser = False
-					flag_to_act = True #set flag action to True it means the log data can be inserted into OpenERP database
-					print dictResponseUser['GetUserInfoResponse'],'NOt exists ----------------------------'
-				if dictRowsResponseUser:
-					# if many users not exits it will be response as list so we need check the data type
-					if type(dictRowsResponseUser) is list:
-						for uinfo in dictRowsResponseUser:
-							err_msg += uinfo['Name']+" ("+uinfo['PIN2']+")\r\n"
-							# print uinfo
+					# if some data not sync between machine and db
+					err_msg = ""
+					xml_pin = ""
+					for not_av in check_existance_employee['not_available']:
+						xml_pin += """<Arg><PIN xsi:type="xsd:integer">{pin}</PIN></Arg>""".format(pin=not_av)
+					flag_to_act = False
+					xml_get_user = """<GetUserInfo>
+							<ArgComKey xsi:type="xsd:integer">{machine_key}</ArgComKey>
+							{PINS}
+						</GetUserInfo>""".format(machine_key=mac.key,PINS=xml_pin)
+					res_get_user = self._request_to_machine(cr,uid, mac.ip, headers, xml_get_user,context=context)
+					dictResponseUser = xmltodict.parse(res_get_user) # JSON Formatted User INfo from machine
+
+					if dictResponseUser['GetUserInfoResponse']:
+						flag_to_act = False
+						dictRowsResponseUser = dictResponseUser['GetUserInfoResponse']['Row']
 					else:
-						if dictRowsResponseUser['Name']:
-							err_msg += dictRowsResponseUser['Name']+" ("+dictRowsResponseUser['PIN2']+")\r\n"
+						# user not exist on machine too
+						dictRowsResponseUser = False
+						flag_to_act = True #set flag action to True it means the log data can be inserted into OpenERP database
+						print dictResponseUser['GetUserInfoResponse'],'NOt exists ----------------------------'
+					if dictRowsResponseUser:
+						# if many users not exits it will be response as list so we need check the data type
+						if type(dictRowsResponseUser) is list:
+							for uinfo in dictRowsResponseUser:
+								err_msg += uinfo['Name']+" ("+uinfo['PIN2']+")\r\n"
+								# print uinfo
 						else:
-							flag_to_act = True
-					if not flag_to_act:
-						raise osv.except_osv(_('Processing Error!'), _('1 OR MORE EMPLOYEE DATA IS NOT EXISTS ON OPENERP SYSTEM:\r\n(%s)') \
-										% (err_msg))
+							if dictRowsResponseUser['Name']:
+								err_msg += dictRowsResponseUser['Name']+" ("+dictRowsResponseUser['PIN2']+")\r\n"
+							else:
+								flag_to_act = True
+						if not flag_to_act:
+							raise osv.except_osv(_('Processing Error!'), _('1 OR MORE EMPLOYEE DATA IS NOT EXISTS ON OPENERP SYSTEM:\r\n(%s)') \
+											% (err_msg))
 
-			# unique_eid = set(row for row in dictRowsResponse)
-			att_log_obj = self.pool.get('hr.attendance.log')
-			# print flag_to_act
-			if flag_to_act:
-				# user validation success then in this condition we must check every log are already on database or not ?
-				log_to_insert = []
-				for row in log_tree:
-					# INDEX 0 FOR <PIN>
-					# 1 FOR <DateTime>
-					# 2 FOR <Verified>
-					# 3 For <Status>
-					# 4 For <WorkCode>
-					datetime_log = int(time.mktime(time.strptime(row[1].text, '%Y-%m-%d %H:%M:%S')))
-					name = time.strftime('%Y/%m')+"/"+row[0].text+"/"+str(datetime_log)
-					att_pin = int(row[0].text)
-					employee_id = hr_employee.search(cr,uid,[('att_pin','=',att_pin)])
+				# unique_eid = set(row for row in dictRowsResponse)
+				att_log_obj = self.pool.get('hr.attendance.log')
+				# print flag_to_act
+				if flag_to_act:
+					# user validation success then in this condition we must check every log are already on database or not ?
+					log_to_insert = []
+					for row in log_tree:
+						# INDEX 0 FOR <PIN>
+						# 1 FOR <DateTime>
+						# 2 FOR <Verified>
+						# 3 For <Status>
+						# 4 For <WorkCode>
+						datetime_log = int(time.mktime(time.strptime(row[1].text, '%Y-%m-%d %H:%M:%S')))
+						name = time.strftime('%Y/%m')+"/"+row[0].text+"/"+str(datetime_log)
+						att_pin = int(row[0].text)
+						employee_id = hr_employee.search(cr,uid,[('att_pin','=',att_pin)])
 
-					if employee_id:
-						att_data = {
-							'name': name,
-							'employee_id': employee_id[0],
-							'att_pin': att_pin,
-							'datetime_log': datetime_log,
-							'm_verified': row[2].text,
-							'm_status': row[3].text,
-							'm_work_code': row[4].text,
-							'state':'3',
-							'machine_id':mac.id,
-						}
-					# check if log already exists
-					if not att_log_obj.check_is_log_exists(cr,uid,row[0].text,datetime_log,context=context):
-						log_to_insert.append(att_data)
-				# print log_to_insert
-				# insert only the filtered log
-				print log_to_insert
-				att_log_obj.creates(cr,uid,log_to_insert,context=context)
+						if employee_id:
+							att_data = {
+								'name': name,
+								'employee_id': employee_id[0],
+								'att_pin': att_pin,
+								'datetime_log': datetime_log,
+								'm_verified': row[2].text,
+								'm_status': row[3].text,
+								'm_work_code': row[4].text,
+								'state':'3',
+								'machine_id':mac.id,
+							}
+						# check if log already exists
+						if not att_log_obj.check_is_log_exists(cr,uid,row[0].text,datetime_log,context=context):
+							log_to_insert.append(att_data)
+					# print log_to_insert
+					# insert only the filtered log
+					print log_to_insert
+					att_log_obj.creates(cr,uid,log_to_insert,context=context)
 		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",failed_connection
 		if len(failed_connection)>0:
 			msg = ""

@@ -66,11 +66,6 @@
 			<field name="name">Product Admin</field>
 		</record>
 
-		<record model="res.groups" id="sbm_work_order.group_admin_support">
-			
-			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
-		</record>
-
 		<record model="res.groups" id="base.group_sale_manager">
 			
 			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
@@ -81,15 +76,7 @@
 			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
 		</record>
 
-		<record model="res.groups" id="group_rmpsm">
-			<field name="name">RMPSM</field>
-			<field name="category_id" ref="base.module_category_sales_management"/>
-		</record>
-
-		<record model="res.groups" id="group_rmpsm">
-			
-			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
-		</record>
+		
 
 
 		

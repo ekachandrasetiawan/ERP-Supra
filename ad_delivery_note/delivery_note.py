@@ -11,6 +11,9 @@ import openerp.addons.decimal_precision as dp
 from openerp import netsvc
 from openerp.tools.float_utils import float_compare
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class sale_order(osv.osv):
 	_inherit = "sale.order"
 	_columns = {
@@ -1845,15 +1848,22 @@ class stock_return_picking(osv.osv_memory):
 		if context.get('active_model') == 'delivery.note':
 			op_line = self.pool.get('order.preparation.line')
 			dn_line = self.pool.get('delivery.note.line')
-
+		_logger.error((val_id),"OOOOOOOOOOOO")
 		for v in val_id:
 			data_get = data_obj.browse(cr, uid, v, context=context)
 			mov_id = data_get.move_id.id
 			
 			# search op and dn
 			if context.get('active_model') == 'delivery.note':
+				_logger.error((mov_id,"aaaaa<<<<<<<<<<<<<<<<"))
+
 				op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
-				dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
+				if type(op_line_id)==list:
+					op_line_id = op_line_id[0]
+
+				dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id)],context=context)
+				if type(dn_line_id)==list and len(dn_line_id)>0:
+					dn_line_id = dn_line_id[0]
 
 			if not mov_id:
 				raise osv.except_osv(_('Warning !'), _("You have manually created product lines, please delete them to proceed"))

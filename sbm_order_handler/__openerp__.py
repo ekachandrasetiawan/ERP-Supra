@@ -30,6 +30,7 @@
 		'new_sbm_sale_order/security_rmpsm/ir.model.access.csv',
 	],
 	'update_xml': [
+		'menu.xml',
 		'new_sbm_sale_order/sbm_quotation.xml',
 		'new_sbm_sale_order/win_quatition_wizard.xml',
 		'new_sbm_sale_order/wizard_lost_quotation.xml',
@@ -54,7 +55,7 @@
 		'sbm_account_invoice_cancel/account_invoice_cancel.xml',
 		'sbm_invoice_multi_po/invoice_multi_po_view.xml',
 		'sbm_e_faktur/account_invoice.xml',
-		'menu.xml',
+		
 	],
 	'js': [
 		'sbm_delivery_note/static/src/js/delivery_note.js',

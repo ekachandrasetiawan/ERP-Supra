@@ -19,6 +19,7 @@ class order_preparation(osv.osv):
 		'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=False, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
 		'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
 		'location_id':fields.many2one('stock.location',required=True,string='Product Location',readonly=True, states={'draft': [('readonly', False)]}),
+		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True),
 
 	}
 
@@ -97,6 +98,15 @@ class order_preparation(osv.osv):
 		self._set_op_followers(cr, uid, res, context=None)
 		return res
 
+
+	"""Action submit
+	"""
+	def preparation_submit(self, cr, uid, ids, context=None):
+		res = False
+		if self.validasi(cr, uid, ids, context=context):
+			res = self.write(cr, uid, ids, {'state':'submited'}, context=context)
+		return res
+
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 
@@ -105,6 +115,50 @@ class order_preparation(osv.osv):
 		# 		raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
+
+
+	def set_delivery_notes(self, cr, uid, ids, context=None):
+		res = False
+		ops = self.browse(cr, uid, ids, context=context)
+		dn_obj = self.pool.get('delivery.note')
+		
+		new_dn_ids = []
+		for op in ops:
+			prep_dn = {}
+			evt_prepare_change = dn_obj.prepare_change(cr, uid, ids, op.id)
+			print evt_prepare_change,"EVTTTTTTTT"
+			prep_dn = evt_prepare_change['value']
+			prep_dn['prepare_id']=op.id
+			prep_dn['special']=False
+
+			print prep_dn,"...............................,,,,,,,,,,,,,<<<<<<<<<<<<<<<"
+			new_dn_ids.append(dn_obj.create(cr, uid, prep_dn, context=context))
+
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'ad_delivery_note', 'view_delivery_note_form')
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': new_dn_ids,
+			'active_id': len(new_dn_ids) and new_dn_ids[0] or False
+		})
+
+		# print context,"Coooooontext"
+		res = {
+			'name': _('Delivery Note'),
+			'view_type': 'form',
+			'view_mode': 'form',
+			'view_id': [view_id],
+			'res_model': 'delivery.note',
+			'context': context,
+			'type': 'ir.actions.act_window',
+			'nodestroy': True,
+			'target': 'current',
+			'res_id': new_dn_ids and new_dn_ids[0] or False,
+		}
+
+
+
+		return res
 
 	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
 
@@ -178,12 +232,13 @@ class order_preparation(osv.osv):
 							location += [y.picking_location.id]
 
 							line.append({
-										 'product_id' : y.product_id.id,
-										 'product_qty': y.qty - nilai,
-										 'product_uom': y.uom.id,
-										 'name': y.desc,
-										 'sale_line_material_id':y.id,
-										 'sale_line_id':y.sale_order_line_id.id
+								'no': y.sale_order_line_id.sequence,
+								'product_id' : y.product_id.id,
+								'product_qty': y.qty - nilai,
+								'product_uom': y.uom.id,
+								'name': y.desc,
+								'sale_line_material_id':y.id,
+								'sale_line_id':y.sale_order_line_id.id
 							})
 			res['prepare_lines'] = line
 
@@ -204,7 +259,7 @@ class order_preparation(osv.osv):
 				
 
 			
-
+			print res,"OP***********************************"
 			return  {'value': res}
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
@@ -300,6 +355,7 @@ order_preparation()
 class order_preparation_line(osv.osv):
 	_inherit = "order.preparation.line"
 	_columns = {
+		# 'cust_ref_no': fields.char('Cust Ref No', required=False),
 		'product_id': fields.many2one('product.product', 'Product',track_visibility='always'),
 		'product_uom': fields.many2one('product.uom', 'UoM'),
 		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=True),

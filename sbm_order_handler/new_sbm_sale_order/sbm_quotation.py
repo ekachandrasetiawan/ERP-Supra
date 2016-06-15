@@ -8,7 +8,9 @@ import openerp.exceptions
 from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class inherit_stock_picking_out(osv.osv):
 	_inherit = "stock.picking.out"
@@ -93,11 +95,15 @@ class Sale_order(osv.osv):
 		# print "CALLEDDD",ids;
 		rec = self.browse(cr,uid,ids,context)[0]
 		isi_line = []
-		isi_tax = []
+		
 		
 		for line in rec.order_line:
+			isi_tax = []
+			tax_ids = []
+			change_prouct = self.pool.get('sale.order.line').onchange_product_quotation(cr, uid, [line.id], line.product_id.id, line.product_uom_qty, line.product_uom)['value'];
 			for taxid in line.tax_id:
-				isi_tax.append((taxid.id))
+				tax_ids.append(taxid.id)
+
 			
 			isi_material=[]
 			for material in line.material_lines:
@@ -109,18 +115,26 @@ class Sale_order(osv.osv):
 					'uom':material.uom.id,
 					'picking_location':material.picking_location.id
 					}))
+			if len(isi_material)==0:
+				
+				isi_material = change_prouct['material_lines']
+
+				_logger.error((change_prouct,"............>>>>",isi_material))
+
+
 			isi_line.append((0,0,
 				{
 				'product_id':line.product_id.id,
 				'name':line.name,
 				'product_uom_qty':line.product_uom_qty,
-				'price_unit':line.price_unit,
-				'discount':line.discount,
-				'base_total':line.base_total,
-				'price_subtotal':line.price_subtotal,
-				'tax_id':isi_tax,
-				'amount_tax':line.amount_tax,
-				'material_lines':isi_material
+				# 'price_unit':line.price_unit,
+				# 'discount':line.discount,
+				# 'base_total':line.base_total,
+				# 'price_subtotal':line.price_subtotal,
+				'tax_id':[(6,0,tax_ids)],
+				# 'amount_tax':line.amount_tax,
+				'material_lines':isi_material,
+				'product_uom':line.product_uom.id
 				}))
 
 			# print isi_line,"ini isiiiiiiiiiiiiiiiiiiiiiiiiiii lineeeeeeeeeeeeeeeeee"
@@ -174,7 +188,7 @@ class Sale_order(osv.osv):
 		self._set_repeat_so_id(cr,uid,newOrderId,rec.id,context=context)
 
 		
-		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'new_sbm_sale_order', 'quotation_form_view')
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_order_handler', 'quotation_form_view')
 		return {
 			'view_mode': 'form',
 			'view_id': view_id,

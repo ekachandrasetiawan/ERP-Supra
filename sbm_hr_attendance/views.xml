@@ -96,7 +96,7 @@
 
 				<field name="active" position="after">
 					<button name="sync_employee_into_machine" type="object" string="Register User into Fingerprints" />
-					<button name="resign" type="object" string="Resign" />
+					<button name="resign" type="object" string="Resign" attrs="{'invisible':[('active','=',False)]}" />
 				</field>
 
 
