@@ -121,8 +121,17 @@ class perintah_kerja(osv.osv):
 	def work_validate(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		if val.type == 'pabrikasi' :
+			seq_out_mnfct = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.out.manufacture')
+			seq_from_mnfct = self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.from.manufacture')
+			
+			if not seq_out_mnfct:
+				raise osv.except_osv(_('Error'), _('stock.picking.out.manufacture Sequence not exist.\nPlease contact system administrator'))
+			
+			if not seq_from_mnfct:
+				raise osv.except_osv(_('Error'), _('stock.picking.from.manufacture Sequence not exist.\nPlease contact system administrator.'))
+			
 			material_id = self.pool.get('stock.picking').create(cr,uid, {
-									'name': self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.out.manufacture'),
+									'name': seq_out_mnfct,
 									'origin': val.name,
 									'type': 'internal',
 									'move_type': 'one',
@@ -133,7 +142,7 @@ class perintah_kerja(osv.osv):
 								})
 			
 			goods_id = self.pool.get('stock.picking').create(cr,uid, {
-									'name': self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.from.manufacture'),
+									'name': seq_from_mnfct,
 									'origin': val.name,
 									'type': 'internal',
 									'move_type': 'one',
@@ -155,8 +164,31 @@ class perintah_kerja(osv.osv):
 									'location_dest_id': 7,
 									'state': 'waiting',
 									'company_id': 1})
-				
+			prodlot = self.pool.get('stock.production.lot')
 			for x in val.perintah_lines:
+				prodlot_obj_id = False
+				if x.product_id.track_production:
+					# check if manufacture lot exists
+					lot_name_ws = x.product_id.default_code+'-WS'
+					get_lot = prodlot.search(cr, uid, [('product_id','=',x.product_id.id), ('name','=',lot_name_ws)])
+					if not get_lot:
+						# set new serial
+						prodlot_obj_id = prodlot.create(
+							cr, uid, 
+							{
+								'name': lot_name_ws, 
+								'product_id': x.product_id.id,
+								'desc': 'Manufacture Lot',
+							}, 
+							context=context
+						)
+					else:
+						prodlot_obj_id = get_lot[0]
+
+
+					# set serial number for manufacture lot
+				print prodlot_obj_id,">>>>>>>>>>>>>>"
+
 				self.pool.get('stock.move').create(cr,uid, {
 									'name': x.product_id.default_code + x.product_id.name_template,
 									'picking_id': goods_id,
@@ -167,7 +199,8 @@ class perintah_kerja(osv.osv):
 									'location_id': 7,
 									'location_dest_id': val.location_dest_id.id,
 									'state': 'waiting',
-									'company_id': 1})
+									'company_id': 1
+									,'prodlot_id':prodlot_obj_id or False})
 				
 			wf_service = netsvc.LocalService("workflow")
 			wf_service.trg_validate(uid, 'stock.picking', goods_id, 'button_confirm', cr)
