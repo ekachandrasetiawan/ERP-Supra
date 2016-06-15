@@ -127,12 +127,12 @@ class Sale_order(osv.osv):
 				'product_id':line.product_id.id,
 				'name':line.name,
 				'product_uom_qty':line.product_uom_qty,
-				'price_unit':line.price_unit,
-				'discount':line.discount,
-				'base_total':line.base_total,
-				'price_subtotal':line.price_subtotal,
+				# 'price_unit':line.price_unit,
+				# 'discount':line.discount,
+				# 'base_total':line.base_total,
+				# 'price_subtotal':line.price_subtotal,
 				'tax_id':[(6,0,tax_ids)],
-				'amount_tax':line.amount_tax,
+				# 'amount_tax':line.amount_tax,
 				'material_lines':isi_material,
 				'product_uom':line.product_uom.id
 				}))
