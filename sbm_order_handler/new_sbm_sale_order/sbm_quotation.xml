@@ -781,7 +781,7 @@
 												<!-- <field name="product_uom" invisible="1"/> -->
 											</group>
 											<group>
-												<field name="price_unit" on_change="onchange_price_unit(product_uom_qty,price_unit,discount,discount_nominal,tax_id)"/>
+												<field name="price_unit" on_change="onchange_price_unit(product_uom_qty,price_unit,discount,discount_nominal,tax_id)" string="Price per Unit" />
 												 <label for="discount"/>
 													<div>
 														<field name="discount" on_change="replace_discount(product_uom_qty,price_unit,discount)" class="oe_inline" />

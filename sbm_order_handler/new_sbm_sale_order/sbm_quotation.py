@@ -95,11 +95,15 @@ class Sale_order(osv.osv):
 		# print "CALLEDDD",ids;
 		rec = self.browse(cr,uid,ids,context)[0]
 		isi_line = []
-		isi_tax = []
+		
 		
 		for line in rec.order_line:
+			isi_tax = []
+			tax_ids = []
+			change_prouct = self.pool.get('sale.order.line').onchange_product_quotation(cr, uid, [line.id], line.product_id.id, line.product_uom_qty, line.product_uom)['value'];
 			for taxid in line.tax_id:
-				isi_tax.append((taxid.id))
+				tax_ids.append(taxid.id)
+
 			
 			isi_material=[]
 			for material in line.material_lines:
@@ -112,7 +116,7 @@ class Sale_order(osv.osv):
 					'picking_location':material.picking_location.id
 					}))
 			if len(isi_material)==0:
-				change_prouct = self.pool.get('sale.order.line').onchange_product_quotation(cr, uid, [line.id], line.product_id.id, line.product_uom_qty, line.product_uom)['value'];
+				
 				isi_material = change_prouct['material_lines']
 
 				_logger.error((change_prouct,"............>>>>",isi_material))
@@ -127,7 +131,7 @@ class Sale_order(osv.osv):
 				'discount':line.discount,
 				'base_total':line.base_total,
 				'price_subtotal':line.price_subtotal,
-				'tax_id':isi_tax,
+				'tax_id':[(6,0,tax_ids)],
 				'amount_tax':line.amount_tax,
 				'material_lines':isi_material,
 				'product_uom':line.product_uom.id
