@@ -8,7 +8,9 @@ import openerp.exceptions
 from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class inherit_stock_picking_out(osv.osv):
 	_inherit = "stock.picking.out"
@@ -109,6 +111,13 @@ class Sale_order(osv.osv):
 					'uom':material.uom.id,
 					'picking_location':material.picking_location.id
 					}))
+			if len(isi_material)==0:
+				change_prouct = self.pool.get('sale.order.line').onchange_product_quotation(cr, uid, [line.id], line.product_id.id, line.product_uom_qty, line.product_uom)['value'];
+				isi_material = change_prouct['material_lines']
+
+				_logger.error((change_prouct,"............>>>>",isi_material))
+
+
 			isi_line.append((0,0,
 				{
 				'product_id':line.product_id.id,
@@ -120,7 +129,8 @@ class Sale_order(osv.osv):
 				'price_subtotal':line.price_subtotal,
 				'tax_id':isi_tax,
 				'amount_tax':line.amount_tax,
-				'material_lines':isi_material
+				'material_lines':isi_material,
+				'product_uom':line.product_uom.id
 				}))
 
 			# print isi_line,"ini isiiiiiiiiiiiiiiiiiiiiiiiiiii lineeeeeeeeeeeeeeeeee"
