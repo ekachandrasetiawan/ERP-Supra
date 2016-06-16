@@ -266,6 +266,10 @@ class SBM_Work_Order(osv.osv):
 			if item.state in ['draft','confirmed']:
 				RequestNo = '/'
 			else:
+				code_sale =''
+				if item.source_type=='internal_request':
+					code_sale = 'INTERNAL'
+
 				if item.adhoc_order_request_id.id:
 					code_sale = item.adhoc_order_request_id.sales_man_id.initial
 				elif item.sale_order_id.id:
@@ -549,14 +553,6 @@ class SBM_Work_Order(osv.osv):
 				for m in c.raw_materials:
 					if m.qty == 0.00:
 						raise openerp.exceptions.Warning("Work Order Line Material Tidak Boleh 0")
-
-					if m.item_id.type <> 'service':
-						if m.item_id.supply_method == 'buy':
-						 	if m.item_id.track_production == False:
-						 		if m.item_id.track_incoming == False:
-						 			if m.item_id.track_outgoing==False:
-										raise openerp.exceptions.Warning("Item " + m.item_id.default_code + ' No Process')
-
 		return True
 
 	def set_confirm(self, cr, uid, ids, context=None):
@@ -693,6 +689,7 @@ class SBM_Work_Order(osv.osv):
 		set_loc = stock_location.search(cr, uid, [('name','=', 'MANUFACTURE')])
 
 		loc_id = stock_location.browse(cr, uid, ids, set_loc)[0].id
+		origin = False
 		if val.adhoc_order_request_id.id:
 			origin = 'Adhoc Order Request '+val.adhoc_order_request_id.name
 		elif val.sale_order_id.id:
