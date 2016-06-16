@@ -245,6 +245,10 @@ class SBM_Work_Order(osv.osv):
 			if item.state == 'draft':
 				RequestNo = '/'
 			else:
+				code_sale =''
+				if item.source_type=='internal_request':
+					code_sale = 'INTERNAL'
+				
 				if item.adhoc_order_request_id.id:
 					code_sale = item.adhoc_order_request_id.sales_man_id.initial
 				elif item.sale_order_id.id:
