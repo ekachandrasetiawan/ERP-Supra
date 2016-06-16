@@ -384,7 +384,6 @@ class SBM_Work_Order(osv.osv):
 					for n_material in work_order_output.browse(cr, uid, cek_wo):
 						if n_material.work_order_id.state <> 'cancel':
 							nilai += n_material.qty
-
 					if m.qty > nilai:
 						if m.product_id.type <> 'service':
 							if m.product_id.supply_method == 'produce':
@@ -406,8 +405,18 @@ class SBM_Work_Order(osv.osv):
 								'sale_order_material_line': m.id
 							})
 
-					no +=1
+						# Cek Product Batch
+						if m.product_id.track_production == True or m.product_id.track_incoming == True or m.product_id.track_outgoing == True:
+							line.append({
+								'no': no,
+								'item_id' : m.product_id.id,
+								'desc': m.desc,
+								'qty': m.qty-nilai,
+								'uom_id': m.uom.id,
+								'sale_order_material_line': m.id
+							})
 
+					no +=1
 			if line == []:
 				raise openerp.exceptions.Warning("Item Sales Order Tidak Ditemukan")
 
@@ -539,7 +548,10 @@ class SBM_Work_Order(osv.osv):
 
 				if c.item_id.type <> 'service':
 					if c.item_id.supply_method == 'buy':
-						raise openerp.exceptions.Warning("Item " + c.item_id.default_code + ' No Process')
+						if c.item_id.track_production == False:
+							if c.item_id.track_incoming == False:
+								if c.item_id.track_outgoing==False:
+									raise openerp.exceptions.Warning("Item " + c.item_id.default_code + ' No Process')
 
 				# Cek Material
 				for m in c.raw_materials:
@@ -548,7 +560,10 @@ class SBM_Work_Order(osv.osv):
 
 					if m.item_id.type <> 'service':
 						if m.item_id.supply_method == 'buy':
-							raise openerp.exceptions.Warning("Item " + m.item_id.default_code + ' No Process')
+						 	if m.item_id.track_production == False:
+						 		if m.item_id.track_incoming == False:
+						 			if m.item_id.track_outgoing==False:
+										raise openerp.exceptions.Warning("Item " + m.item_id.default_code + ' No Process')
 
 		return True
 
@@ -643,6 +658,34 @@ class SBM_Work_Order(osv.osv):
 
 		return True
 
+	def cek_product_batch(self, cr, uid, ids, context=None):
+		obj_product = self.pool.get('product.product')
+		obj_batch=self.pool.get('stock.production.lot')
+
+		cek = obj_product.browse(cr, uid, ids)
+		if cek.track_production == True or cek.track_incoming == True or cek.track_outgoing == True:
+
+			lot_name_ws = cek.default_code+'-WS'
+			get_lot = obj_batch.search(cr, uid, [('product_id','=',cek.id), ('name','=',lot_name_ws)])
+			if not get_lot:
+				# set new serial
+				prodlot_obj_id = obj_batch.create(
+					cr, uid, 
+					{
+						'name': lot_name_ws, 
+						'product_id': cek.id,
+						'desc': 'Manufacture Lot',
+					}, 
+					context=context
+				)
+			else:
+				prodlot_obj_id = get_lot[0]
+		
+		return prodlot_obj_id
+
+
+
+
 	def create_picking(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 
@@ -679,6 +722,13 @@ class SBM_Work_Order(osv.osv):
 
 		# Create Stock Move
 		for line in val.outputs:
+
+			# Cek Product Batch 
+			if line.item_id.track_production == True or line.item_id.track_incoming == True or line.item_id.track_outgoing == True:
+				batch_id = self.cek_product_batch(cr, uid, line.item_id.id, context=None)
+			else:
+				batch_id = False
+
 			move_id = stock_move.create(cr,uid,{
 				'name' : line.desc,
 				'origin':origin,
@@ -691,6 +741,7 @@ class SBM_Work_Order(osv.osv):
 				'auto_validate':False,
 				'location_id' :46,
 				'company_id':1,
+				'prodlot_id':batch_id,
 				'picking_id': picking,
 				'state':'draft',
 				'location_dest_id' :val.location_id.id
