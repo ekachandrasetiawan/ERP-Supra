@@ -404,18 +404,6 @@ class SBM_Work_Order(osv.osv):
 								'uom_id': m.uom.id,
 								'sale_order_material_line': m.id
 							})
-
-						# Cek Product Batch
-						if m.product_id.track_production == True or m.product_id.track_incoming == True or m.product_id.track_outgoing == True:
-							line.append({
-								'no': no,
-								'item_id' : m.product_id.id,
-								'desc': m.desc,
-								'qty': m.qty-nilai,
-								'uom_id': m.uom.id,
-								'sale_order_material_line': m.id
-							})
-
 					no +=1
 			if line == []:
 				raise openerp.exceptions.Warning("Item Sales Order Tidak Ditemukan")
@@ -773,10 +761,11 @@ class SBM_Work_Order(osv.osv):
 		raw_material = self.pool.get('sbm.work.order.output.picking')
 
 		data = raw_material.search(cr, uid, [('work_order_id', '=', ids)])
-		picking_id = raw_material.browse(cr, uid, data)[0].picking_id.id
 
-		# Update Done Picking & Move
-		stock_picking.action_move(cr, uid, [picking_id])
+		for x in raw_material.browse(cr, uid, data):
+			if x.picking_id.state <> 'cancel':
+				# Update Done Picking & Move
+				stock_picking.action_move(cr, uid, [x.picking_id.id])
 		return True
 
 
