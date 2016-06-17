@@ -683,7 +683,7 @@ class SBM_Work_Order(osv.osv):
 		work_order = self.pool.get('sbm.work.order')
 		work_order_line = self.pool.get('sbm.work.order.output')
 
-		picking_type = 'in'
+		picking_type = 'internal'
 		seq_obj_name =  'stock.picking.' + picking_type
 
 		set_loc = stock_location.search(cr, uid, [('name','=', 'MANUFACTURE')])
@@ -697,7 +697,8 @@ class SBM_Work_Order(osv.osv):
 
 		# Create Stock Picking 
 		picking = stock_picking.create(cr, uid, {
-					'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+					# 'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+					'name':'INT/WO/'+val.wo_no[:7],
 					'origin':origin,
 					'partner_id':val.customer_id.id,
 					'move_type':'direct',
@@ -710,7 +711,6 @@ class SBM_Work_Order(osv.osv):
 
 		# Create Stock Move
 		for line in val.outputs:
-
 			# Cek Product Batch 
 			if line.item_id.track_production == True or line.item_id.track_incoming == True or line.item_id.track_outgoing == True:
 				batch_id = self.cek_product_batch(cr, uid, line.item_id.id, context=None)
@@ -737,6 +737,32 @@ class SBM_Work_Order(osv.osv):
 
 			# Create Output Picking
 			self.create_output_picking(cr, uid, ids, picking, move_id, line.id, context=None)
+
+
+			for x in line.raw_materials:
+				# Cek Product Batch 
+				if x.item_id.track_production == True or x.item_id.track_incoming == True or x.item_id.track_outgoing == True:
+					batch_id_detail = self.cek_product_batch(cr, uid, x.item_id.id, context=None)
+				else:
+					batch_id_detail = False
+
+				move_detail_id = stock_move.create(cr,uid,{
+					'name' : x.desc,
+					'origin':origin,
+					'product_uos_qty':x.qty,
+					'product_uom':x.uom_id.id,
+					'product_qty':x.qty,
+					'product_uos':x.uom_id.id,
+					'partner_id':val.customer_id.id,
+					'product_id':x.item_id.id,
+					'auto_validate':False,
+					'location_id' :val.location_id.id,
+					'company_id':1,
+					'prodlot_id':batch_id_detail,
+					'picking_id': picking,
+					'state':'draft',
+					'location_dest_id' :46
+					},context=context)
 
 		stock_picking.action_assign(cr, uid, [picking])
 
