@@ -700,7 +700,6 @@ class SBM_Work_Order(osv.osv):
 					'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
 					'origin':origin,
 					'partner_id':val.customer_id.id,
-					'stock_journal_id':1,
 					'move_type':'direct',
 					'invoice_state':'none',
 					'auto_picking':False,
