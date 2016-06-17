@@ -197,7 +197,7 @@ class order_preparation(osv.osv):
 			for old_id in old_so_doc_ids:
 				so.generate_material(cr,uid,old_id,context=context)
 				so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
-
+			print data.order_line,">>>>>>>>>>>>>>>>>>>>>>>"
 			for x in data.order_line:
 				
 
@@ -209,16 +209,23 @@ class order_preparation(osv.osv):
 				material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
 
 				for y in so_material_line.browse(cr, uid, material_lines):
+					print y.id,"++"
 					# Cek Material Line Dengan OP Line
-					nilai= 0
-					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','!=',ids)])
+					nilai= 0 #nilai yang sudah di ambil item nya ke dalam op.
+					op_line = []
+					curr_op_id=ids
+					if len(ids)==1:
+						curr_op_id = ids[0]
 
+					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','!=',curr_op_id)])
+					print op_line,"++--"
 					for l in obj_op_line.browse(cr, uid, op_line):
 						# Cek Status OP 
 						op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
 						product_return = 0
 						search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
-						if search_dn_lm:
+						print search_dn_lm,"_________________________"
+						if len(search_dn_lm):
 							search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , [search_dn_lm])])
 							# Cek DN Line Material Return
 							for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
@@ -227,21 +234,24 @@ class order_preparation(osv.osv):
 
 						if op.state <> 'cancel':
 							nilai += l.product_qty - product_return
+
+
 					if y.product_id.type <> 'service':
+						print (nilai, y.qty,'=================')
 						if nilai < y.qty:
 							location += [y.picking_location.id]
 
 							line.append({
 								'no': y.sale_order_line_id.sequence,
 								'product_id' : y.product_id.id,
-								'product_qty': y.qty - nilai,
+								'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
 								'product_uom': y.uom.id,
 								'name': y.desc,
 								'sale_line_material_id':y.id,
 								'sale_line_id':y.sale_order_line_id.id
 							})
 			res['prepare_lines'] = line
-
+			print res['prepare_lines'],",,,,........................................."
 
 			# check if picking exist on Sale.Order object
 			if data.picking_ids:
@@ -331,6 +341,17 @@ class order_preparation(osv.osv):
 				if x.product_qty > product.qty_available:
 					raise openerp.exceptions.Warning(msg)
 					return False
+
+				if product.track_outgoing:
+					for batch in x.prodlot_id:
+						prodlot_browse = self.pool.get('stock.production.lot').browse(cr, uid, batch.name.id, context=context)
+						stock_batch = prodlot_browse.stock_available
+						# _logger.error(('Tesss---------------------',batch.qty,'--',stock_batch, context, prodlot_browse))
+						if batch.qty > stock_batch:
+							stock = ' ' + str(stock_batch) + ' '
+							msg = 'Stock Product' + mm + ' '+batch.name.name+' Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+							raise openerp.exceptions.Warning(msg)
+							return False
 					
 		if len(notActiveProducts) > 0:
 			m_p_error = ""
