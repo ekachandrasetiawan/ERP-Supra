@@ -315,6 +315,9 @@
 
 						<button name="transferMove" type="object" string="Transfer Move" icon="gtk-apply" states="ready" confirm="Sure ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
+
+						<button name="receiveMove" type="object" string="Receive" icon="gtk-apply" states="transfered" confirm="Receive ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation" icon="gtk-print" states="confirmed,checked,ready"  groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_inherit.group_im_set"/>
 
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation WS" icon="gtk-print" states="checked,ready,transfered,done"  groups="sbm_inherit.group_im_ws_checker"/>
