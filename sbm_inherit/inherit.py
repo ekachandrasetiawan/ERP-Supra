@@ -2462,3 +2462,58 @@ class sale_advance_payment_inv(osv.osv_memory):
 
 			result.append((sale.id, inv_values))
 		return result
+
+class purchase_partial_invoice(osv.osv_memory):
+	_inherit = "purchase.partial.invoice"
+
+	def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		purchase_obj = self.pool.get('purchase.order')
+		inv_line_obj = self.pool.get('account.invoice.line')
+		wizard = self.browse(cr, uid, ids[0], context)
+		purchase_ids = context.get('active_ids', [])
+
+		id_product=self.pool.get('product.product').search(cr,uid,[('default_code', '=' ,'ADVCPYMNT')])
+		data_product =self.pool.get('product.product').browse(cr,uid,id_product)[0]
+
+		result = []
+		for purchase in purchase_obj.browse(cr, uid, purchase_ids, context=context):
+			val = inv_line_obj.product_id_change(cr, uid, [], purchase.order_line[0].product_id.id, uom_id=False, partner_id=purchase.partner_id.id, fposition_id=purchase.fiscal_position.id)
+			res = val['value']
+
+			# determine invoice amount
+			if wizard.amount <= 0.00:
+				raise osv.except_osv(_('Incorrect Data'), _('The value of Advance Amount must be positive.'))
+			
+			inv_amount = purchase.amount_untaxed * wizard.amount / 100
+			if not res.get('name'):
+				res['name'] = _("Advance of %s %%") % (wizard.amount)
+
+			# create the invoice
+			inv_line_values = {
+				'name': data_product.name + ' ' + str(wizard.amount) + '%',
+				'origin': purchase.name,
+				'account_id': res['account_id'],
+				'price_unit': inv_amount,
+				'quantity': 1.0,
+				'uos_id': res.get('uos_id', False),
+				'product_id': data_product.id,
+				'invoice_line_tax_id': False
+			}
+			
+			inv_values = {
+				'name': purchase.partner_ref or purchase.name,
+				'origin': purchase.name,
+				'type': 'in_invoice',
+				'account_id': purchase.partner_id.property_account_payable.id,
+				'partner_id': purchase.partner_id.id,
+				'invoice_line': [(0, 0, inv_line_values)],
+				'currency_id': purchase.pricelist_id.currency_id.id,
+				'fiscal_position': purchase.fiscal_position.id or purchase.partner_id.property_account_position.id
+			}
+			result.append((purchase.id, inv_values))
+		return result
+
+
+purchase_partial_invoice()
