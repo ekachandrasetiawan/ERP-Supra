@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="account_bank_statmenet_form" model="ir.ui.view">
+             <field name="name">account.bank.statement.form</field>
+             <field name="model">account.bank.statement</field>
+             <field name="type">form</field>
+             <field name="inherit_id" ref="account.view_bank_statement_form"/>
+             <field name="arch" type="xml">
+                <button name="button_dummy" position="after">
+                    <button name="action_cancel" type="object" states="draft" string="Cancel Bank Statement" confirm="Are you sure to Cancel Bank Statement"/>
+                </button>
+            </field>
+        </record>
+
+
+
+        <!-- Bank statement -->
+        <record id="inherit_view_account_bank_statement_filter" model="ir.ui.view">
+            <field name="name">account.cash.statement.select</field>
+            <field name="model">account.bank.statement</field>
+            <field name="inherit_id" ref="account.view_bank_statement_search"/>
+            <field name="arch" type="xml">
+                <search string="Search Bank Statements">
+                    <field name="name" string="Bank Statement"/>
+                    <field name="po_id" string="Bank Statement"/>
+                    <field name="account_id" string="Bank Statement"/>
+                    <field name="obi_name" string="Bank Statement"/>
+                    <field name="date"/>
+                    <filter string="Draft" name="state_draft" domain="[('state','=','draft')]" icon="terp-document-new"/>
+                    <filter string="Open" name="state_open" domain="[('state','=','open')]" icon="terp-check"/>
+                    <filter string="Confirmed" name="state_confirmed" domain="[('state','=','confirm')]" icon="terp-camera_test"/>
+                    <field name="journal_id" domain="[('type', '=', 'cash')]" />
+                    <group expand="0" string="Group By...">
+                        <filter string="Journal" context="{'group_by': 'journal_id'}" icon="terp-folder-orange"/>
+                        <filter string="Status" context="{'group_by': 'state'}" icon="terp-stock_effects-object-colorize"/>
+                        <filter string="Period" context="{'group_by': 'period_id'}" icon="terp-go-month"/>
+                        <filter string="po_id" context="{'group_by': 'po_id'}"/>
+                        <filter string="account_id" context="{'group_by': 'account_id'}"/>
+                        <filter string="obi_name" context="{'group_by': 'obi_name'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+    </data>
+</openerp>

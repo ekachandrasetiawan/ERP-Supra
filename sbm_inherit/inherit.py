@@ -2517,3 +2517,27 @@ class purchase_partial_invoice(osv.osv_memory):
 
 
 purchase_partial_invoice()
+
+
+class account_bank_statement(osv.osv):
+	_inherit = "account.bank.statement"
+	_columns = {
+		'line_ids': fields.one2many('account.bank.statement.line','statement_id', 'Statement lines',states={'confirm':[('readonly', True)]}),
+		'po_id': fields.related('line_ids','po_id', type='many2one', relation='purchase.order', string='Purchase Order'),
+		'account_id': fields.related('line_ids','account_id', type='many2one', relation='account.account', string='Account Name'),
+		'obi_name': fields.related('line_ids','name', type='string', string='OBI Name'),
+		'state': fields.selection([
+									('draft', 'New'),
+									('open','Open'),
+									('confirm', 'Closed'),
+									('cancel','Cancel')],
+								   'Status', required=True, readonly="1",
+								   help='When new statement is created the status will be \'Draft\'.\n'
+										'And after getting confirmation from the bank it will be in \'Confirmed\' status.'),
+	}
+
+	def action_cancel(self, cr, uid, ids, context={}):
+		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
+		return res
+
+account_bank_statement()
