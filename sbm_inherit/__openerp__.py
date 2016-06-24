@@ -7,7 +7,8 @@
         "ad_delivery_note",
         "account","ad_discount",
         "ad_order_preparation",
-        "web"
+        "web",
+        "account"
     ],
     "author": "Suprabakti Mandiri",
     "category": "Purchase Suprabakti",
@@ -37,6 +38,7 @@
         "sales_man_target.xml",
         "sale_order.xml",
         "setting.xml",
+        "search_bank_statement.xml",
         # "report/faktur.xml"
         # "purchase_order.xml",
     ],
