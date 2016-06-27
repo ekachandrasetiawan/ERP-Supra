@@ -130,6 +130,34 @@ class PurchaseOrder(osv.osv):
 	_defaults = {
 		'total_discount': _default_total_discount
 	}
+
+
+
+	def invoice_dp_bank_statment(self, cr, uid, ids, context=None):
+		mod_obj = self.pool.get('ir.model.data')
+		act_obj = self.pool.get('ir.actions.act_window')
+		act_acc_line = self.pool.get('account.bank.statement.line')
+
+		result = mod_obj.get_object_reference(cr, uid, 'account', 'action_bank_statement_tree')
+		id = result and result[1] or False
+		result = act_obj.read(cr, uid, [id], context=context)[0]
+		inv_ids = []
+		
+		po_id=act_acc_line.search(cr,uid,[('po_id', '=' ,ids)])
+		data_po=act_acc_line.browse(cr,uid,po_id)
+		for po in data_po:
+			inv_ids+= [po.statement_id.id]
+		if not inv_ids:
+			raise osv.except_osv(_('Error!'), _('No Invoice DP.'))
+		if len(inv_ids)>1:
+			result['domain'] = "[('id','in',["+','.join(map(str, inv_ids))+"])]"
+		else:
+			res = mod_obj.get_object_reference(cr, uid, 'account', 'view_bank_statement_form')
+			result['views'] = [(res and res[1] or False, 'form')]
+			result['res_id'] = inv_ids and inv_ids[0] or False
+		return result
+
+		
 PurchaseOrder()
 
 class PurchaseOrderLine(osv.osv):
