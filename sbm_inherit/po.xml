@@ -27,6 +27,11 @@
             		<field name="amount_bruto" widget="monetary" options="{'currency_field': 'currency_id'}"/>
             		<field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
             	</field>
+            	
+            	<button name="invoice_open" position="inside">
+					<button name="invoice_dp_bank_statment" type="object" string="Invoice DP" class="oe_highlight"/>
+				</button>
+				
 			</field>
 		</record>
 		<!-- END OF INHERIT FIELD cust_ref_no -->
@@ -42,6 +47,7 @@
 					<field name="description" />
 				</xpath>
 
+				
 			</field>
 		</record>
 
