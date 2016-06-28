@@ -69,10 +69,8 @@
             <field name="arch" type="xml">
             <form string="PURCHASE ORDER RESIVE" version="7.0">
                 <header>
-
-                    <button name="po_resive_submit" states="approved" string="Submit" type="object"  icon="gtk-apply" confirm="Are you sure to Submit Purchase Order Resive"/>
-
-                    <button name="po_resive_setdraft" states="approved" string="Set to Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Purchase Order Resive"/>
+                    
+                    <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order"/>
 
                     <button name="po_resive_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" confirm="Are you sure to Approve Purchase Order Resive"/>
 
@@ -104,15 +102,48 @@
     </field>
         </record>
 
+        <record id="view_po_revision_search" model="ir.ui.view">
+            <field name="name">purchase.order.revision.search</field>
+            <field name="model">purchase.order.revision</field>
+            <field name="type">search</field>
 
-           
-	<record model="ir.actions.act_window" id="action_po_to_revise">
-		<field name="name">Purchase Order Revision</field>
-		<field name="res_model">purchase.order.revision</field>
-		<field name="view_type">form</field>
-        <field name="domain">[('state', '=', 'confirm')]</field>
-		<field name="view_mode">tree,form</field>			
-	</record>
+            <field name="arch" type="xml">
+                <search string="Purchase Order Revision">
+                    <group expand="!" string="Purchase Order Revision">
+                        <filter string="Confirm" name="confirm" icon="terp-check" domain="[('state','=','confirm')]"/>
+
+                    </group>
+                    <group expand="1" string="Group By...">
+                        <filter icon="terp-personal" name="group_po" string="PO No." domain="[]" context="{'group_by':'po_source'}"/>
+                    </group>
+                    
+                    <newline/>
+                </search>
+            </field>
+        </record>
+
+
+    <record model="ir.actions.act_window" id="action_po_to_revise">
+        <field name="name">Purchase Order Item Cancel</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.order.revision</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form,tree</field>
+        <field name="search_view_id" ref="view_po_revision_search" />
+        <field name="context">{'search_default_group_po':1,'search_default_confirm':1}</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_po_line_waiting_approval">
+        <field name="name">Purchase Order Item Cancel</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.order.revision</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_po_revision_search" />
+        <field name="tree_view_id" ref="view_po_revise_tree" />
+        <field name="context">{'search_default_group_po':1,'search_default_confirm':1}</field>
+    </record>
+
 
     <menuitem name="PO To Revise" parent="purchase.menu_procurement_management" id="po_to_revise" action="action_po_to_revise"/>
 
