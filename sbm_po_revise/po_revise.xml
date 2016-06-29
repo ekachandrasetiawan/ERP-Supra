@@ -15,10 +15,10 @@
         </record>
 
         <record id="wizard_po_revise_form" model="ir.ui.view">
-            <field name="name">Wizard Purhcase Order Resive</field>
-            <field name="model">wizard.po.resive</field>
+            <field name="name">Wizard Purhcase Order revise</field>
+            <field name="model">wizard.po.revise</field>
             <field name="arch" type="xml">
-                <form string="Purchase Order Resive" version="7.0">
+                <form string="Purchase Order revise" version="7.0">
                     <group>
                         <field name="po_source" readonly="True" />
                     </group>
@@ -26,7 +26,7 @@
                         <field name="reason" />
                     </group>
                     <footer>
-                        <button name="request_po_resive" string="Submit" type="object" class="oe_highlight"/>
+                        <button name="request_po_revise" string="Submit" type="object" class="oe_highlight"/>
                         or
                         <button string="Cancel" class="oe_link" special="cancel"/>
                     </footer>
@@ -34,9 +34,9 @@
             </field>
         </record>
 
-        <record id="wizard_po_resive_action" model="ir.actions.act_window">
-            <field name="name">Action Purcahse Order Resive</field>
-            <field name="res_model">wizard.po.resive</field>
+        <record id="wizard_po_revise_action" model="ir.actions.act_window">
+            <field name="name">Action Purcahse Order revise</field>
+            <field name="res_model">wizard.po.revise</field>
             <field name="type">ir.actions.act_window</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
@@ -67,12 +67,12 @@
             <field name="type">form</field>
             <field name="priority">2</field>
             <field name="arch" type="xml">
-            <form string="PURCHASE ORDER RESIVE" version="7.0">
+            <form string="Purchase Order Revise" version="7.0">
                 <header>
                     
-                    <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order"/>
+                    <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order" groups="purchase.group_purchase_user"/>
 
-                    <button name="po_resive_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" confirm="Are you sure to Approve Purchase Order Resive"/>
+                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager"/>
 
                     <field name="state" widget="statusbar" statusbar_visible="confirm,approved,to_revise,done"/>
 
@@ -80,7 +80,7 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <label string="PURCHASE ORDER RESIVE"/>
+                            <label string="Purchase Order Revise"/>
                             <separator string=""/>
                             <field name="po_source" class="oe_inline" colspan="4"/>
                         </h1>
@@ -124,24 +124,24 @@
 
 
     <record model="ir.actions.act_window" id="action_po_to_revise">
-        <field name="name">Purchase Order Item Cancel</field>
+        <field name="name">Purchase Order Revision</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">purchase.order.revision</field>
         <field name="view_type">form</field>
-        <field name="view_mode">form,tree</field>
+        <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_po_revision_search" />
-        <field name="context">{'search_default_group_po':1,'search_default_confirm':1}</field>
+        <field name="context">{'search_default_confirm':1}</field>
     </record>
 
     <record model="ir.actions.act_window" id="action_po_line_waiting_approval">
-        <field name="name">Purchase Order Item Cancel</field>
+        <field name="name">Purchase Order Revision</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">purchase.order.revision</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_po_revision_search" />
         <field name="tree_view_id" ref="view_po_revise_tree" />
-        <field name="context">{'search_default_group_po':1,'search_default_confirm':1}</field>
+        <field name="context">{'search_default_confirm':1}</field>
     </record>
 
 
