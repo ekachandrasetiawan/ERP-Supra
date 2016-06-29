@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="purchase_order_form_with_po_revise" model="ir.ui.view">
+            <field name="name">purchase.order.form.with.po.revise</field>
+            <field name="type">form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_cancel']" position="after">
+                    <button name="action_po_to_revise" states="sent,confirmed,approved" string="PO Revision" type="object"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="wizard_po_revise_form" model="ir.ui.view">
+            <field name="name">Wizard Purhcase Order revise</field>
+            <field name="model">wizard.po.revise</field>
+            <field name="arch" type="xml">
+                <form string="Purchase Order revise" version="7.0">
+                    <group>
+                        <field name="po_source" readonly="True" />
+                    </group>
+                    <group>
+                        <field name="reason" />
+                    </group>
+                    <footer>
+                        <button name="request_po_revise" string="Submit" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="wizard_po_revise_action" model="ir.actions.act_window">
+            <field name="name">Action Purcahse Order revise</field>
+            <field name="res_model">wizard.po.revise</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="wizard_po_revise_form"/>
+        </record>
+
+
+        <!--  Purchase Order Revise -->
+
+ 		<record id="view_po_revise_tree" model="ir.ui.view">
+            <field name="name">purchase.order.revision.tree</field>
+            <field name="model">purchase.order.revision</field>
+            <field name="type">tree</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+                <tree string="Purchase Order Revision">
+                	<field name="po_source"/>
+                	<field name="rev_counter"/>
+                    <field name="revise_w_new_no"/>
+	                <field name="state"/>
+                </tree>
+            </field>
+        </record>
+		
+		<record id="view_po_revise_form" model="ir.ui.view">
+            <field name="name">purchase.order.revision.form</field>
+            <field name="model">purchase.order.revision</field>
+            <field name="type">form</field>
+            <field name="priority">2</field>
+            <field name="arch" type="xml">
+            <form string="Purchase Order Revise" version="7.0">
+                <header>
+                    
+                    <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order" groups="purchase.group_purchase_user"/>
+
+                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="confirm,approved,to_revise,done"/>
+
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <label string="Purchase Order Revise"/>
+                            <separator string=""/>
+                            <field name="po_source" class="oe_inline" colspan="4"/>
+                        </h1>
+                    </div>
+                    <group col="4" colspan="4">
+                        <field name="rev_counter"/>
+                        <field name="new_po"/>
+                        <field name="revise_w_new_no"/>
+                    </group>
+
+                    <div class="oe_clear"/>
+                    <field name="reason" class="oe_inline" placeholder="Notes..."/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+    </field>
+        </record>
+
+        <record id="view_po_revision_search" model="ir.ui.view">
+            <field name="name">purchase.order.revision.search</field>
+            <field name="model">purchase.order.revision</field>
+            <field name="type">search</field>
+
+            <field name="arch" type="xml">
+                <search string="Purchase Order Revision">
+                    <group expand="!" string="Purchase Order Revision">
+                        <filter string="Confirm" name="confirm" icon="terp-check" domain="[('state','=','confirm')]"/>
+
+                    </group>
+                    <group expand="1" string="Group By...">
+                        <filter icon="terp-personal" name="group_po" string="PO No." domain="[]" context="{'group_by':'po_source'}"/>
+                    </group>
+                    
+                    <newline/>
+                </search>
+            </field>
+        </record>
+
+
+    <record model="ir.actions.act_window" id="action_po_to_revise">
+        <field name="name">Purchase Order Revision</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.order.revision</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_po_revision_search" />
+        <field name="context">{'search_default_confirm':1}</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_po_line_waiting_approval">
+        <field name="name">Purchase Order Revision</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.order.revision</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_po_revision_search" />
+        <field name="tree_view_id" ref="view_po_revise_tree" />
+        <field name="context">{'search_default_confirm':1}</field>
+    </record>
+
+
+    <menuitem name="PO To Revise" parent="purchase.menu_procurement_management" id="po_to_revise" action="action_po_to_revise"/>
+
+    </data>
+</openerp>
