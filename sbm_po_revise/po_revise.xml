@@ -9,7 +9,7 @@
             <field name="inherit_id" ref="purchase.purchase_order_form" />
             <field name="arch" type="xml">
                 <xpath expr="//button[@name='action_cancel']" position="after">
-                    <button name="action_po_to_revise" states="sent,confirmed,approved" string="PO Revision" type="object"/>
+                    <button name="action_po_to_revise" states="sent,confirmed,approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
                 </xpath>
             </field>
         </record>
@@ -116,7 +116,10 @@
                     <group expand="1" string="Group By...">
                         <filter icon="terp-personal" name="group_po" string="PO No." domain="[]" context="{'group_by':'po_source'}"/>
                     </group>
-                    
+
+                    <field name="po_source" select="1" string="Purchase Order No"/>
+                    <field name="new_po" select="1" string="Purchase Order New No"/>
+                    <field name="state" select="1" string="State"/>
                     <newline/>
                 </search>
             </field>
