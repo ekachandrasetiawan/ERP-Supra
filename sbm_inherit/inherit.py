@@ -1877,8 +1877,9 @@ class InternalMove(osv.osv):
 		pick = self.pool.get('stock.picking')
 
 		for tid in self.browse(cr,uid,ids,context):
-			pick.action_assign(cr,uid,[tid.picking_id.id])
-			tid.write({'state':'ready','date_prepared':time.strftime('%Y-%m-%d')})
+			if self._finalyCheckQty(cr,uid,tid):
+				pick.action_assign(cr,uid,[tid.picking_id.id])
+				tid.write({'state':'ready','date_prepared':time.strftime('%Y-%m-%d')})
 		return res
 
 
@@ -1894,8 +1895,10 @@ class InternalMove(osv.osv):
 		
 
 		for data in self.browse(cr,uid,ids,context):
-			for move in data.picking_id.move_lines:
-				move.write({'location_dest_id':trsLoc})
+			if self._finalyCheckQty(cr,uid,data):
+				for move in data.picking_id.move_lines:
+					move.write({'location_dest_id':trsLoc})
+
 			# data.picking.action_move
 			# self.action_move(cr, uid, [new_picking], context=context)
 			self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
