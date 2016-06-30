@@ -81,7 +81,9 @@ class Purchase_Order(osv.osv):
 
 	def action_picking_create(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
+		obj_po=self.pool.get('purchase.order')
 		obj_po_revision=self.pool.get('purchase.order.revision')
+		
 		res = super(Purchase_Order, self).action_picking_create(cr, uid, ids, context=None)
 
 		if val.po_revision_id.id:
@@ -90,8 +92,14 @@ class Purchase_Order(osv.osv):
 			# Cancel Purchase Order
 			cancel_po = self.action_cancel(cr, uid, [val.po_revision_id.po_source.id], context=None)
 
+			msg = _("Revision Version Confirmed @ " + val.name)
+			obj_po.message_post(cr, uid, [val.po_revision_id.po_source.id], body=msg, context=context)
+
 			if val.po_revision_id.po_source.state != 'cancel':
 				self.cancel_purchase_order(cr, uid, [val.po_revision_id.po_source.id], context=None)
+
+			# Done Purchase Order Revision
+			obj_po_revision.write(cr,uid,val.po_revision_id.id,{'state':'done'})
 
 		return res
 
@@ -165,7 +173,7 @@ class Purchase_Order_Revision(osv.osv):
 		val = self.browse(cr, uid, ids, context={})[0]
 		obj_po=self.pool.get('purchase.order')
 
-		msg = _("Purchase Order Revision To Revise")
+		msg = _("Approval to Revision Complete")
 		obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 
 		res = self.write(cr,uid,ids,{'state':'to_revise'},context=context)
@@ -215,10 +223,10 @@ class Purchase_Order_Revision(osv.osv):
 
 		if data_bank_statment:
 			for n in data_bank_statment:
-				if n.statement_id.state == 'confirm':
-					self.update_revise_w_new_no(cr, uid, ids, context={})
+
+				self.update_revise_w_new_no(cr, uid, ids, context={})
 					
-				msg = _("Please Cancel Bank Statement " + n.statement_id.name)
+				msg = _("Please Cancel Bank Statement " + str(n.statement_id.name) + " --> Waiting to Cancel Bank Statement " + str(n.statement_id.name))
 				obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 
 				# elif n.statement_id.state == 'draft':
@@ -226,14 +234,15 @@ class Purchase_Order_Revision(osv.osv):
 				# 	obj_bank_statment.action_cancel(cr,uid,[n.statement_id.id])
 		if invoice:
 			for x in obj_invoice.browse(cr, uid, invoice):
-				if x.state == 'paid':
+				if x.state == 'paid' or x.state == 'open':
 					self.update_revise_w_new_no(cr, uid, ids, context={})
 
-				msg = _("Please Cancel Invoice " + x.name)
+				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
 				obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 				# elif x.state == 'draft':
 				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
 				# 	obj_invoice.action_cancel(cr, uid, [x.id], context={})
+		# return self.pool.get('warning').info(cr, uid, title='Export imformation', message="%s products Created, %s products Updated "%(str(prod_new),str(prod_update)))
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
@@ -254,7 +263,11 @@ class Purchase_Order_Revision(osv.osv):
 		res = {};lines= []
 
 		if val.revise_w_new_no == False:
-			seq = po.po_source.name + '-Rev'+str(val.rev_counter)
+			
+			if po.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
+				seq = po.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
+			else:
+				seq = po.po_source.name + '/Rev'+str(val.rev_counter)
 		else:
 			seq =int(time.time())
 
@@ -269,7 +282,8 @@ class Purchase_Order_Revision(osv.osv):
 										'origin':po.po_source.origin,
 										'type_permintaan':'1',
 										'term_of_payment':po.po_source.term_of_payment,
-										'po_revision_id':val.id
+										'po_revision_id':val.id,
+										'rev_counter':val.rev_counter
 									   })
 		noline=1
 		for line in po.po_source.order_line:
@@ -306,11 +320,16 @@ class Purchase_Order_Revision(osv.osv):
 		if po_id:
 			obj_po_revision.write(cr,uid,ids,{'new_po':po_id})
 
+			no_po = obj_po.browse(cr, uid, [po_id])[0]
 			if val.revise_w_new_no == False:
-				name_seq = val.po_source.name + '-Rev'+str(val.rev_counter)
+				if val.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
+					name_seq = val.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
+				else:
+					name_seq = val.po_source.name + '/Rev'+str(val.rev_counter)
+					
 				obj_po.write(cr,uid,po_id,{'name':name_seq})
 
-			msg = _("Purchase Order Revision Create New Purchase")
+			msg = _("Revision Version Created @ # " + no_po.name)
 			obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 
 
@@ -396,7 +415,9 @@ class WizardPOrevise(osv.osv_memory):
 					'state':'confirm'
 					})
 
-		# redir
+		msg = _("Ask for Revision with reason: " + data.reason + " Waiting Approval")
+		obj_po.message_post(cr, uid, [po], body=msg, context=context)
+
 
 		pool_data=self.pool.get("ir.model.data")
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_po_revise', "view_po_revise_form")     
@@ -473,10 +494,14 @@ class account_invoice(osv.osv):
 
 	def update_po_revision(self, cr, uid, ids, context=None):
 		obj_po_revision=self.pool.get('purchase.order.revision')
-
+		obj_po=self.pool.get('purchase.order')
 		cek_po = obj_po_revision.search(cr, uid, [('po_source', '=', ids)])
 		data_po = obj_po_revision.browse(cr, uid, cek_po)[0]
 		if data_po.state == 'approved':
+
+			msg = _("Approval to Revision Complete")
+			obj_po.message_post(cr, uid, [data_po.po_source.id], body=msg, context=context)
+
 			return obj_po_revision.write(cr,uid,data_po.id,{'state':'to_revise'},context=context)
 		else:
 			return False
@@ -533,10 +558,14 @@ class account_bank_statement(osv.osv):
 
 	def update_po_revision(self, cr, uid, ids, context=None):
 		obj_po_revision=self.pool.get('purchase.order.revision')
+		obj_po=self.pool.get('purchase.order')
 
 		cek_po = obj_po_revision.search(cr, uid, [('po_source', '=', ids)])
 		data_po = obj_po_revision.browse(cr, uid, cek_po)[0]
 		if data_po.state == 'approved':
+
+			msg = _("Approval to Revision Complete")
+			obj_po.message_post(cr, uid, [data_po.po_source.id], body=msg, context=context)
 			return obj_po_revision.write(cr,uid,data_po.id,{'state':'to_revise'},context=context)
 		else:
 			return False
