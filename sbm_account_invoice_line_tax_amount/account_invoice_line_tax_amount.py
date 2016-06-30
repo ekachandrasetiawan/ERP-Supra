@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 import math
 from osv import osv, fields
