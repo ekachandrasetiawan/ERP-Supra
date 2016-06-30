@@ -352,6 +352,14 @@ Purchase_Order_Revision()
 
 class ClassNamePOrevise(osv.osv):
 	def action_po_to_revise(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		po_revision=self.pool.get('purchase.order.revision')
+
+		search_po = po_revision.search(cr, uid, [('po_source', '=', val.id)])
+
+		if search_po:
+			raise osv.except_osv(('Warning..!!'), ('Purchase Order is Already in Revision..'))
+
 		if context is None:
 			context = {}
 		
