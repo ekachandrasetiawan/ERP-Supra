@@ -317,6 +317,9 @@ class Purchase_Order_Revision(osv.osv):
 		obj_po_revision = self.pool.get('purchase.order.revision')
 		po_id=self.create_purchase_order(cr, uid, ids, context=None)
 
+		if val.new_po.id:
+			raise osv.except_osv(('Warning..!!'), ('The New Purchase Order is Already in the Create..'))
+
 		if po_id:
 			obj_po_revision.write(cr,uid,ids,{'new_po':po_id})
 
