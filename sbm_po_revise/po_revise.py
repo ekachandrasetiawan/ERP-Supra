@@ -33,6 +33,19 @@ class Purchase_Order(osv.osv):
 		'rev_counter':0,
 	}
 
+
+	def action_invoice_create(self, cr, uid, ids, context=None):
+		po_revision=self.pool.get('purchase.order.revision')
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		search_po_revision = po_revision.search(cr, uid, [('po_source', '=', ids)])
+		if search_po_revision:
+			raise osv.except_osv(_('Warning!'),
+			_('Purchase Order ' + val.name + ' Tidak Dapat Di Proses Karna Revisi'))
+
+		res = super(Purchase_Order, self).action_invoice_create(cr, uid, ids, context=None)
+		return res
+
 	def wkf_confirm_order(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		res = super(Purchase_Order, self).wkf_confirm_order(cr, uid, ids, context=None)
