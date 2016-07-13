@@ -262,7 +262,8 @@ class Purchase_Order_Revision(osv.osv):
 				# 	obj_bank_statment.action_cancel(cr,uid,[n.statement_id.id])
 		if invoice:
 			for x in obj_invoice.browse(cr, uid, invoice):
-				if x.state == 'paid' or x.state == 'open':
+				# if x.state == 'paid' or x.state == 'open':
+				if x.state != 'cancel':
 					self.update_revise_w_new_no(cr, uid, ids, context={})
 
 				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
