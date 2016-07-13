@@ -69,6 +69,9 @@ class Purchase_Order(osv.osv):
 			picking = obj_picking.browse(cr, uid, search_picking)
 			for x in picking:
 				if x.state == 'done':
+					#  Update Stock Pickin Doc Ref 
+					obj_picking.write(cr,uid,n_picking.id,{'cust_doc_ref':x.cust_doc_ref})
+
 					partial_data = {}
 					for line in x.move_lines:
 						po_line = obj_po_line.search(cr, uid, [('po_line_rev', '=', line.purchase_line_id.id)])
