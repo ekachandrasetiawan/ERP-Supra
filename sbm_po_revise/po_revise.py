@@ -40,8 +40,10 @@ class Purchase_Order(osv.osv):
 
 		search_po_revision = po_revision.search(cr, uid, [('po_source', '=', ids)])
 		if search_po_revision:
-			raise osv.except_osv(_('Warning!'),
-			_('Purchase Order ' + val.name + ' Tidak Dapat Di Proses Karna Revisi'))
+			state_revision=po_revision.browse(cr, uid, search_po_revision)[0]
+			if state_revision.state != 'cancel':
+				raise osv.except_osv(_('Warning!'),
+				_('Purchase Order ' + val.name + ' Tidak Dapat Di Proses Karna Revisi'))
 
 		res = super(Purchase_Order, self).action_invoice_create(cr, uid, ids, context=None)
 		return res
@@ -158,6 +160,7 @@ class Purchase_Order_Revision(osv.osv):
 			('approved','Approved'),
 			('to_revise','To Revise'),
 			('done', 'Done'),
+			('cancel', 'Cancel'),
 		], 'Status', readonly=True, select=True, track_visibility='onchange'),
 		'revise_w_new_no':fields.boolean(string='Revise New No', readonly=True, track_visibility='onchange'),
 	}
@@ -169,6 +172,11 @@ class Purchase_Order_Revision(osv.osv):
 	}
 
 	_rec_name = 'po_source'
+
+
+	def po_revision_state_cancel(self, cr, uid, ids, context={}):
+		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
+		return res
 
 
 	def po_revision_state_setconfirm(self, cr, uid, ids, context={}):
@@ -213,6 +221,10 @@ class Purchase_Order_Revision(osv.osv):
 		obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 
 		res = self.write(cr,uid,ids,{'revise_w_new_no':True},context=context)
+		return res
+
+	def po_revise_cancel(self, cr, uid, ids, context={}):
+		res = self.po_revision_state_cancel(cr, uid, ids, context=None)
 		return res
 
 	def po_revise_approve(self, cr, uid, ids, context={}):
@@ -377,7 +389,9 @@ class ClassNamePOrevise(osv.osv):
 		search_po = po_revision.search(cr, uid, [('po_source', '=', val.id)])
 
 		if search_po:
-			raise osv.except_osv(('Warning..!!'), ('Purchase Order is Already in Revision..'))
+			state_po_revisi = po_revision.browse(cr, uid, search_po)[0]
+			if state_po_revisi.state != 'cancel':
+				raise osv.except_osv(('Warning..!!'), ('Purchase Order is Already in Revision..'))
 
 		if context is None:
 			context = {}
@@ -550,8 +564,10 @@ class account_bank_statement(osv.osv):
 
 					search_po_revision = po_revision.search(cr, uid, [('po_source', '=', po.id)])
 					if search_po_revision:
-						raise osv.except_osv(_('Warning!'),
-						_('Purchase Order ' + po.name + ' Tidak Dapat Di Proses Karna Revisi'))
+						state_revision=po_revision.browse(cr, uid, search_po_revision)[0]
+						if state_revision.state != 'cancel':
+							raise osv.except_osv(_('Warning!'),
+							_('Purchase Order ' + po.name + ' Tidak Dapat Di Proses Karna Revisi'))
 
 		return super(account_bank_statement, self).create(cr, uid, vals, context=context)
 
@@ -626,221 +642,29 @@ purchase_partial_invoice()
 class merge_pickings(osv.osv_memory):
 	_inherit = "merge.pickings"
 
-
-	def merge_orders(self, cr, uid, ids, context={}):
-		pool_data = self.pool.get('ir.model.data')
-		journal_obj = self.pool.get('account.journal')
-		pool_invoice = self.pool.get('account.invoice')
+	def check_is_po_revise(self, cr, uid, ids, picking_ids, context=None):
 		pool_picking = self.pool.get('stock.picking')
 		obj_po_revision=self.pool.get('purchase.order.revision')
-		pool_partner = self.pool.get('res.partner')
-		pool_invoice_line = self.pool.get('account.invoice.line')
-
-		data = self.browse(cr, uid, ids, context=context)[0]
-		picking_ids = [x.id for x in data['picking_ids']]
-		partner_obj = data['partner_id']
-
-		# Valisasi Invoice Picking Cek Po apakah sudah ada Invoice
 		for x in picking_ids:
 			pick =pool_picking.browse(cr,uid,x)
+			if pick.type == 'in':
+				search_po_revision = obj_po_revision.search(cr, uid, [('po_source', '=', pick.purchase_id.id)])
+				if search_po_revision:
+					state_revision=obj_po_revision.browse(cr, uid, search_po_revision)[0]
+					if state_revision.state != 'cancel':
+						raise osv.except_osv(_('Warning!'),
+						_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
 
-			search_po_revision = obj_po_revision.search(cr, uid, [('po_source', '=', pick.purchase_id.id)])
-
-			if search_po_revision:
-				raise osv.except_osv(_('Warning!'),
-				_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
-
-			cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [pick.purchase_id.id])
-			invoice = map(lambda x: x[0], cr.fetchall())
-			
-			if invoice:
-				raise osv.except_osv(_('Warning!'),
-				_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Dari Consolidate Picking'))
+		return True
 
 
-		
-		alamat = pool_partner.address_get(cr, uid, [partner_obj.id],['contact', 'invoice'])
-		address_contact_id = alamat['contact']
-		address_invoice_id = alamat['invoice']
-			   
-		picking = pool_picking.browse(cr, uid, picking_ids[0], context=context)
-		namepick = False
-		origin = False
-		if data.type == 'out':
-			type_inv = 'out_invoice'
-			account_id = partner_obj.property_account_receivable.id
-			curency = picking.sale_id.pricelist_id.currency_id.id
-			journal_ids = journal_obj.search(cr, uid, [('type','=','sale'),('company_id', '=', 1)], limit=1)
+	def merge_orders(self, cr, uid, ids, context={}):
+		data = self.browse(cr, uid, ids, context=context)[0]
+		picking_ids = [x.id for x in data['picking_ids']]
+		self.check_is_po_revise(cr, uid, ids, picking_ids)
 
-
-			origin = ''
-			namepick = ''
-			for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
-				if picking.note_id.id:
-					origin += picking.origin +':'+ (picking.note_id.name)[:7] + ', '
-				else:
-					origin += picking.origin+ ', '
-
-				namepick += picking.sale_id.client_order_ref + ', '
-
-		elif data.type == 'in':
-			type_inv = 'in_invoice'
-			account_id = partner_obj.property_account_payable.id
-			curency = picking.purchase_id.pricelist_id.currency_id.id
-			journal_ids = journal_obj.search(cr, uid, [('type','=','purchase'),('company_id', '=', 1)], limit=1)
-		
-		if not journal_ids:
-			raise osv.except_osv(('Error !'), ('There is no sale/purchase journal defined for this company'))            
-
-		invoice_id = pool_invoice.create(cr, uid, {
-			'name': namepick[:-2] if namepick else 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
-			# 'name': 'Merged Invoice for '+ partner_obj.name + ' on ' + time.strftime('%Y-%m-%d %H:%M:%S'),
-			'type': type_inv,
-			'account_id': account_id,
-			'partner_id': partner_obj.id,
-			'journal_id': journal_ids[0] or False,
-			'address_invoice_id': address_invoice_id,
-			'address_contact_id': address_contact_id,
-			'date_invoice': time.strftime('%Y-%m-%d'),
-			'user_id': uid,
-			'origin':origin[:-2] if origin else False,
-			'currency_id': curency or False,
-			'picking_ids': [(6,0, picking_ids)]})
-		
-
-		# Daftarkan Ke Purchase Invoice Rel
-		add_po_id = []
-		for y in picking_ids:
-			pick2 =pool_picking.browse(cr,uid,y)
-			add_po_id += [pick2.purchase_id.id]
-
-		
-		#convert list into set
-		cek_unique = set(add_po_id)
-
-		#convert back to list
-		add_po_id = list(cek_unique)
-
-		# Filter PO ID yang sama, Handle jika Multi Picking dari PO yang sama
-		unique_list = [
-		e
-		for i, e in enumerate(add_po_id)
-			if add_po_id.index(e) == i
-		]
-
-		for a in add_po_id:
-			cr.execute('insert into purchase_invoice_rel (purchase_id,invoice_id) values (%s,%s)', (a, invoice_id))
-		
-		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
-			pool_picking.write(cr, uid, [picking.id], {'invoice_state': 'invoiced', 'invoice_id': invoice_id}) 
-			for move_line in picking.move_lines:
-				disc_amount = 0
-				if data.type == 'out':
-					price_unit = pool_picking._get_price_unit_invoice(cr, uid, move_line, 'out_invoice')
-					tax_ids = pool_picking._get_taxes_invoice(cr, uid, move_line, 'out_invoice')
-					line_account_id = move_line.product_id.product_tmpl_id.property_account_income.id or move_line.product_id.categ_id.property_account_income_categ.id
-				elif data.type == 'in':
-					price_unit = pool_picking._get_price_unit_invoice(cr, uid, move_line, 'in_invoice')
-					tax_ids = pool_picking._get_taxes_invoice(cr, uid, move_line, 'in_invoice')
-					line_account_id = move_line.product_id.product_tmpl_id.property_account_expense.id or move_line.product_id.categ_id.property_account_expense_categ.id
-					disc_amount = move_line.purchase_line_id.discount_nominal
-				discount = pool_picking._get_discount_invoice(cr, uid, move_line)
-				 
-				origin = picking.origin +':'+ (picking.name).strip()
-				#origin = (picking.delivery_note).strip() +';'+ (picking.name).strip()
-				if picking.note_id:
-					# search op line id by move line ID
-					
-					cekopline=self.pool.get('order.preparation.line').search(cr,uid,[('move_id', '=' ,move_line.id)])
-
-					op_line=self.pool.get('order.preparation.line').browse(cr,uid,cekopline)
-					
-					if op_line:
-						for opl in op_line:
-							#Search DN Line ID By OP Line ID
-							cek=self.pool.get('delivery.note.line').search(cr,uid,[('op_line_id', '=' ,opl.id)])
-							product_dn=self.pool.get('delivery.note.line').browse(cr,uid,cek)[0]
-
-							if cek:
-								pool_invoice_line.create(
-									cr, uid, 
-									{
-										'name': product_dn.name,
-										'picking_id': picking.id,
-										'origin': origin,
-										'uos_id': move_line.product_uos.id or move_line.product_uom.id,
-										'product_id': move_line.product_id.id,
-										'price_unit': price_unit,
-										'discount': discount,
-										'quantity': move_line.product_qty,
-										'invoice_id': invoice_id,
-										'invoice_line_tax_id': [(6, 0, tax_ids)],
-										'account_analytic_id': pool_picking._get_account_analytic_invoice(cr, uid, picking, move_line),
-										'account_id': self.pool.get('account.fiscal.position').map_account(cr, uid, partner_obj.property_account_position, line_account_id),
-										'amount_discount':disc_amount
-									}
-								)
-							else:
-								raise osv.except_osv(('Perhatian..!!'), ('No Delivery Note Tidak Ditemukan'))
-						# end for
-					else:
-						pool_invoice_line.create(
-							cr, uid, 
-							{
-								# 'name': picking.origin +':'+ (picking.name).strip(), #move_line.name,
-								'name': move_line.name,
-								'picking_id': picking.id,
-								'origin': origin,
-								'uos_id': move_line.product_uos.id or move_line.product_uom.id,
-								'product_id': move_line.product_id.id,
-								'price_unit': price_unit,
-								'discount': discount,
-								'quantity': move_line.product_qty,
-								'invoice_id': invoice_id,
-								'invoice_line_tax_id': [(6, 0, tax_ids)],
-								'account_analytic_id': pool_picking._get_account_analytic_invoice(cr, uid, picking, move_line),
-								'account_id': self.pool.get('account.fiscal.position').map_account(cr, uid, partner_obj.property_account_position, line_account_id),
-								'amount_discount':disc_amount
-							}
-						)
-				else:
-					pool_invoice_line.create(
-						cr, uid, 
-						{
-							# 'name': picking.origin +':'+ (picking.name).strip(), #move_line.name,
-							'name': move_line.name,
-							'picking_id': picking.id,
-							'origin': origin,
-							'uos_id': move_line.product_uos.id or move_line.product_uom.id,
-							'product_id': move_line.product_id.id,
-							'price_unit': price_unit,
-							'discount': discount,
-							'quantity': move_line.product_qty,
-							'invoice_id': invoice_id,
-							'invoice_line_tax_id': [(6, 0, tax_ids)],
-							'account_analytic_id': pool_picking._get_account_analytic_invoice(cr, uid, picking, move_line),
-							'account_id': self.pool.get('account.fiscal.position').map_account(cr, uid, partner_obj.property_account_position, line_account_id),
-							'amount_discount':disc_amount
-						}
-					)
-		pool_invoice.button_compute(cr, uid, [invoice_id], context=context, set_total=False)           
-		action_model,action_id = pool_data.get_object_reference(cr, uid, 'account', "invoice_form")
-		if data.type == 'in':
-			action_model,action_id = pool_data.get_object_reference(cr, uid, 'account', "invoice_supplier_form")
-		 
-		action_pool = self.pool.get(action_model)
-		res_id = action_model and action_id or False
-		action = action_pool.read(cr, uid, action_id, context=context)
-		action['name'] = 'Merged Invoice'
-		action['view_type'] = 'form'
-		action['view_mode'] = 'form'
-		action['view_id'] = [res_id]
-		action['res_model'] = 'account.invoice'
-		action['type'] = 'ir.actions.act_window'
-		action['target'] = 'current'
-		action['res_id'] = invoice_id
-		return action
-
+		res = super(merge_pickings, self).merge_orders(cr, uid, ids, context=None)
+		return res
 
 merge_pickings()
 
@@ -856,8 +680,10 @@ class purchase_partial_invoice(osv.osv_memory):
 		
 		search_po_revision = po_revision.search(cr, uid, [('po_source', '=', active_id)])
 		if search_po_revision:
-			raise osv.except_osv(_('Warning!'),
-			_('Purchase Order Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
+			state_po = po_revision.browse(cr, uid, search_po_revision)[0]
+			if state_po.state <> 'cancel':
+				raise osv.except_osv(_('Warning!'),
+				_('Purchase Order Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
 
 		return res
 
