@@ -2,17 +2,6 @@
 <openerp>
     <data>
 
-        <record id="purchase_order_remove_cancel_item_button" model="ir.ui.view">
-            <field name="name">purchase.order.remove.cancel.item.button</field>
-            <field name="type">form</field>
-            <field name="model">purchase.order</field>
-            <field name="inherit_id" ref="sbm_purchaseorder.replace_button_cancel_item" />
-            <field name="arch" type="xml">
-                <button name="action_cancel_item" position="replace" />
-            </field>
-
-        </record>
-
         <record id="purchase_order_form_with_po_revise" model="ir.ui.view">
             <field name="name">purchase.order.form.with.po.revise</field>
             <field name="type">form</field>
