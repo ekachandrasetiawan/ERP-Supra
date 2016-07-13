@@ -87,6 +87,8 @@
 
                     <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager"/>
 
+                    <button name="po_revise_cancel" states="confirm" string="Cancel" type="object"  icon="STOCK_CANCEL" groups="account.group_account_manager"/>
+
                     <field name="state" widget="statusbar" statusbar_visible="confirm,approved,to_revise,done"/>
 
                 </header>

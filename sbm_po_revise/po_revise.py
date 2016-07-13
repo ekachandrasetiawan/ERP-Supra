@@ -40,8 +40,10 @@ class Purchase_Order(osv.osv):
 
 		search_po_revision = po_revision.search(cr, uid, [('po_source', '=', ids)])
 		if search_po_revision:
-			raise osv.except_osv(_('Warning!'),
-			_('Purchase Order ' + val.name + ' Tidak Dapat Di Proses Karna Revisi'))
+			state_revision=po_revision.browse(cr, uid, search_po_revision)[0]
+			if state_revision.state != 'cancel':
+				raise osv.except_osv(_('Warning!'),
+				_('Purchase Order ' + val.name + ' Tidak Dapat Di Proses Karna Revisi'))
 
 		res = super(Purchase_Order, self).action_invoice_create(cr, uid, ids, context=None)
 		return res
@@ -158,6 +160,7 @@ class Purchase_Order_Revision(osv.osv):
 			('approved','Approved'),
 			('to_revise','To Revise'),
 			('done', 'Done'),
+			('cancel', 'Cancel'),
 		], 'Status', readonly=True, select=True, track_visibility='onchange'),
 		'revise_w_new_no':fields.boolean(string='Revise New No', readonly=True, track_visibility='onchange'),
 	}
@@ -169,6 +172,11 @@ class Purchase_Order_Revision(osv.osv):
 	}
 
 	_rec_name = 'po_source'
+
+
+	def po_revision_state_cancel(self, cr, uid, ids, context={}):
+		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
+		return res
 
 
 	def po_revision_state_setconfirm(self, cr, uid, ids, context={}):
@@ -213,6 +221,10 @@ class Purchase_Order_Revision(osv.osv):
 		obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 
 		res = self.write(cr,uid,ids,{'revise_w_new_no':True},context=context)
+		return res
+
+	def po_revise_cancel(self, cr, uid, ids, context={}):
+		res = self.po_revision_state_cancel(cr, uid, ids, context=None)
 		return res
 
 	def po_revise_approve(self, cr, uid, ids, context={}):
@@ -377,7 +389,9 @@ class ClassNamePOrevise(osv.osv):
 		search_po = po_revision.search(cr, uid, [('po_source', '=', val.id)])
 
 		if search_po:
-			raise osv.except_osv(('Warning..!!'), ('Purchase Order is Already in Revision..'))
+			state_po_revisi = po_revision.browse(cr, uid, search_po)[0]
+			if state_po_revisi.state != 'cancel':
+				raise osv.except_osv(('Warning..!!'), ('Purchase Order is Already in Revision..'))
 
 		if context is None:
 			context = {}
@@ -550,8 +564,10 @@ class account_bank_statement(osv.osv):
 
 					search_po_revision = po_revision.search(cr, uid, [('po_source', '=', po.id)])
 					if search_po_revision:
-						raise osv.except_osv(_('Warning!'),
-						_('Purchase Order ' + po.name + ' Tidak Dapat Di Proses Karna Revisi'))
+						state_revision=po_revision.browse(cr, uid, search_po_revision)[0]
+						if state_revision.state != 'cancel':
+							raise osv.except_osv(_('Warning!'),
+							_('Purchase Order ' + po.name + ' Tidak Dapat Di Proses Karna Revisi'))
 
 		return super(account_bank_statement, self).create(cr, uid, vals, context=context)
 
@@ -647,8 +663,10 @@ class merge_pickings(osv.osv_memory):
 			search_po_revision = obj_po_revision.search(cr, uid, [('po_source', '=', pick.purchase_id.id)])
 
 			if search_po_revision:
-				raise osv.except_osv(_('Warning!'),
-				_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
+				state_revision=po_revision.browse(cr, uid, search_po_revision)[0]
+				if state_revision.state != 'cancel':
+					raise osv.except_osv(_('Warning!'),
+					_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
 
 			cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [pick.purchase_id.id])
 			invoice = map(lambda x: x[0], cr.fetchall())
@@ -856,8 +874,10 @@ class purchase_partial_invoice(osv.osv_memory):
 		
 		search_po_revision = po_revision.search(cr, uid, [('po_source', '=', active_id)])
 		if search_po_revision:
-			raise osv.except_osv(_('Warning!'),
-			_('Purchase Order Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
+			state_po = po_revision.browse(cr, uid, search_po_revision)[0]
+			if state_po.state <> 'cancel':
+				raise osv.except_osv(_('Warning!'),
+				_('Purchase Order Tidak Dapat Di Buat Invoice Karna Proses Revisi'))
 
 		return res
 
