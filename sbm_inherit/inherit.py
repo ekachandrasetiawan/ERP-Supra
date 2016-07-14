@@ -2505,11 +2505,11 @@ class purchase_partial_invoice(osv.osv_memory):
 		wizard = self.browse(cr, uid, ids[0], context)
 		purchase_ids = context.get('active_ids', [])
 
-		id_product=self.pool.get('product.product').search(cr,uid,[('default_code', '=' ,'ADVCPYMNT')])
+		id_product=self.pool.get('product.product').search(cr,uid,[('default_code', '=' ,'PAYADV')])
 
 		print '=====',
 		if id_product == []:
-			raise osv.except_osv(_('Informasi'), _('Please Create Product ADVCPYMNT'))
+			raise osv.except_osv(_('Informasi'), _('Please Create Product PAYADV'))
 
 		data_product =self.pool.get('product.product').browse(cr,uid,id_product)[0]
 
