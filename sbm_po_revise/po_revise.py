@@ -227,6 +227,39 @@ class Purchase_Order_Revision(osv.osv):
 		res = self.po_revision_state_cancel(cr, uid, ids, context=None)
 		return res
 
+	def check_group_purchase(self, cr, uid, ids, context={}):
+		#  Jika dia Admin Invoice
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'base', 'module_category_purchase_management').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		a = False
+		for x in user_group.users:
+			if x.id == uid:
+				a = True
+
+		if a == True:
+			return True
+		else:
+			return False
+
+	def check_group_finance(self, cr, uid, ids, context={}):
+		#  Jika dia Admin Invoice
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'base', 'module_category_accounting_and_finance').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		a = False
+		for x in user_group.users:
+			if x.id == uid:
+				a = True
+
+		if a == True:
+			return True
+		else:
+			return False
+
+
 	def po_revise_approve(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
 		obj_invoice = self.pool.get('account.invoice')
@@ -247,11 +280,16 @@ class Purchase_Order_Revision(osv.osv):
 			self.po_revision_state_to_revise(cr, uid, ids, context={})
 		else:
 			self.po_revision_state_approve(cr, uid, ids, context={})
-			
-
+		
 		if data_bank_statment:
-			for n in data_bank_statment:
+			user_purchase = self.check_group_purchase(cr, uid, ids, context={})
+			if user_purchase == True:
+				user_finance = self.check_group_finance(cr, uid, ids, context={})
 
+				if user_finance == False:
+					raise osv.except_osv(('Warning..!!'), ('Akses Approve PO Revision Ada Pada Finance'))
+
+			for n in data_bank_statment:
 				self.update_revise_w_new_no(cr, uid, ids, context={})
 					
 				msg = _("Please Cancel Bank Statement " + str(n.statement_id.name) + " --> Waiting to Cancel Bank Statement " + str(n.statement_id.name))
@@ -261,6 +299,13 @@ class Purchase_Order_Revision(osv.osv):
 				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
 				# 	obj_bank_statment.action_cancel(cr,uid,[n.statement_id.id])
 		if invoice:
+			user_purchase = self.check_group_purchase(cr, uid, ids, context={})
+			if user_purchase == True:
+				user_finance = self.check_group_finance(cr, uid, ids, context={})
+
+				if user_finance == False:
+					raise osv.except_osv(('Warning..!!'), ('Akses Approve PO Revision Ada Pada Finance'))	
+
 			for x in obj_invoice.browse(cr, uid, invoice):
 				if x.state == 'paid' or x.state == 'open':
 					self.update_revise_w_new_no(cr, uid, ids, context={})

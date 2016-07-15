@@ -82,10 +82,9 @@
             <field name="arch" type="xml">
             <form string="Purchase Order Revise" version="7.0">
                 <header>
-                    
                     <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order" groups="purchase.group_purchase_user"/>
 
-                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager" confirm="Are you sure to Confirm Purchase Order Revision"/>
+                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager,purchase.group_purchase_manager,sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_user,account.group_account_manager,sbm_purchaseorder.group_finance_staff" confirm="Are you sure to Confirm Purchase Order Revision"/>
 
                     <button name="po_revise_cancel" states="confirm" string="Cancel" type="object"  icon="STOCK_CANCEL" groups="account.group_account_manager" confirm="Are you sure to Cancel Purchase Order Revision"/>
 
