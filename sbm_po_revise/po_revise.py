@@ -479,6 +479,65 @@ class WizardPOrevise(osv.osv_memory):
 			po = self.pool.get('purchase.order').browse(cr, uid, po_id, context=context)		
 		return res
 
+	# def _set_message_unread(self, cr, uid, ids, context=None):
+	# 	m  = self.pool.get('ir.model.data')
+	# 	id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
+	# 	user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+	# 	for x in user_group.users:
+	# 		if x.id:
+	# 			cr.execute('''
+	# 				UPDATE mail_notification SET
+	# 					read=false
+	# 				WHERE
+	# 					message_id IN (SELECT id from mail_message where res_id=any(%s) and model=%s) and
+	# 					partner_id = %s
+	# 			''', (ids, 'order.preparation', x.partner_id.id))
+	# 	return True
+
+	def _set_mail_notification(self, cr, uid, ids, partner_id, context=None):
+		message = self.pool.get('mail.message')
+
+		mail_message = message.search(cr, uid, [('res_id', '=',ids),('model', '=', 'purchase.order.revision')])
+		mail_id = message.browse(cr, uid, mail_message)
+
+		for x in mail_id:
+			if x.parent_id.id == False:
+				id_notif = self.pool.get('mail.notification').create(cr, uid, {
+							'read': False,
+							'message_id': x.id,
+							'partner_id': partner_id,
+						}, context=context)
+		return True
+
+	def _set_op_followers(self, cr, uid, ids, context=None):
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'account', 'group_account_manager').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		for x in user_group.users:
+			# Create By Mail Notification Untuk finance Manager
+			if x.partner_id.id:
+				self._set_mail_notification(cr, uid, ids, x.partner_id.id, context=None)
+
+		id_group_purchase_manager = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
+		user_group_purchase_manager = self.pool.get('res.groups').browse(cr, uid, id_group_purchase_manager)
+
+		for y in user_group_purchase_manager.users:
+			# Create By Mail Notification Untuk Purchase manager 
+			if y.partner_id.id:
+				self._set_mail_notification(cr, uid, ids, y.partner_id.id, context=None)
+
+
+		id_group_purchaseChief = m.get_object(cr, uid, 'sbm_purchaseorder', 'group_purchase_chief').id
+		user_group_purchaseChief = self.pool.get('res.groups').browse(cr, uid, id_group_purchaseChief)
+
+		for z in user_group_purchaseChief.users:
+			# Create By Mail Notification Untuk Purchase Cheif
+			if z.partner_id.id:
+				self._set_mail_notification(cr, uid, ids, z.partner_id.id, context=None)
+
+		return True
+
 
 	def request_po_revise(self,cr,uid,ids,context=None):
 		data = self.browse(cr,uid,ids,context)[0]
@@ -504,6 +563,8 @@ class WizardPOrevise(osv.osv_memory):
 		msg = _("Ask for Revision with reason: " + data.reason + " Waiting Approval")
 		obj_po.message_post(cr, uid, [po], body=msg, context=context)
 
+		# Create Mail Message 
+		self._set_op_followers(cr, uid, po_revision, context=None)
 
 		pool_data=self.pool.get("ir.model.data")
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_po_revise', "view_po_revise_form")     
