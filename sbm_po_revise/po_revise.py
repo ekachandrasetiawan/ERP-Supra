@@ -353,7 +353,7 @@ class Purchase_Order_Revision(osv.osv):
 										'pricelist_id': po.po_source.pricelist_id.id,
 										'location_id': 12,
 										'origin':po.po_source.origin,
-										'type_permintaan':'1',
+										'type_permintaan':po.po_source.type_permintaan,
 										'term_of_payment':po.po_source.term_of_payment,
 										'po_revision_id':val.id,
 										'rev_counter':val.rev_counter
@@ -375,6 +375,8 @@ class Purchase_Order_Revision(osv.osv):
 										 'product_qty': line.product_qty,
 										 'product_uom': line.product_uom.id,
 										 'price_unit': line.price_unit,
+										 'discount_nominal':line.discount_nominal,
+										 'discount':line.discount,
 										 'note_line':'-',
 										 'taxes_id': [(6,0,taxes_ids)],
 										 'po_line_rev':line.id,

@@ -65,7 +65,7 @@
             <field name="type">tree</field>
             <field name="priority">2</field>
             <field name="arch" type="xml">
-                <tree string="Purchase Order Revision" colors="red:state == 'donerefund'">
+                <tree string="Purchase Order Revision" fonts="bold:message_unread==True;'">
 
                 	<field name="po_source"/>
                 	<field name="rev_counter"/>
