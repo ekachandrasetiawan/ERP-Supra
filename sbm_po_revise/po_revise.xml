@@ -14,18 +14,16 @@
             </field>
         </record>
 
-        
-
         <record id="wizard_po_revise_form" model="ir.ui.view">
             <field name="name">Wizard Purhcase Order revise</field>
             <field name="model">wizard.po.revise</field>
             <field name="arch" type="xml">
                 <form string="Purchase Order revise" version="7.0">
                     <group>
-                        <field name="po_source" readonly="True" />
+                        <field name="po_source" readonly="True"/>
                     </group>
                     <group>
-                        <field name="reason" />
+                        <field name="reason"/>
                     </group>
                     <footer>
                         <button name="request_po_revise" string="Submit" type="object" class="oe_highlight"/>
@@ -55,6 +53,7 @@
             <field name="priority">2</field>
             <field name="arch" type="xml">
                 <tree string="Purchase Order Revision">
+
                 	<field name="po_source"/>
                 	<field name="rev_counter"/>
                     <field name="revise_w_new_no"/>
@@ -71,10 +70,9 @@
             <field name="arch" type="xml">
             <form string="Purchase Order Revise" version="7.0">
                 <header>
-                    
                     <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order" groups="purchase.group_purchase_user"/>
 
-                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager" confirm="Are you sure to Confirm Purchase Order Revision"/>
+                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager,purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" confirm="Are you sure to Confirm Purchase Order Revision"/>
 
                     <button name="po_revise_cancel" states="confirm" string="Cancel" type="object"  icon="STOCK_CANCEL" groups="account.group_account_manager" confirm="Are you sure to Cancel Purchase Order Revision"/>
 
@@ -130,7 +128,7 @@
         </record>
 
 
-    <record model="ir.actions.act_window" id="action_po_to_revise">
+    <record model="ir.actions.act_window" id="action_purchase_order_to_revise">
         <field name="name">Purchase Order Revision</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">purchase.order.revision</field>
@@ -151,8 +149,7 @@
         <field name="context">{'search_default_confirm':1}</field>
     </record>
 
-
-    <menuitem name="PO To Revise" parent="purchase.menu_procurement_management" id="po_to_revise" action="action_po_to_revise"/>
+    <menuitem name="Purchase Order To Revise" parent="purchase.menu_procurement_management" id="purchase_order_to_revise" action="action_purchase_order_to_revise" groups="account.group_account_manager"/>
 
     </data>
 </openerp>

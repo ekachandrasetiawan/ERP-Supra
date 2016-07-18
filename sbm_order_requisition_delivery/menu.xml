@@ -2,9 +2,9 @@
 <openerp>
 	<data>
 
-		<menuitem id="order_delivery_purchase_requistion_menu" name="Order Delivery" parent="base.menu_purchase_root" sequence="5" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
+		<menuitem id="order_delivery_purchase_requistion_menu" name="Order Delivery" parent="base.menu_purchase_root" sequence="5" groups="sbm_po_revise.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
-		<menuitem name="Order Requisition Delivery" parent="order_delivery_purchase_requistion_menu" id="order_requisition_delivery" action="master_order_requisition_delivery_action" groups="sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
+		<menuitem name="Order Requisition Delivery" parent="order_delivery_purchase_requistion_menu" id="order_requisition_delivery" action="master_order_requisition_delivery_action" groups="sbm_po_revise.group_purchase_chief,purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
 	</data>
 </openerp>
