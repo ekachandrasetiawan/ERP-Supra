@@ -160,5 +160,60 @@
 
     <menuitem name="Purchase Order To Revise" parent="purchase.menu_procurement_management" id="purchase_order_to_revise" action="action_purchase_order_to_revise" groups="account.group_account_manager"/>
 
+
+    <record id="inherit_purchase_order_menu" model="ir.ui.view">
+       <field name="name">purchase.order.form</field>
+       <field name="model">purchase.order</field>
+       <field name="type">form</field>
+       <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
+       <field name="arch" type="xml">
+            <button name="print_quotation" position="after">
+                 <button name="rfq_sent" type="object" states="draft" string="Submit" icon="gtk-apply"/>
+            </button>
+            <button name="purchase_confirm" position="replace">
+              <button name="purchase_confirm" states="sent" string="Confirm Order" icon="STOCK_SAVE" groups="purchase.group_purchase_user,sbm_po_revise.group_purchase_chief"/>
+            </button> 
+
+            <button name="print_po_out" position="replace">
+                <button name="print_po_out" type="object" states="sent" string="Print Desktop" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+            </button>
+
+            <xpath expr="//button[@string='Print PDF']" position="replace">
+                <button name="%(sbm_purchaseorder.printpo)d" states="sent" string="Print PDF" type="action" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+            </xpath>
+
+       </field>
+    </record>
+
+    <record id="replace_print_purchase_import_button" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="sbm_purchaseorder.replace_print_purchase_import"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@string='Import J']" position="replace">
+                <button name="%(ad_purchase_import.purchase_importj)d" type="action" states="draft,approved,done" string="Import J" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['impj','imps'])]}"/>
+            </xpath>
+
+            <xpath expr="//button[@string='Import S']" position="replace">
+                <button name="%(ad_purchase_import.purchase_imports)d" type="action" states="draft,approved,done" string="Import S" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['impj','imps'])]}"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="purchase_order_form_view_report_po_revision" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
+        <field name="arch" type="xml">
+            <button name="print_po_import_out" position="replace">
+              <button name="print_po_import_out" type="object" states="draft" string="Print Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
+            </button>
+        </field>
+    </record>
+
+
     </data>
 </openerp>

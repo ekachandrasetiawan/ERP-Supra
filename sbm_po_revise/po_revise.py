@@ -37,6 +37,9 @@ class Purchase_Order(osv.osv):
 		'rev_counter':0,
 	}
 
+	def rfq_sent(self, cr, uid, ids, context={}):
+		res = self.write(cr,uid,ids,{'state':'sent'},context=context)
+		return res
 
 	def action_invoice_create(self, cr, uid, ids, context=None):
 		po_revision=self.pool.get('purchase.order.revision')
@@ -181,7 +184,6 @@ class Purchase_Order_Revision(osv.osv):
 	def po_revision_state_cancel(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
 		return res
-
 
 	def po_revision_state_setconfirm(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'confirm'},context=context)
