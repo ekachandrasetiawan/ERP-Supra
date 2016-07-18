@@ -180,6 +180,33 @@ class Purchase_Order_Revision(osv.osv):
 
 	_rec_name = 'po_source'
 
+	def send_email(self, cr, uid, ids, email_to, context={}):
+		# fromaddr = 'chandra@beltcare.com'
+		# toaddrs  = email_to
+		FROM = "chandra@beltcare.com"
+		TO = ["ekachandrasetiawan@yahoo.com"]
+		SUBJECT = "Hello! Please Purchase Order Revision"
+		TEXT = "This message was sent with Python's smtplib."
+
+		# Login Email
+		username = 'chandra@beltcare.com' 
+		password = 'xxxxxxxxxxx' 
+
+		message = """\
+		From: %s
+		To: %s
+		Subject: %s
+		%s
+		""" % (FROM, ", ".join(TO), SUBJECT, TEXT)
+
+		# Kirim Email
+		server = smtplib.SMTP('smtp.beltcare.com:587')
+		server.starttls()
+		server.login(username,password)
+		# server.sendmail(fromaddr, toaddrs, msg)
+		server.sendmail(FROM, TO, message)
+		server.quit()
+		return True
 
 	def po_revision_state_cancel(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
