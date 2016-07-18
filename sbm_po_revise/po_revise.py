@@ -37,10 +37,6 @@ class Purchase_Order(osv.osv):
 		'rev_counter':0,
 	}
 
-	def rfq_sent(self, cr, uid, ids, context={}):
-		res = self.write(cr,uid,ids,{'state':'sent'},context=context)
-		return res
-
 	def action_invoice_create(self, cr, uid, ids, context=None):
 		po_revision=self.pool.get('purchase.order.revision')
 		val = self.browse(cr, uid, ids, context={})[0]

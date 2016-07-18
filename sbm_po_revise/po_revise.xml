@@ -168,7 +168,7 @@
        <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
        <field name="arch" type="xml">
             <button name="print_quotation" position="after">
-                 <button name="rfq_sent" type="object" states="draft" string="Submit" icon="gtk-apply"/>
+                 <button name="send_rfq" states="draft" string="Submit" icon="gtk-apply"/>
             </button>
             <button name="purchase_confirm" position="replace">
               <button name="purchase_confirm" states="sent" string="Confirm Order" icon="STOCK_SAVE" groups="purchase.group_purchase_user,sbm_po_revise.group_purchase_chief"/>
