@@ -1,15 +1,19 @@
 import time
 import netsvc
 import openerp.exceptions
-from openerp.exceptions import Warning
+import smtplib
 import decimal_precision as dp
 import re
+import logging
+
+from openerp.exceptions import Warning
 from tools.translate import _
 from osv import fields, osv
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
-import logging
+
+
 
 class Purchase_Order_Line(osv.osv):
 	_inherit = 'purchase.order.line'
@@ -162,13 +166,13 @@ class Purchase_Order_Revision(osv.osv):
 			('done', 'Done'),
 			('cancel', 'Cancel'),
 		], 'Status', readonly=True, select=True, track_visibility='onchange'),
-		'revise_w_new_no':fields.boolean(string='Revise New No', readonly=True, track_visibility='onchange'),
+		'is_invoiced':fields.boolean(string='Is Invoice', readonly=True, track_visibility='onchange'),
 	}
 
 	_inherit = ['mail.thread']
 
 	_defaults = {
-		'revise_w_new_no':False,
+		'is_invoiced':False,
 	}
 
 	_rec_name = 'po_source'
@@ -213,14 +217,14 @@ class Purchase_Order_Revision(osv.osv):
 		res = self.write(cr,uid,ids,{'state':'done'},context=context)
 		return res
 
-	def update_revise_w_new_no(self, cr, uid, ids, context={}):
+	def update_is_invoiced(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
 		obj_po=self.pool.get('purchase.order')
 
 		msg = _("Purchase Order Revision Update New Po No")
 		obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 
-		res = self.write(cr,uid,ids,{'revise_w_new_no':True},context=context)
+		res = self.write(cr,uid,ids,{'is_invoiced':True},context=context)
 		return res
 
 	def po_revise_cancel(self, cr, uid, ids, context={}):
@@ -252,7 +256,7 @@ class Purchase_Order_Revision(osv.osv):
 		if data_bank_statment:
 			for n in data_bank_statment:
 
-				self.update_revise_w_new_no(cr, uid, ids, context={})
+				self.update_is_invoiced(cr, uid, ids, context={})
 					
 				msg = _("Please Cancel Bank Statement " + str(n.statement_id.name) + " --> Waiting to Cancel Bank Statement " + str(n.statement_id.name))
 				obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
@@ -264,7 +268,7 @@ class Purchase_Order_Revision(osv.osv):
 			for x in obj_invoice.browse(cr, uid, invoice):
 				# if x.state == 'paid' or x.state == 'open':
 				if x.state != 'cancel':
-					self.update_revise_w_new_no(cr, uid, ids, context={})
+					self.update_is_invoiced(cr, uid, ids, context={})
 
 				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
 				obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
@@ -291,14 +295,11 @@ class Purchase_Order_Revision(osv.osv):
 
 		res = {};lines= []
 
-		if val.revise_w_new_no == False:
-			
+		if val.is_invoiced:
 			if po.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
 				seq = po.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
 			else:
 				seq = po.po_source.name + '/Rev'+str(val.rev_counter)
-		else:
-			seq =int(time.time())
 
 		po_id = obj_purchase.create(cr, uid, {
 										'name':seq,
@@ -353,7 +354,7 @@ class Purchase_Order_Revision(osv.osv):
 			obj_po_revision.write(cr,uid,ids,{'new_po':po_id})
 
 			no_po = obj_po.browse(cr, uid, [po_id])[0]
-			if val.revise_w_new_no == False:
+			if val.is_invoiced:
 				if val.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
 					name_seq = val.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
 				else:
