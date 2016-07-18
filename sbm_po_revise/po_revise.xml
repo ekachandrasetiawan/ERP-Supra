@@ -65,7 +65,7 @@
 
                 	<field name="po_source"/>
                 	<field name="rev_counter"/>
-                    <field name="revise_w_new_no"/>
+                    <field name="is_invoiced"/>
 	                <field name="state"/>
                 </tree>
             </field>
@@ -99,7 +99,7 @@
                     <group col="4" colspan="4">
                         <field name="rev_counter"/>
                         <field name="new_po"/>
-                        <field name="revise_w_new_no"/>
+                        <field name="is_invoiced"/>
                     </group>
 
                     <div class="oe_clear"/>
