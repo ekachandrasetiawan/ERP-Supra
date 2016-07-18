@@ -227,55 +227,6 @@ class Purchase_Order_Revision(osv.osv):
 		res = self.po_revision_state_cancel(cr, uid, ids, context=None)
 		return res
 
-	def check_group_purchase_manager(self, cr, uid, ids, context={}):
-		#  Check User Groups Purchase Manager
-		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
-		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
-		a = False
-		for x in user_group.users:
-			if x.id == uid:
-				a = True
-
-		if a == True:
-			return True
-		else:
-			return False
-
-	def check_group_purchase_chief(self, cr, uid, ids, context={}):
-		#  Check User Groups Purchase Chief
-		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
-		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
-		a = False
-		for x in user_group.users:
-			print '============user chief=============',x.id
-			if x.id == uid:
-				a = True
-
-		if a == True:
-			return True
-		else:
-			return False
-
-
-	def check_group_finance(self, cr, uid, ids, context={}):
-		#  Jika dia Admin Invoice
-		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'base', 'module_category_accounting_and_finance').id
-		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
-
-		a = False
-		for x in user_group.users:
-			if x.id == uid:
-				a = True
-
-		if a == True:
-			return True
-		else:
-			return False
-
-
 	def po_revise_approve(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
 		obj_invoice = self.pool.get('account.invoice')
@@ -296,21 +247,11 @@ class Purchase_Order_Revision(osv.osv):
 			self.po_revision_state_to_revise(cr, uid, ids, context={})
 		else:
 			self.po_revision_state_approve(cr, uid, ids, context={})
-		
+			
+
 		if data_bank_statment:
-			user_purchase_manager = self.check_group_purchase_manager(cr, uid, ids, context={})
-			user_purchase_chief = self.check_group_purchase_chief(cr, uid, ids, context={})
-
-			print '=======user_purchase_manager Bank Statement=========',user_purchase_manager
-			print '========user_purchase_chief Bank Statement========',user_purchase_chief
-
-			if user_purchase_manager == True or user_purchase_chief == True:
-				user_finance = self.check_group_finance(cr, uid, ids, context={})
-
-				if user_finance == False:
-					raise osv.except_osv(('Warning..!!'), ('Akses Approve PO Revision Ada Pada Finance'))
-
 			for n in data_bank_statment:
+
 				self.update_revise_w_new_no(cr, uid, ids, context={})
 					
 				msg = _("Please Cancel Bank Statement " + str(n.statement_id.name) + " --> Waiting to Cancel Bank Statement " + str(n.statement_id.name))
@@ -320,20 +261,9 @@ class Purchase_Order_Revision(osv.osv):
 				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
 				# 	obj_bank_statment.action_cancel(cr,uid,[n.statement_id.id])
 		if invoice:
-			user_purchase_manager = self.check_group_purchase_manager(cr, uid, ids, context={})
-			user_purchase_chief = self.check_group_purchase_chief(cr, uid, ids, context={})
-
-			print '=======user_purchase_manager Invoice=========',user_purchase_manager
-			print '========user_purchase_chief Invoice========',user_purchase_chief
-
-			if user_purchase_manager == True or user_purchase_chief == True:
-				user_finance = self.check_group_finance(cr, uid, ids, context={})
-
-				if user_finance == False:
-					raise osv.except_osv(('Warning..!!'), ('Akses Approve PO Revision Ada Pada Finance'))	
-
 			for x in obj_invoice.browse(cr, uid, invoice):
-				if x.state == 'paid' or x.state == 'open':
+				# if x.state == 'paid' or x.state == 'open':
+				if x.state != 'cancel':
 					self.update_revise_w_new_no(cr, uid, ids, context={})
 
 				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
@@ -379,7 +309,7 @@ class Purchase_Order_Revision(osv.osv):
 										'pricelist_id': po.po_source.pricelist_id.id,
 										'location_id': 12,
 										'origin':po.po_source.origin,
-										'type_permintaan':po.po_source.type_permintaan,
+										'type_permintaan':'1',
 										'term_of_payment':po.po_source.term_of_payment,
 										'po_revision_id':val.id,
 										'rev_counter':val.rev_counter
@@ -401,8 +331,6 @@ class Purchase_Order_Revision(osv.osv):
 										 'product_qty': line.product_qty,
 										 'product_uom': line.product_uom.id,
 										 'price_unit': line.price_unit,
-										 'discount_nominal':line.discount_nominal,
-										 'discount':line.discount,
 										 'note_line':'-',
 										 'taxes_id': [(6,0,taxes_ids)],
 										 'po_line_rev':line.id,
@@ -507,65 +435,6 @@ class WizardPOrevise(osv.osv_memory):
 			po = self.pool.get('purchase.order').browse(cr, uid, po_id, context=context)		
 		return res
 
-	# def _set_message_unread(self, cr, uid, ids, context=None):
-	# 	m  = self.pool.get('ir.model.data')
-	# 	id_group = m.get_object(cr, uid, 'sbm_order_preparation', 'group_admin_ho').id
-	# 	user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
-	# 	for x in user_group.users:
-	# 		if x.id:
-	# 			cr.execute('''
-	# 				UPDATE mail_notification SET
-	# 					read=false
-	# 				WHERE
-	# 					message_id IN (SELECT id from mail_message where res_id=any(%s) and model=%s) and
-	# 					partner_id = %s
-	# 			''', (ids, 'order.preparation', x.partner_id.id))
-	# 	return True
-
-	def _set_mail_notification(self, cr, uid, ids, partner_id, context=None):
-		message = self.pool.get('mail.message')
-
-		mail_message = message.search(cr, uid, [('res_id', '=',ids),('model', '=', 'purchase.order.revision')])
-		mail_id = message.browse(cr, uid, mail_message)
-
-		for x in mail_id:
-			if x.parent_id.id == False:
-				id_notif = self.pool.get('mail.notification').create(cr, uid, {
-							'read': False,
-							'message_id': x.id,
-							'partner_id': partner_id,
-						}, context=context)
-		return True
-
-	def _set_op_followers(self, cr, uid, ids, context=None):
-		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'account', 'group_account_manager').id
-		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
-
-		for x in user_group.users:
-			# Create By Mail Notification Untuk finance Manager
-			if x.partner_id.id:
-				self._set_mail_notification(cr, uid, ids, x.partner_id.id, context=None)
-
-		id_group_purchase_manager = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
-		user_group_purchase_manager = self.pool.get('res.groups').browse(cr, uid, id_group_purchase_manager)
-
-		for y in user_group_purchase_manager.users:
-			# Create By Mail Notification Untuk Purchase manager 
-			if y.partner_id.id:
-				self._set_mail_notification(cr, uid, ids, y.partner_id.id, context=None)
-
-
-		# id_group_purchaseChief = m.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
-		# user_group_purchaseChief = self.pool.get('res.groups').browse(cr, uid, id_group_purchaseChief)
-
-		# for z in user_group_purchaseChief.users:
-		# 	# Create By Mail Notification Untuk Purchase Cheif
-		# 	if z.partner_id.id:
-		# 		self._set_mail_notification(cr, uid, ids, z.partner_id.id, context=None)
-
-		return True
-
 
 	def request_po_revise(self,cr,uid,ids,context=None):
 		data = self.browse(cr,uid,ids,context)[0]
@@ -591,8 +460,6 @@ class WizardPOrevise(osv.osv_memory):
 		msg = _("Ask for Revision with reason: " + data.reason + " Waiting Approval")
 		obj_po.message_post(cr, uid, [po], body=msg, context=context)
 
-		# Create Mail Message 
-		self._set_op_followers(cr, uid, po_revision, context=None)
 
 		pool_data=self.pool.get("ir.model.data")
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_po_revise', "view_po_revise_form")     

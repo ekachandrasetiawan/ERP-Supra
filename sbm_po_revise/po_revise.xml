@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-
         <record id="purchase_order_remove_cancel_item_button" model="ir.ui.view">
             <field name="name">purchase.order.remove.cancel.item.button</field>
             <field name="type">form</field>
             <field name="model">purchase.order</field>
-            <field name="inherit_id" ref="sbm_purchaseorder.replace_button_cancel_item" />
+            <field name="inherit_id" ref="sbm_purchaseorder.replace_button_cancel_item"/>
             <field name="arch" type="xml">
-                <button name="action_cancel_item" position="replace" />
+                <button name="action_cancel_item" position="replace"/>
             </field>
-
         </record>
 
         <record id="purchase_order_form_with_po_revise" model="ir.ui.view">
@@ -25,18 +23,16 @@
             </field>
         </record>
 
-        
-
         <record id="wizard_po_revise_form" model="ir.ui.view">
             <field name="name">Wizard Purhcase Order revise</field>
             <field name="model">wizard.po.revise</field>
             <field name="arch" type="xml">
                 <form string="Purchase Order revise" version="7.0">
                     <group>
-                        <field name="po_source" readonly="True" />
+                        <field name="po_source" readonly="True"/>
                     </group>
                     <group>
-                        <field name="reason" />
+                        <field name="reason"/>
                     </group>
                     <footer>
                         <button name="request_po_revise" string="Submit" type="object" class="oe_highlight"/>
@@ -65,7 +61,7 @@
             <field name="type">tree</field>
             <field name="priority">2</field>
             <field name="arch" type="xml">
-                <tree string="Purchase Order Revision" fonts="bold:message_unread==True;'">
+                <tree string="Purchase Order Revision">
 
                 	<field name="po_source"/>
                 	<field name="rev_counter"/>
@@ -141,7 +137,7 @@
         </record>
 
 
-    <record model="ir.actions.act_window" id="action_po_to_revise">
+    <record model="ir.actions.act_window" id="action_purchase_order_to_revise">
         <field name="name">Purchase Order Revision</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">purchase.order.revision</field>
@@ -162,8 +158,7 @@
         <field name="context">{'search_default_confirm':1}</field>
     </record>
 
-
-    <menuitem name="PO To Revise" parent="purchase.menu_procurement_management" id="po_to_revise" action="action_po_to_revise" groups="account.group_account_manager"/>
+    <menuitem name="Purchase Order To Revise" parent="purchase.menu_procurement_management" id="purchase_order_to_revise" action="action_purchase_order_to_revise" groups="account.group_account_manager"/>
 
     </data>
 </openerp>
