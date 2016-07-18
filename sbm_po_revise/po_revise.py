@@ -12,7 +12,7 @@ from osv import fields, osv
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
-
+from email.mime.multipart import MIMEMultipart
 
 
 class Purchase_Order_Line(osv.osv):
@@ -196,7 +196,8 @@ class Purchase_Order_Revision(osv.osv):
 		msg = _("Purchase Order Revision Approved")
 		obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 		
-		res = self.write(cr,uid,ids,{'state':'approved'},context=context)
+		# res = self.write(cr,uid,ids,{'state':'approved'},context=context)
+		res = self.write(cr,uid,ids,{'state':'confirm'},context=context)
 		return res
 
 	def po_revision_state_to_revise(self, cr, uid, ids, context={}):
@@ -229,9 +230,53 @@ class Purchase_Order_Revision(osv.osv):
 		res = self.write(cr,uid,ids,{'is_invoiced':True},context=context)
 		return res
 
-	def po_revise_cancel(self, cr, uid, ids, context={}):
-		res = self.po_revision_state_cancel(cr, uid, ids, context=None)
-		return res
+	def check_group_purchase_manager(self, cr, uid, ids, context={}):
+		#  Check User Groups Purchase Manager
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+		a = False
+		for x in user_group.users:
+			if x.id == uid:
+				a = True
+
+		if a == True:
+			return True
+		else:
+			return False
+
+	def check_group_purchase_chief(self, cr, uid, ids, context={}):
+		#  Check User Groups Purchase Chief
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+		a = False
+		for x in user_group.users:
+			if x.id == uid:
+				a = True
+
+		if a == True:
+			return True
+		else:
+			return False
+
+
+	def check_group_finance(self, cr, uid, ids, context={}):
+		#  Jika dia Admin Invoice
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'base', 'module_category_accounting_and_finance').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		a = False
+		for x in user_group.users:
+			if x.id == uid:
+				a = True
+
+		if a == True:
+			return True
+		else:
+			return False
+
 
 	def po_revise_approve(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
@@ -253,11 +298,18 @@ class Purchase_Order_Revision(osv.osv):
 			self.po_revision_state_to_revise(cr, uid, ids, context={})
 		else:
 			self.po_revision_state_approve(cr, uid, ids, context={})
-			
-
+		
 		if data_bank_statment:
-			for n in data_bank_statment:
+			user_purchase_manager = self.check_group_purchase_manager(cr, uid, ids, context={})
+			user_purchase_chief = self.check_group_purchase_chief(cr, uid, ids, context={})
 
+			if user_purchase_manager == True or user_purchase_chief == True:
+				user_finance = self.check_group_finance(cr, uid, ids, context={})
+
+				if user_finance == False:
+					raise osv.except_osv(('Warning..!!'), ('Akses Approve PO Revision Ada Pada Finance'))
+
+			for n in data_bank_statment:
 				self.update_is_invoiced(cr, uid, ids, context={})
 					
 				msg = _("Please Cancel Bank Statement " + str(n.statement_id.name) + " --> Waiting to Cancel Bank Statement " + str(n.statement_id.name))
@@ -267,9 +319,17 @@ class Purchase_Order_Revision(osv.osv):
 				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
 				# 	obj_bank_statment.action_cancel(cr,uid,[n.statement_id.id])
 		if invoice:
+			user_purchase_manager = self.check_group_purchase_manager(cr, uid, ids, context={})
+			user_purchase_chief = self.check_group_purchase_chief(cr, uid, ids, context={})
+
+			if user_purchase_manager == True or user_purchase_chief == True:
+				user_finance = self.check_group_finance(cr, uid, ids, context={})
+
+				if user_finance == False:
+					raise osv.except_osv(('Warning..!!'), ('Akses Approve PO Revision Ada Pada Finance'))	
+
 			for x in obj_invoice.browse(cr, uid, invoice):
-				# if x.state == 'paid' or x.state == 'open':
-				if x.state != 'cancel':
+				if x.state == 'paid' or x.state == 'open':
 					self.update_is_invoiced(cr, uid, ids, context={})
 
 				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
@@ -312,7 +372,7 @@ class Purchase_Order_Revision(osv.osv):
 										'pricelist_id': po.po_source.pricelist_id.id,
 										'location_id': 12,
 										'origin':po.po_source.origin,
-										'type_permintaan':'1',
+										'type_permintaan':po.po_source.type_permintaan,
 										'term_of_payment':po.po_source.term_of_payment,
 										'po_revision_id':val.id,
 										'rev_counter':val.rev_counter
@@ -335,6 +395,8 @@ class Purchase_Order_Revision(osv.osv):
 										 'product_uom': line.product_uom.id,
 										 'price_unit': line.price_unit,
 										 'note_line':'-',
+										 'discount_nominal':line.discount_nominal,
+										 'discount':line.discount,
 										 'taxes_id': [(6,0,taxes_ids)],
 										 'po_line_rev':line.id,
 										 })
