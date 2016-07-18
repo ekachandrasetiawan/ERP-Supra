@@ -227,12 +227,11 @@ class Purchase_Order_Revision(osv.osv):
 		res = self.po_revision_state_cancel(cr, uid, ids, context=None)
 		return res
 
-	def check_group_purchase(self, cr, uid, ids, context={}):
-		#  Jika dia Admin Invoice
+	def check_group_purchase_manager(self, cr, uid, ids, context={}):
+		#  Check User Groups Purchase Manager
 		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'base', 'module_category_purchase_management').id
+		id_group = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
-
 		a = False
 		for x in user_group.users:
 			if x.id == uid:
@@ -242,6 +241,23 @@ class Purchase_Order_Revision(osv.osv):
 			return True
 		else:
 			return False
+
+	def check_group_purchase_chief(self, cr, uid, ids, context={}):
+		#  Check User Groups Purchase Chief
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+		a = False
+		for x in user_group.users:
+			print '============user chief=============',x.id
+			if x.id == uid:
+				a = True
+
+		if a == True:
+			return True
+		else:
+			return False
+
 
 	def check_group_finance(self, cr, uid, ids, context={}):
 		#  Jika dia Admin Invoice
@@ -282,8 +298,13 @@ class Purchase_Order_Revision(osv.osv):
 			self.po_revision_state_approve(cr, uid, ids, context={})
 		
 		if data_bank_statment:
-			user_purchase = self.check_group_purchase(cr, uid, ids, context={})
-			if user_purchase == True:
+			user_purchase_manager = self.check_group_purchase_manager(cr, uid, ids, context={})
+			user_purchase_chief = self.check_group_purchase_chief(cr, uid, ids, context={})
+
+			print '=======user_purchase_manager Bank Statement=========',user_purchase_manager
+			print '========user_purchase_chief Bank Statement========',user_purchase_chief
+
+			if user_purchase_manager == True or user_purchase_chief == True:
 				user_finance = self.check_group_finance(cr, uid, ids, context={})
 
 				if user_finance == False:
@@ -299,8 +320,13 @@ class Purchase_Order_Revision(osv.osv):
 				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
 				# 	obj_bank_statment.action_cancel(cr,uid,[n.statement_id.id])
 		if invoice:
-			user_purchase = self.check_group_purchase(cr, uid, ids, context={})
-			if user_purchase == True:
+			user_purchase_manager = self.check_group_purchase_manager(cr, uid, ids, context={})
+			user_purchase_chief = self.check_group_purchase_chief(cr, uid, ids, context={})
+
+			print '=======user_purchase_manager Invoice=========',user_purchase_manager
+			print '========user_purchase_chief Invoice========',user_purchase_chief
+
+			if user_purchase_manager == True or user_purchase_chief == True:
 				user_finance = self.check_group_finance(cr, uid, ids, context={})
 
 				if user_finance == False:
@@ -530,13 +556,13 @@ class WizardPOrevise(osv.osv_memory):
 				self._set_mail_notification(cr, uid, ids, y.partner_id.id, context=None)
 
 
-		id_group_purchaseChief = m.get_object(cr, uid, 'sbm_purchaseorder', 'group_purchase_chief').id
-		user_group_purchaseChief = self.pool.get('res.groups').browse(cr, uid, id_group_purchaseChief)
+		# id_group_purchaseChief = m.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
+		# user_group_purchaseChief = self.pool.get('res.groups').browse(cr, uid, id_group_purchaseChief)
 
-		for z in user_group_purchaseChief.users:
-			# Create By Mail Notification Untuk Purchase Cheif
-			if z.partner_id.id:
-				self._set_mail_notification(cr, uid, ids, z.partner_id.id, context=None)
+		# for z in user_group_purchaseChief.users:
+		# 	# Create By Mail Notification Untuk Purchase Cheif
+		# 	if z.partner_id.id:
+		# 		self._set_mail_notification(cr, uid, ids, z.partner_id.id, context=None)
 
 		return True
 
