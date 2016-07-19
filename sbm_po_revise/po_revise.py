@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 from email.mime.multipart import MIMEMultipart
-
+from email.mime.text import MIMEText
 
 class Purchase_Order_Line(osv.osv):
 	_inherit = 'purchase.order.line'
@@ -177,36 +177,48 @@ class Purchase_Order_Revision(osv.osv):
 
 	_rec_name = 'po_source'
 
-	def send_email(self, cr, uid, ids, email_to, url, context={}):
-		val = self.browse(cr, uid, ids, context={})[0]
-		ip_address = 'localhost:8069'
-		db = '2016_07'
-		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
+	def send_email(self, cr, uid, ids, Subject, email_to, url, html, context={}):
+		me="chandra@beltcare.com"
+		you= email_to
+		
+		msg = MIMEMultipart('alternative')
+		msg['Subject'] = Subject
+		msg['From'] = 'adminerp@beltcare.com'
+		msg['To'] = you
 
-		FROM = "chandra@beltcare.com"
-		TO = ["ekachandrasetiawan@yahoo.com"]
-		SUBJECT = "Hello! Please Purchase Order Revision"
-		TEXT = "This message was sent with Python's smtplib."
+		part2 = MIMEText(html, 'html')
 
+		msg.attach(part2)
 		# Login Email
 		username = 'chandra@beltcare.com' 
 		password = 'kswn9271'
-
-		message = """\
-		From: %s
-		To: %s
-		Subject: %s
-		%s
-		""" % (FROM, ", ".join(TO), SUBJECT, TEXT)
 
 		# Kirim Email
 		server = smtplib.SMTP('smtp.beltcare.com:587')
 		server.starttls()
 		server.login(username,password)
-		# server.sendmail(fromaddr, toaddrs, msg)
-		server.sendmail(FROM, TO, message)
+		server.sendmail(me, you,msg.as_string())
 		server.quit()
 		return True
+
+	def template_email_approve(self, cr, uid, ids, user, no_po, url, context={}):
+		res = """\
+		<html>
+		  <head></head>
+		  <body>
+		    <p>
+		    	Hi %s!<br>
+				Permintaan Revisi <b>PO # %s </b> sudah di setujui.<br>
+				Silahkan membuat dokumen revisi pada sistem ERP.<br>
+				Klik link ini untuk membuka detail. <a href="%s">View Purchase Order Revision</a><br>
+		    </p>
+		    <br>
+		    Best Regards,<br>
+			Administrator ERP
+		  </body>
+		</html>
+		""" % (user, no_po, url)
+		return res
 
 	def po_revision_state_cancel(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
@@ -223,8 +235,7 @@ class Purchase_Order_Revision(osv.osv):
 		msg = _("Purchase Order Revision Approved")
 		obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 		
-		# res = self.write(cr,uid,ids,{'state':'approved'},context=context)
-		res = self.write(cr,uid,ids,{'state':'confirm'},context=context)
+		res = self.write(cr,uid,ids,{'state':'approved'},context=context)
 		return res
 
 	def po_revision_state_to_revise(self, cr, uid, ids, context={}):
@@ -287,7 +298,6 @@ class Purchase_Order_Revision(osv.osv):
 		else:
 			return False
 
-
 	def check_group_finance(self, cr, uid, ids, context={}):
 		#  Jika dia Admin Invoice
 		m  = self.pool.get('ir.model.data')
@@ -304,16 +314,20 @@ class Purchase_Order_Revision(osv.osv):
 		else:
 			return False
 
-
 	def po_revise_approve(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
+		ip_address = '10.36.15.52:8069'
+		db = '2016_07'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
+
 		obj_invoice = self.pool.get('account.invoice')
 		obj_po = self.pool.get('purchase.order')
+		obj_users = self.pool.get('res.users')
 		obj_bank_statment = self.pool.get('account.bank.statement')
 		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
-		po_id = val.po_source.id
 		
-		self.send_email(cr, uid, ids, 'ekachandrasetiawan@yahoo.com', context={})
+		po_id = val.po_source.id
+
 		#Cek Bank Statement 
 		cek_po_bank = obj_bank_statment_line.search(cr, uid, [('po_id', '=', po_id)])
 		data_bank_statment = obj_bank_statment_line.browse(cr, uid, cek_po_bank)
@@ -362,10 +376,21 @@ class Purchase_Order_Revision(osv.osv):
 
 				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
 				obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
-				# elif x.state == 'draft':
-				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
-				# 	obj_invoice.action_cancel(cr, uid, [x.id], context={})
-		# return self.pool.get('warning').info(cr, uid, title='Export imformation', message="%s products Created, %s products Updated "%(str(prod_new),str(prod_update)))
+
+		#  Saerch ID User
+		cr.execute("SELECT create_uid FROM purchase_order_revision WHERE id = %s", ids)
+		id_user_create = map(lambda id: id[0], cr.fetchall())
+
+		usr = obj_users.browse(cr, uid, id_user_create)[0]
+		subject = 'Approve Purchase Order Revision ' + val.po_source.name
+		email_to = usr.email
+		po_name=val.po_source.name
+
+		# Send Email Approve
+		if usr.email:	
+			template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})			
+			self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
