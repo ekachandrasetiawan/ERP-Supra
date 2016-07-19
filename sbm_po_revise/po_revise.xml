@@ -235,6 +235,10 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
+            <button name="action_cancel_draft" position="replace">
+                <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" />
+            </button>
+            
             <field name="origin" position="attributes">
                 <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
             </field>
