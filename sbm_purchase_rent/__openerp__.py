@@ -15,7 +15,6 @@
         "term/term_payment.xml",
         # "contract/po_contract.xml"
         "menu.xml",
-        "setting.xml",
     ],
     'js' : ['static/js/rent.js'],
     'demo_xml': [],

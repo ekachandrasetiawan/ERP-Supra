@@ -5,14 +5,6 @@ import netsvc
 from osv import osv, fields
 
 
-
-class purchase_requisition_subcont(osv.osv):
-    _inherit="purchase.requisition.subcont"
-    _description="Purchase Requisition Subcont"
-
-
-purchase_requisition_subcont()
-
 # Model Rent Requisition
 class RentRequisition (osv.osv):
 	_name = 'rent.requisition'
