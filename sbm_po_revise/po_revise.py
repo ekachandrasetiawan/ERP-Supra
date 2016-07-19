@@ -380,7 +380,8 @@ class Purchase_Order_Revision(osv.osv):
 		po = obj_po_revision.browse(cr, uid, ids)[0]
 
 		res = {};lines= []
-
+		
+		seq = po.po_source.name + '/REV'+str(val.rev_counter)
 		if val.is_invoiced:
 			if po.po_source.name[-4:] == 'REV'+str(val.rev_counter-1):
 				seq = po.po_source.name[:-4] + 'REV'+str(val.rev_counter)
