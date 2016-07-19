@@ -2,6 +2,7 @@
 <openerp>
      <data>
           <report auto="False" id="printpo" menu="True" model="purchase.order" name="report.purchase.order" rml="addons/sbm_purchaseorder/report/report_purchaseorder.rml" string="Report"/>
+          <!-- <report auto="False" id="printpo" menu="True" model="purchase.order" name="report.purchase.order" rml="addons/sbm_purchaseorder/report/report_order_local.rml" string="Report"/> -->
           <record id="view_po_form_set" model="ir.ui.view">
                <field name="name">purchase.order.form</field>
                <field name="model">purchase.order</field>
@@ -10,33 +11,15 @@
                <field name="arch" type="xml">
 
                     <button name="print_quotation" position="after">
-                         <button name="print_po_out" type="object" states="approved,draft" string="Print Desktop" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+                         <button name="print_po_out" type="object" states="approved,draft" string="New Print" icon="gtk-print"/>
                     </button>
 
                     <button name="print_quotation" position="replace">
-                         <button name="%(printpo)d" states="approved,draft" string="Print PDF" type="action" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+                         <button class="oe_highlight" name="%(printpo)d" states="approved,draft" string="Print Purchase Order" type="action"/>
                     </button>
 
-                    <button name="action_cancel_draft" position="replace">
-                        <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief"/>
-                    </button>
 
-                    <button name="purchase_cancel" position="replace">
-                        <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_CANCEL"/>
-                    </button>
-                    
-                    <button name="action_cancel" position="replace">
-                        <button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_CANCEL"/>
-                    </button>
-                   
-                    <button name="purchase_confirm" position="replace">
-                      <button name="purchase_confirm" states="draft" string="Confirm Order" icon="STOCK_SAVE" groups="purchase.group_purchase_user,sbm_po_revise.group_purchase_chief"/>
-                    </button> 
-                    
-                    <button name="view_picking" position="replace">
-                        <button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" class="oe_highlight" groups="stock.group_stock_user"/>
-                    </button>
-
+                       
                     <field name="name" position="replace">
                          <field name="name"/>
                     </field>
@@ -62,14 +45,8 @@
                     </field>
                     <field name="price_subtotal" position="after">
                          <field name="note_line" />
-                         <field name="received_items"/>
-                         <field name="supplied_items"/>
-                         <field name="qty_available_to_pick"/>
                     </field>
 
-                    <field name="minimum_planned_date" position="after">
-                         <field name="shipment_to_product"/>
-                    </field>
                     <field name="date_planned" position="before">
                          <field name="part_number"/>
                     </field>
@@ -83,6 +60,7 @@
                     <field name="product_uom" position="replace">
                          <field name="product_uom" on_change="onchange_product_new(product_id, product_uom)"/>
                     </field>
+                    
                     <xpath expr="//page[@string='Purchase Order']" position="after">
                           <page string="Print Line">
                               <group>
@@ -90,58 +68,6 @@
                               </group>
                          </page>
                     </xpath>
-                    <xpath expr="//page[@string='Purchase Order']" position="after">
-                          <page string="Submit No">
-                              <group>
-                                   <field name='submit_no' readonly="1"/>
-                              </group>
-                         </page>
-                    </xpath>
-               </field>
-          </record>
-
-          <record id="replace_button_cancel_item" model="ir.ui.view">
-               <field name="name">purchase.order.form</field>
-               <field name="model">purchase.order</field>
-               <field name="type">form</field>
-               <field name="inherit_id" ref="sbm_inherit.purchase_order_form_with_cancel_button"/>
-               <field name="arch" type="xml">
-                  <xpath expr="//button[@name='action_cancel_item']" position="replace">
-                    <button name="action_cancel_item" states="sent,confirmed,approved" string="Cancel Item" type="object"  groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_CANCEL"/>
-                  </xpath>
-               </field>
-          </record>
-
-          <record id="replace_print_purchase_import" model="ir.ui.view">
-              <field name="name">purchase.order.form</field>
-               <field name="model">purchase.order</field>
-               <field name="type">form</field>
-               <field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
-               <field name="arch" type="xml">
-                  <xpath expr="//button[@string='Import J']" position="replace">
-                    <button name="%(ad_purchase_import.purchase_importj)d" type="action" states="draft,approved,done" string="Import J" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
-                  </xpath>
-
-                  <xpath expr="//button[@string='Import S']" position="replace">
-                    <button name="%(ad_purchase_import.purchase_imports)d" type="action" states="draft,approved,done" string="Import S" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
-                  </xpath>
-               </field>
-          </record>
-
-
-          <record id="replace_button_invoice" model="ir.ui.view">
-              <field name="name">purchase.order.form</field>
-               <field name="model">purchase.order</field>
-               <field name="type">form</field>
-               <field name="inherit_id" ref="purchase_partial_invoicing.purchase_order_invoice"/>
-               <field name="arch" type="xml">
-                   <xpath expr="//button[@string='Partial Invoice']" position="replace">
-                      <button name="%(purchase_partial_invoicing.action_purchase_partial_invoice)d" string="Partial Invoice" type="action" states="approved" class="oe_highlight" groups="sbm_purchaseorder.group_finance_staff"/>
-                  </xpath>
-                   <xpath expr="//button[@name='action_invoice_create']" position="replace">
-                      <button name="action_invoice_create" string="Full Invoice" type="object" states="approved" class="oe_highlight" groups="sbm_purchaseorder.group_finance_staff"/>
-                  </xpath>
-
                </field>
           </record>
 
@@ -161,30 +87,5 @@
                     </field>
                </field>
           </record>
-
-          <record model="ir.actions.act_window" id="action_purchase_order_petty_form">
-             <field name="name">Purchase Order Petty</field>
-             <field name="type">ir.actions.act_window</field>
-             <field name="inherit_id" ref="purchase.purchase_order_form"/>
-             <field name="res_model">purchase.order</field>
-             <field name="domain">[('jenis','=','loc-petty')]</field>
-             <field name="view_type">form</field>
-             <field name="view_mode">tree,form</field>
-         </record>
-
-
-            <!-- Start Membuat Seq No -->
-        <record id="seq_pop_new" model="ir.sequence.type">
-          <field name="name">Purchase Order Petty</field>
-          <field name="code">purchase.order.petty</field>
-        </record>
-        <record id="seq_new" model="ir.sequence">
-          <field name="name">Purchase Order Petty</field>
-          <field name="code">purchase.order.petty</field>
-          <field name="prefix">POP/%(y)s/%(month)s/</field>
-          <field name="padding">5</field>
-        </record>
-
-
      </data>
 </openerp>

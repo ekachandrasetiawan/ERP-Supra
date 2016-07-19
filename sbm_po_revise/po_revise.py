@@ -5,7 +5,6 @@ import smtplib
 import decimal_precision as dp
 import re
 import logging
-import http
 
 from openerp.exceptions import Warning
 from tools.translate import _
@@ -14,8 +13,6 @@ from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 from email.mime.multipart import MIMEMultipart
-# from openerp import http
-# from openerp.http import request
 
 
 class Purchase_Order_Line(osv.osv):
@@ -190,10 +187,12 @@ class Purchase_Order_Revision(osv.osv):
 
 	_rec_name = 'po_source'
 
-	def send_email(self, cr, uid, ids, email_to, context={}):
+	def send_email(self, cr, uid, ids, email_to, url, context={}):
+		val = self.browse(cr, uid, ids, context={})[0]
+		ip_address = 'localhost:8069'
+		db = '2016_07'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
 
-		# fromaddr = 'chandra@beltcare.com'
-		# toaddrs  = email_to
 		FROM = "chandra@beltcare.com"
 		TO = ["ekachandrasetiawan@yahoo.com"]
 		SUBJECT = "Hello! Please Purchase Order Revision"

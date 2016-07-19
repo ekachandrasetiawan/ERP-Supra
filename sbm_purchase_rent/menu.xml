@@ -8,38 +8,30 @@
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
-            <field name="view_id" ref="sbm_purchase.view_set_po_form"/>
+            <field name="view_id" ref="sbm_purchase.view_set_po_form2"/>
         </record>
 
-        <menuitem id="purchase.menu_procurement_management_inventory" name="Incoming Products"
-            parent="base.menu_purchase_root" sequence="4" groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
-        <menuitem id="purchase.menu_procurement_management_invoice" name="Invoice Control"
-        parent="base.menu_purchase_root" sequence="6" groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
-
-         <menuitem name="Purchases" id="base.menu_purchase_root" groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager" sequence="60"/>
-
-        <menuitem id="purchase.menu_procurement_management" name="Purchase" parent="base.menu_purchase_root" sequence="1"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
-
-        	<menuitem name="Order Rent Requisition" parent="purchase.menu_procurement_management" id="order_rent_requisition_menu" action="rent_requisition_order_action"/>
-
-
-		<menuitem id="purchase_order_menu" name="Purchase Order" parent="base.menu_purchase_root" sequence="2" icon="terp-purchase" groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
+		<menuitem id="purchase_order_menu" name="Purchase Order" parent="base.menu_purchase_root" sequence="1" icon="terp-purchase"/>
+			<!-- <menuitem action="purchase.order.view" id="purchase_order_view_menu" name="All Order" parent="purchase_order_menu" sequence="1"/> -->
 
 			<menuitem groups="base.group_user" name="Create by Regular Requisition" web_icon="static/image/texas.png" parent="purchase_order_menu" id="wizard_reguler_order_menu" action="sbm_purchase.master_wizard_list_action"/>
 
+			<menuitem groups="base.group_user" name="Create PO By Regular Requisition" parent="purchase_order_menu" id="create_po_by_regular_menu" action="wizard_create_po_by_regular"/>
+			
+			<!-- <menuitem action="wizard_rent_list_action" id="wizard_sub_con_order_menu" name="Create by Sub Con Requisition" parent="purchase_order_menu"/> -->
+
 			<menuitem groups="base.group_user" action="wizard_rent_list_action" id="wizard_rent_order_menu" name="Create by Rent Requisition" parent="purchase_order_menu"/>
 			
-		<menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
+		<menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2"/>
 		
-		
-			<menuitem action="sbm_purchase.master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
+			<menuitem action="sbm_purchase.master_pb_list_action" id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1"/>
 
-			<menuitem action="rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisition" parent="purchase_requistion_menu" sequence="3" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
-		
+			<!-- <menuitem action="rent_requisition_list_action" id="sub_con_requisition" name="Sub Contract Requisition" parent="purchase_requistion_menu" sequence="2"/> -->
 
-		  <menuitem id="menu_purchase_requisition_subcont_pro_mgt" sequence="4" parent="purchase_requistion_menu" action="ad_purchase_subcont.action_purchase_requisition_subcont" name="Subcount Requisition" groups="sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager"/>
+			<menuitem action="rent_requisition_list_action" id="rent_requisition_menu" name="Rent Requisition" parent="purchase_requistion_menu" sequence="3"/>
 		
+		<menuitem name="Order Rent Requisition" parent="purchase.menu_procurement_management" id="order_rent_requisition_menu" action="rent_requisition_order_action"/>
 
 			
 	</data>
