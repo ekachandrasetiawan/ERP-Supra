@@ -14,7 +14,6 @@
 
 		<menuitem id="purchase_order_menu" name="Purchase Order" parent="base.menu_purchase_root" sequence="1" icon="terp-purchase"/>
 			<!-- <menuitem action="purchase.order.view" id="purchase_order_view_menu" name="All Order" parent="purchase_order_menu" sequence="1"/> -->
-			
 
 			<menuitem groups="base.group_user" name="Create by Regular Requisition" web_icon="static/image/texas.png" parent="purchase_order_menu" id="wizard_reguler_order_menu" action="sbm_purchase.master_wizard_list_action"/>
 
