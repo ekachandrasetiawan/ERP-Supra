@@ -17,8 +17,6 @@
         <menuitem id="purchase.menu_procurement_management_invoice" name="Invoice Control"
         parent="base.menu_purchase_root" sequence="6" groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
-
-
          <menuitem name="Purchases" id="base.menu_purchase_root" groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_purchaseorder.group_jobdesc_position_dept_chief,sbm_purchaseorder.group_jobdesc_position_dept_manager" sequence="60"/>
 
         <menuitem id="purchase.menu_procurement_management" name="Purchase" parent="base.menu_purchase_root" sequence="1"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>

@@ -5,6 +5,7 @@ import smtplib
 import decimal_precision as dp
 import re
 import logging
+import http
 
 from openerp.exceptions import Warning
 from tools.translate import _
@@ -13,6 +14,8 @@ from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 from email.mime.multipart import MIMEMultipart
+# from openerp import http
+# from openerp.http import request
 
 
 class Purchase_Order_Line(osv.osv):
@@ -177,6 +180,7 @@ class Purchase_Order_Revision(osv.osv):
 	_rec_name = 'po_source'
 
 	def send_email(self, cr, uid, ids, email_to, context={}):
+
 		# fromaddr = 'chandra@beltcare.com'
 		# toaddrs  = email_to
 		FROM = "chandra@beltcare.com"
@@ -186,7 +190,7 @@ class Purchase_Order_Revision(osv.osv):
 
 		# Login Email
 		username = 'chandra@beltcare.com' 
-		password = 'xxxxxxxxxxx' 
+		password = 'kswn9271'
 
 		message = """\
 		From: %s
@@ -309,6 +313,7 @@ class Purchase_Order_Revision(osv.osv):
 		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
 		po_id = val.po_source.id
 		
+		self.send_email(cr, uid, ids, 'ekachandrasetiawan@yahoo.com', context={})
 		#Cek Bank Statement 
 		cek_po_bank = obj_bank_statment_line.search(cr, uid, [('po_id', '=', po_id)])
 		data_bank_statment = obj_bank_statment_line.browse(cr, uid, cek_po_bank)
