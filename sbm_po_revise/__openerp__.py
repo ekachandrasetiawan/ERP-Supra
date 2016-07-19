@@ -1,7 +1,7 @@
 {
     "name": "Purchase Order Revise",
     "version": "1.0",
-    "depends": ["base","purchase","hr","product","sbm_purchase","sbm_purchaseorder","account"],
+    "depends": ["base","purchase","hr","product","sbm_purchase","sbm_purchaseorder","account","ad_purchase_import"],
     "author": "Suprabakti Mandiri",
     "category": "Purchase Order",
     "description": """Modul ini digunakan untuk Menghandel Purchase order Revisi atau Pengganti""",
