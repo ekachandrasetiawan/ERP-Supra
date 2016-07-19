@@ -3,7 +3,7 @@
     <data>
 	    	<record model="res.groups" id="group_purchase_chief">
 			<field name="category_id" ref="base.module_category_purchase_management"/>
-				<field name="name">Purchase Position Chief</field>
+				<field name="name">Purchase Chief</field>
 			</record>
     </data>
 </openerp>
