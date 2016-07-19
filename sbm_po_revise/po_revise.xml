@@ -9,7 +9,7 @@
             <field name="inherit_id" ref="purchase.purchase_order_form" />
             <field name="arch" type="xml">
                 <xpath expr="//button[@name='action_cancel']" position="after">
-                    <button name="action_po_to_revise" states="confirmed,approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
+                    <button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
                 </xpath>
             </field>
         </record>
@@ -163,7 +163,7 @@
             </button> 
 
             <button name="print_po_out" position="replace">
-                <button name="print_po_out" type="object" states="draft,sent" string="Print" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+                <button name="print_po_out" type="object" states="draft,sent,confirmed" string="Print" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
             </button>
 
        </field>
@@ -176,7 +176,25 @@
        <field name="inherit_id" ref="purchase.purchase_order_form"/>
        <field name="arch" type="xml">
             <button name="print_quotation" position="after">
-                 <button name="send_rfq" states="draft" string="Submit" icon="gtk-apply"/>
+                 <button name="purchase_confirm" states="draft" string="Submit" icon="gtk-apply"/>
+            </button>
+
+            <xpath expr="//button[@string='Resend Purchase Order']" position="replace"></xpath>
+            
+
+       </field>
+    </record>
+
+
+    <record id="deactive_po_line_cancel" model="ir.ui.view">
+       <field name="name">purchase.order.form</field>
+       <field name="model">purchase.order</field>
+       <field name="type">form</field>
+       <field name="inherit_id" ref="sbm_inherit.purchase_order_form_with_cancel_button"/>
+       <field name="arch" type="xml">
+
+            <button name="action_cancel_item" position="replace">
+                
             </button>
             
 
@@ -191,7 +209,7 @@
         <field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
         <field name="arch" type="xml">
             <button name="print_po_import_out" position="replace">
-              <button name="print_po_import_out" type="object" states="draft" string="Print Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
+              <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
             </button>
         </field>
     </record>
