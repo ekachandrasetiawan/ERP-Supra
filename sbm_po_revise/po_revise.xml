@@ -238,6 +238,27 @@
             <field name="origin" position="attributes">
                 <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
             </field>
+             <field name="order_line" position="attributes">
+                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+            </field>
+        </field>
+    </record>
+
+    <record id="add_readonly_view_po_form_set" model="ir.ui.view">
+        <field name="name">add.readonly.view.po.form.set</field>
+        <field name="model">purchase.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
+        <field name="arch" type="xml">
+            <field name="attention" position="attributes">
+                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+            </field>
+            <field name="duedate" position="attributes">
+                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+            </field>
+             <field name="name" position="attributes">
+                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+            </field>
         </field>
     </record>
 
