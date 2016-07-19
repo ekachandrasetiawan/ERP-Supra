@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 from email.mime.multipart import MIMEMultipart
-
+from email.mime.text import MIMEText
 
 class Purchase_Order_Line(osv.osv):
 	_inherit = 'purchase.order.line'
@@ -37,6 +37,24 @@ class Purchase_Order(osv.osv):
 	_defaults ={
 		'rev_counter':0,
 	}
+
+	def template_email_confirm(self, cr, uid, ids, user, no_po, url, context={}):
+		res = """\
+		<html>
+		  <head></head>
+		  <body>
+		    <p>
+			   	Hi %s! <br/>
+				PO Revisi <b> %s </b> telah di konfirm. Silahkan follow up
+		    </p>
+		    <br>
+		    Best Regards,<br>
+			Administrator ERP
+		  </body>
+		</html>
+		""" % (user, no_po)
+		return res
+
 
 	def action_invoice_create(self, cr, uid, ids, context=None):
 		po_revision=self.pool.get('purchase.order.revision')
@@ -67,6 +85,37 @@ class Purchase_Order(osv.osv):
 
 		po_revision = obj_po_revision.browse(cr, uid, [po_id_revision])[0]
 		po_id=po_revision.po_source.id
+
+
+		# Send Email Jika Sudah Terbentuk Invoice di Purchase Order Lama
+		if po_revision.is_invoiced == True:
+			ip_address = '10.36.15.52:8069'
+			db = '2016_07'
+			url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order&menu_id=329&action=393'
+
+			# Group Purhcase Manager
+			m  = self.pool.get('ir.model.data')
+			id_group = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
+			user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+			# Group Finance Manager
+			p  = self.pool.get('ir.model.data')
+			finance_manager = p.get_object(cr, uid, 'account', 'group_account_manager').id
+			user_finance_manager = self.pool.get('res.groups').browse(cr, uid, finance_manager)
+
+			for x in user_group.users:
+				if x.email:
+					subject = 'Confirm Purchase Order Revision ' + val.name
+					email_to= x.email
+					template_email = self.template_email_confirm(cr, uid, ids, x.name, val.name, url, context={})
+					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+
+			for y in user_finance_manager.users:
+				if y.email:
+					subject = 'Confirm Purchase Order Revision ' + val.name
+					email_to= y.email
+					template_email = self.template_email_confirm(cr, uid, ids, y.name, val.name, url, context={})
+					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
 
 		new_picking = obj_picking.search(cr, uid, [('purchase_id', '=', ids),(('state', '=', 'assigned'))])
 		n_picking = obj_picking.browse(cr, uid, new_picking)[0]
@@ -177,33 +226,47 @@ class Purchase_Order_Revision(osv.osv):
 
 	_rec_name = 'po_source'
 
-	def send_email(self, cr, uid, ids, email_to, context={}):
-		# fromaddr = 'chandra@beltcare.com'
-		# toaddrs  = email_to
-		FROM = "chandra@beltcare.com"
-		TO = ["ekachandrasetiawan@yahoo.com"]
-		SUBJECT = "Hello! Please Purchase Order Revision"
-		TEXT = "This message was sent with Python's smtplib."
+	def send_email(self, cr, uid, ids, Subject, email_to, url, html, context={}):
+		me="chandra@beltcare.com"
+		you= email_to
+		msg = MIMEMultipart('alternative')
+		msg['Subject'] = Subject
+		msg['From'] = 'adminerp@beltcare.com'
+		msg['To'] = you
 
+		part2 = MIMEText(html, 'html')
+
+		msg.attach(part2)
 		# Login Email
 		username = 'chandra@beltcare.com' 
-		password = 'xxxxxxxxxxx' 
-
-		message = """\
-		From: %s
-		To: %s
-		Subject: %s
-		%s
-		""" % (FROM, ", ".join(TO), SUBJECT, TEXT)
+		password = 'kswn9271'
 
 		# Kirim Email
 		server = smtplib.SMTP('smtp.beltcare.com:587')
 		server.starttls()
 		server.login(username,password)
-		# server.sendmail(fromaddr, toaddrs, msg)
-		server.sendmail(FROM, TO, message)
+		server.sendmail(me, you,msg.as_string())
 		server.quit()
 		return True
+
+	def template_email_approve(self, cr, uid, ids, user, no_po, url, context={}):
+		res = """\
+		<html>
+		  <head></head>
+		  <body>
+		    <p>
+		    	Hi %s!<br><br>
+				Permintaan Revisi <b>PO # %s </b> sudah di setujui.<br>
+				Silahkan membuat dokumen revisi pada sistem ERP.<br>
+				Klik link ini untuk membuka detail. <a href="%s">View Purchase Order Revision</a><br>
+		    </p>
+		    <br>
+		    Best Regards,<br>
+			Administrator ERP
+		  </body>
+		</html>
+		""" % (user, no_po, url)
+		return res
 
 	def po_revision_state_cancel(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
@@ -220,8 +283,7 @@ class Purchase_Order_Revision(osv.osv):
 		msg = _("Purchase Order Revision Approved")
 		obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 		
-		# res = self.write(cr,uid,ids,{'state':'approved'},context=context)
-		res = self.write(cr,uid,ids,{'state':'confirm'},context=context)
+		res = self.write(cr,uid,ids,{'state':'approved'},context=context)
 		return res
 
 	def po_revision_state_to_revise(self, cr, uid, ids, context={}):
@@ -284,7 +346,6 @@ class Purchase_Order_Revision(osv.osv):
 		else:
 			return False
 
-
 	def check_group_finance(self, cr, uid, ids, context={}):
 		#  Jika dia Admin Invoice
 		m  = self.pool.get('ir.model.data')
@@ -301,15 +362,20 @@ class Purchase_Order_Revision(osv.osv):
 		else:
 			return False
 
-
 	def po_revise_approve(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
+		ip_address = '10.36.15.52:8069'
+		db = '2016_07'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
+
 		obj_invoice = self.pool.get('account.invoice')
 		obj_po = self.pool.get('purchase.order')
+		obj_users = self.pool.get('res.users')
 		obj_bank_statment = self.pool.get('account.bank.statement')
 		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
-		po_id = val.po_source.id
 		
+		po_id = val.po_source.id
+
 		#Cek Bank Statement 
 		cek_po_bank = obj_bank_statment_line.search(cr, uid, [('po_id', '=', po_id)])
 		data_bank_statment = obj_bank_statment_line.browse(cr, uid, cek_po_bank)
@@ -339,9 +405,6 @@ class Purchase_Order_Revision(osv.osv):
 				msg = _("Please Cancel Bank Statement " + str(n.statement_id.name) + " --> Waiting to Cancel Bank Statement " + str(n.statement_id.name))
 				obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
 
-				# elif n.statement_id.state == 'draft':
-				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
-				# 	obj_bank_statment.action_cancel(cr,uid,[n.statement_id.id])
 		if invoice:
 			user_purchase_manager = self.check_group_purchase_manager(cr, uid, ids, context={})
 			user_purchase_chief = self.check_group_purchase_chief(cr, uid, ids, context={})
@@ -358,10 +421,21 @@ class Purchase_Order_Revision(osv.osv):
 
 				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
 				obj_po.message_post(cr, uid, [val.po_source.id], body=msg, context=context)
-				# elif x.state == 'draft':
-				# 	# Jika Status Masih New / Draft, Maka harus langsung Cancel
-				# 	obj_invoice.action_cancel(cr, uid, [x.id], context={})
-		# return self.pool.get('warning').info(cr, uid, title='Export imformation', message="%s products Created, %s products Updated "%(str(prod_new),str(prod_update)))
+
+		#  Saerch ID User
+		cr.execute("SELECT create_uid FROM purchase_order_revision WHERE id = %s", ids)
+		id_user_create = map(lambda id: id[0], cr.fetchall())
+
+		usr = obj_users.browse(cr, uid, id_user_create)[0]
+		subject = 'Approve Purchase Order Revision ' + val.po_source.name
+		email_to = usr.email
+		po_name=val.po_source.name
+
+		# Send Email Approve
+		if usr.email:	
+			template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})			
+			self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
@@ -443,11 +517,11 @@ class Purchase_Order_Revision(osv.osv):
 			obj_po_revision.write(cr,uid,ids,{'new_po':po_id})
 
 			no_po = obj_po.browse(cr, uid, [po_id])[0]
-			if val.is_invoiced:
-				if val.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
-					name_seq = val.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
-				else:
-					name_seq = val.po_source.name + '/Rev'+str(val.rev_counter)
+
+			if val.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
+				name_seq = val.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
+			else:
+				name_seq = val.po_source.name + '/Rev'+str(val.rev_counter)
 					
 				obj_po.write(cr,uid,po_id,{'name':name_seq})
 
@@ -525,17 +599,151 @@ class WizardPOrevise(osv.osv_memory):
 			po = self.pool.get('purchase.order').browse(cr, uid, po_id, context=context)		
 		return res
 
+	def template_email_create(self, cr, uid, ids, user, user_create, no_po, notes, url, invoice, bank_statment, status, context={}):
+		
+		if status == False:
+			res = """\
+			<html>
+			  <head></head>
+			  <body>
+			    <p>
+			    	Hi %s!<br/><br/>
+					%s mengajukan permohonan untuk merevisi dokumen Purchase Order <b># %s </b> <br><b>Dengan alasan :</b><br/>
+					 %s .<br/><br/>
+					Silahkan klik Link ini untuk melihat detail pada sistem ERP. <a href="%s">View Purchase Order Revision</a>
+			    </p>
+			    <br/>
+			    Best Regards,<br/>
+				Administrator ERP
+			  </body>
+			</html>
+			""" % (user, user_create, no_po, notes, url)
+		else:
+			res = """\
+			<html>
+			  <head></head>
+			  <body>
+			    <p>
+					Hi %s !<br/><br/>
+
+					%s mengajukan permohonan untuk merevisi dokumen Purchase Order <b># %s </b> <br><b>Dengan alasan :</b><br>
+					%s <br/><br/>
+					PO tersebut sudah mempunyai Invoice dengan nomor kwitansi <b># %s </b> <br>
+
+					Dan, Atau<br/>
+					Mempunyai Bank Statement dengan nomor <b> %s </b><br/>
+					Silahkan klik tombol Approve untuk approval permintaan tersebut pada Link ini.<a href="%s">View Purchase Order Revision</a>
+			    </p>
+			    <br>
+			    Best Regards,<br/>
+				Administrator ERP
+			  </body>
+			</html>
+			""" % (user, user_create, no_po, notes, invoice, bank_statment, url)
+		return res
+
+	def action_send_email(self, cr, uid, ids, po_name, user_create, notes, context=None):
+		obj_invoice = self.pool.get('account.invoice')
+		obj_po = self.pool.get('purchase.order')
+		obj_po_revision = self.pool.get('purchase.order.revision')
+		obj_users = self.pool.get('res.users')
+		obj_bank_statment = self.pool.get('account.bank.statement')
+		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
+
+		ip_address = '10.36.15.52:8069'
+		db = '2016_07'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(ids)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
+
+		#Cek Bank Statement 
+		cek_po_bank = obj_bank_statment_line.search(cr, uid, [('po_id', '=', ids)])
+		data_bank_statment = obj_bank_statment_line.browse(cr, uid, cek_po_bank)
+
+		#  Cek PO apakah sudah dibuatkan Invoice
+		cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [ids])
+		invoice = map(lambda x: x[0], cr.fetchall())
+
+		# Group Purhcase Manager
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+		
+		# Group Purchase Chief
+		p  = self.pool.get('ir.model.data')
+		id_group_chief = p.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
+		user_group_chief = self.pool.get('res.groups').browse(cr, uid, id_group_chief)
+
+
+		# Group Finance Manager
+		p  = self.pool.get('ir.model.data')
+		finance_manager = p.get_object(cr, uid, 'account', 'group_account_manager').id
+		user_finance_manager = self.pool.get('res.groups').browse(cr, uid, finance_manager)
+
+
+		inv =''
+		bnk_statment =''
+
+		if data_bank_statment or invoice:
+			if data_bank_statment:
+				for bnk in data_bank_statment:
+					bnk_statment += bnk.statement_id.name +','
+
+				bnk_statment = bnk_statment[:-1]
+			if invoice:
+				data_invoice = obj_invoice.browse(cr, uid, invoice)
+				for i in data_invoice:
+					inv += i.kwitansi + ','
+
+				inv = inv[:-1]
+
+			# Send Email Purchase Manager
+			for x in user_group.users:
+				if x.email:
+					subject = 'On Ask For Revision Purchase Order ' + po_name
+					email_to= x.email
+					template_email = self.template_email_create(cr, uid, ids, x.name, user_create, po_name, notes, url, inv, bnk_statment, status=True, context={})
+					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+
+			# Send Email Finance Manager
+			for x_finance in user_finance_manager.users:
+				if x_finance.email:
+					subject = 'On Ask For Revision Purchase Order ' + po_name
+					email_to= x_finance.email
+
+					template_email = self.template_email_create(cr, uid, ids, x_finance.name, user_create, po_name, notes, url, inv, bnk_statment, status=True, context={})
+					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+
+		else:
+			# Send Email Purchase Manager
+			for x in user_group.users:
+				if x.email:
+					subject = 'On Ask For Revision Purchase Order ' + po_name
+					email_to= x.email
+
+					template_email = self.template_email_create(cr, uid, ids, x.name, user_create, po_name, notes, url, inv, bnk_statment, status=False, context={})
+					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+
+			# Send Email Purchase Chief
+			for x_chief in user_group_chief.users:
+				if x_chief.email:
+					subject = 'On Ask For Revision Purchase Order ' + po_name
+					email_to= x_chief.email
+
+					template_email = self.template_email_create(cr, uid, ids, x_chief.name, user_create, po_name, notes, url, inv, bnk_statment, status=False, context={})
+					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+		return True
 
 	def request_po_revise(self,cr,uid,ids,context=None):
 		data = self.browse(cr,uid,ids,context)[0]
 		obj_po = self.pool.get('purchase.order')
+		obj_users = self.pool.get('res.users')
 		obj_po_revision = self.pool.get('purchase.order.revision')
 
 		data_po=obj_po.browse(cr, uid, data.po_source.id)
 
 		po = data.po_source.id
+		po_name = data.po_source.name
+		user_create = obj_users.browse(cr, uid, uid).name
 		counter =data_po.rev_counter+1
-
 		# Update PO Rev Counter
 		obj_po.write(cr,uid,po,{'rev_counter':counter})
 
@@ -550,6 +758,8 @@ class WizardPOrevise(osv.osv_memory):
 		msg = _("Ask for Revision with reason: " + data.reason + " Waiting Approval")
 		obj_po.message_post(cr, uid, [po], body=msg, context=context)
 
+		# Action Send Email Create Purchase Order Revision
+		self.action_send_email(cr, uid, po, po_name, user_create, data.reason, context={})
 
 		pool_data=self.pool.get("ir.model.data")
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_po_revise', "view_po_revise_form")     
