@@ -26,19 +26,9 @@ Purchase_Order_Line()
 
 class Purchase_Order(osv.osv):
 	_inherit = 'purchase.order'
-	STATE_SELECTION = [
-		('draft', 'Draft PO'),
-		('sent', 'Submited'),
-		('confirmed', 'Waiting Approval'),
-		('approved', 'Purchase Order'),
-		('except_picking', 'Shipping Exception'),
-		('except_invoice', 'Invoice Exception'),
-		('done', 'Done'),
-		('cancel', 'Cancelled')
-	]
+	
 
 	_columns = {
-		'state': fields.selection(STATE_SELECTION, 'Status', readonly=True, help="The status of the purchase order or the quotation request. A quotation is a purchase order in a 'Draft' status. Then the order has to be confirmed by the user, the status switch to 'Confirmed'. Then the supplier must confirm the order to change the status to 'Approved'. When the purchase order is paid and received, the status becomes 'Done'. If a cancel action occurs in the invoice or in the reception of goods, the status becomes in exception.", select=True),
 		'rev_counter':fields.integer('Rev Counter'),
 		'revise_histories': fields.one2many('purchase.order.revision', 'po_source', 'Purchase Order Revision'),
 		'po_revision_id': fields.many2one('purchase.order.revision', 'Purchase Order Revision'),
@@ -396,10 +386,10 @@ class Purchase_Order_Revision(osv.osv):
 		res = {};lines= []
 
 		if val.is_invoiced:
-			if po.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
-				seq = po.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
+			if po.po_source.name[-4:] == 'REV'+str(val.rev_counter-1):
+				seq = po.po_source.name[:-4] + 'REV'+str(val.rev_counter)
 			else:
-				seq = po.po_source.name + '/Rev'+str(val.rev_counter)
+				seq = po.po_source.name + '/REV'+str(val.rev_counter)
 
 		po_id = obj_purchase.create(cr, uid, {
 										'name':seq,
