@@ -416,7 +416,7 @@ class Purchase_Order_Revision(osv.osv):
 					raise osv.except_osv(('Warning..!!'), ('Akses Approve PO Revision Ada Pada Finance'))	
 
 			for x in obj_invoice.browse(cr, uid, invoice):
-				if x.state == 'paid' or x.state == 'open':
+				if x.state <> 'cancel':
 					self.update_is_invoiced(cr, uid, ids, context={})
 
 				msg = _("Waiting to Cancel Invoice " + str(x.kwitansi))
@@ -713,7 +713,8 @@ class WizardPOrevise(osv.osv_memory):
 			if invoice:
 				data_invoice = obj_invoice.browse(cr, uid, invoice)
 				for i in data_invoice:
-					inv += i.kwitansi + ','
+					if i.kwitansi:
+						inv += i.kwitansi + ','
 
 				inv = inv[:-1]
 
