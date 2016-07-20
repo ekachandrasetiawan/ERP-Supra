@@ -3,24 +3,7 @@
     <data>
     	
 
-        <record id="base_group_admin_support" model="ir.model.data">
-                <field name="name">group_admin_support</field>
-                <field name="module">base</field>
-                <field name="noupdate">TRUE</field>
-                <field name="display_name">group_admin_support</field>
-                <field name="model">res.groups</field>
-                <field name="res_id" model="res.groups" search="[('id', '=', '61')]"/>
-        </record>
-
-		<record model="res.groups" id="group_admin_manager">
-		<field name="category_id" ref="base.module_category_sales_management"/>
-			<field name="name">Admin Manager</field>
-		</record>
-
-		<record model="res.groups" id="group_admin_workshop">
-		<field name="category_id" ref="base.module_category_sales_management"/>
-			<field name="name">Admin Workshop</field>
-		</record>
+        
 
 		<!-- Adhoc Request Admin HO-->
 		<record model="ir.model.access" id="ir_access_sbm_adhoc_order_request_admin_ho">
