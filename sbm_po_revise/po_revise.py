@@ -454,25 +454,36 @@ class Purchase_Order_Revision(osv.osv):
 		po = obj_po_revision.browse(cr, uid, ids)[0]
 
 		res = {};lines= []
-		
-		seq = po.po_source.name + '/REV'+str(val.rev_counter)
-		if val.is_invoiced:
-			if po.po_source.name[-4:] == 'REV'+str(val.rev_counter-1):
-				seq = po.po_source.name[:-4] + 'REV'+str(val.rev_counter)
-			else:
-				seq = po.po_source.name + '/REV'+str(val.rev_counter)
+
+		if po.po_source.name[-4:] == 'Rev'+str(val.rev_counter-1):
+			seq = po.po_source.name[:-4] + 'Rev'+str(val.rev_counter)
+		else:
+			seq = po.po_source.name + '/Rev'+str(val.rev_counter)
 
 		po_id = obj_purchase.create(cr, uid, {
 										'name':seq,
 										'date_order': time.strftime("%Y-%m-%d"),
 										'duedate':time.strftime("%Y-%m-%d"),
 										'partner_id': po.po_source.partner_id.id,
+										'attention':po.po_source.attention.id,
 										'jenis': po.po_source.jenis,
 										'pricelist_id': po.po_source.pricelist_id.id,
-										'location_id': 12,
+										'partner_ref': po.po_source.partner_ref,
+										'location_id': po.po_source.location_id.id,
 										'origin':po.po_source.origin,
 										'type_permintaan':po.po_source.type_permintaan,
 										'term_of_payment':po.po_source.term_of_payment,
+										'company_id':po.po_source.company_id.id,
+										'notes':po.po_source.notes,
+										'yourref':po.po_source.yourref,
+										'note':po.po_source.note,
+										'other':po.po_source.other,
+										'delivery':po.po_source.delivery,
+										'after_shipment':po.po_source.after_shipment,
+										'total_price':po.po_source.total_price,
+										'shipment_to':po.po_source.shipment_to,
+										'no_fpb':po.po_source.no_fpb,
+										'print_line':po.po_source.print_line,
 										'po_revision_id':val.id,
 										'rev_counter':val.rev_counter
 									   })
@@ -481,8 +492,12 @@ class Purchase_Order_Revision(osv.osv):
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.product_id.supplier_taxes_id))
 			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+			if line.no:
+				no_line = line.no
+			else:
+				no_line = noline
 			obj_purchase_line.create(cr, uid, {
-										 'no':noline,
+										 'no':no_line,
 										 'date_planned': time.strftime("%Y-%m-%d"),
 										 'order_id': po_id,
 										 'product_id': line.product_id.id,
@@ -493,14 +508,21 @@ class Purchase_Order_Revision(osv.osv):
 										 'product_qty': line.product_qty,
 										 'product_uom': line.product_uom.id,
 										 'price_unit': line.price_unit,
-										 'note_line':'-',
+										 'note_line':line.note_line,
 										 'discount_nominal':line.discount_nominal,
 										 'discount':line.discount,
+										 'move_dest_id':line.move_dest_id.id,
+										 'partner_id':line.partner_id.id,
+										 'company_id':line.company_id.id,
+										 'line_pb_rent_id':line.line_pb_rent_id.id,
+										 'line_pb_subcont_id':line.line_pb_subcont_id.id,
+										 'pb_id':line.pb_id.id,
+										 'wo_id':line.wo_id.id,
+										 'state':line.state,
 										 'taxes_id': [(6,0,taxes_ids)],
 										 'po_line_rev':line.id,
 										 })
 			noline=noline+1
-
 		return po_id
 
 
