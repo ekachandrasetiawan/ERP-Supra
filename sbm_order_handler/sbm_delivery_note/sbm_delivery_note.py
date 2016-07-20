@@ -144,7 +144,8 @@ class delivery_note(osv.osv):
 				product = self.pool.get('product.product').browse(cr, uid, [got_line['product_id']])[0]
 
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
-
+		print ",,,,,,,,,,,,,,,,,,,,,,,,"
+		print vals,">>>>>"
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 	""""Event On Change Order Packaging"""
@@ -174,7 +175,7 @@ class delivery_note(osv.osv):
 						'op_line_id':op_line.id
 					}))
 
-					line.append({
+					line.append((0,0,{
 						'no': op_line.no,
 						'product_id' : op_line.product_id.id,
 						'product_qty': op_line.product_qty,
@@ -182,7 +183,7 @@ class delivery_note(osv.osv):
 						'name': op_line.name,
 						'note_lines_material': material_line,
 						'sale_line_id': op_line.move_id.sale_line_id.id
-					})
+					}))
 
 			order_line = self.pool.get('sale.order.line').search(cr, uid, [('id', 'in', product)])
 			data_order_line = self.pool.get('sale.order.line').browse(cr, uid, order_line)

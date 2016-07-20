@@ -30,7 +30,7 @@
 
 								<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="stock.group_stock_user" confirm="Are you sure to Back To Draft Order Preparation ?"/>
 
-								<button name="set_delivery_notes" type="object" states="done" string="Set Delivery Notes" icon="gtk-dnd" groups="stock.group_stock_user" confirm="Create DN Document?"/>
+								<button name="set_delivery_notes" type="object" states="done" string="Set Delivery Notes" icon="gtk-dnd" groups="sbm_order_handler.group_admin_ho" confirm="Create DN Document?"  />
 
 							</button>
 
