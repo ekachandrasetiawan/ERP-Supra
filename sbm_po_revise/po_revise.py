@@ -89,8 +89,8 @@ class Purchase_Order(osv.osv):
 
 		# Send Email Jika Sudah Terbentuk Invoice di Purchase Order Lama
 		if po_revision.is_invoiced == True:
-			ip_address = '10.36.15.52:8069'
-			db = '2016_07'
+			ip_address = '192.168.9.26:10001'
+			db = 'LIVE_2014'
 			url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order&menu_id=329&action=393'
 
 			# Group Purhcase Manager
@@ -227,19 +227,19 @@ class Purchase_Order_Revision(osv.osv):
 	_rec_name = 'po_source'
 
 	def send_email(self, cr, uid, ids, Subject, email_to, url, html, context={}):
-		me="chandra@beltcare.com"
+		me="jay@beltcare.com"
 		you= email_to
 		msg = MIMEMultipart('alternative')
 		msg['Subject'] = Subject
-		msg['From'] = 'adminerp@beltcare.com'
+		msg['From'] = 'noreply@beltcare.com'
 		msg['To'] = you
 
 		part2 = MIMEText(html, 'html')
 
 		msg.attach(part2)
 		# Login Email
-		username = 'chandra@beltcare.com' 
-		password = 'kswn9271'
+		username = 'jay@beltcare.com' 
+		password = 'wskg3815'
 
 		# Kirim Email
 		server = smtplib.SMTP('smtp.beltcare.com:587')
@@ -364,8 +364,8 @@ class Purchase_Order_Revision(osv.osv):
 
 	def po_revise_approve(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
-		ip_address = '10.36.15.52:8069'
-		db = '2016_07'
+		ip_address = '192.168.9.26:10001'
+		db = 'LIVE_2014'
 		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
 
 		obj_invoice = self.pool.get('account.invoice')
@@ -672,8 +672,8 @@ class WizardPOrevise(osv.osv_memory):
 		obj_bank_statment = self.pool.get('account.bank.statement')
 		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
 
-		ip_address = '10.36.15.52:8069'
-		db = '2016_07'
+		ip_address = '192.168.9.26:10001'
+		db = 'LIVE_2014'
 		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(po_revision)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
 
 		#Cek Bank Statement 
