@@ -760,6 +760,8 @@ class WizardPOrevise(osv.osv_memory):
 		obj_po = self.pool.get('purchase.order')
 		obj_users = self.pool.get('res.users')
 		obj_po_revision = self.pool.get('purchase.order.revision')
+		obj_bank_statment = self.pool.get('account.bank.statement')
+		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
 
 		data_po=obj_po.browse(cr, uid, data.po_source.id)
 
@@ -770,11 +772,24 @@ class WizardPOrevise(osv.osv_memory):
 		# Update PO Rev Counter
 		obj_po.write(cr,uid,po,{'rev_counter':counter})
 
+		#Cek Bank Statement 
+		cek_po_bank = obj_bank_statment_line.search(cr, uid, [('po_id', '=', po)])
+		data_bank_statment = obj_bank_statment_line.browse(cr, uid, cek_po_bank)
+
+		#  Cek PO apakah sudah dibuatkan Invoice
+		cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [po])
+		invoice = map(lambda x: x[0], cr.fetchall())
+
+		is_invoiced = False
+
+		if data_bank_statment or invoice:
+			is_invoiced = True
 		# Create Stock Picking 
 		po_revision = obj_po_revision.create(cr, uid, {
 					'rev_counter':counter,
 					'po_source':po,
 					'reason':data.reason,
+					'is_invoiced':is_invoiced,
 					'state':'confirm'
 					})
 
@@ -877,21 +892,21 @@ account_invoice()
 class account_bank_statement(osv.osv):
 	_inherit = "account.bank.statement"
 
-
 	def create(self, cr, uid, vals, context=None):
 		po_revision=self.pool.get('purchase.order.revision')
-		for lines in vals['line_ids']:
-			if lines[2]:
-				if lines[2]['po_id']:
+		if 'line_ids' in vals:
+			for lines in vals['line_ids']:
+				if lines[2]:
+					if lines[2]['po_id']:
 
-					po = self.pool.get('purchase.order').browse(cr, uid, [lines[2]['po_id']])[0]
+						po = self.pool.get('purchase.order').browse(cr, uid, [lines[2]['po_id']])[0]
 
-					search_po_revision = po_revision.search(cr, uid, [('po_source', '=', po.id)])
-					if search_po_revision:
-						state_revision=po_revision.browse(cr, uid, search_po_revision)[0]
-						if state_revision.state != 'cancel':
-							raise osv.except_osv(_('Warning!'),
-							_('Purchase Order ' + po.name + ' Tidak Dapat Di Proses Karna Revisi'))
+						search_po_revision = po_revision.search(cr, uid, [('po_source', '=', po.id)])
+						if search_po_revision:
+							state_revision=po_revision.browse(cr, uid, search_po_revision)[0]
+							if state_revision.state != 'cancel':
+								raise osv.except_osv(_('Warning!'),
+								_('Purchase Order ' + po.name + ' Tidak Dapat Di Proses Karna Revisi'))
 
 		return super(account_bank_statement, self).create(cr, uid, vals, context=context)
 
