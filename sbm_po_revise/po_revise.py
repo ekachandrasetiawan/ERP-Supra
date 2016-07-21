@@ -86,36 +86,36 @@ class Purchase_Order(osv.osv):
 		po_revision = obj_po_revision.browse(cr, uid, [po_id_revision])[0]
 		po_id=po_revision.po_source.id
 
+		if val.jenis == 'loc':
+			# Send Email Jika Sudah Terbentuk Invoice di Purchase Order Lama
+			if po_revision.is_invoiced == True:
+				ip_address = '192.168.9.26:10001'
+				db = 'LIVE_2014'
+				url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order&menu_id=329&action=393'
 
-		# Send Email Jika Sudah Terbentuk Invoice di Purchase Order Lama
-		if po_revision.is_invoiced == True:
-			ip_address = '192.168.9.26:10001'
-			db = 'LIVE_2014'
-			url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order&menu_id=329&action=393'
+				# Group Purhcase Manager
+				m  = self.pool.get('ir.model.data')
+				id_group = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
+				user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
 
-			# Group Purhcase Manager
-			m  = self.pool.get('ir.model.data')
-			id_group = m.get_object(cr, uid, 'purchase', 'group_purchase_manager').id
-			user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+				# Group Finance Manager
+				p  = self.pool.get('ir.model.data')
+				finance_manager = p.get_object(cr, uid, 'account', 'group_account_manager').id
+				user_finance_manager = self.pool.get('res.groups').browse(cr, uid, finance_manager)
 
-			# Group Finance Manager
-			p  = self.pool.get('ir.model.data')
-			finance_manager = p.get_object(cr, uid, 'account', 'group_account_manager').id
-			user_finance_manager = self.pool.get('res.groups').browse(cr, uid, finance_manager)
+				for x in user_group.users:
+					if x.email:
+						subject = 'Confirm Purchase Order Revision ' + val.name
+						email_to= x.email
+						template_email = self.template_email_confirm(cr, uid, ids, x.name, val.name, url, context={})
+						obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
 
-			for x in user_group.users:
-				if x.email:
-					subject = 'Confirm Purchase Order Revision ' + val.name
-					email_to= x.email
-					template_email = self.template_email_confirm(cr, uid, ids, x.name, val.name, url, context={})
-					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
-
-			for y in user_finance_manager.users:
-				if y.email:
-					subject = 'Confirm Purchase Order Revision ' + val.name
-					email_to= y.email
-					template_email = self.template_email_confirm(cr, uid, ids, y.name, val.name, url, context={})
-					obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+				for y in user_finance_manager.users:
+					if y.email:
+						subject = 'Confirm Purchase Order Revision ' + val.name
+						email_to= y.email
+						template_email = self.template_email_confirm(cr, uid, ids, y.name, val.name, url, context={})
+						obj_po_revision.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
 
 		new_picking = obj_picking.search(cr, uid, [('purchase_id', '=', ids),(('state', '=', 'assigned'))])
 		n_picking = obj_picking.browse(cr, uid, new_picking)[0]
@@ -371,8 +371,10 @@ class Purchase_Order_Revision(osv.osv):
 		obj_invoice = self.pool.get('account.invoice')
 		obj_po = self.pool.get('purchase.order')
 		obj_users = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
 		obj_bank_statment = self.pool.get('account.bank.statement')
 		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
+		obj_mail = self.pool.get('mail.followers')
 		
 		po_id = val.po_source.id
 
@@ -426,16 +428,24 @@ class Purchase_Order_Revision(osv.osv):
 		cr.execute("SELECT create_uid FROM purchase_order_revision WHERE id = %s", ids)
 		id_user_create = map(lambda id: id[0], cr.fetchall())
 
+
+		#  Saerch Mail Followers
+		cr.execute("SELECT partner_id FROM mail_followers WHERE res_model = 'purchase.order' AND res_id = %s", [po_id])
+		id_mail_followers = map(lambda partner_id: partner_id[0], cr.fetchall())
+
 		usr = obj_users.browse(cr, uid, id_user_create)[0]
 		subject = 'Approve Purchase Order Revision ' + val.po_source.name
-		email_to = usr.email
+		
 		po_name=val.po_source.name
-
-		# Send Email Approve
-		if usr.email:	
-			template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})			
-			self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
-
+		
+		if val.po_source.jenis == 'loc':
+			for l in id_mail_followers:
+				usr = obj_partner.browse(cr, uid, [l])[0]
+				for s in usr.user_ids:
+					if s.email:
+						email_to = s.email
+						template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})
+						self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
@@ -797,7 +807,8 @@ class WizardPOrevise(osv.osv_memory):
 		obj_po.message_post(cr, uid, [po], body=msg, context=context)
 
 		# Action Send Email Create Purchase Order Revision
-		self.action_send_email(cr, uid, po, po_revision, po_name, user_create, data.reason, context={})
+		if data.po_source.jenis == 'loc':
+			self.action_send_email(cr, uid, po, po_revision, po_name, user_create, data.reason, context={})
 
 		pool_data=self.pool.get("ir.model.data")
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_po_revise', "view_po_revise_form")     
