@@ -18,7 +18,7 @@ class order_preparation(osv.osv):
 		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=['|', ('quotation_state','=','win'),('state','in',['progress','manual'])], states={'draft': [('readonly', False)]}),
 		'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=False, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
 		'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location',required=True,string='Product Location',readonly=True, states={'draft': [('readonly', False)]}),
+		'location_id':fields.many2one('stock.location',required=True,string='Picking Location',readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True),
 
 	}
