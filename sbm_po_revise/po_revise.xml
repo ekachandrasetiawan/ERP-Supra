@@ -11,6 +11,9 @@
                 <xpath expr="//button[@name='action_cancel']" position="after">
                     <button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
                 </xpath>
+                <button name="purchase_approve" position="replace">
+                    <button name="purchase_approve" states="confirmed" string="Approve Order" class="oe_highlight" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief"/>
+                </button>
             </field>
         </record>
 
@@ -160,10 +163,6 @@
        <field name="arch" type="xml">
             <button name="purchase_confirm" position="replace">
               
-            </button> 
-
-            <button name="print_po_out" position="replace">
-                <button name="print_po_out" type="object" states="draft,sent,confirmed" string="Print" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
             </button>
 
        </field>
@@ -210,6 +209,8 @@
         <field name="arch" type="xml">
             <button name="print_po_import_out" position="replace">
               <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
+
+              <button name="print_po_out" type="object" states="draft,sent,confirmed" string="Print" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
             </button>
         </field>
     </record>
@@ -238,6 +239,7 @@
             <button name="action_cancel_draft" position="replace">
                 <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" />
             </button>
+
             
             <field name="origin" position="attributes">
                 <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
