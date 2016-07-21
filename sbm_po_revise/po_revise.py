@@ -664,7 +664,7 @@ class WizardPOrevise(osv.osv_memory):
 			""" % (user, user_create, no_po, notes, invoice, bank_statment, url)
 		return res
 
-	def action_send_email(self, cr, uid, ids, po_name, user_create, notes, context=None):
+	def action_send_email(self, cr, uid, ids, po_revision, po_name, user_create, notes, context=None):
 		obj_invoice = self.pool.get('account.invoice')
 		obj_po = self.pool.get('purchase.order')
 		obj_po_revision = self.pool.get('purchase.order.revision')
@@ -674,7 +674,7 @@ class WizardPOrevise(osv.osv_memory):
 
 		ip_address = '10.36.15.52:8069'
 		db = '2016_07'
-		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(ids)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(po_revision)+'&view_type=form&model=purchase.order.revision&menu_id=738&action=892'
 
 		#Cek Bank Statement 
 		cek_po_bank = obj_bank_statment_line.search(cr, uid, [('po_id', '=', ids)])
@@ -797,7 +797,7 @@ class WizardPOrevise(osv.osv_memory):
 		obj_po.message_post(cr, uid, [po], body=msg, context=context)
 
 		# Action Send Email Create Purchase Order Revision
-		self.action_send_email(cr, uid, po, po_name, user_create, data.reason, context={})
+		self.action_send_email(cr, uid, po, po_revision, po_name, user_create, data.reason, context={})
 
 		pool_data=self.pool.get("ir.model.data")
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_po_revise', "view_po_revise_form")     
