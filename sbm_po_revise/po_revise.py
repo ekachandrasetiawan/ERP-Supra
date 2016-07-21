@@ -371,8 +371,10 @@ class Purchase_Order_Revision(osv.osv):
 		obj_invoice = self.pool.get('account.invoice')
 		obj_po = self.pool.get('purchase.order')
 		obj_users = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
 		obj_bank_statment = self.pool.get('account.bank.statement')
 		obj_bank_statment_line = self.pool.get('account.bank.statement.line')
+		obj_mail = self.pool.get('mail.followers')
 		
 		po_id = val.po_source.id
 
@@ -426,16 +428,24 @@ class Purchase_Order_Revision(osv.osv):
 		cr.execute("SELECT create_uid FROM purchase_order_revision WHERE id = %s", ids)
 		id_user_create = map(lambda id: id[0], cr.fetchall())
 
+
+		#  Saerch Mail Followers
+		cr.execute("SELECT partner_id FROM mail_followers WHERE res_model = 'purchase.order' AND res_id = %s", [po_id])
+		id_mail_followers = map(lambda partner_id: partner_id[0], cr.fetchall())
+
 		usr = obj_users.browse(cr, uid, id_user_create)[0]
 		subject = 'Approve Purchase Order Revision ' + val.po_source.name
-		email_to = usr.email
+		
 		po_name=val.po_source.name
-
+		
 		if val.po_source.jenis == 'loc':
-			if usr.email:
-				template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})			
-				self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
-
+			for l in id_mail_followers:
+				usr = obj_partner.browse(cr, uid, [l])[0]
+				for s in usr.user_ids:
+					if s.email:
+						email_to = s.email
+						template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})
+						self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
