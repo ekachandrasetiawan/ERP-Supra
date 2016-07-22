@@ -1218,6 +1218,7 @@ class WizardCreatePbSo(osv.osv_memory):
 		print line,">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 		res = {
+		'so_line_id': line.sale_order_line_id.id,
 		'so_material_line_id': line.id,
 		'product_id'		: line.product_id.id,
 		'description'		: line.desc,
