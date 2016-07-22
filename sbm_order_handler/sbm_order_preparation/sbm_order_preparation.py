@@ -26,12 +26,14 @@ class order_preparation(osv.osv):
 	_order = "id desc"
 
 	def picking_change(self,cr,uid,ids,picking_id):
-		pick = self.pool.get('stock.picking').browse(cr,uid,picking_id)
-		res = super(order_preparation,self).picking_change(cr,uid,ids,picking_id)
-		if pick:
-			res['value']['partner_id'] = pick.sale_id.partner_id.id
-			res['value']['partner_shipping_id'] = pick.sale_id.partner_shipping_id.id
-			res['value']['poc'] = pick.sale_id.client_order_ref
+		res = False
+		if picking_id:
+			pick = self.pool.get('stock.picking').browse(cr,uid,picking_id)
+			res = super(order_preparation,self).picking_change(cr,uid,ids,picking_id)
+			if pick:
+				res['value']['partner_id'] = pick.sale_id.partner_id.id
+				res['value']['partner_shipping_id'] = pick.sale_id.partner_shipping_id.id
+				res['value']['poc'] = pick.sale_id.client_order_ref
 
 		return res
 		
@@ -217,7 +219,7 @@ class order_preparation(osv.osv):
 					if len(ids)==1:
 						curr_op_id = ids[0]
 
-					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','!=',curr_op_id)])
+					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','not in',curr_op_id)])
 					print op_line,"++--"
 					for l in obj_op_line.browse(cr, uid, op_line):
 						# Cek Status OP 
