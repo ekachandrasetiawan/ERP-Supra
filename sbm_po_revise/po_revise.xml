@@ -158,12 +158,10 @@
        <field name="type">form</field>
        <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
        <field name="arch" type="xml">
-            <button name="purchase_confirm" position="replace">
-              
-            </button> 
-
+            <button name="purchase_confirm" position="replace"/>
+            <xpath expr="//button[@string='Print Purchase Order']" position="replace"/>
             <button name="print_po_out" position="replace">
-                <button name="print_po_out" type="object" states="draft,sent,confirmed" string="Print" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+                <button name="print_po_out" type="object" states="draft,sent,confirmed" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
             </button>
 
        </field>
@@ -178,10 +176,25 @@
             <button name="print_quotation" position="after">
                  <button name="purchase_confirm" states="draft" string="Submit" icon="gtk-apply"/>
             </button>
-
+               <button name="action_cancel_draft" position="replace">
+                <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_JUMP_TO"/>
+            </button>
+            <button name="purchase_cancel" position="replace">
+                <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" icon="STOCK_CANCEL"/>
+            </button>
+            <button name="purchase_confirm" position="replace">
+                <button name="purchase_confirm" states="draft" string="Confirm Order" icon="STOCK_APPLY"/>
+            </button>
+            <button name="action_cancel" position="replace">
+                <button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" icon="STOCK_CANCEL" />
+            </button>
+            <button name="view_picking" position="replace">
+                <button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" icon="STOCK_OPEN"/>
+            </button>
+            <button name="purchase_approve" position="replace">
+                <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager" icon="STOCK_APPLY"/>
+            </button>
             <xpath expr="//button[@string='Resend Purchase Order']" position="replace"></xpath>
-            
-
        </field>
     </record>
 
@@ -208,9 +221,27 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
         <field name="arch" type="xml">
-            <button name="print_po_import_out" position="replace">
-              <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
-            </button>
+            <xpath expr="//button[@string='Import J']" position="replace"/>
+            <xpath expr="//button[@string='Import S']" position="replace"/>
+            <xpath expr="//button[@string='Print Import']" position="replace">
+                 <button name="print_po_import_out" type="object" states="approved,draft" string="Print Purchase Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc'])]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_invoice_po_revision" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="purchase_partial_invoicing.purchase_order_invoice"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@string='Partial Invoice']" position="replace">
+                <button name="%(purchase_partial_invoicing.action_purchase_partial_invoice)d" string="Partial Invoice" type="action" states="approved" groups="base.group_user" icon="terp-dolar"/>
+            </xpath>
+
+             <xpath expr="//button[@string='Full Invoice']" position="replace">
+                <button name="action_invoice_create" string="Full Invoice" type="object" states="approved" groups="base.group_user" icon="terp-dolar"/>
+            </xpath>
         </field>
     </record>
 
@@ -235,10 +266,6 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
-            <button name="action_cancel_draft" position="replace">
-                <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" />
-            </button>
-            
             <field name="origin" position="attributes">
                 <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
             </field>
