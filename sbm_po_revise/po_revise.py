@@ -86,7 +86,7 @@ class Purchase_Order(osv.osv):
 		po_revision = obj_po_revision.browse(cr, uid, [po_id_revision])[0]
 		po_id=po_revision.po_source.id
 
-		if val.jenis == 'loc':
+		if val.jenis != 'impj' and val.jenis!='imps':
 			# Send Email Jika Sudah Terbentuk Invoice di Purchase Order Lama
 			if po_revision.is_invoiced == True:
 				ip_address = '192.168.9.26:10001'
@@ -807,7 +807,7 @@ class WizardPOrevise(osv.osv_memory):
 		obj_po.message_post(cr, uid, [po], body=msg, context=context)
 
 		# Action Send Email Create Purchase Order Revision
-		if data.po_source.jenis == 'loc':
+		if data.po_source.jenis != 'impj' and data.po_source.jenis!='imps':
 			self.action_send_email(cr, uid, po, po_revision, po_name, user_create, data.reason, context={})
 
 		pool_data=self.pool.get("ir.model.data")
