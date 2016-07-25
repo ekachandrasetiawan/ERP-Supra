@@ -216,8 +216,6 @@ class order_preparation(osv.osv):
 					nilai= 0 #nilai yang sudah di ambil item nya ke dalam op.
 					op_line = []
 					curr_op_id=ids
-					if len(ids)==1:
-						curr_op_id = ids[0]
 
 					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','not in',curr_op_id)])
 					print op_line,"++--"
