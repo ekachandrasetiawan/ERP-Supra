@@ -12,7 +12,7 @@
                     <button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
                 </xpath>
                 <button name="purchase_approve" position="replace">
-                    <button name="purchase_approve" states="confirmed" string="Approve Order" class="oe_highlight" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief"/>
+                    <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_APPLY" class="oe_highlight"/>
                 </button>
             </field>
         </record>
@@ -174,9 +174,7 @@
 
             <button name="purchase_confirm" position="replace"/>
             <xpath expr="//button[@string='Print Purchase Order']" position="replace"/>
-            <button name="print_po_out" position="replace">
-                <button name="print_po_out" type="object" states="draft,sent,confirmed" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
-            </button>
+            
 
        </field>
     </record>
@@ -205,9 +203,7 @@
             <button name="view_picking" position="replace">
                 <button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" icon="STOCK_OPEN"/>
             </button>
-            <button name="purchase_approve" position="replace">
-                <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_APPLY"/>
-            </button>
+            
             <xpath expr="//button[@string='Resend Purchase Order']" position="replace"></xpath>
        </field>
     </record>
