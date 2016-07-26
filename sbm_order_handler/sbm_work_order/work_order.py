@@ -95,7 +95,7 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
-			'tag'	: 'print.adhoc.order.request',
+			'tag'   : 'print.out.op',
 			'params': {
 				'redir'	: urlTo,
 				'uid':uid
@@ -469,25 +469,25 @@ class SBM_Work_Order(osv.osv):
 
 						no_material+=1
 
-				cek_n_line = work_order_output.search(cr, uid, [('adhoc_output_ids', '=', x.id)])
+				cek_n_line = work_order_output.search(cr, uid, [('adhoc_output_id', '=', x.id)])
 
 				for n_line in work_order_output.browse(cr, uid, cek_n_line):
 					nilai_line += n_line.qty
-
-				if x.qty > nilai_line:
+				
+				if x.qty >= nilai_line:
 					line.append({
 						'no': no_line,
 						'item_id' : x.item_id.id,
 						'desc': x.desc,
 						'qty': x.qty - nilai_line,
 						'uom_id': x.uom_id.id,
-						'adhoc_output_ids':x.id,
+						'adhoc_output_id':x.id,
 						'raw_materials': material_line
 					})
 
 					no_line +=1
 
-			if line == []:
+			if not len(line):
 				raise openerp.exceptions.Warning("Item Adhoc Order Tidak Ditemukan")
 
 			res['customer_id'] = adhoc.customer_id.id
@@ -824,7 +824,7 @@ class SBM_Work_Order_Output(osv.osv):
 		'raw_materials':fields.one2many('sbm.work.order.output.raw.material', 'work_order_output_id', string='Raw Materials',ondelete='cascade'),
 		'attachment_ids': fields.many2many('ir.attachment', 'work_order_rel','work_order_id', 'attachment_id', 'Attachments'),
 		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking',ondelete='cascade'),
-		'adhoc_output_ids':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
+		'adhoc_output_id':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
 		'sale_order_material_line':fields.many2one('sale.order.material.line',string='SO Line Materials', required=False),
 
 	}

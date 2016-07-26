@@ -159,7 +159,7 @@
 	</record>
 
 	<record id="seq_sbm_work_order_wo_no" model="ir.sequence">
-		<field name="name">Work Order Request Wo No</field>
+		<field name="name">Work Order No</field>
 		<field name="code">sbm.work.order.wo.no</field>
 		<field name="padding">4</field>
 	</record>
