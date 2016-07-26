@@ -392,8 +392,8 @@ class Sale_order(osv.osv):
 			'tag'   : 'print.out.op',
 			'params': {
 				# 'id'  : ids[0],
-			'redir' : urlTo,
-			'uid':uid
+				'redir' : urlTo,
+				'uid':uid
 			},
 		}
 
