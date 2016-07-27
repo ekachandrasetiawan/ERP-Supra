@@ -97,9 +97,24 @@ class SBM_Adhoc_Order_Request(osv.osv):
 			prep_wo['adhoc_order_request_id']=adhoc.id
 			prep_wo['source_type']='adhoc'
 
-			new_wo_ids.append((0,0,{obj_wo.create(cr, uid, prep_wo, context=context)}))
+			id_wo = obj_wo.create(cr, uid, prep_wo, context=context)
 
-		return True
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_order_handler', "sbm_work_order_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'sbm.work.order.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'sbm.work.order'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = id_wo
+		return action
+
 
 	def adhoc_setdraft(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'draft'},context=context)
