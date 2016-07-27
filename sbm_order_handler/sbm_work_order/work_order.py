@@ -76,6 +76,31 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		res = self.write(cr,uid,ids,{'state':'submited'},context=context)
 		return res
 
+	def generate_wo_adhoc(self,cr,uid,ids,context={}):
+		action = False
+		val = self.browse(cr, uid, ids, context={})[0]
+		ops = self.browse(cr, uid, ids, context=context)
+		obj_wo = self.pool.get('sbm.work.order')
+
+		seq_id = obj_wo.search(cr, uid, [('adhoc_order_request_id','=', val.id)])
+		
+		if seq_id:
+			raise osv.except_osv(_('Warning'),_('Adhoc Order Sudah dibuat Work Order'))
+
+		new_wo_ids = []
+
+		for adhoc in ops:
+			prep_wo = {}
+			evt_prepare_change = obj_wo.adhoc_order_change(cr, uid, ids, val.id)
+
+			prep_wo = evt_prepare_change['value']
+			prep_wo['adhoc_order_request_id']=adhoc.id
+			prep_wo['source_type']='adhoc'
+
+			new_wo_ids.append((0,0,{obj_wo.create(cr, uid, prep_wo, context=context)}))
+
+		return True
+
 	def adhoc_setdraft(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'draft'},context=context)
 		return res
@@ -475,7 +500,7 @@ class SBM_Work_Order(osv.osv):
 					nilai_line += n_line.qty
 
 				if x.qty > nilai_line:
-					line.append({
+					line.append((0,0,{
 						'no': no_line,
 						'item_id' : x.item_id.id,
 						'desc': x.desc,
@@ -483,7 +508,7 @@ class SBM_Work_Order(osv.osv):
 						'uom_id': x.uom_id.id,
 						'adhoc_output_ids':x.id,
 						'raw_materials': material_line
-					})
+					}))
 
 					no_line +=1
 
