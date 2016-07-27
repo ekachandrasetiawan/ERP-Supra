@@ -466,6 +466,26 @@ class Sale_order(osv.osv):
 		}
 		return res
 
+	def generate_wo(self,cr,uid,ids,context={}):
+		action = False
+		val = self.browse(cr, uid, ids, context={})[0]
+		ops = self.browse(cr, uid, ids, context=context)
+		obj_wo = self.pool.get('sbm.work.order')
+		
+		new_wo_ids = []
+		for so in ops:
+			prep_wo = {}
+			evt_prepare_change = obj_wo.sale_order_change(cr, uid, ids, val.id)
+
+			prep_wo = evt_prepare_change['value']
+			prep_wo['sale_order_id']=so.id
+			prep_wo['source_type']='sale_order'
+
+			new_wo_ids.append((0,0,{obj_wo.create(cr, uid, prep_wo, context=context)}))
+
+		return True
+
+
 	def generate_material(self,cr,uid,ids,context={}):
 		res={}
 		vals = {}

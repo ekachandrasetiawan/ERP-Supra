@@ -556,7 +556,10 @@
 
 			<field name="arch" type="xml">
 				<header> 
-					<button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}"/>
+					<button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}" />
+
+					<button name="generate_wo" type="object" string="Generate work Order" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure to Generate Work Order"/>
+
 					<button name="cek_so" type="object" string="Cek Sale order"/>
 					 <button name="print_so_web" type="object" string="Print SO"/>
 				</header>

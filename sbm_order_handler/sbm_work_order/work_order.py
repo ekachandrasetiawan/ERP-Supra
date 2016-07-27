@@ -301,13 +301,13 @@ class SBM_Work_Order(osv.osv):
 			}),
 		'seq_wo_no':fields.char(string='WO Sequence'),
 		'seq_req_no':fields.char(string='Request Sequence'),
-		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer SITE')], 'Work Location', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=True,track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
+		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer SITE')], 'Work Location', readonly=True,required=False, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
+		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=False,track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
-		'due_date':fields.date(string='Due Date', required=True,readonly=True, states={'draft':[('readonly',False)]}),
+		'due_date':fields.date(string='Due Date', required=False,readonly=True, states={'draft':[('readonly',False)]}),
 		'order_date':fields.date(string='Order Date',readonly=True, states={'draft':[('readonly',False)]}),
-		'source_type': fields.selection([('project', 'Project'),('sale_order', 'Sale Order'), ('adhoc','Adhoc'), ('internal_request', 'Internal Request')], 'Source Type', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
+		'source_type': fields.selection([('project', 'Project'),('sale_order', 'Sale Order'), ('adhoc','Adhoc'), ('internal_request', 'Internal Request')], 'Source Type', readonly=True,required=False, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
 		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False, domain=[('state', 'in', ['progress','manual'])],track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
 		'adhoc_order_request_id':fields.many2one('sbm.adhoc.order.request', required=False, domain=[('state','in',['approved','done'])], string='Adhoc Order Request',readonly=True, states={'draft':[('readonly',False)]}),
 		'repeat_ref_id':fields.many2one('sbm.work.order',required=False, string='Repeat Ref',track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
@@ -378,7 +378,7 @@ class SBM_Work_Order(osv.osv):
 		res = {}; line = []
 		if sale:
 			order = self.pool.get('sale.order').browse(cr, uid, sale)
-			
+
 			for x in order.order_line:
 				if x.material_lines == []:
 					raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
@@ -395,23 +395,23 @@ class SBM_Work_Order(osv.osv):
 					if m.qty > nilai:
 						if m.product_id.type <> 'service':
 							if m.product_id.supply_method == 'produce':
-								line.append({
+								line.append((0,0,{
 									'no': no,
 									'item_id' : m.product_id.id,
 									'desc': m.desc,
 									'qty': m.qty-nilai,
 									'uom_id': m.uom.id,
 									'sale_order_material_line': m.id
-								})
+								}))
 						elif m.product_id.type == 'service':
-							line.append({
+							line.append((0,0,{
 								'no': no,
 								'item_id' : m.product_id.id,
 								'desc': m.desc,
 								'qty': m.qty-nilai,
 								'uom_id': m.uom.id,
 								'sale_order_material_line': m.id
-							})
+							}))
 					no +=1
 			if line == []:
 				raise openerp.exceptions.Warning("Item Sales Order Tidak Ditemukan")
