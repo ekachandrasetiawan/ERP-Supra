@@ -172,7 +172,7 @@
        <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
        <field name="arch" type="xml">
             <xpath expr="//button[@string='Print Purchase Order']" position="replace"/>
-            <xpath expr="//button[@string='New Print']" position="replace"/>
+            
        </field>
     </record>
 
