@@ -60,7 +60,7 @@
 				</div>
         			<group col="4" colspan="4">
         				<group colspan="2">
-        					<field name="source_type"/>
+        					<field name="source_type" attrs="{'required':True}"/>
 		            	 	<field name="sale_order_id" attrs="{'invisible':[('source_type', 'in', ['adhoc','internal_request'])], 'required':[('source_type', 'in', ['project','sale_order'])]}" on_change="sale_order_change(sale_order_id)"/>
 		            	 	<field name="adhoc_order_request_id" attrs="{'invisible':[('source_type', '!=', 'adhoc')], 'required':[('source_type', '=', 'adhoc')]}" on_change="adhoc_order_change(adhoc_order_request_id)"/>
 		            	 	<field name="customer_id" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
@@ -68,9 +68,9 @@
 		            	 	
         				</group>
         				<group colspan="2">
-		            		<field name="work_location"/>
-		            		<field name="location_id"/>
-		            	 	<field name="due_date"/>
+		            		<field name="work_location" attrs="{'required':True}"/>
+		            		<field name="location_id" attrs="{'required':True}"/>
+		            	 	<field name="due_date"  attrs="{'required':True}"/>
 		            	 	<field name="order_date"/>
 	            		</group>
 	            	</group>

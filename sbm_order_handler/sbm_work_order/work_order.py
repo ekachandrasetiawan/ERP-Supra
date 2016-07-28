@@ -76,6 +76,46 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		res = self.write(cr,uid,ids,{'state':'submited'},context=context)
 		return res
 
+	def generate_wo_adhoc(self,cr,uid,ids,context={}):
+		action = False
+		val = self.browse(cr, uid, ids, context={})[0]
+		ops = self.browse(cr, uid, ids, context=context)
+		obj_wo = self.pool.get('sbm.work.order')
+
+		seq_id = obj_wo.search(cr, uid, [('adhoc_order_request_id','=', val.id)])
+		
+		if seq_id:
+			raise osv.except_osv(_('Warning'),_('Adhoc Order Sudah dibuat Work Order'))
+
+		new_wo_ids = []
+
+		for adhoc in ops:
+			prep_wo = {}
+			evt_prepare_change = obj_wo.adhoc_order_change(cr, uid, ids, val.id)
+
+			prep_wo = evt_prepare_change['value']
+			prep_wo['adhoc_order_request_id']=adhoc.id
+			prep_wo['source_type']='adhoc'
+
+			id_wo = obj_wo.create(cr, uid, prep_wo, context=context)
+
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_order_handler', "sbm_work_order_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'sbm.work.order.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'sbm.work.order'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = id_wo
+		return action
+
+
 	def adhoc_setdraft(self, cr, uid, ids, context={}):
 		res = self.write(cr,uid,ids,{'state':'draft'},context=context)
 		return res
@@ -301,13 +341,13 @@ class SBM_Work_Order(osv.osv):
 			}),
 		'seq_wo_no':fields.char(string='WO Sequence'),
 		'seq_req_no':fields.char(string='Request Sequence'),
-		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer Site')], 'Work Location', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=True,track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
+		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer sITE')], 'Work Location', readonly=True,required=False, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
+		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=False,track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
-		'customer_site_id':fields.many2one('res.partner','Cust. Work Location Address',readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
-		'due_date':fields.date(string='Due Date', required=True,readonly=True, states={'draft':[('readonly',False)]}),
+		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
+		'due_date':fields.date(string='Due Date', required=False,readonly=True, states={'draft':[('readonly',False)]}),
 		'order_date':fields.date(string='Order Date',readonly=True, states={'draft':[('readonly',False)]}),
-		'source_type': fields.selection([('project', 'Project'),('sale_order', 'Sale Order'), ('adhoc','Adhoc'), ('internal_request', 'Internal Request')], 'Source Type', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
+		'source_type': fields.selection([('project', 'Project'),('sale_order', 'Sale Order'), ('adhoc','Adhoc'), ('internal_request', 'Internal Request')], 'Source Type', readonly=True,required=False, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
 		'sale_order_id':fields.many2one('sale.order', string='Sale Order', required=False, domain=[('state', 'in', ['progress','manual'])],track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
 		'adhoc_order_request_id':fields.many2one('sbm.adhoc.order.request', required=False, domain=[('state','in',['approved','done'])], string='Adhoc Order Request',readonly=True, states={'draft':[('readonly',False)]}),
 		'repeat_ref_id':fields.many2one('sbm.work.order',required=False, string='Repeat Ref',track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
@@ -378,7 +418,7 @@ class SBM_Work_Order(osv.osv):
 		res = {}; line = []
 		if sale:
 			order = self.pool.get('sale.order').browse(cr, uid, sale)
-			
+
 			for x in order.order_line:
 				if x.material_lines == []:
 					raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
@@ -395,23 +435,23 @@ class SBM_Work_Order(osv.osv):
 					if m.qty > nilai:
 						if m.product_id.type <> 'service':
 							if m.product_id.supply_method == 'produce':
-								line.append({
+								line.append((0,0,{
 									'no': no,
 									'item_id' : m.product_id.id,
 									'desc': m.desc,
 									'qty': m.qty-nilai,
 									'uom_id': m.uom.id,
 									'sale_order_material_line': m.id
-								})
+								}))
 						elif m.product_id.type == 'service':
-							line.append({
+							line.append((0,0,{
 								'no': no,
 								'item_id' : m.product_id.id,
 								'desc': m.desc,
 								'qty': m.qty-nilai,
 								'uom_id': m.uom.id,
 								'sale_order_material_line': m.id
-							})
+							}))
 					no +=1
 			if line == []:
 				raise openerp.exceptions.Warning("Item Sales Order Tidak Ditemukan")
@@ -473,9 +513,10 @@ class SBM_Work_Order(osv.osv):
 
 				for n_line in work_order_output.browse(cr, uid, cek_n_line):
 					nilai_line += n_line.qty
-				
+
+
 				if x.qty >= nilai_line:
-					line.append({
+					line.append((0,0,{
 						'no': no_line,
 						'item_id' : x.item_id.id,
 						'desc': x.desc,
@@ -483,7 +524,7 @@ class SBM_Work_Order(osv.osv):
 						'uom_id': x.uom_id.id,
 						'adhoc_output_id':x.id,
 						'raw_materials': material_line
-					})
+					}))
 
 					no_line +=1
 

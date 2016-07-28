@@ -19,8 +19,17 @@ class order_preparation(osv.osv):
 		'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=False, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
 		'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
 		'location_id':fields.many2one('stock.location',required=True,string='Picking Location',readonly=True, states={'draft': [('readonly', False)]}),
-		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True),
+		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True, track_visibility='onchange'),
 
+	}
+
+	_track = {
+		'state':{
+			'order_preparation.op_pack_submited': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'submited',
+			'order_preparation.op_pack_approved': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'approved',
+			'order_preparation.op_pack_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
+			'order_preparation.op_pack_draft': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'draft',
+		},
 	}
 
 	_order = "id desc"
@@ -95,6 +104,21 @@ class order_preparation(osv.osv):
 
 		return True
 
+	def send_email(self, cr, uid, ids, subject, body, follower_id, context=None):
+		mail_mail = self.pool.get('mail.mail')
+		mail_id = mail_mail.create(cr, uid, {
+			'model': 'order.preparation',
+			'res_id': ids,
+			'subject': subject,
+			'body_html': body,
+			'auto_delete': True,
+			}, context=context)
+		print '============EKA CHANDRA SETIAWAN=============='
+
+		mail_mail.send(cr, uid, [mail_id], recipient_ids=[follower_id], context=context)
+		# mail_mail.send(cr, uid, [mail_id], recipient_ids=[follower_id], context=context)
+		return True
+
 	def create(self, cr, uid, vals, context=None):
 		res = super(order_preparation, self).create(cr, uid, vals, context=context)
 		self._set_op_followers(cr, uid, res, context=None)
@@ -104,9 +128,14 @@ class order_preparation(osv.osv):
 	"""Action submit
 	"""
 	def preparation_submit(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
 		res = False
 		if self.validasi(cr, uid, ids, context=context):
 			res = self.write(cr, uid, ids, {'state':'submited'}, context=context)
+			subject = 'Order Preparation no' + val.name + 'Submited'
+			follower_id=int(592)
+			body = 'Order Preparation Telah di Submited'
+			self.send_email(cr, uid, ids, subject, body, follower_id, context={})
 		return res
 
 	def preparation_done(self, cr, uid, ids, context=None):
