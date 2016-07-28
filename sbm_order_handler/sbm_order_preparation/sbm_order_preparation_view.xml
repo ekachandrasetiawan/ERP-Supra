@@ -1,97 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
+		
+		<record id="wizard_order_preparation_form" model="ir.ui.view">
+            <field name="name">Wizard Order Preparation</field>
+            <field name="model">wizard.order.preparation</field>
+            <field name="arch" type="xml">
+                <form string="Order Preparation" version="7.0">
+                    <group>
+                        <field name="op_id" readonly="True"/>
+                    </group>
+                    <group>
+                        <field name="notes"/>
+                    </group>
+                    <footer>
+                        <button name="request_op_validate" string="Validate" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="wizard_order_preparation_action" model="ir.actions.act_window">
+            <field name="name">Action Order Preparation</field>
+            <field name="res_model">wizard.order.preparation</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="wizard_order_preparation_form"/>
+        </record>
+
+
 		<record id="order_preparation_form" model="ir.ui.view">
-					 <field name="name">order.preparation.form</field>
-					 <field name="model">order.preparation</field>
-					 <field name="type">form</field>
-					 <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_form"/>
-					 <field name="arch" type="xml">
-							<button name="preparation_confirm" position="replace">
-								<button name="preparation_confirm" type="object" states="submited" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
+			 <field name="name">order.preparation.form</field>
+			 <field name="model">order.preparation</field>
+			 <field name="type">form</field>
+			 <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_form"/>
+			 <field name="arch" type="xml">
+					<button name="preparation_confirm" position="replace">
+						<button name="preparation_confirm" type="object" states="submited" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
 
+						<button name="preparation_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are you sure to Submit Order Preparation ?" groups="sbm_order_handler.group_admin_ho" />
+					</button>
+					<field name="state" position="replace">
+						<field name="state" widget="statusbar" statusbar_visible="draft,submited,approve,done"/>
+					</field>
 
-								<button name="preparation_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are you sure to Submit Order Preparation ?" groups="sbm_order_handler.group_admin_ho" />
-							</button>
-							<field name="state" position="replace">
-								<field name="state" widget="statusbar" statusbar_visible="draft,submited,approve,done"/>
-							</field>
+					<button name="print_op_out" position="replace">
+						<button name="print_op_out" type="object" states="submited,approve,done" string="Print" icon="gtk-print"/>
+					</button>
 
-							<button name="print_op_out" position="replace">
-								<button name="print_op_out" type="object" states="submited,approve,done" string="Print" icon="gtk-print"/>
-							</button>
+					<button name="preparation_cancel" position="replace">
+						<button name="preparation_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize" confirm="Are you sure to ancel Order Preparation ?" groups="sbm_order_handler.group_admin_ho"/>
+					</button>
+					
+					<button name="preparation_draft" position="replace">
+						<button name="preparation_draft" type="object" states="submited" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="sbm_order_handler.group_admin_warehouse" confirm="Are you sure to Back To Draft Order Preparation ?"/>
 
-							<button name="preparation_cancel" position="replace">
-								<button name="preparation_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize" confirm="Are you sure to ancel Order Preparation ?" groups="sbm_order_handler.group_admin_ho"/>
-							</button>
+						<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="stock.group_stock_user" confirm="Are you sure to Back To Draft Order Preparation ?"/>
+
+						<button name="set_delivery_notes" type="object" states="done" string="Set Delivery Notes" icon="gtk-dnd" groups="sbm_order_handler.group_admin_ho" confirm="Create DN Document?"  />
+
+					</button>
+
+					<button name="preparation_done" position="replace">
+						<!-- <button name="preparation_done" type="object" states="approve" string="Validate" icon="gtk-apply" confirm="Are you sure to validate Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/> -->
+
+						<button name="action_wizard_order_preparation" states="approve" string="Validate" type="object" icon="gtk-apply" confirm="Are you sure to validate Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
+					</button>
+
+					<field name="picking_id" position="replace" />
 							
-							<button name="preparation_draft" position="replace">
-								<button name="preparation_draft" type="object" states="submited" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="sbm_order_handler.group_admin_warehouse" confirm="Are you sure to Back To Draft Order Preparation ?"/>
 
-								<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="stock.group_stock_user" confirm="Are you sure to Back To Draft Order Preparation ?"/>
+					<field name="poc" position="after">
+						<field name="location_id" on_change="sale_change(sale_id,location_id)"/>
+					</field>
+					
+					<field name="duedate" position="replace"/>
 
-								<button name="set_delivery_notes" type="object" states="done" string="Set Delivery Notes" icon="gtk-dnd" groups="sbm_order_handler.group_admin_ho" confirm="Create DN Document?"  />
+					<field name="partner_shipping_id" position="after">
+						<field name="duedate"/>
+					</field>
 
-							</button>
+					<field name="sale_id" position="replace">
+						<field name="sale_id" on_change="sale_change(sale_id, location_id)"/> 
+					</field>
 
-							<button name="preparation_done" position="replace">
-								<button name="preparation_done" type="object" states="approve" string="Validate" icon="gtk-apply" confirm="Are you sure to validate Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
-							</button>
+					<xpath expr="//page[@string='Notes']" position="after">
+							<page string="Others">
+									<group>
+										<field name="picking_id" on_change="picking_change(picking_id)"/>
+									</group>
+						 </page>
+					</xpath>
 
-							<field name="picking_id" position="replace" />
-									
+					<xpath expr="//page[@string='Notes']" position="after">
+							<page string="Warehouse Notes">
+								<group>
+									<field name="warehouse_notes"/>
+								</group>
+						 </page>
+					</xpath>
 
-							<field name="poc" position="after">
-								<field name="location_id" on_change="sale_change(sale_id,location_id)"/>
-							</field>
-							
-							<field name="duedate" position="replace"/>
+					<field name="product_id" position="replace">
+						<field name="product_id" on_change="change_item(product_id)"/>
+					</field>
 
-							<field name="partner_shipping_id" position="after">
-								<field name="duedate"/>
-							</field>
-
-							<field name="sale_id" position="replace">
-								<field name="sale_id" on_change="sale_change(sale_id, location_id)"/> 
-							</field>
-
-							<xpath expr="//page[@string='Notes']" position="after">
-									<page string="Others">
-											<group>
-												<field name="picking_id" on_change="picking_change(picking_id)"/>
-											</group>
-								 </page>
-							</xpath>
-
-							<field name="product_id" position="replace">
-								<field name="product_id" on_change="change_item(product_id)"/>
-							</field>
-
-							<field name="product_uom" position="replace">
-								<field name="product_uom" on_change="change_item(product_id)"/>
-							</field>
+					<field name="product_uom" position="replace">
+						<field name="product_uom" on_change="change_item(product_id)"/>
+					</field>
 
 
-							<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_id']" position="attributes">
-									<attribute name="required">True</attribute>
-							</xpath>
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_id']" position="attributes">
+							<attribute name="required">True</attribute>
+					</xpath>
 
-							<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_uom']" position="attributes">
-									<attribute name="required">True</attribute>
-							</xpath>
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_uom']" position="attributes">
+							<attribute name="required">True</attribute>
+					</xpath>
 
-							<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_qty']" position="attributes">
-									<attribute name="required">True</attribute>
-							</xpath>
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_qty']" position="attributes">
+							<attribute name="required">True</attribute>
+					</xpath>
 
-							<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form" position="inside">
-									<separator string="Detail Sales Order" colspan="4"/>
-									<field name="sale_line_id" domain="[('order_id', '=', parent.sale_id)]" on_change="check_item_material(sale_line_id)"/>
-									<field name="sale_line_material_id" domain="[('sale_order_line_id', '=', sale_line_id)]"/>
-							</xpath>
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form" position="inside">
+							<separator string="Detail Sales Order" colspan="4"/>
+							<field name="sale_line_id" domain="[('order_id', '=', parent.sale_id)]" on_change="check_item_material(sale_line_id)"/>
+							<field name="sale_line_material_id" domain="[('sale_order_line_id', '=', sale_line_id)]"/>
+					</xpath>
 
 
-					 </field>
+			 </field>
 		</record>
 
 		<record id="op_pack_submited" model="mail.message.subtype">
