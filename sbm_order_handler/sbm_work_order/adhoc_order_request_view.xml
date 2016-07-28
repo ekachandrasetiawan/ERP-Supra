@@ -146,8 +146,8 @@
 	<record id="seq_sbm_adhoc_order_request" model="ir.sequence">
 		<field name="name">Adhoc Order Request</field>
 		<field name="code">sbm.adhoc.order.request</field>
-		<!-- <field name="suffix">/</field> -->
-		<field name="padding">5</field>
+		<field name="prefix">AD/SBM/%(y)s/</field>
+		<field name="padding">4</field>
 	</record>
 
 	<!-- Log History Button -->
