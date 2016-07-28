@@ -105,26 +105,91 @@ class order_preparation(osv.osv):
 
 		return True
 
-	def send_email(self, cr, uid, ids, subject, body, follower_id, context=None):
+	def send_email(self, cr, uid, ids, subject, context=None):
+		val = self.browse(cr, uid, ids)[0]
 		mail_mail = self.pool.get('mail.mail')
-		mail_id = mail_mail.create(cr, uid, {
-			'model': 'order.preparation',
-			'res_id': ids,
-			'subject': subject,
-			'body_html': body,
-			'auto_delete': True,
-			}, context=context)
-		print '============EKA CHANDRA SETIAWAN=============='
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
 
-		mail_mail.send(cr, uid, [mail_id], recipient_ids=[follower_id], context=context)
-		# mail_mail.send(cr, uid, [mail_id], recipient_ids=[follower_id], context=context)
+		username = obj_usr.browse(cr, uid, uid)
+		
+
+		ip_address = '192.168.9.26:10001'
+		db = 'LIVE_2014'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=order.preparation&menu_id=529&action=498'
+
+		# Group warehouse User
+		p  = self.pool.get('ir.model.data')
+		warehouse_user = p.get_object(cr, uid, 'stock', 'group_stock_user').id
+		user_warehouse = self.pool.get('res.groups').browse(cr, uid, warehouse_user)
+
+		for x in ids:
+			if val.state == 'submited':
+				for user in user_warehouse.users:
+					body = """\
+						<html>
+						  <head></head>
+						  <body>
+						    <p>
+						    	Dear %s!<br/><br/>
+								%s Telah Mensubmit Order Preparation <b> %s </b><br/>
+								<br/>
+								Silahkan klik Link ini untuk melihat detail Order Preparation. <a href="%s">View Order Preparation</a>
+						    </p>
+						    <br/>
+						    Best Regards,<br/>
+							Administrator ERP
+						  </body>
+						</html>
+						""" % (user.name, username.name, val.name, url)
+
+					mail_id = mail_mail.create(cr, uid, {
+						'model': 'order.preparation',
+						'res_id': x,
+						'subject': subject,
+						'body_html': body,
+						'auto_delete': True,
+						}, context=context)
+
+					mail_mail.send(cr, uid, [mail_id], recipient_ids=[user.partner_id.id], context=context)
+			else:
+				cr.execute("SELECT create_uid FROM order_preparation WHERE id = %s", ids)
+				id_user_create = map(lambda id: id[0], cr.fetchall())
+				
+				usr = obj_usr.browse(cr, uid, id_user_create)[0]
+				body = """\
+					<html>
+					  <head></head>
+					  <body>
+					    <p>
+					    	Dear %s!<br/><br/>
+							%s Telah Memproses Order Preparation <b> %s </b> dan siap untuk dibuatkan surat jalan / Delivery Notes <br/>
+							<br/>
+							Silahkan klik Link ini untuk melihat detail Order Preparation.  <a href="%s">View Order Preparation</a>
+					    </p>
+					    <br/>
+					    Best Regards,<br/>
+						Administrator ERP
+					  </body>
+					</html>
+					""" % (usr.name, username.name, val.name, url)
+
+				mail_id = mail_mail.create(cr, uid, {
+					'model': 'order.preparation',
+					'res_id': x,
+					'subject': subject,
+					'body_html': body,
+					'auto_delete': True,
+					}, context=context)
+
+				mail_mail.send(cr, uid, [mail_id], recipient_ids=[usr.partner_id.id], context=context)
+
 		return True
 
 	def create(self, cr, uid, vals, context=None):
 		res = super(order_preparation, self).create(cr, uid, vals, context=context)
 		self._set_op_followers(cr, uid, res, context=None)
 		return res
-
 
 	"""Action submit
 	"""
@@ -133,17 +198,18 @@ class order_preparation(osv.osv):
 		res = False
 		if self.validasi(cr, uid, ids, context=context):
 			res = self.write(cr, uid, ids, {'state':'submited'}, context=context)
-			# subject = 'Order Preparation no' + val.name + 'Submited'
-			# follower_id=int(592)
-			# body = 'Order Preparation Telah di Submited'
-			# self.send_email(cr, uid, ids, subject, body, follower_id, context={})
+			subject = 'Order Preparation no' + val.name + ' Submited'
+
+			self.send_email(cr, uid, ids, subject, context=None)
 		return res
 
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
-		# for x in val.prepare_lines:
-		# 	if x.sale_line_material_id.id==False:
-		# 		raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
+		
+		# Send Email
+		subject = 'Order Preparation no' + val.name + ' Validate'
+		self.send_email(cr, uid, ids, subject, context=None)
+
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
