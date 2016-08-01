@@ -3,6 +3,7 @@ from openerp import netsvc
 from datetime import date, timedelta, datetime
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+import re
 
 class product_product(osv.osv):
 	_inherit = "product.product"
@@ -19,8 +20,9 @@ class product_product(osv.osv):
 		return self.write(cr,uid,ids,{'active':True},context=context)
 
 	def code_change(self, cr, uid, ids, code):
-		cekspace=code.replace(" ", "")
-		return {'value': {'default_code': cekspace}}
+		pure_code=re.sub(r'\W+', '', code)
+		# replace non alphanumeric characters
+		return {'value': {'default_code': pure_code}}
 
 	def create(self, cr, uid, vals, context=None):
 		if vals['default_code']:
