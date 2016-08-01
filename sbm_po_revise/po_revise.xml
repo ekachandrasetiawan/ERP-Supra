@@ -2,21 +2,6 @@
 <openerp>
     <data>
 
-        <record id="purchase_order_form_with_po_revise" model="ir.ui.view">
-            <field name="name">purchase.order.form.with.po.revise</field>
-            <field name="type">form</field>
-            <field name="model">purchase.order</field>
-            <field name="inherit_id" ref="purchase.purchase_order_form" />
-            <field name="arch" type="xml">
-                <xpath expr="//button[@name='action_cancel']" position="after">
-                    <button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
-                </xpath>
-                <button name="purchase_approve" position="replace">
-                    <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_APPLY" class="oe_highlight"/>
-                </button>
-            </field>
-        </record>
-
         <record id="wizard_po_revise_form" model="ir.ui.view">
             <field name="name">Wizard Purhcase Order revise</field>
             <field name="model">wizard.po.revise</field>
@@ -172,7 +157,7 @@
        <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
        <field name="arch" type="xml">
             <xpath expr="//button[@string='Print Purchase Order']" position="replace"/>
-            
+
        </field>
     </record>
 
@@ -182,6 +167,12 @@
        <field name="type">form</field>
        <field name="inherit_id" ref="purchase.purchase_order_form"/>
        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_cancel']" position="after">
+                    <button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
+                </xpath>
+            <button name="purchase_approve" position="replace">
+                <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_APPLY" class="oe_highlight"/>
+            </button>
             <button name="action_cancel_draft" position="replace">
                 <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_JUMP_TO"/>
             </button>
@@ -227,7 +218,7 @@
         <field name="arch" type="xml">
             <button name="print_po_import_out" position="replace">
               <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Purchase Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
-              <button name="print_po_out" type="object" states="draft,sent,confirmed" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+              <button name="print_po_out" type="object" states="draft,sent,confirmed,approved" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
             </button>
 
             <xpath expr="//button[@string='Import J']" position="replace"/>
@@ -253,7 +244,6 @@
 
 
     <!-- ADD READONLY -->
-
     <record id="add_readonly_rent_view" model="ir.ui.view">
         <field name="name">add.readonly.rent.view</field>
         <field name="model">purchase.order</field>
@@ -301,6 +291,35 @@
 
     <!-- END READONLY -->
 
+
+    <record id="order_receive_status_tree" model="ir.ui.view">
+        <field name="name">purchase.order.line.tree</field>
+        <field name="model">purchase.order.line</field>
+        <field name="type">tree</field>
+        <field name="priority">2</field>
+        <field name="arch" type="xml">
+            <tree string="Order Receive Status" colors="grey:state == 'cancel';blue:state in ('draft','approve');green:state in ('done')">
+                <field name="order_id"/>
+                <field name="product_id"/>
+                <field name="name"/>
+                <field name="part_number"/>
+                <field name="date_planned"/>
+                <field name="product_qty"/>
+                <field name="product_uom"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    
+
+    <record model="ir.actions.act_window" id="action_order_receive_status">
+        <field name="name">Order Receive Status</field>
+        <field name="res_model">purchase.order.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>           
+    </record>
+
+    <menuitem name="Order Receive Status" parent="purchase.menu_procurement_management" id="order_receive_status_id" action="action_order_receive_status"/>
 
     </data>
 </openerp>

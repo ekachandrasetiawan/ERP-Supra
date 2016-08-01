@@ -20,6 +20,7 @@ class order_preparation(osv.osv):
 		'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
 		'location_id':fields.many2one('stock.location',required=True,string='Picking Location',readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True, track_visibility='onchange'),
+		'warehouse_notes':fields.text('Warehouse Notes', readonly=True),
 
 	}
 
@@ -104,26 +105,91 @@ class order_preparation(osv.osv):
 
 		return True
 
-	def send_email(self, cr, uid, ids, subject, body, follower_id, context=None):
+	def send_email(self, cr, uid, ids, subject, context=None):
+		val = self.browse(cr, uid, ids)[0]
 		mail_mail = self.pool.get('mail.mail')
-		mail_id = mail_mail.create(cr, uid, {
-			'model': 'order.preparation',
-			'res_id': ids,
-			'subject': subject,
-			'body_html': body,
-			'auto_delete': True,
-			}, context=context)
-		print '============EKA CHANDRA SETIAWAN=============='
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
 
-		mail_mail.send(cr, uid, [mail_id], recipient_ids=[follower_id], context=context)
-		# mail_mail.send(cr, uid, [mail_id], recipient_ids=[follower_id], context=context)
+		username = obj_usr.browse(cr, uid, uid)
+		
+
+		ip_address = '192.168.9.26:10001'
+		db = 'LIVE_2014'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=order.preparation&menu_id=529&action=498'
+
+		# Group warehouse User
+		p  = self.pool.get('ir.model.data')
+		warehouse_user = p.get_object(cr, uid, 'stock', 'group_stock_user').id
+		user_warehouse = self.pool.get('res.groups').browse(cr, uid, warehouse_user)
+
+		for x in ids:
+			if val.state == 'submited':
+				for user in user_warehouse.users:
+					body = """\
+						<html>
+						  <head></head>
+						  <body>
+						    <p>
+						    	Dear %s!<br/><br/>
+								%s Telah Mensubmit Order Preparation <b> %s </b><br/>
+								<br/>
+								Silahkan klik Link ini untuk melihat detail Order Preparation. <a href="%s">View Order Preparation</a>
+						    </p>
+						    <br/>
+						    Best Regards,<br/>
+							Administrator ERP
+						  </body>
+						</html>
+						""" % (user.name, username.name, val.name, url)
+
+					mail_id = mail_mail.create(cr, uid, {
+						'model': 'order.preparation',
+						'res_id': x,
+						'subject': subject,
+						'body_html': body,
+						'auto_delete': True,
+						}, context=context)
+
+					mail_mail.send(cr, uid, [mail_id], recipient_ids=[user.partner_id.id], context=context)
+			else:
+				cr.execute("SELECT create_uid FROM order_preparation WHERE id = %s", ids)
+				id_user_create = map(lambda id: id[0], cr.fetchall())
+				
+				usr = obj_usr.browse(cr, uid, id_user_create)[0]
+				body = """\
+					<html>
+					  <head></head>
+					  <body>
+					    <p>
+					    	Dear %s!<br/><br/>
+							%s Telah Memproses Order Preparation <b> %s </b> dan siap untuk dibuatkan surat jalan / Delivery Notes <br/>
+							<br/>
+							Silahkan klik Link ini untuk melihat detail Order Preparation.  <a href="%s">View Order Preparation</a>
+					    </p>
+					    <br/>
+					    Best Regards,<br/>
+						Administrator ERP
+					  </body>
+					</html>
+					""" % (usr.name, username.name, val.name, url)
+
+				mail_id = mail_mail.create(cr, uid, {
+					'model': 'order.preparation',
+					'res_id': x,
+					'subject': subject,
+					'body_html': body,
+					'auto_delete': True,
+					}, context=context)
+
+				mail_mail.send(cr, uid, [mail_id], recipient_ids=[usr.partner_id.id], context=context)
+
 		return True
 
 	def create(self, cr, uid, vals, context=None):
 		res = super(order_preparation, self).create(cr, uid, vals, context=context)
 		self._set_op_followers(cr, uid, res, context=None)
 		return res
-
 
 	"""Action submit
 	"""
@@ -132,18 +198,18 @@ class order_preparation(osv.osv):
 		res = False
 		if self.validasi(cr, uid, ids, context=context):
 			res = self.write(cr, uid, ids, {'state':'submited'}, context=context)
-			subject = 'Order Preparation no' + val.name + 'Submited'
-			follower_id=int(592)
-			body = 'Order Preparation Telah di Submited'
-			self.send_email(cr, uid, ids, subject, body, follower_id, context={})
+			subject = 'Order Preparation no' + val.name + ' Submited'
+
+			self.send_email(cr, uid, ids, subject, context=None)
 		return res
 
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
+		
+		# Send Email
+		subject = 'Order Preparation no' + val.name + ' Validate'
+		self.send_email(cr, uid, ids, subject, context=None)
 
-		# for x in val.prepare_lines:
-		# 	if x.sale_line_material_id.id==False:
-		# 		raise openerp.exceptions.Warning("OP Line Tidak Memiliki ID Material Line")
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
@@ -187,8 +253,6 @@ class order_preparation(osv.osv):
 			'res_id': new_dn_ids and new_dn_ids[0] or False,
 		}
 
-
-
 		return res
 
 	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
@@ -228,7 +292,6 @@ class order_preparation(osv.osv):
 			for old_id in old_so_doc_ids:
 				so.generate_material(cr,uid,old_id,context=context)
 				so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
-			print data.order_line,">>>>>>>>>>>>>>>>>>>>>>>"
 			for x in data.order_line:
 				
 
@@ -253,7 +316,6 @@ class order_preparation(osv.osv):
 						op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
 						product_return = 0
 						search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
-						print search_dn_lm,"_________________________"
 						if len(search_dn_lm):
 							search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , [search_dn_lm])])
 							# Cek DN Line Material Return
@@ -266,7 +328,6 @@ class order_preparation(osv.osv):
 
 
 					if y.product_id.type <> 'service':
-						print (nilai, y.qty,'=================')
 						if nilai < y.qty:
 							location += [y.picking_location.id]
 
@@ -280,7 +341,6 @@ class order_preparation(osv.osv):
 								'sale_line_id':y.sale_order_line_id.id
 							})
 			res['prepare_lines'] = line
-			print res['prepare_lines'],",,,,........................................."
 
 			# check if picking exist on Sale.Order object
 			if data.picking_ids:
@@ -399,7 +459,34 @@ class order_preparation(osv.osv):
 	def preparation_cancel(self, cr, uid, ids, context=None):
 		self._set_message_unread(cr, uid, ids, context=None)
 		return super(order_preparation, self).preparation_cancel(cr, uid, ids, context=context)
+
+
+	def action_wizard_order_preparation(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		op=self.pool.get('order.preparation')
+
+		if context is None:
+			context = {}
 		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_order_handler', 'wizard_order_preparation_form')
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_order_preparation_form',
+			'res_model': 'wizard.order.preparation',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
 order_preparation()
 
 class order_preparation_line(osv.osv):
@@ -420,8 +507,44 @@ class order_preparation_line(osv.osv):
 
 		return {'value':{'sale_line_material_id':False}}
 
-
 order_preparation_line()
+
+class WizardOrderPreparation(osv.osv_memory):
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: context = {}
+		op_ids = context.get('active_ids', [])
+		active_model = context.get('active_model')
+		res = super(WizardOrderPreparation, self).default_get(cr, uid, fields, context=context)
+		if not op_ids or len(op_ids) != 1:
+			return res
+		op_id, = op_ids
+		if op_id:
+			res.update(op_id=op_id)
+			po = self.pool.get('order.preparation').browse(cr, uid, op_id, context=context)		
+		return res
+
+	def request_op_validate(self,cr,uid,ids,context=None):
+		data = self.browse(cr,uid,ids,context)[0]
+		obj_op = self.pool.get('order.preparation')
+		op_id = data.op_id.id
+		# Validasi
+		obj_op.preparation_done(cr, uid, [op_id])
+		# Update Warehouse Notes
+		obj_op.write(cr,uid,op_id,{'warehouse_notes':data.notes})
+
+		return True
+
+	_name="wizard.order.preparation"
+	_description="Wizard Order Preparation"
+	_columns = {
+		'op_id':fields.many2one('order.preparation',string="Order Preparation"),
+		'notes':fields.text('Notes',required=True, help="Warehouse Notes"),
+	}
+
+	_rec_name="op_id"
+
+WizardOrderPreparation()
 
 
 class sale_order_line(osv.osv):
