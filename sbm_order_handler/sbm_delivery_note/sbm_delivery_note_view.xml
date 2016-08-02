@@ -20,7 +20,9 @@
 					 <field name="type">form</field>
 					 <field name="inherit_id" ref="ad_delivery_note.view_delivery_note_form"/>
 					 <field name="arch" type="xml">
-
+					 		<field name="prepare_id" position="after">
+					 			<field name="doc_date"/>
+					 		</field>
 							<button name="package_validate" position="after">
 								<button name="submit" type="object" states="draft" string="Submit" icon="terp-check" confirm="Submit Document ?\nIf document Submited its cant be modified" groups="sbm_order_handler.group_admin_ho"/>
 
@@ -29,6 +31,9 @@
 								<button name="package_continue" type="object" states="postpone" string="Continue" icon="STOCK_JUMP_TO" confirm="Are you sure to Continue Delivery Note" groups="sbm_order_handler.group_admin_ho"/>
 
 								<button name="set_new_sequence_no" type="object" states="postpone" string="Generate No" icon="STOCK_NEW" confirm="Are you sure to Generate No" groups="sbm_order_handler.group_admin_spv"/>
+
+								<button name="generate_mount_years_no" type="object" states="postpone" string="Update Mount Years No" icon="STOCK_REFRESH" confirm="Are you sure to Update Mount Years No" groups="sbm_order_handler.group_admin_spv"/>
+
 							</button>
 
 							<button name="package_draft" position="replace">
