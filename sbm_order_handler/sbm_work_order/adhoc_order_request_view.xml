@@ -35,7 +35,7 @@
 
         		<button name="print_adhoc_order_request" type="object" states="approved, done" string="Print Adhoc Order Request" icon="gtk-dnd-multiple"/>
 
-        		<button name="create_quotation" type="object" states="approved,done" string="Create Quotation" icon="STOCK_ADD" confirm="Are you sure To Create Quotation"/>
+        		<button name="create_quotation" type="object" states="submited,approved" string="Create Quotation" icon="STOCK_ADD" confirm="Are you sure To Create Quotation"/>
 
         		<button name="generate_wo_adhoc" type="object" string="Generate work Order" states="approved" confirm="Are you sure to Generate Work Order" icon="STOCK_FILE"/>
 
