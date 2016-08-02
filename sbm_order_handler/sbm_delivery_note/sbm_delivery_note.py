@@ -62,6 +62,63 @@ class delivery_note(osv.osv):
 		res = [('name','ilike','%/'+str(filter_no))]
 		return res
 
+	def _getRequestDocNo(self,cr,uid,ids,field_name,args,context={}):
+		val = self.browse(cr, uid, ids, context={})[0]
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+
+			if val.doc_date[5:5 + 2] == '01':
+				mount = 'I'
+			elif val.doc_date[5:5 + 2] == '02':
+				mount = 'II'
+			elif val.doc_date[5:5 + 2] == '03':
+				mount = 'III'
+			elif val.doc_date[5:5 + 2] == '04':
+				mount = 'IV'
+			elif val.doc_date[5:5 + 2] == '05':
+				mount = 'V'
+			elif val.doc_date[5:5 + 2] == '06':
+				mount = 'VI'
+			elif val.doc_date[5:5 + 2] == '07':
+				mount = 'VII'
+			elif val.doc_date[5:5 + 2] == '08':
+				mount = 'VIII'
+			elif val.doc_date[5:5 + 2] == '09':
+				mount = 'V'
+			elif val.doc_date[5:5 + 2] == '10':
+				mount = 'VI'
+			elif val.doc_date[5:5 + 2] == '11':
+				mount = 'VII'
+			elif val.doc_date[5:5 + 2] == '12':
+				mount = 'VIII'
+			else:
+				mount= rom[int(vals[2])]
+
+			dn = self.pool.get('delivery.note')
+			
+			saleid = self.pool.get('order.preparation').browse(cr, uid, val.prepare_id.id).sale_id.id
+			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
+
+			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+			RequestNo  = 'C/SBM-ADM/'+usa+'-'+use+'/'+mount+'/'+val.doc_date[2:2 + 2]
+
+			res[item.id] = RequestNo
+		return res
+
+	def _getRequestName(self,cr,uid,ids,field_name,args,context={}):
+		val = self.browse(cr, uid, ids, context={})[0]
+		res = {}
+		self._getRequestDocNo(cr, uid, ids, field_name,args,context={})
+		for item in self.browse(cr,uid,ids,context=context):
+			if val.state == 'draft':
+				RequestNo = '/'	
+			else:
+				RequestNo = val.seq_no+val.request_doc_no			
+			res[item.id] = RequestNo
+		return res
+
 	_inherit = "delivery.note"
 	_columns = {
 		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
@@ -75,8 +132,21 @@ class delivery_note(osv.osv):
 		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('done', 'Done'), ('cancel', 'Cancel'), ('torefund', 'To Refund'), ('refunded', 'Refunded'),('postpone', 'Postpone')], 'State', readonly=True,track_visibility='onchange'),
 		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
 		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
-		'name': fields.char('No#',required=False,track_visibility='onchange'),
+		'doc_date' : fields.date('Document Date',track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)], 'postpone': [('readonly', False)]}),
+		'name': fields.function(_getRequestName, method=True, track_visibility='onchange', string="No#",type="char",
+			store={
+				'delivery.note': (lambda self, cr, uid, ids, c={}: ids, ['doc_date','state'], 20),
+			}),
+		'seq_no':fields.char('Seq No Delivery Note'),
+		'request_doc_no': fields.function(_getRequestDocNo, track_visibility='onchange', method=True, string="Request No",type="char",
+			store={
+				'delivery.note': (lambda self, cr, uid, ids, c={}: ids, ['doc_date','state'], 20),
+			}),
 
+	}
+
+	_defaults = {
+		'doc_date': time.strftime('%Y-%m-%d'),
 	}
 
 	_order = "id desc"
@@ -102,7 +172,6 @@ class delivery_note(osv.osv):
 			# op
 			if not val.prepare_id:
 				raise osv.except_osv(_('Error'),_('Cant Re Packing Package, Order Preparation False'))
-
 
 			op.write(cr,uid,val.prepare_id.id,{'state':'draft'})
 			op.log(cr,uid,val.prepare_id.id,_('Repacking Package !'))
@@ -131,21 +200,15 @@ class delivery_note(osv.osv):
 				no += "["+nt.name+"]\n"
 			raise osv.except_osv(_("Error!!!"),_("Delivery Notes Already Exist. DN Doc. No = "+no))
 		vals['name'] ='/'
-		print vals['note_lines'],"MMMMMMMMMMMMMMMMMMMMMMMMMMM"
 		for lines in vals['note_lines']:
 			if(type(lines)==tuple):
 				got_line = lines[2]
-				
 			else:
 				got_line = lines
-
-			if got_line['product_qty'] == 0:
-				# Cek Part Number Value
-				product = self.pool.get('product.product').browse(cr, uid, [got_line['product_id']])[0]
-
+			if got_line[2]['product_qty'] == 0:
+				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
-		print ",,,,,,,,,,,,,,,,,,,,,,,,"
-		print vals,">>>>>"
+
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 	""""Event On Change Order Packaging"""
@@ -209,8 +272,6 @@ class delivery_note(osv.osv):
 							# Set Product Qty yang bukan Set
 							qty_dn_line = qty_op.product_qty
 				# else:
-					
-
 				for dline in data_material_line:
 					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', 'in', [dline.id]), ('preparation_id', '=', [pre])])
 					data_op_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
@@ -253,7 +314,6 @@ class delivery_note(osv.osv):
 					'note_lines_material': material_line,
 					'sale_line_id': y.id,
 					}))
-			print line , "77777777777777777777777777777777777777777"
 
 			self._qty_recount(cr,uid,ids,line,{})
 
@@ -263,7 +323,6 @@ class delivery_note(osv.osv):
 			res['partner_id'] = data.sale_id.partner_id.id
 			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
 			res['attn'] = data.sale_id.attention.id
-			print res,"++++++++++++++++++9999999999999999999999999"
 
 		return  {'value': res}
 
@@ -328,12 +387,21 @@ class delivery_note(osv.osv):
 
 		return dn_no
 
+	def get_seq_no(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		dn = self.pool.get('delivery.note')
+		vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+		dn_no =time.strftime('%y')+ vals[-1]
+		return dn_no
 
 	def set_sequence_no(self, cr, uid, ids, force=False,context=None):
 		vals = self.browse(cr,uid,ids,context=context)
 		for val in vals:
 			if not val.name or force or val.name == '/': #if name is None / False OR if allow to write new sequence no
-				self.write(cr, uid, ids,{'name':self.get_new_sequence_no(cr,uid,ids,context=context)},context=context) #write name into new sequence
+				self.write(cr, uid, ids,{
+										'seq_no':self.get_seq_no(cr,uid,ids,context=context),
+										'name':self.get_new_sequence_no(cr,uid,ids,context=context),
+										},context=context) #write name into new sequence
 		return True
 
 	def set_new_sequence_no(self,cr,uid,ids,context={}):
@@ -384,8 +452,6 @@ class delivery_note(osv.osv):
 				# elif  x.op_line_id.move_id and x.op_line_id.move_id.sale_line_id:
 				# 	# if old op not has sale_line_material_id on order_preparation_line object
 				# 	sale_line_id = x.op_line_id.move_id.sale_line_id.id
-
-
 				sale_line_id = x.op_line_id.sale_line_id.id
 				
 				move_id = stock_move.create(cr,uid,{
