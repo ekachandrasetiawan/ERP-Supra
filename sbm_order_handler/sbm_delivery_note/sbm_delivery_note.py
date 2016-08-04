@@ -115,7 +115,17 @@ class delivery_note(osv.osv):
 			if val.state == 'draft':
 				RequestNo = '/'	
 			else:
-				RequestNo = val.seq_no+val.request_doc_no			
+				if val.seq_no:
+					RequestNo = val.seq_no+val.request_doc_no
+				else:
+					# jika dn lama jika name sudah ada maka pasti name = nomor DN
+					if val.name != '/' and val.name.strip() != '':
+						RequestNo = val.name
+						# set up seq_no = name[:6]
+						self.write(cr, uid, ids, {'seq_no':val.name[:6]})
+					else:
+						raise osv.except_osv(_('Error'), _("Failed to update name code on Delivery Note,, Please Contat System Administrator!"))
+				
 			res[item.id] = RequestNo
 		return res
 
@@ -150,6 +160,14 @@ class delivery_note(osv.osv):
 	}
 
 	_order = "id desc"
+
+	_track = {
+		'name':{},
+		'doc_date':{},
+		'tanggal':{},
+		'poc':{},
+		'prepare_id':{}
+	}
 
 	"""
 	:return boolean True or False
