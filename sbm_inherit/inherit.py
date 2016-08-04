@@ -1641,9 +1641,9 @@ class InternalMove(osv.osv):
 
 		return res
 
-	def _loadLines(self,cr,uid,request):
+	def _loadLines(self,cr,uid,request,context={}):
 		
-		res = [(0,0,self._im_line_preparation(cr,uid,line)) for line in request.lines if (line.qty-line.processed_item_qty) > 0]
+		res = [(0,0,self._im_line_preparation(cr,uid,line,context=context)) for line in request.lines if (line.qty-line.processed_item_qty) > 0]
 
 		return res
 	def prepareBomLine(self,cr,uid,bom_line,im_line):
@@ -1671,7 +1671,7 @@ class InternalMove(osv.osv):
 
 
 
-	def _im_line_preparation(self,cr,uid,line):
+	def _im_line_preparation(self,cr,uid,line,context={}):
 		# check for sets
 		# set = self.checkSet(cr,uid,line.product_id)
 		res = {
@@ -1683,20 +1683,31 @@ class InternalMove(osv.osv):
 			'qty_available':line.product_id.qty_available,
 			'internal_move_request_line_id':line.id,
 			'detail_ids':self._loadLineDetail(cr,uid,line),
-			'state':'draft'
+			'state':'draft',
+			'source':context['location'],
+			'destination':context['destination']
 
 		}
 		return res
 
-	def load_request(self,cr,uid,ids,req_id,context={}):
+	def load_request(self, cr, uid, ids, req_id, source=None, context={}):
 		
 		res = {'value':{}}
 		data = self.pool.get('internal.move.request').browse(cr,uid,req_id,context)
 		if data:
-			
+			if not source:
+				context['location']=data.source.id
+				context['location_id']=data.source.id
+			else:
+				context['location']=source
+				context['location_id']=source
+
+			context['destination']=data.destination.id #set destination for im line
+
 			res['value'] = {
-				'source':data.source.id,'destination':data.destination.id,'due_date_transfer':data.due_date,
-				'lines':self._loadLines(cr,uid,data),
+				'source':source or data.source.id,
+				'destination':data.destination.id,'due_date_transfer':data.due_date,
+				'lines':self._loadLines(cr,uid,data,context=context),
 				'manual_pb_no':data.manual_pb_no,
 				'ref_no':data.ref_no,
 				'state':'draft',
@@ -1779,6 +1790,7 @@ class InternalMove(osv.osv):
 
 		return res
 
+
 	def checkedInternalMove(self,cr,uid,ids,context={}):
 		res = True
 		self.write(cr,uid,ids,{'state':'checked'},context)
@@ -1798,7 +1810,7 @@ class InternalMove(osv.osv):
 			prepare_picking = {
 				'name':self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.inernal.move.seq'),
 				'origin':data.manual_pb_no+", "+data.internal_move_request_id.name,
-				'state':'confirmed',
+				'state':'draft',
 				'internal_move_id':data.id
 			}
 
@@ -1847,6 +1859,7 @@ class InternalMove(osv.osv):
 								# self.pool.get('stock.move').unlink(cr,uid,move_line_id)
 								move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
 								line_to_delete = [move_line_id]
+								print line_to_delete,"<><><><><><>"
 
 						if valid:
 							move_detail_id = self.pool.get('stock.move').create(cr,uid,move_detail,{})
@@ -1868,7 +1881,8 @@ class InternalMove(osv.osv):
 			if len(line_to_delete):
 				self.pool.get('stock.move').unlink(cr,uid,line_to_delete)
 		# raise osv.except_osv(('Error !!!'), ('The Qty that Requested in Item is '))
-
+		wf_service = netsvc.LocalService("workflow")
+		wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_confirm', cr)
 		return res
 
 
@@ -1901,8 +1915,10 @@ class InternalMove(osv.osv):
 
 			# data.picking.action_move
 			# self.action_move(cr, uid, [new_picking], context=context)
-			self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
-			data.picking_id.write({'state':'done'})
+			# self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
+			self.pool.get('stock.picking').force_assign(cr, uid, [data.picking_id.id])
+			wf_service = netsvc.LocalService("workflow")
+			wf_service.trg_validate(uid, 'stock.picking', data.picking_id.id, 'button_done', cr)
 			data.write({'state':'transfered','date_transfered':time.strftime('%Y-%m-%d')})
 			res = True
 		return res
@@ -1976,7 +1992,7 @@ class InternalMove(osv.osv):
 			'origin':"PB No : "+data.manual_pb_no,
 			'name':detail.product_id.name_template,
 			'desc':detail.desc,
-			'state':'confirmed',
+			'state':'draft',
 		}
 		if detail.desc:
 			move_detail['name'] += ". "+detail.desc
@@ -2146,7 +2162,10 @@ class InternalMoveLine(osv.osv):
 								   ('assigned', 'Available'),
 								   ('done', 'Done'),
 								   ]),
+		'source':fields.many2one('stock.location',required=False,string="Source Location"),
+		'destination':fields.many2one('stock.location',required=False,string="Destination Location"),
 	}
+
 	_defaults={
 		'state':'draft',
 	}
@@ -2180,6 +2199,39 @@ class InternalMoveLine(osv.osv):
 				}
 			}
 		return res
+
+	def on_change_source_line(self, cr, uid, ids, source, detail_ids, context={}):
+		print "ON Change Source Linesssssssssssss",source, detail_ids
+		context['location']=source
+		context['location_id']=source
+		detail_res = []
+		if type(detail_ids)==list:
+			
+			for detail in detail_ids:
+				detail_obj_res = [detail[0],detail[1],{}]
+
+				detail_obj = detail[2]
+				item_to_pick = self.pool.get('product.product').browse(cr, uid, detail_obj['product_id'], context=context)
+				qty_available = item_to_pick.qty_available
+				if detail_obj['type'] == 'batch' and detail_obj['stock_prod_lot_id']:
+					item_to_pick = self.pool.get('stock.production.lot').browse(cr, uid, detail_obj['stock_prod_lot_id'],context=context) #result as browse non list
+					qty_available = item_to_pick.stock_available
+
+				detail_obj['qty_available'] = qty_available
+				detail_obj_res[2] = detail_obj
+				detail_res.append(detail_obj_res)
+		res = {
+			'value':{
+				'detail_ids':detail_res
+			}
+			
+		}
+		print res, "<RESULLLLLLLLLLLLLLLLLLTTTTTTT"
+		return res
+
+
+
+
 
 class InternalMoveLineDetail(osv.osv):
 	_description = "Internal Move Line Detail"
@@ -2312,10 +2364,12 @@ class InternalMoveLineDetail(osv.osv):
 					}
 					
 		return res
-	def on_change_batch(self,cr,uid,ids,batch=None):
+	def on_change_batch(self,cr,uid,ids,batch=None,source=None,context={}):
 		res = {}
+		context['location']=source
+		context['location_id']=source
 		if batch:
-			data = self.pool.get('stock.production.lot').browse(cr,uid,batch,{})
+			data = self.pool.get('stock.production.lot').browse(cr,uid,batch,context=context)
 
 			if data:
 				if data.exp_date:
