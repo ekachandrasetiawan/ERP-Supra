@@ -339,10 +339,10 @@
 							<field name="source" on_change="load_request(internal_move_request_id, source)" attrs="{'readonly':[('state','!=','draft')]}" />
 							<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
 
-							<field name="manual_pb_no" required="True" />
-							<field name="ref_no" />
+							<field name="manual_pb_no" required="True" attrs="{'readonly':[('state','!=','draft')]}" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="ref_no" attrs="{'readonly':[('state','!=','draft')]}" />
 
-							<field name="picking_id" />
+							<field name="picking_id" attrs="{'readonly':[('state','!=','draft')]}" />
 
 							<field name="lines" widget="one2many_list" attrs="{'delete':[('state','=','draft')]}">
 								<tree string="Items">
@@ -405,7 +405,7 @@
 						<field name="uom_id" attrs="{'readonly':[('state','!=','draft')]}"/>
 						<field name="stock_move_id" readonly="1"/>
 						<field name="source" on_change="on_change_source_line(source, detail_ids)" attrs="{'readonly':[('state','!=','draft')]}" />
-						<field name="destination" hidden="True" />
+						<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
 						<field name="detail_ids">
 							<tree editable="bottom">
 								<!-- <field name="name" readonly="1" /> -->
