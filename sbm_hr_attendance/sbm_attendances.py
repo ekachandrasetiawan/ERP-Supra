@@ -432,15 +432,27 @@ class hr_attendance_machine(osv.osv):
 
 
 class import_attendance_log(osv.osv):
+
+	def cancel_import(self, cr, uid, ids, context={}):
+		return self.write(cr, uid, ids, {'state':'cancel'})
+
 	_name = 'hr.attendance.import.attendance.log'
 	_columns = {
+		'name':fields.char('Doc No', requried=False),
 		'machine_id': fields.many2one('hr.attendance.machine',string="Machine"),
 		'data':fields.binary('File',required=True),
 		'state':fields.selection([('draft','Draft'),('done','Done'),('cancel','Cancel')],string="State"),
 	}
 
+	def _default_name(self, cr, uid, context={}):
+		res_user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+		res = time.strftime('%Y/%m')+"/"
+		return res
+
+
 	_defaults = {
-		'state':'draft'
+		'name':_default_name,
+		'state':'draft',
 	}
 
 
