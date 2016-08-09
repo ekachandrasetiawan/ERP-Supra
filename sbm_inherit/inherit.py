@@ -1776,17 +1776,17 @@ class InternalMove(osv.osv):
 						# check available by batch number
 						if detail.qty > detail.stock_prod_lot_id.stock_available:
 							res = False
-							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" on "+detail.stock_prod_lot_id.name+" is "+detail.stock_prod_lot_id.stock_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+str(detail.product_id.name_template)+" on "+str(detail.stock_prod_lot_id.name)+" is "+str(detail.stock_prod_lot_id.stock_available)+" "+str(detail.product_id.uom_id.name)+". Requested Item is "+str(detail.qty)+" "+str(detail.uom_id.name)+"!"))
 					else:
 						# else set not batches
 						if detail.qty > detail.product_id.qty_available:
 							res = False
-							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" is "+detail.product_id.qty_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+str(detail.product_id.name_template)+" is "+str(detail.product_id.qty_available)+" "+str(detail.product_id.uom_id.name)+". Requested Item is "+str(detail.qty)+" "+str(detail.uom_id.name)+"!"))
 			else:
 				# if not has detail
 				if line.qty>line.product_id.qty_available:
 					res = False
-					raise osv.except_osv(_("Error !!!"),_("Available Stock For "+line.product_id.name_template+" is "+str(line.product_id.qty_available)+" "+line.product_id.uom_id.name+". Requested Item is "+str(line.qty)+" "+line.uom_id.name+"!"))
+					raise osv.except_osv(_("Error !!!"),_("Available Stock For "+str(line.product_id.name_template)+" is "+str(line.product_id.qty_available)+" "+line.product_id.uom_id.name+". Requested Item is "+str(line.qty)+" "+str(line.uom_id.name)+"!"))
 
 		return res
 
@@ -1798,9 +1798,13 @@ class InternalMove(osv.osv):
 	def confirmInternalMove(self,cr,uid,ids,context={}):
 		res = True
 		valid = True
-
+		
 		# loop each ids
-		for data in self.browse(cr,uid,ids,context):
+		for pre_data in self.browse(cr,uid,ids,context):
+			context['location'] = pre_data.source.id
+			context['location_id'] = pre_data.source.id
+
+			data = self.browse(cr,uid,pre_data.id, context=context)
 			getPrefixStorage = self._get_prefix_storage_code(cr,uid,data.id,context)
 			
 			if data.source == data.destination:
@@ -1867,7 +1871,7 @@ class InternalMove(osv.osv):
 					
 				
 			if res:
-				self._finalyCheckQty(cr,uid,data)
+				self._finalyCheckQty(cr,uid,data, context=context)
 
 				# add doc number
 				updateIm = {}
@@ -1890,10 +1894,14 @@ class InternalMove(osv.osv):
 		res = {}
 		pick = self.pool.get('stock.picking')
 
-		for tid in self.browse(cr,uid,ids,context):
-			if self._finalyCheckQty(cr,uid,tid):
-				pick.action_assign(cr,uid,[tid.picking_id.id])
-				tid.write({'state':'ready','date_prepared':time.strftime('%Y-%m-%d')})
+		for pre_data in self.browse(cr,uid,ids,context):
+			context['location'] = pre_data.source.id
+			context['location_id'] = pre_data.source.id
+
+			tid = self.browse(cr, uid, pre_data.id, context=context)
+			if self._finalyCheckQty(cr, uid, tid, context=context):
+				pick.action_assign(cr, uid,  [tid.picking_id.id])
+				tid.write({'state':'ready', 'date_prepared':time.strftime('%Y-%m-%d')})
 		return res
 
 
@@ -1906,16 +1914,16 @@ class InternalMove(osv.osv):
 			trsLoc = searchLoc[0]
 		else:
 			raise osv.except_osv(_('ERROR!!!'),_("Please Define Transition with \"TRS\" code and type is Transit"))
-		
 
-		for data in self.browse(cr,uid,ids,context):
-			if self._finalyCheckQty(cr,uid,data):
+		for pre_data in self.browse(cr,uid,ids,context=context):
+			context['location'] = pre_data.source.id
+			context['location_id'] = pre_data.source.id
+			data = self.browse(cr, uid, pre_data.id, context=context)
+
+			if self._finalyCheckQty(cr, uid, data, context=context):
 				for move in data.picking_id.move_lines:
 					move.write({'location_dest_id':trsLoc})
 
-			# data.picking.action_move
-			# self.action_move(cr, uid, [new_picking], context=context)
-			# self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
 			self.pool.get('stock.picking').force_assign(cr, uid, [data.picking_id.id])
 			wf_service = netsvc.LocalService("workflow")
 			wf_service.trg_validate(uid, 'stock.picking', data.picking_id.id, 'button_done', cr)
