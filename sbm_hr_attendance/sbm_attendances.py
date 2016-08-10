@@ -213,6 +213,12 @@ class hr_employee(osv.osv):
 		print "---------------",res
 		return res
 
+class res_users(osv.osv):
+	_inherit = 'res.users'
+	_columns = {
+		'admin_of_attendance_machine_ids': fields.one2many('hr.attendance.machine.admin', 'user_id',string='Admin of Attendance Machines')
+	}
+
 
 class hr_attendance_machine(osv.osv):
 	_name = 'hr.attendance.machine'
@@ -224,6 +230,7 @@ class hr_attendance_machine(osv.osv):
 		'port': fields.char('Port', required=True),
 		'key': fields.char('Key',help="Key to Communicate with Machine", required=True),
 		'online':fields.boolean('Online State'),
+		'admin_ids':fields.one2many('hr.attendance.machine.admin','machine_id',string="Admins"),
 	}
 	_sql_constraints = [
 		('unique_machine_id', 'unique(machine_id)', "Machine ID already defined on other machine, Machine ID must be Unique"),
@@ -431,16 +438,42 @@ class hr_attendance_machine(osv.osv):
 		return res
 
 
+class hr_attendance_machine_admin(osv.osv):
+	_name = 'hr.attendance.machine.admin'
+	_columns = {
+		'machine_id':fields.many2one('hr.attendance.machine', "Machine", required=True),
+		'user_id':fields.many2one('res.users', 'User', required=True),
+	}
+
+	rec_name = "user_id"
+
 class import_attendance_log(osv.osv):
+
+	def cancel_import(self, cr, uid, ids, context={}):
+		return self.write(cr, uid, ids, {'state':'cancel'})
+
 	_name = 'hr.attendance.import.attendance.log'
 	_columns = {
+		'name':fields.char('Doc No', requried=False),
 		'machine_id': fields.many2one('hr.attendance.machine',string="Machine"),
 		'data':fields.binary('File',required=True),
 		'state':fields.selection([('draft','Draft'),('done','Done'),('cancel','Cancel')],string="State"),
 	}
 
+	def _default_name(self, cr, uid, context={}):
+		res_user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+		initial = False
+		if res_user.initial:
+			initial = 'NN'
+		else:
+			print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< nothing initial"
+		res = time.strftime('%Y/%m')+"/"+initial
+		return res
+
+
 	_defaults = {
-		'state':'draft'
+		'name':_default_name,
+		'state':'draft',
 	}
 
 
