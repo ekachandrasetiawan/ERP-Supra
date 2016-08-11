@@ -26,7 +26,6 @@ Purchase_Order_Line()
 
 class Purchase_Order(osv.osv):
 	_inherit = 'purchase.order'
-	
 
 	_columns = {
 		'rev_counter':fields.integer('Rev Counter'),
