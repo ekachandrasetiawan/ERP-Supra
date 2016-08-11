@@ -996,6 +996,7 @@ class delivery_note(osv.osv):
 		'note': fields.text('Notes'),
 		'terms':fields.text('Terms & Condition'),
 		'attn':fields.many2one('res.partner',string="Attention"),
+		'signature':fields.many2one('hr.employee', string='Signature'),
 		'refund_id':fields.many2one('stock.picking',string="Refund No", domain=[('type','=', 'in')], readonly=True),
 		'note_return_ids': fields.many2many('stock.picking','delivery_note_return','delivery_note_id',string="Note Return",readonly=True),
 		'note_return_ids_proses': fields.many2many('stock.picking.in','delivery_note_return','delivery_note_id',string="Note Return",readonly=True,states={'torefund': [('readonly', False)]}),
@@ -1003,6 +1004,7 @@ class delivery_note(osv.osv):
 	_defaults = {
 		'name': '/',
 		'state': 'draft', 
+		'signature':40,
 	}
 	# to add mail thread in footer
 	_inherit = ['mail.thread']
