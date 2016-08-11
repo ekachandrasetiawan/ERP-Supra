@@ -1062,37 +1062,27 @@ class delivery_note(osv.osv):
 				'datas': data,
 				'nodestroy':True
 		}
-	
-	 
-	# def create(self, cr, uid, vals, context=None):
-	# 	# validate dn input
-		
-	# 	prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
-		
-	# 	if prepareExists and vals['special']==False:
-	# 		no = ""
-	# 		for nt in self.browse(cr,uid,prepareExists,context):
-	# 			no += "["+nt.name+"]\n"
-	# 		raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
 
+	def get_old_no(self, cr, uid, the_id, context={}):
+		vals = self.browse(cr, uid, the_id, context=context) #return single browse record
 
-	# 	if vals['special']==True:
-	# 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-	# 		# saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
-	# 		usa = 'SPC'
-	# 		val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-	# 		use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-	# 		vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-	# 		return super(delivery_note, self).create(cr, uid, vals, context=context)
-	# 	else:    
-	# 		# ex: 000001C/SBM-ADM/JH-NR/X/13
-	# 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-	# 		saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
-	# 		usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
-	# 		val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-	# 		use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-	# 		vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-	# 		return super(delivery_note, self).create(cr, uid, vals, context=context)
+		if vals.special==True:
+			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+			# saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
+			usa = 'SPC'
+			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+			res =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+			# return super(delivery_note, self).create(cr, uid, vals, context=context)
+		else:    
+			# ex: 000001C/SBM-ADM/JH-NR/X/13
+			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+			saleid = self.pool.get('order.preparation').browse(cr, uid, vals.prepare_id.id).sale_id.id
+			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
+			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+			res =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+		return res
 			
 	def package_draft(self, cr, uid, ids, context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
@@ -1112,7 +1102,11 @@ class delivery_note(osv.osv):
 		for x in val.note_lines:
 			if x.product_qty <= 0:
 				raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
-		self.write(cr, uid, ids, {'state': 'approve'})
+		no = val.name
+		if val.name=="/":
+			no = self.get_old_no(cr, uid, val.id, context=context)
+
+		self.write(cr, uid, ids, {'state': 'approve', 'name':no})
 		return True
 		 
 	def unlink(self, cr, uid, ids, context=None):
@@ -1120,8 +1114,24 @@ class delivery_note(osv.osv):
 		if val.state != 'draft':
 			raise osv.except_osv(('Invalid action !'), ('Cannot delete a delivery note which is in state \'%s\'!') % (val.state,))
 		return super(delivery_note, self).unlink(cr, uid, ids, context=context)
-		  
+	
+	#check is prepare id has active dn document to process
+	def check_is_processed_queue(self, cr, uid, prepare_id, special=False, context={}):
+		res=True
+		# validate dn input
+		prepareExists = self.search(cr,uid,[('prepare_id','=',prepare_id),('state','not in',['cancel'])])
+		
+		if prepareExists and special==False:
+			no = ""
+			for nt in self.browse(cr,uid,prepareExists,context):
+				no += "["+nt.name+"]\n"
+			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
+			# return super(delivery_note, self).create(cr, uid, vals, context=context)
+		return res
+
 	def prepare_change(self, cr, uid, ids, pre):
+		self.check_is_processed_queue(cr, uid, pre, False, {}) #special still static, please fix it
+
 		if pre :
 			res = {}; line = []
 			data = self.pool.get('order.preparation').browse(cr, uid, pre)
