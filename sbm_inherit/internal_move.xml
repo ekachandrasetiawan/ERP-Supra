@@ -339,7 +339,7 @@
 							<field name="source" on_change="load_request(internal_move_request_id, source)" attrs="{'readonly':[('state','!=','draft')]}" />
 							<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
 
-							<field name="manual_pb_no" required="True" attrs="{'readonly':[('state','!=','draft')]}" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="manual_pb_no" required="True" attrs="{'readonly':[('state','!=','draft')]}"/>
 							<field name="ref_no" attrs="{'readonly':[('state','!=','draft')]}" />
 
 							<field name="picking_id" attrs="{'readonly':[('state','!=','draft')]}" />

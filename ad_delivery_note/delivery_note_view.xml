@@ -227,6 +227,9 @@
                         <page string="Notes">
                             <field name="note" colspan="4" nolabel="1"/>
                         </page>
+                        <page string="Signature">
+                            <field name="signature" colspan="4" nolabel="1" domain="[('id','in',['40', '38','25'])]" widget="selection"/>
+                        </page>
                         <page string="Proses Return Products">
 
                             <field name="note_return_ids_proses" widget="x2many_counter"/>
