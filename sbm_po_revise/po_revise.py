@@ -44,17 +44,7 @@ class Purchase_Order(osv.osv):
 	_defaults ={
 		'rev_counter':0,
 	}
-
-
-
-	def _generate_order_by(self, order_spec, query):
-		res = super(Purchase_Order, self)._generate_order_by(order_spec, query)
-		print "**************************************&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",res
-		print ">>>>>>>>>>>>>",order_spec
-		print "<<<<<<<<<<<<<",query
-		# print "VARRRRRRRRRRRRRRRRRRRRR", vars(self)
-		return res		
-
+	
 	def template_email_confirm(self, cr, uid, ids, user, no_po, url, context={}):
 		res = """\
 		<html>
