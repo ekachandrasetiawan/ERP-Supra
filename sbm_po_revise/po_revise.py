@@ -25,6 +25,13 @@ Purchase_Order_Line()
 
 
 class Purchase_Order(osv.osv):
+	def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+		# if has default order in context
+		if "default_order" in context:
+			order = context['default_order']
+		return super(Purchase_Order, self).search(cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count)
+
+
 	_inherit = 'purchase.order'
 	
 
@@ -37,6 +44,16 @@ class Purchase_Order(osv.osv):
 	_defaults ={
 		'rev_counter':0,
 	}
+
+
+
+	def _generate_order_by(self, order_spec, query):
+		res = super(Purchase_Order, self)._generate_order_by(order_spec, query)
+		print "**************************************&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",res
+		print ">>>>>>>>>>>>>",order_spec
+		print "<<<<<<<<<<<<<",query
+		# print "VARRRRRRRRRRRRRRRRRRRRR", vars(self)
+		return res		
 
 	def template_email_confirm(self, cr, uid, ids, user, no_po, url, context={}):
 		res = """\
