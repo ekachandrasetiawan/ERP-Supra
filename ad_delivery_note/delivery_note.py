@@ -1276,7 +1276,7 @@ class delivery_note(osv.osv):
 					self.write(cr, uid, ids, {'state': 'done'})
 
 					print "OP PICKING TO BE",id_done[0][1]['delivered_picking']
-					raise osv.except_osv('errr','eerrr')
+					# raise osv.except_osv('errr','eerrr')
 					# raise osv.except_osv(_("TEST"),_("TEST"))
 
 
