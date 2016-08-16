@@ -13,7 +13,9 @@ import re
 
 class attencance_log(osv.osv):
 	_inherit = 'hr.attendance.log'
-
+	_columns ={
+		'date_extra_out': fields.datetime('Date Extra Out'),
+	}
 
 	# def unlink(cr, uid, ids, context=None):
 	# 	res={}
