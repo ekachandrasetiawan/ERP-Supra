@@ -1003,8 +1003,7 @@ class delivery_note(osv.osv):
 	}
 	_defaults = {
 		'name': '/',
-		'state': 'draft', 
-		'signature':40,
+		'state': 'draft',
 	}
 	# to add mail thread in footer
 	_inherit = ['mail.thread']
@@ -1094,9 +1093,10 @@ class delivery_note(osv.osv):
 		 
 	def package_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-
-		if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
-			raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
+		
+		if not val.special:
+			if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
+				raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
 
 
 		for x in val.note_lines:
