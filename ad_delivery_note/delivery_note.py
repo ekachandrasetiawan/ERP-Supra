@@ -948,6 +948,18 @@ class procurement_order(osv.osv):
 procurement_order()
 
 class delivery_note(osv.osv):
+
+	def _employee_get(obj, cr, uid, context=None):
+		if context is None:
+			context = {}
+		ids = obj.pool.get('hr.employee').search(cr, uid, [('user_id', '=', uid)], context=context)
+		dept = obj.pool.get('hr.department').search(cr, uid, [('name', '=', 'SALES ADMIN')], context=context)
+		employee = obj.pool.get('hr.department').browse(cr, uid, dept, context=context)[0]
+
+		if employee:
+			return employee.manager_id.id
+		return False
+		
 	def print_dn_out(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
