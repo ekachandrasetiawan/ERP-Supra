@@ -1431,12 +1431,12 @@ class stock_move(osv.osv):
 	}
 
 # Fixing bug min_date on picking when null it will be filled timestamp
-class stockPicking(osv.osv):
-	_inherit = 'stock.picking'
-	_columns = {
-		# 'min_date': fields.function(get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date", store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"),
-		'min_date':fields.datetime(string="Delivery Date",help="Delivered Date shipment",required=False)
-	}
+# class stockPicking(osv.osv):
+# 	_inherit = 'stock.picking'
+# 	_columns = {
+# 		# 'min_date': fields.function(get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date", store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"),
+# 		'min_date':fields.datetime(string="Delivery Date",help="Delivered Date shipment",required=False)
+# 	}
 
 
 #START NEW INTERNAL MOVE MODULES DEVELOPMENT
