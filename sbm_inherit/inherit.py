@@ -1798,7 +1798,6 @@ class InternalMove(osv.osv):
 	def confirmInternalMove(self,cr,uid,ids,context={}):
 		res = True
 		valid = True
-		
 		# loop each ids
 		for pre_data in self.browse(cr,uid,ids,context):
 			context['location'] = pre_data.source.id
@@ -1806,7 +1805,6 @@ class InternalMove(osv.osv):
 
 			data = self.browse(cr,uid,pre_data.id, context=context)
 			getPrefixStorage = self._get_prefix_storage_code(cr,uid,data.id,context)
-			
 			if data.source == data.destination:
 				res = False
 				raise osv.except_osv(_('Error !'),_('Source and Destination Location is Not Valid..!Please Check!'))
@@ -1817,7 +1815,6 @@ class InternalMove(osv.osv):
 				'state':'draft',
 				'internal_move_id':data.id
 			}
-
 			picking_id = self.pool.get('stock.picking').create(cr,uid,prepare_picking,context)
 
 			moves_for_line = []
@@ -1834,46 +1831,32 @@ class InternalMove(osv.osv):
 				if line.detail_ids:
 					for detail in line.detail_ids:
 						move_detail = self._prepare_move(data,detail,picking_id)
-						
-						# if line.product_id.track_outgoing:
 						if detail.type =='sets':
-							# if sets
 							if detail.product_id.track_outgoing:
-								# if set and has batches then must pick batch
-								
 								if not detail.stock_prod_lot_id:
 									res = False
 									raise osv.except_osv(('Error!!!'),_('Batch Must picked in '+str(detail.product_id.name)+'!'))
 								else:
-									# prepare move with batch sets
 									move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
 									res = True
 							else:
-								# if sets
 								move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
 								res= True
 							self._write_autovalidate(cr,uid,move_line_id,{})
-
 						elif detail.type=='batch':
-							move_line = False # dont add move_line into db cause batch roduct splitter in table
-
+							move_line = False
 							valid = self.validateLot(line)
 							res = valid
 							if valid:
 								# self.pool.get('stock.move').unlink(cr,uid,move_line_id)
 								move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
-								line_to_delete = [move_line_id]
-								print line_to_delete,"<><><><><><>"
-
+								# line_to_delete = [move_line_id]
+								line_to_delete.append(move_line_id)
 						if valid:
 							move_detail_id = self.pool.get('stock.move').create(cr,uid,move_detail,{})
 							self._update_im_line_stock_move(cr,uid,detail.id,move_detail_id,'line.detail',context)
-					
-				
 			if res:
 				self._finalyCheckQty(cr,uid,data, context=context)
-
-				# add doc number
 				updateIm = {}
 				if not data.name:
 					im_no = getPrefixStorage+self.pool.get('ir.sequence').get(cr, uid, 'internal.move')
@@ -1888,7 +1871,6 @@ class InternalMove(osv.osv):
 		wf_service = netsvc.LocalService("workflow")
 		wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_confirm', cr)
 		return res
-
 
 	def setAsReady(self,cr,uid,ids,context={}):
 		res = {}
@@ -1991,7 +1973,8 @@ class InternalMove(osv.osv):
 
 	def _prepare_move(self,data,detail,picking_id=False,prodlot_id=None,move_dest_id=None):
 		
-		move_detail = {			'location_id':data.source.id,
+		move_detail = {			
+			'location_id':data.source.id,
 			'location_dest_id':data.destination.id,
 			'no':detail.no,
 			'product_id':detail.product_id.id,
@@ -2017,9 +2000,6 @@ class InternalMove(osv.osv):
 				move_detail['internal_move_line_detail_id'] = detail.id
 		except Exception, e:
 			move_detail['internal_move_line_id'] = detail.id
-
-
-
 		return move_detail
 			
 
