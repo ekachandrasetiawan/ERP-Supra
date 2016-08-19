@@ -3,7 +3,8 @@
 	<data>
 			
 		<!-- Create Product -->
-		<record id="advance_payment" model="product.product">
+		<!-- UNCOMMENT TO UPDATE -->
+		<!-- <record id="advance_payment" model="product.product">
             <field name="name">Advance Payment</field>
             <field name="categ_id">24</field>
             <field name="type">service</field>
@@ -13,7 +14,7 @@
             <field name="property_account_expense" model="account.account" search="[('id', '=', '69')]"/>
             <field name="sale_ok" eval="False"/>
 	        <field name="purchase_ok" eval="False"/>
-        </record>
+        </record> -->
 
 
 		<record id="purchase_order_form" model="ir.ui.view">
