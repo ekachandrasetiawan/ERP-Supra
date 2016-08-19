@@ -534,7 +534,7 @@ class Purchase_Order_Revision(osv.osv):
 										 'line_pb_subcont_id':line.line_pb_subcont_id.id,
 										 'pb_id':line.pb_id.id,
 										 'wo_id':line.wo_id.id,
-										 'state':line.state,
+										 'state':'draft',
 										 'taxes_id': [(6,0,taxes_ids)],
 										 'po_line_rev':line.id,
 										 })

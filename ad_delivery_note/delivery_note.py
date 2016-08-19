@@ -948,6 +948,18 @@ class procurement_order(osv.osv):
 procurement_order()
 
 class delivery_note(osv.osv):
+
+	def _employee_get(obj, cr, uid, context=None):
+		if context is None:
+			context = {}
+		ids = obj.pool.get('hr.employee').search(cr, uid, [('user_id', '=', uid)], context=context)
+		dept = obj.pool.get('hr.department').search(cr, uid, [('name', '=', 'SALES ADMIN')], context=context)
+		employee = obj.pool.get('hr.department').browse(cr, uid, dept, context=context)[0]
+
+		if employee:
+			return employee.manager_id.id
+		return False
+		
 	def print_dn_out(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
@@ -1003,8 +1015,7 @@ class delivery_note(osv.osv):
 	}
 	_defaults = {
 		'name': '/',
-		'state': 'draft', 
-		'signature':40,
+		'state': 'draft',
 	}
 	# to add mail thread in footer
 	_inherit = ['mail.thread']
@@ -1094,9 +1105,10 @@ class delivery_note(osv.osv):
 		 
 	def package_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-
-		if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
-			raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
+		
+		if not val.special:
+			if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
+				raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
 
 
 		for x in val.note_lines:
@@ -1276,7 +1288,7 @@ class delivery_note(osv.osv):
 					self.write(cr, uid, ids, {'state': 'done'})
 
 					print "OP PICKING TO BE",id_done[0][1]['delivered_picking']
-					raise osv.except_osv('errr','eerrr')
+					# raise osv.except_osv('errr','eerrr')
 					# raise osv.except_osv(_("TEST"),_("TEST"))
 
 
