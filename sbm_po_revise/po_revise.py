@@ -512,6 +512,10 @@ class Purchase_Order_Revision(osv.osv):
 				no_line = line.no
 			else:
 				no_line = noline
+			if line.taxes_id:
+				new_taxes = [(6,0,taxes_ids)]
+			else:
+				new_taxes = False
 			obj_purchase_line.create(cr, uid, {
 										 'no':no_line,
 										 'date_planned': time.strftime("%Y-%m-%d"),
@@ -535,7 +539,7 @@ class Purchase_Order_Revision(osv.osv):
 										 'pb_id':line.pb_id.id,
 										 'wo_id':line.wo_id.id,
 										 'state':'draft',
-										 'taxes_id': [(6,0,taxes_ids)],
+										 'taxes_id': new_taxes,
 										 'po_line_rev':line.id,
 										 })
 			noline=noline+1
