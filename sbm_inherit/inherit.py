@@ -2549,7 +2549,6 @@ class purchase_partial_invoice(osv.osv_memory):
 
 		id_product=self.pool.get('product.product').search(cr,uid,[('default_code', '=' ,'PAYADV')])
 
-		print '=====',
 		if id_product == []:
 			raise osv.except_osv(_('Informasi'), _('Please Create Product PAYADV'))
 
@@ -2558,24 +2557,27 @@ class purchase_partial_invoice(osv.osv_memory):
 		result = []
 		for purchase in purchase_obj.browse(cr, uid, purchase_ids, context=context):
 			val = inv_line_obj.product_id_change(cr, uid, [], purchase.order_line[0].product_id.id, uom_id=False, partner_id=purchase.partner_id.id, fposition_id=purchase.fiscal_position.id)
-			res = val['value']
+			if val:
+				res = val['value']
+				set_account_id = res['account_id']
+				set_uom_id = res.get('uos_id', False)
+			else:
+				set_account_id = 49
+				set_uom_id = 13
 
-			# determine invoice amount
 			if wizard.amount <= 0.00:
 				raise osv.except_osv(_('Incorrect Data'), _('The value of Advance Amount must be positive.'))
 			
 			inv_amount = purchase.amount_untaxed * wizard.amount / 100
-			if not res.get('name'):
-				res['name'] = _("Advance of %s %%") % (wizard.amount)
 
 			# create the invoice
 			inv_line_values = {
 				'name': data_product.name + ' ' + str(wizard.amount) + '%',
 				'origin': purchase.name,
-				'account_id': res['account_id'],
+				'account_id': set_account_id,
 				'price_unit': inv_amount,
 				'quantity': 1.0,
-				'uos_id': res.get('uos_id', False),
+				'uos_id': set_uom_id,
 				'product_id': data_product.id,
 				'invoice_line_tax_id': False
 			}
@@ -2591,6 +2593,7 @@ class purchase_partial_invoice(osv.osv_memory):
 				'fiscal_position': purchase.fiscal_position.id or purchase.partner_id.property_account_position.id
 			}
 			result.append((purchase.id, inv_values))
+
 		return result
 
 
