@@ -2563,7 +2563,7 @@ class purchase_partial_invoice(osv.osv_memory):
 				set_uom_id = res.get('uos_id', False)
 			else:
 				set_account_id = 49
-				set_uom_id = 13
+				set_uom_id = data_product.uom_id.id
 
 			if wizard.amount <= 0.00:
 				raise osv.except_osv(_('Incorrect Data'), _('The value of Advance Amount must be positive.'))
