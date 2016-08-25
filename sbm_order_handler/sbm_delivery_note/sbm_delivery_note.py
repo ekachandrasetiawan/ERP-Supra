@@ -223,7 +223,8 @@ class delivery_note(osv.osv):
 				got_line = lines[2]
 			else:
 				got_line = lines
-			if got_line[2]['product_qty'] == 0:
+			print got_line,"<><><><><><>"
+			if got_line['product_qty'] == 0:
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
 
@@ -488,7 +489,8 @@ class delivery_note(osv.osv):
 					'picking_id': picking,
 					'state':'draft',
 					'location_dest_id' :id_loc,
-					'sale_line_id': sale_line_id
+					'sale_line_id': sale_line_id,
+					'sale_material_id':x.op_line_id.sale_line_material_id.id,
 					},context=context)
 
 				# Update DN Line Material Dengan ID Move
@@ -946,6 +948,13 @@ class stock_picking(osv.osv):
 	}
 
 stock_picking()
+
+
+class stock_move(osv.osv):
+	_inherit = 'stock.move'
+	_columns = {
+		'sale_material_id': fields.many2one('sale.order.material.line','Sale Material', required=False),
+	}
 
 
 class stock_return_picking(osv.osv_memory):

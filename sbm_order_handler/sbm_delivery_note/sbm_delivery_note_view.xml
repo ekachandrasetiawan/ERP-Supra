@@ -115,9 +115,11 @@
 										<group>
 											<field name="picking_id"/>
 											<field name="postpone_picking"/>
+											<field name="signature"/>
 										</group>
 								 </page>
 							</xpath>
+							<xpath expr="//page[@string='Signature']" position="replace"></xpath>
 					 </field>
 				 </record>
 

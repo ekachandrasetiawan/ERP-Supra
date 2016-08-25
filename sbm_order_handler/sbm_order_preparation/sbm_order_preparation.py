@@ -39,11 +39,44 @@ class order_preparation(osv.osv):
 		res = False
 		if picking_id:
 			pick = self.pool.get('stock.picking').browse(cr,uid,picking_id)
+			is_so_has_material = False
+			# check if so already has material
+			for ol in pick.sale_id.order_line:
+				for material in ol.material_lines:
+					is_so_has_material = True
+			# if so has material
+			if is_so_has_material:
+				# maybe its old so  but already partialed order
+				# means maybe in past some item has been delivered
+				# need check is moves has material line id
+				is_move_linked_to_material = False
+				for move in pick.move_lines:
+					if move.sale_material_id:
+						is_move_linked_to_material  = True
+				if not is_move_linked_to_material:
+					# if not linked it means so is old so,, so confirmed has picking
+					# then we need to rewrite sale order material line into stock move
+
+					self.pool.get('sale.order').generate_material(cr,uid,move.sale_line_id.order_id.id,context=context)
+					# then we need to re call sale_change_id after material generated
+					return self.sale_change(cr, uid, ids, move.sale_line_id.order_id.id, False, context=context)
+
+				else:
+					# if stock move has sale_material_id then it means its picking is partial on old so processing
+					# then we just only need to load line
+					print "aAAA"
+
+			else:
+				# if so does not has material
+				# it means old so,, and not delivered yet
+				print "BBBB"
 			res = super(order_preparation,self).picking_change(cr,uid,ids,picking_id)
 			if pick:
 				res['value']['partner_id'] = pick.sale_id.partner_id.id
 				res['value']['partner_shipping_id'] = pick.sale_id.partner_shipping_id.id
 				res['value']['poc'] = pick.sale_id.client_order_ref
+				print res,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+				# for prepare_line in res['value']['prepare_lines']
 
 		return res
 		
@@ -274,91 +307,102 @@ class order_preparation(osv.osv):
 		so = self.pool.get('sale.order')
 
 		if sale:
+			has_old_picking = False
+			has_postpone_picking=False
 			line = []
 			data = self.pool.get('sale.order').browse(cr, uid, sale)
-			
-			res['poc'] = data.client_order_ref
-			res['partner_id'] = data.partner_id.id
-			res['duedate'] = data.delivery_date
-			res['partner_shipping_id'] = data.partner_shipping_id.id
-
-			location = []
-			old_so_doc_ids = []
-			for x in data.order_line:
-				if x.material_lines == []:
-					# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
-					old_so_doc_ids.append(x.order_id.id)
-
-			for old_id in old_so_doc_ids:
-				so.generate_material(cr,uid,old_id,context=context)
-				so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
-			for x in data.order_line:
-				
-
-				# if loc:
-				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
-				# else:
-				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
-
-				material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
-
-				for y in so_material_line.browse(cr, uid, material_lines):
-					print y.id,"++"
-					# Cek Material Line Dengan OP Line
-					nilai= 0 #nilai yang sudah di ambil item nya ke dalam op.
-					op_line = []
-					curr_op_id=ids
-
-					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','not in',curr_op_id)])
-					print op_line,"++--"
-					for l in obj_op_line.browse(cr, uid, op_line):
-						# Cek Status OP 
-						op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
-						product_return = 0
-						search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
-						if len(search_dn_lm):
-							search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , [search_dn_lm])])
-							# Cek DN Line Material Return
-							for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
-								if rn.stock_move_id.state == 'done':
-									product_return += rn.stock_move_id.product_qty
-
-						if op.state <> 'cancel':
-							nilai += l.product_qty - product_return
-
-
-					if y.product_id.type <> 'service':
-						if nilai < y.qty:
-							location += [y.picking_location.id]
-
-							line.append({
-								'no': y.sale_order_line_id.sequence,
-								'product_id' : y.product_id.id,
-								'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
-								'product_uom': y.uom.id,
-								'name': y.desc,
-								'sale_line_material_id':y.id,
-								'sale_line_id':y.sale_order_line_id.id
-							})
-			res['prepare_lines'] = line
 
 			# check if picking exist on Sale.Order object
 			if data.picking_ids:
+				has_old_picking=True
 				# if picking ids then we need to check state
+				active = [] #list of browse record
+				sale_material_id_generated = False
 				for picking in data.picking_ids:
-					active = [] #list of browse record
-					if picking.state != 'cancel' or picking.state !='done':
+					print picking.id,"ISSSSSSSSSSSSSSSS-->",picking.state
+					if picking.state != 'cancel' and picking.state !='done':
 						print "Has active picking",picking
-						active.append(picking)
+						for move_line in picking.move_lines:
+							if move_line.sale_material_id:
+								sale_material_id_generated =True
 
-				if len(active)==1:
+						active.append(picking)
+				print active,"<<<<<<"
+				if len(active)==1 and sale_material_id_generated == False:
+					so.generate_material(cr,uid,sale,context=context)
+					has_postpone_picking=True
 					# if only 1 active picking
 					# then wee need to add picking_id into order preparation
 					res['picking_id'] = active[0].id
-				
+					return {'value':res}
 
-			
-			print res,"OP***********************************"
+				res['poc'] = data.client_order_ref
+				res['partner_id'] = data.partner_id.id
+				res['duedate'] = data.delivery_date
+				res['partner_shipping_id'] = data.partner_shipping_id.id
+
+				location = []
+				old_so_doc_ids = []
+				for x in data.order_line:
+					if x.material_lines == []:
+						# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
+						old_so_doc_ids.append(x.order_id.id)
+
+				for old_id in old_so_doc_ids:
+					so.generate_material(cr,uid,old_id,context=context)
+					so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
+				for x in data.order_line:
+					
+
+					# if loc:
+					# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
+					# else:
+					# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
+
+					material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
+
+					for y in so_material_line.browse(cr, uid, material_lines):
+						print y.id,"++"
+						# Cek Material Line Dengan OP Line
+						nilai= 0 #nilai yang sudah di ambil item nya ke dalam op.
+						op_line = []
+						curr_op_id=ids
+
+						op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','not in',curr_op_id)])
+						print op_line,"++--"
+						for l in obj_op_line.browse(cr, uid, op_line):
+							# Cek Status OP 
+							op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
+							product_return = 0
+							search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
+							if len(search_dn_lm):
+								search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , [search_dn_lm])])
+								# Cek DN Line Material Return
+								for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
+									if rn.stock_move_id.state == 'done':
+										product_return += rn.stock_move_id.product_qty
+
+							if op.state <> 'cancel':
+								nilai += l.product_qty - product_return
+
+
+						if y.product_id.type <> 'service':
+							if nilai < y.qty:
+								location += [y.picking_location.id]
+
+								line.append({
+									'no': y.sale_order_line_id.sequence,
+									'product_id' : y.product_id.id,
+									'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
+									'product_uom': y.uom.id,
+									'name': y.desc,
+									'sale_line_material_id':y.id,
+									'sale_line_id':y.sale_order_line_id.id
+								})
+				res['prepare_lines'] = line
+
+				
+				print res,"OP***********************************"
 			return  {'value': res}
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
