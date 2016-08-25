@@ -2559,10 +2559,10 @@ class purchase_partial_invoice(osv.osv_memory):
 			val = inv_line_obj.product_id_change(cr, uid, [], purchase.order_line[0].product_id.id, uom_id=False, partner_id=purchase.partner_id.id, fposition_id=purchase.fiscal_position.id)
 			if val:
 				res = val['value']
-				set_account_id = res['account_id']
+				set_account_id = res.get('account_id',data_product.property_account_expense.id)
 				set_uom_id = res.get('uos_id', False)
 			else:
-				set_account_id = 49
+				set_account_id = data_product.property_account_expense.id
 				set_uom_id = data_product.uom_id.id
 
 			if wizard.amount <= 0.00:
