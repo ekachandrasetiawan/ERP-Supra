@@ -857,14 +857,14 @@ class SBM_Work_Order_Output(osv.osv):
 	_name = 'sbm.work.order.output'
 	_columns = {
 		'no':fields.float(string='No', required=False),
-		'work_order_id':fields.many2one('sbm.work.order','Work Order No', required=False),
+		'work_order_id':fields.many2one('sbm.work.order','Work Order No', required=False, ondelete="CASCADE", onupdate="CASCADE"),
 		'item_id':fields.many2one('product.product', string='Product', domain=[('active', '=', True), ('sale_ok','=',True)], required=True),
 		'desc':fields.text(string='Description', required=False),
 		'qty':fields.float(required=True, string='Qty'),
 		'uom_id':fields.many2one('product.uom', required=True, string='UOM'),
-		'raw_materials':fields.one2many('sbm.work.order.output.raw.material', 'work_order_output_id', string='Raw Materials',ondelete='cascade'),
+		'raw_materials':fields.one2many('sbm.work.order.output.raw.material', 'work_order_output_id', string='Raw Materials',ondelete='cascade',onupdate="CASCADE"),
 		'attachment_ids': fields.many2many('ir.attachment', 'work_order_rel','work_order_id', 'attachment_id', 'Attachments'),
-		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking',ondelete='cascade'),
+		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking',ondelete='cascade',onupdate="CASCADE"),
 		'adhoc_output_id':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
 		'sale_order_material_line':fields.many2one('sale.order.material.line',string='SO Line Materials', required=False),
 
