@@ -2,6 +2,34 @@
 <openerp>
 	<data>
 
+        <record id="wizard_hr_attendance_form" model="ir.ui.view">
+            <field name="name">Wizard HR Attendance</field>
+            <field name="model">wizard.hr.attendance.log</field>
+            <field name="arch" type="xml">
+                <form string="Purchase Order revise" version="7.0">
+                    <group>
+                        <field name="log_id" readonly="True"/>
+                    </group>
+                    <group>
+                        <field name="date_extra_out"/>
+                    </group>
+                    <footer>
+                        <button name="update_date_hr_log" string="Submit" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="wizard_hr_attendance_action" model="ir.actions.act_window">
+            <field name="name">Action HR Attendance</field>
+            <field name="res_model">wizard.hr.attendance.log</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="wizard_hr_attendance_form"/>
+        </record>
 
 
 		<!-- ATTENDANCE TYPE DEFAULT -->
@@ -127,6 +155,7 @@
 						<button name="stream_data_http" type="object" string="Stream Data" confirm="Sure want to Sync Data ?" />
 						<button name="clear_log_data" type="object" string="Clear Log Data" confirm="Sure Want to Clear All Log Data ?" />
 						<button name="openprint_min_max" type="object" string="Attendance History (Min Max)" />
+						<button name="openprint_min_max_site" type="object" string="Attendance History SITE" />
 					</header>
 					<sheet>
 						<group col="4">
@@ -187,11 +216,15 @@
 			<field name="type">form</field>
 			<field name="arch" type="xml">
 				<form create="false" edit="false" string="Log" version="7.0">
+					<header>
+						<button name="action_update_date" string="Update Date Extra Out" type="object" icon="STOCK_NEW"/>
+					</header>
 					<sheet>
 						<group col="1">
 							<field name="name" />
 							<field name="employee_id" />
 							<field name="log_time"/>
+							<field name="date_extra_out"/>
 							<field name="manual_log_time" widget="date" />
 							<field name="m_status" />
 							<field name="m_work_code" />
@@ -203,7 +236,8 @@
 			</field>
 		</record>
 		
-		
+
+	
 
 		<record id="sbm_attendance_manual_log_tree" model="ir.ui.view">
 			<field name="name">sbm.hr.attendance.manual.log.tree</field>
