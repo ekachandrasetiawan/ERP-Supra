@@ -653,7 +653,7 @@ class hr_attendance_log(osv.osv):
 		'notes': fields.text(string="Notes", required=False),
 		'log_time': fields.function(_get_log_time_from_epoch, method=True, string="Log Time", store=True, type="datetime"),
 		'machine_id': fields.many2one('hr.attendance.machine',string='Machine ID',required=True),
-		'date_extra_out': fields.datetime('Date Extra Out'),
+		'date_extra_out': fields.date('Date Extra Out'),
 	}
 
 	def check_is_log_exists(self,cr,uid,eid,datetime_log,context={}):
@@ -714,7 +714,7 @@ class WizardAttendanceLog(osv.osv_memory):
 	_description="Wizard HR Attendance LOG"
 	_columns = {
 		'log_id':fields.many2one('hr.attendance.log',string="Attendance LOG"),
-		'date_extra_out': fields.datetime('Date Extra Out'),
+		'date_extra_out': fields.date('Date Extra Out'),
 	}
 
 WizardAttendanceLog()
