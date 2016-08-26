@@ -437,6 +437,35 @@ class hr_attendance_machine(osv.osv):
 		}
 		return res
 
+	def openprint_min_max_site(self,cr,uid,ids,context={}):
+		res = False
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		urlTo = str(browseConf.value)+"attendance/first-and-last-scan-site"
+		# user_ids = self.pool.get('res.users').search(cr,uid,uid,context=context)
+		userBrowse = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+
+		employee = userBrowse.employee_ids[0]
+
+		work_addr = employee.address_id.id
+
+		if work_addr:
+
+			searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.'+str(work_addr))], context=context)
+			if searchConfSite:
+				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
+				urlTo = str(browseConf.value)+"attendance/first-and-last-scan-site&site="+str(work_addr)
+		
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.out',
+			'params': {
+				# 'id'	: ids[0],
+				'redir'	: urlTo
+			},
+		}
+		return res
 
 class hr_attendance_machine_admin(osv.osv):
 	_name = 'hr.attendance.machine.admin'
@@ -624,6 +653,7 @@ class hr_attendance_log(osv.osv):
 		'notes': fields.text(string="Notes", required=False),
 		'log_time': fields.function(_get_log_time_from_epoch, method=True, string="Log Time", store=True, type="datetime"),
 		'machine_id': fields.many2one('hr.attendance.machine',string='Machine ID',required=True),
+		'date_extra_out': fields.datetime('Date Extra Out'),
 	}
 
 	def check_is_log_exists(self,cr,uid,eid,datetime_log,context={}):
@@ -632,6 +662,62 @@ class hr_attendance_log(osv.osv):
 		# print "searching ",eid," and ",datetime_log
 		# print res,"---------->>RES"
 		return res
+
+	def action_update_date(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		hr=self.pool.get('hr.attendance.log')
+
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_hr_attendance', 'wizard_hr_attendance_form')
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_hr_attendance_form',
+			'res_model': 'wizard.hr.attendance.log',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
+class WizardAttendanceLog(osv.osv_memory):
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: context = {}
+		log_ids = context.get('active_ids', [])
+		active_model = context.get('active_model')
+		res = super(WizardAttendanceLog, self).default_get(cr, uid, fields, context=context)
+		if not log_ids or len(log_ids) != 1:
+			return res
+		log_id, = log_ids
+		if log_id:
+			res.update(log_id=log_id)
+			log = self.pool.get('hr.attendance.log').browse(cr, uid, log_id, context=context)	
+		return res
+
+	def update_date_hr_log(self,cr,uid,ids,context=None):
+		data = self.browse(cr,uid,ids,context)[0]
+		print '===================',data.log_id.id
+		hr_log = self.pool.get('hr.attendance.log')
+		return hr_log.write(cr,uid,data.log_id.id,{'date_extra_out':data.date_extra_out},context=context)
+
+	_name="wizard.hr.attendance.log"
+	_description="Wizard HR Attendance LOG"
+	_columns = {
+		'log_id':fields.many2one('hr.attendance.log',string="Attendance LOG"),
+		'date_extra_out': fields.datetime('Date Extra Out'),
+	}
+
+WizardAttendanceLog()
 
 class hr_attendance_min_max_log(osv.osv):
 	_name = "hr.attendance.min.max.log"
