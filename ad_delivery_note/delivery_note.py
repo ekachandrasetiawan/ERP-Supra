@@ -372,8 +372,9 @@ class stock_picking(osv.osv):
 				# END UNCOMMENT FOR LIVE
 		return self.write(cr,uid,ids,{'state':'warehouse'})
 		# return False
-	def draft_force_assign(self,cr,uid,ids,context=None):
-		return self.write(cr,uid,ids,{'state':'confirmed'})
+	def draft_force_assign(self, cr, uid, ids, *args):
+		self.write(cr,uid,ids,{'state':'confirmed'})
+		return super(stock_picking, self).draft_force_assign(cr, uid, ids, *args)
 
 	def setdraft(self,cr,uid,ids,context=None):
 		return self.write(cr,uid,ids,{'state':'draft'})
@@ -1591,7 +1592,7 @@ class stock_move(osv.osv):
 			if addr_rec:
 				lang = addr_rec and addr_rec.lang or False
 		ctx = {'lang': lang}
-
+		
 		product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=ctx)[0]
 		uos_id  = product.uos_id and product.uos_id.id or False
 		result = {
