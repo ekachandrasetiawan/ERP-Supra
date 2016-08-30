@@ -33,7 +33,7 @@
 
         		<button name="adhoc_validate" states="approved" string="Validate" type="object"  icon="gtk-apply" confirm="Are you sure to Validate Adhoc Order Request"/>
 
-        		<button name="print_adhoc_order_request" type="object" states="approved, done" string="Print Adhoc Order Request" icon="gtk-dnd-multiple"/>
+        		<button name="print_adhoc_order_request" type="object" states="submited,approved,done" string="Print Adhoc Order Request" icon="gtk-dnd-multiple"/>
 
         		<button name="create_quotation" type="object" states="submited,approved" string="Create Quotation" icon="STOCK_ADD" confirm="Are you sure To Create Quotation"/>
 
