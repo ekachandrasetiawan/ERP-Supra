@@ -651,15 +651,18 @@ class account_invoice(osv.osv):
 
 	def action_cancel(self,cr,uid,ids,context={}):
 		ir_model_data_group = self.pool.get('ir.model.data').search(cr,uid,[('model','=','res.groups'),('name','=','group_customer_invoice_administrator'),('module','=','sbm_inherit')],context=context)
-		if ir_model_data_group:
+		ir_model_data_group_finance = self.pool.get('ir.model.data').search(cr,uid,[('model','=','res.groups'),('name','=','group_account_manager'),('module','=','account')],context=context)
+		if ir_model_data_group or ir_model_data_group_finance:
 			data = self.pool.get('ir.model.data').browse(cr,uid,ir_model_data_group[0],context=context)
-			
+			data_finance = self.pool.get('ir.model.data').browse(cr,uid,ir_model_data_group_finance[0],context=context)
 			res_id = data.res_id
+			res_id_finance = data_finance.res_id
 			# check if user in group customer invoice administrator ?
 			# only customer invoice administrator can cancel the invoice
 			group = self.pool.get('res.groups').search(cr,uid,[('id','=',res_id),('users','in',uid)])
+			group_finance = self.pool.get('res.groups').search(cr,uid,[('id','=',res_id_finance),('users','in',uid)])
 			
-			if group:
+			if group or group_finance:
 				return super(account_invoice,self).action_cancel(cr,uid,ids,context)
 			else:
 				raise osv.except_osv(_('Error!'),_('Your\'re not Authorized to Canceling Invoice!'))
