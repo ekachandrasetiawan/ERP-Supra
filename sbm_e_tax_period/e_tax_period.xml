@@ -7,8 +7,9 @@
 			<field name="inherit_id" ref="account.invoice_form" />
 			<field name="arch" type="xml">
 				<xpath expr="//button[@string='Cancel Invoice']" position="after">
-					<button name="create_invoice_replace_tax" type="object" states="proforma2" string="Replace Tax New" icon="STOCK_ADD" confirm="Are you sure To Replace Tax"/>
+					<button name="create_invoice_replace_tax" type="object" states="proforma2,cancel" string="Replace Tax New" icon="STOCK_ADD" confirm="Are you sure To Replace Tax"/>
 				</xpath>
+				<button name="action_to_tax_replacement" position="replace"/>
 
 				<field name="date_invoice" position="replace">
 					<!-- <attribute name="onchange">onchange_date_invoice()</attribute> -->
