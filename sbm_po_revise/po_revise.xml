@@ -60,7 +60,7 @@
                 <header>
                     <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order" groups="purchase.group_purchase_user"/>
 
-                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager,purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" confirm="Are you sure to Confirm Purchase Order Revision"/>
+                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager,purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" confirm="Are you sure to Confirm Purchase Order Revision"/>
 
                     <button name="po_revise_cancel" states="confirm" string="Cancel" type="object"  icon="STOCK_CANCEL" groups="account.group_account_manager" confirm="Are you sure to Cancel Purchase Order Revision"/>
 
@@ -149,7 +149,7 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem name="Waiting Approval PO Local" parent="purchase.menu_procurement_management" id="purchase_order_waiting_approval_po_local" action="action_purchase_order_waiting_approval_po_local" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief"/>
+    <menuitem name="Waiting Approval PO Local" parent="purchase.menu_procurement_management" id="purchase_order_waiting_approval_po_local" action="action_purchase_order_waiting_approval_po_local" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
 
     <record id="replace_sbm_purchaseorder_view_po_form_set" model="ir.ui.view">
        <field name="name">purchase.order.form</field>
@@ -172,41 +172,25 @@
                     <button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
                 </xpath>
             <button name="purchase_approve" position="replace">
-                <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_APPLY" class="oe_highlight"/>
+                <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" icon="STOCK_APPLY" class="oe_highlight"/>
             </button>
             <button name="action_cancel_draft" position="replace">
-                <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief" icon="STOCK_JUMP_TO"/>
+                <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" icon="STOCK_JUMP_TO"/>
             </button>
             <button name="purchase_cancel" position="replace">
-                <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief"/>
+                <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
             </button>
             <button name="purchase_confirm" position="replace">
                 <button name="purchase_confirm" states="draft" string="Confirm Order" icon="STOCK_APPLY" class="oe_highlight"/>
             </button>
             <button name="action_cancel" position="replace">
-                <button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief"/>
+                <button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
             </button>
             <button name="view_picking" position="replace">
                 <button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" icon="STOCK_OPEN"/>
             </button>
             
             <xpath expr="//button[@string='Resend Purchase Order']" position="replace"></xpath>
-       </field>
-    </record>
-
-
-    <record id="deactive_po_line_cancel" model="ir.ui.view">
-       <field name="name">purchase.order.form</field>
-       <field name="model">purchase.order</field>
-       <field name="type">form</field>
-       <field name="inherit_id" ref="sbm_inherit.purchase_order_form_with_cancel_button"/>
-       <field name="arch" type="xml">
-
-            <button name="action_cancel_item" position="replace">
-                
-            </button>
-            
-
        </field>
     </record>
 
@@ -218,12 +202,9 @@
         <field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
         <field name="arch" type="xml">
             <button name="print_po_import_out" position="replace">
-              <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Purchase Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
-              <button name="print_po_out" type="object" states="draft,sent,confirmed,approved" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_po_revise.group_purchase_chief,purchase.group_purchase_user"/>
+              <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Purchase Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
+              <button name="print_po_out" type="object" states="draft,sent,confirmed,approved" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user"/>
             </button>
-
-            <xpath expr="//button[@string='Import J']" position="replace"/>
-            <xpath expr="//button[@string='Import S']" position="replace"/>
         </field>
     </record>
 
@@ -307,6 +288,7 @@
                 <field name="date_planned"/>
                 <field name="product_qty"/>
                 <field name="product_uom"/>
+                <field name="received_items"/>
                 <field name="state"/>
             </tree>
         </field>

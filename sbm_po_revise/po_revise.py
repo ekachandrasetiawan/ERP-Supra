@@ -711,7 +711,7 @@ class WizardPOrevise(osv.osv_memory):
 		
 		# Group Purchase Chief
 		p  = self.pool.get('ir.model.data')
-		id_group_chief = p.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
+		id_group_chief = p.get_object(cr, uid, 'sbm_purchase', 'group_purchase_chief').id
 		user_group_chief = self.pool.get('res.groups').browse(cr, uid, id_group_chief)
 
 

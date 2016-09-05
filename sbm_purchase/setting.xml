@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-    	
-    	
+    	<record model="ir.module.category" id="module_category_jobdesc_position">
+            <field name="name">Job Desc and Position</field>
+        </record>
 
+    	<record model="res.groups" id="group_jobdesc_position_dept_chief">
+			<field name="category_id" ref="module_category_jobdesc_position"/>
+			<field name="name">Dept Chief</field>
+		</record>
 
+		<record model="res.groups" id="group_jobdesc_position_dept_manager">
+			<field name="category_id" ref="module_category_jobdesc_position"/>
+			<field name="name">Dept Manager</field>
+		</record>
+
+		<record model="res.groups" id="group_purchase_chief">
+			<field name="category_id" ref="base.module_category_purchase_management"/>
+			<field name="name">Staff Purchase Chief</field>
+		</record>
+
+		<record model="res.groups" id="group_finance_staff">
+			<field name="category_id" ref="base.module_category_purchase_management"/>
+			<field name="name">Group Finance Staff</field>
+		</record>
     </data>
 </openerp>
