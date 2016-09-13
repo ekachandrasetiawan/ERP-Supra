@@ -21,6 +21,7 @@ class order_preparation(osv.osv):
 		'location_id':fields.many2one('stock.location',required=True,string='Picking Location',readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True, track_visibility='onchange'),
 		'warehouse_notes':fields.text('Warehouse Notes', readonly=True),
+		'sbm_wo_id':fields.many2one('sbm.work.order', 'W.O/SPK', track_visibility="onchange", readonly=True, states={'draft': [('readonly', False)]}),
 
 	}
 

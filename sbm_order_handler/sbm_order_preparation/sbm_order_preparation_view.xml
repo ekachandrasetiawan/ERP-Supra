@@ -85,6 +85,7 @@
 
 					<field name="sale_id" position="replace">
 						<field name="sale_id" on_change="sale_change(sale_id, location_id)"/> 
+						<field name="sbm_wo_id" on_change="sale_change(sale_id, location_id, {'sbm_wo_id':sbm_wo_id})"/> 
 					</field>
 
 					<xpath expr="//page[@string='Notes']" position="after">
