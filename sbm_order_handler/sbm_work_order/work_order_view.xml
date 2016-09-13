@@ -90,7 +90,7 @@
 	            				<field name="uom_id"/>
 	            				<field name="attachment_ids" colspan="4"  widget="many2many_binary" string="Attach a file"/>
 		            				<notebook colspan="4">
-											<page string="DATA MATERIAL">
+											<page string="Consumed Materials">
 												<field name="raw_materials" colspan="4" nolabel="1" widget="one2many_list">
 													<tree string="Material Lines" editable="buttom">
 														<field name="item_id" on_change="change_item(item_id)"/>
