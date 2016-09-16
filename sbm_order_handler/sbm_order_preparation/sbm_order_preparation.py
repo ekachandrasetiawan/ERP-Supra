@@ -15,14 +15,13 @@ class order_preparation(osv.osv):
 	_columns = {
 		'poc': fields.char('Customer Reference', size=64,track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
 		'name': fields.char('Reference', required=True, size=64, select=True, readonly=True, states={'draft': [('readonly', False)]}),
-		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=True, readonly=True, domain=['|', ('quotation_state','=','win'),('state','in',['progress','manual'])], states={'draft': [('readonly', False)]}),
+		'sale_id': fields.many2one('sale.order', 'Sale Order', select=True, required=False, readonly=True, domain=['|', ('quotation_state','=','win'),('state','in',['progress','manual'])], states={'draft': [('readonly', False)]}),
 		'picking_id': fields.many2one('stock.picking', 'Delivery Order', required=False, domain="[('sale_id','=', sale_id), ('state','not in', ('cancel','done'))]", readonly=True, states={'draft': [('readonly', False)]},track_visibility='always'),
 		'duedate' : fields.date('Delivery Date', readonly=True, states={'draft': [('readonly', False)]},track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location',required=True,string='Picking Location',readonly=True, states={'draft': [('readonly', False)]}),
+		'location_id':fields.many2one('stock.location',required=False,string='Picking Location',readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True, track_visibility='onchange'),
 		'warehouse_notes':fields.text('Warehouse Notes', readonly=True),
 		'sbm_wo_id':fields.many2one('sbm.work.order', 'W.O/SPK', track_visibility="onchange", readonly=True, states={'draft': [('readonly', False)]}),
-
 	}
 
 	_track = {
@@ -58,7 +57,7 @@ class order_preparation(osv.osv):
 					# if not linked it means so is old so,, so confirmed has picking
 					# then we need to rewrite sale order material line into stock move
 
-					self.pool.get('sale.order').generate_material(cr,uid,move.sale_line_id.order_id.id,context=context)
+					self.pool.get('sale.order').generate_material(cr,uid,move.sale_line_id.order_id.id,context=None)
 					# then we need to re call sale_change_id after material generated
 					return self.sale_change(cr, uid, ids, move.sale_line_id.order_id.id, False, context=context)
 
@@ -289,15 +288,32 @@ class order_preparation(osv.osv):
 
 		return res
 
-	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
+	def sbm_wo_change(self, cr, uid, ids, wo_id, context=None):
+		work_order = self.pool.get('sbm.work.order')
+		work_order_output = self.pool.get('sbm.work.order.output')
+		work_order_material = self.pool.get('sbm.work.order.output.raw.material')
+		res = {}; line = []
+		if wo_id:
+			wo = work_order_output.search(cr, uid, [('work_order_id', '=', wo_id)])
+			no_line = 1
+			for x in work_order_output.browse(cr, uid, wo, context=None):
+				line.append((0,0,{
+						'no': no_line,
+						'product_id' : x.item_id.id,
+						'name': x.desc,
+						'detail': x.desc,
+						'product_qty': x.qty,
+						'product_uom': x.uom_id.id
+					}))
+				no_line +=1
 
+			res['prepare_lines'] = line
+		return {'value': res}
+
+	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
 		# default 
 		res = {}
-
 		res['picking_id'] = False
-
-
-
 		so_material_line = self.pool.get('sale.order.material.line')
 		obj_op_line = self.pool.get('order.preparation.line')
 		obj_op = self.pool.get('order.preparation')
