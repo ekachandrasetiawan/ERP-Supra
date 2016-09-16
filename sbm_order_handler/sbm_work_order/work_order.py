@@ -342,7 +342,7 @@ class SBM_Work_Order(osv.osv):
 		'seq_wo_no':fields.char(string='WO Sequence'),
 		'seq_req_no':fields.char(string='Request Sequence'),
 		'work_location': fields.selection([('workshop', 'Work Shop'),('customersite', 'Customer sITE')], 'Work Location', readonly=True,required=False, states={'draft':[('readonly',False)]}, select=True,track_visibility='onchange'),
-		'location_id':fields.many2one('stock.location', string='Internal Handler Location', required=False,track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
+		'location_id':fields.many2one('stock.location', string='Resource Location', required=False,track_visibility='onchange',readonly=True, states={'draft':[('readonly',False)]}),
 		'customer_id':fields.many2one('res.partner','Customer', domain=[('customer','=',True),('is_company','=',True)],readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'customer_site_id':fields.many2one('res.partner','Customer Work Location',readonly=True, states={'draft':[('readonly',False)]},track_visibility='onchange'),
 		'due_date':fields.date(string='Due Date', required=False,readonly=True, states={'draft':[('readonly',False)]}),
