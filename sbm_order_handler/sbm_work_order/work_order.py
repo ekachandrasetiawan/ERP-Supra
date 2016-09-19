@@ -943,7 +943,7 @@ class order_preparation(osv.osv):
 	_inherit = "order.preparation"
 	_description = "Order Packaging"
 	_columns = {
-		'sale_id': fields.many2one('sale.order', 'Sale Order', required=True, readonly=True, domain=[
+		'sale_id': fields.many2one('sale.order', 'Sale Order', required=False, readonly=True, domain=[
 			'|','|',('quotation_state','=','win'),('state','in',['progress','manual']) , '&', ('from_adhoc','=',True),'&',('quotation_state','=','confirmed'),('state','=','draft')
 		], states={'draft': [('readonly', False)]}),
 	}

@@ -8,7 +8,7 @@
 				<field name="arch" type="xml">
 
 					<field name="default_code" position="replace">
-						<field name="default_code" on_change="code_change(default_code)"/>
+						<field name="default_code" on_change="code_change(default_code)" required="True"/>
 					</field>
 					 <xpath expr="//div[@name='buttons']" position="inside">
 					 	<button type="object" name="disable_product" string="Disable Product"  groups="sbm_product.group_product_admin" attrs="{'invisible':[('active','=',False)]}"/>
