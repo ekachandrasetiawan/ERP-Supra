@@ -294,20 +294,30 @@ class order_preparation(osv.osv):
 		work_order_material = self.pool.get('sbm.work.order.output.raw.material')
 		res = {}; line = []
 		if wo_id:
-			wo = work_order_output.search(cr, uid, [('work_order_id', '=', wo_id)])
-			no_line = 1
-			for x in work_order_output.browse(cr, uid, wo, context=None):
-				line.append((0,0,{
-						'no': no_line,
-						'product_id' : x.item_id.id,
-						'name': x.desc,
-						'detail': x.desc,
-						'product_qty': x.qty,
-						'product_uom': x.uom_id.id
-					}))
-				no_line +=1
-
-			res['prepare_lines'] = line
+			wo = work_order.browse(cr, uid, [wo_id])[0]
+			if wo.sale_order_id.id:
+				wo_line = work_order_output.search(cr, uid, [('work_order_id', '=', wo_id)])
+				no_line = 1
+				for x in work_order_output.browse(cr, uid, wo_line, context=None):
+					line.append((0,0,{
+							'no': no_line,
+							'product_id' : x.item_id.id,
+							'name': x.desc,
+							'detail': x.desc,
+							'product_qty': x.qty,
+							'product_uom': x.uom_id.id,
+							'sale_line_material_id':x.sale_order_material_line.id
+						}))
+					no_line +=1
+				res['location_id'] = wo.location_id.id
+				res['sale_id'] = wo.sale_order_id.id
+				res['poc'] = wo.sale_order_id.client_order_ref
+				res['partner_shipping_id'] = wo.sale_order_id.partner_shipping_id.id
+				res['duedate'] = wo.due_date
+				res['partner_id'] = wo.customer_id.id
+				res['prepare_lines'] = line
+			else:
+				raise osv.except_osv(_('Perhatian!'), _('Sales Order Not Found'))
 		return {'value': res}
 
 	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
