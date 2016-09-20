@@ -89,6 +89,13 @@
 	            				<field name="qty"/>
 	            				<field name="uom_id"/>
 	            				<field name="attachment_ids" colspan="4"  widget="many2many_binary" string="Attach a file"/>
+	            			
+	            				<separator string="Detail Sales Order" colspan="4"/>
+
+								<field name="sale_line_id" domain="[('order_id', '=', parent.sale_order_id)]" on_change="check_item_material(sale_line_id)"/>
+
+								<field name="sale_order_material_line" domain="[('sale_order_line_id', '=', sale_line_id)]" attrs="{'required':[('sale_line_id', '=', True)]}"/>
+
 		            				<notebook colspan="4">
 											<page string="Consumed Materials">
 												<field name="raw_materials" colspan="4" nolabel="1" widget="one2many_list">

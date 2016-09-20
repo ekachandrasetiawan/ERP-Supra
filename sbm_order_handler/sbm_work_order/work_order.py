@@ -441,6 +441,7 @@ class SBM_Work_Order(osv.osv):
 									'desc': m.desc,
 									'qty': m.qty-nilai,
 									'uom_id': m.uom.id,
+									'sale_line_id':x.id,
 									'sale_order_material_line': m.id
 								}))
 						elif m.product_id.type == 'service':
@@ -450,6 +451,7 @@ class SBM_Work_Order(osv.osv):
 								'desc': m.desc,
 								'qty': m.qty-nilai,
 								'uom_id': m.uom.id,
+								'sale_line_id':x.id,
 								'sale_order_material_line': m.id
 							}))
 					no +=1
@@ -866,8 +868,8 @@ class SBM_Work_Order_Output(osv.osv):
 		'attachment_ids': fields.many2many('ir.attachment', 'work_order_rel','work_order_id', 'attachment_id', 'Attachments'),
 		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking',ondelete='cascade',onupdate="CASCADE"),
 		'adhoc_output_id':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
-		'sale_order_material_line':fields.many2one('sale.order.material.line',string='SO Line Materials', required=False),
-
+		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=False),
+		'sale_order_material_line':fields.many2one('sale.order.material.line',string='Line Materials', required=False),
 	}
 
 	_rec_name = 'item_id'
@@ -876,6 +878,9 @@ class SBM_Work_Order_Output(osv.osv):
 		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
 		return {'value':{'uom_id':product.uom_id.id}}
 
+	def check_item_material(self, cr, uid, ids, item, context={}):
+
+		return {'value':{'sale_line_material_id':False}}
 
 SBM_Work_Order_Output()	
 
