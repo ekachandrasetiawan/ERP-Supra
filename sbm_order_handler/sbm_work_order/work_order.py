@@ -870,9 +870,18 @@ class SBM_Work_Order_Output(osv.osv):
 		'adhoc_output_id':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
 		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=False),
 		'sale_order_material_line':fields.many2one('sale.order.material.line',string='Line Materials', required=False),
+		'wo_type':fields.char(string="WO Type"),
 	}
 
 	_rec_name = 'item_id'
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None:
+			context = {}
+		
+		res = super(SBM_Work_Order_Output, self).default_get(cr, uid, fields, context=context)
+		res.update({'wo_type': context.get('type')})
+		return res
 
 	def change_item(self, cr, uid, ids, item, context={}):
 		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
