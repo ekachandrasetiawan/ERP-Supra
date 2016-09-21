@@ -856,6 +856,18 @@ SBM_Work_Order()
 
 
 class SBM_Work_Order_Output(osv.osv):
+
+	def _getWOType(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for data in self.browse(cr,uid,ids,context):
+			res[data.id] = data.work_order_id.source_type
+
+		return res
+
+	def _getType(self,cr,uid,context={}):
+		im_r = self.pool.get('sbm.work.order')._getType(cr,uid,context)
+		return im_r
+
 	_name = 'sbm.work.order.output'
 	_columns = {
 		'no':fields.float(string='No', required=False),
@@ -870,7 +882,7 @@ class SBM_Work_Order_Output(osv.osv):
 		'adhoc_output_id':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
 		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=False),
 		'sale_order_material_line':fields.many2one('sale.order.material.line',string='Line Materials', required=False),
-		'wo_type':fields.char(string="WO Type"),
+		'wo_type':fields.function(_getWOType,store=False,string="WO Type",type="char"),
 	}
 
 	_rec_name = 'item_id'
