@@ -441,6 +441,7 @@ class SBM_Work_Order(osv.osv):
 									'desc': m.desc,
 									'qty': m.qty-nilai,
 									'uom_id': m.uom.id,
+									'sale_line_id':x.id,
 									'sale_order_material_line': m.id
 								}))
 						elif m.product_id.type == 'service':
@@ -450,6 +451,7 @@ class SBM_Work_Order(osv.osv):
 								'desc': m.desc,
 								'qty': m.qty-nilai,
 								'uom_id': m.uom.id,
+								'sale_line_id':x.id,
 								'sale_order_material_line': m.id
 							}))
 					no +=1
@@ -854,6 +856,18 @@ SBM_Work_Order()
 
 
 class SBM_Work_Order_Output(osv.osv):
+
+	def _getWOType(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for data in self.browse(cr,uid,ids,context):
+			res[data.id] = data.work_order_id.source_type
+
+		return res
+
+	def _getType(self,cr,uid,context={}):
+		im_r = self.pool.get('sbm.work.order')._getType(cr,uid,context)
+		return im_r
+
 	_name = 'sbm.work.order.output'
 	_columns = {
 		'no':fields.float(string='No', required=False),
@@ -866,16 +880,28 @@ class SBM_Work_Order_Output(osv.osv):
 		'attachment_ids': fields.many2many('ir.attachment', 'work_order_rel','work_order_id', 'attachment_id', 'Attachments'),
 		'output_picking_ids':fields.one2many('sbm.work.order.output.picking', 'work_order_output_id', string='Output Picking',ondelete='cascade',onupdate="CASCADE"),
 		'adhoc_output_id':fields.many2one('sbm.adhoc.order.request.output',string='Adhoc Output', required=False),
-		'sale_order_material_line':fields.many2one('sale.order.material.line',string='SO Line Materials', required=False),
-
+		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=False),
+		'sale_order_material_line':fields.many2one('sale.order.material.line',string='Line Materials', required=False),
+		'wo_type':fields.function(_getWOType,store=False,string="WO Type",type="char"),
 	}
 
 	_rec_name = 'item_id'
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None:
+			context = {}
+		
+		res = super(SBM_Work_Order_Output, self).default_get(cr, uid, fields, context=context)
+		res.update({'wo_type': context.get('type')})
+		return res
 
 	def change_item(self, cr, uid, ids, item, context={}):
 		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
 		return {'value':{'uom_id':product.uom_id.id}}
 
+	def check_item_material(self, cr, uid, ids, item, context={}):
+
+		return {'value':{'sale_line_material_id':False}}
 
 SBM_Work_Order_Output()	
 

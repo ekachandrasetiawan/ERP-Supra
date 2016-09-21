@@ -76,7 +76,7 @@
 	            	</group>
 	            <notebook colspan="4">
 	            	<page string="Product Outputs">
-	            		<field name="outputs">
+	            		<field name="outputs" context="{'type':source_type}">
 	            			<tree>
 	            				<field name="item_id"/>
 	            				<field name="desc"/>
@@ -89,6 +89,10 @@
 	            				<field name="qty"/>
 	            				<field name="uom_id"/>
 	            				<field name="attachment_ids" colspan="4"  widget="many2many_binary" string="Attach a file"/>
+	            				<field name="wo_type" invisible="1"/>
+	            				<separator string="Detail Sales Order" colspan="4"/>
+								<field name="sale_line_id" domain="[('order_id', '=', parent.sale_order_id)]" on_change="check_item_material(sale_line_id)" attrs="{'required':[('wo_type', '=', 'sale_order')]}"/>
+								<field name="sale_order_material_line" domain="[('sale_order_line_id', '=', sale_line_id)]" attrs="{'required':[('wo_type', '=', 'sale_order')]}"/>
 		            				<notebook colspan="4">
 											<page string="Consumed Materials">
 												<field name="raw_materials" colspan="4" nolabel="1" widget="one2many_list">
