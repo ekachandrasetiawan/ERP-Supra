@@ -196,6 +196,9 @@ class order_preparation(osv.osv):
          
     def preparation_confirm(self, cr, uid, ids, context=None):
         val = self.browse(cr, uid, ids)[0]
+        if val.picking_id.state == 'cancel':
+            raise osv.except_osv(('Warning'), ('Delivery Order Status Cancel, Please Refresh Delivery Order '))
+            
         notActiveProducts = []
         for x in val.prepare_lines:
             context['location'] = x.move_id.location_id.id
