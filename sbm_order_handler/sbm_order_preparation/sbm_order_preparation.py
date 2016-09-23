@@ -228,6 +228,11 @@ class order_preparation(osv.osv):
 	"""
 	def preparation_submit(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
+
+		if val.picking_id.id:
+			if val.picking_id.state == 'cancel':
+				raise osv.except_osv(('Warning'), ('Delivery Order Status Cancel, Please Refresh Delivery Order '))
+
 		res = False
 		if self.validasi(cr, uid, ids, context=context):
 			res = self.write(cr, uid, ids, {'state':'submited'}, context=context)

@@ -173,6 +173,9 @@ class order_preparation(osv.osv):
 	def preparation_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 
+		if val.picking_id.state == 'cancel':
+			raise osv.except_osv(('Warning'), ('Delivery Order Status Cancel, Please Refresh Delivery Order '))
+
 		obj_op_line = self.pool.get('order.preparation.line')
 		obj_op = self.pool.get('order.preparation')
 		obj_dn_line_mat = self.pool.get('delivery.note.line.material')
