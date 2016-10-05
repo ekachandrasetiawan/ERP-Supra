@@ -558,7 +558,7 @@
 				<header> 
 					<button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}" />
 
-					<button name="generate_wo" type="object" string="Generate work Order" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure to Generate Work Order"/>
+					<button name="generate_wo" type="object" string="Generate work Order" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure to Generate Work Order" />
 
 					<button name="cek_so" type="object" string="Cek Sale order"/>
 					 <button name="print_so_web" type="object" string="Print SO"/>
@@ -732,7 +732,7 @@
 			<field name="arch" type="xml">
 				<form string="quotation" version="7.0">
 					<header>
-						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system" />
+						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system,base.group_admin_support,sbm_order_handler.group_admin_ho"/>
 					
 						<button name="cancel_quotation" type="object" string="Cancel" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system" />
 
