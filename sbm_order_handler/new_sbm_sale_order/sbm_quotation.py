@@ -84,20 +84,19 @@ class Sale_order(osv.osv):
 		user_group_ho = self.pool.get('res.groups').browse(cr, uid, id_group_ho)
 
 		status = False
+		
 		if user_group:
 			for x in user_group.users:
 				if uid == x.id:
 					status = True
 
+		if user_group_ho:
 			for y in user_group_ho.users:
 				if uid == y.id:
 					status = True
 
-		if val.state == 'confirmed' and status == True:
-			print '===ok===='
-		else:
+		if val.quotation_state == 'confirmed' and status == False:
 			raise osv.except_osv(('Warning..!!'), ('User Not Access Edit Quotation'))
-
 
 		return super(Sale_order, self).write(cr, uid, ids, vals, context=context)
 
