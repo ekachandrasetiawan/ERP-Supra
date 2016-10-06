@@ -40,7 +40,7 @@
 					<field name="count_revised"/>
 				</xpath>
 				<header position="inside">
-					<button name='%(wizard_revise_quotation_form)d' type='action' string='Revise' groups="base.group_sales_supra,base.group_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}" confirm="Sure want to revise quotation?"/>
+					<button name='%(wizard_revise_quotation_form)d' type='action' string='Revise' groups="base.group_sales_supra,base.group_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}" confirm="Sure want to revise quotation?" icon="STOCK_EDIT"/>
 				</header>
 				
 

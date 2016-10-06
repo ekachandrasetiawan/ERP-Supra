@@ -73,6 +73,34 @@ class Sale_order(osv.osv):
 	_name ='sale.order'
 	_inherit =['sale.order','mail.thread']
 
+	def write(self,cr,uid,ids,vals,context={}):
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		m  = self.pool.get('ir.model.data')
+		id_group = m.get_object(cr, uid, 'base', 'group_admin_support').id
+		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+		id_group_ho = m.get_object(cr, uid, 'sbm_order_handler', 'group_admin_ho').id
+		user_group_ho = self.pool.get('res.groups').browse(cr, uid, id_group_ho)
+
+		status = False
+		if user_group:
+			for x in user_group.users:
+				if uid == x.id:
+					status = True
+
+			for y in user_group_ho.users:
+				if uid == y.id:
+					status = True
+
+		if val.state == 'confirmed' and status == True:
+			print '===ok===='
+		else:
+			raise osv.except_osv(('Warning..!!'), ('User Not Access Edit Quotation'))
+
+
+		return super(Sale_order, self).write(cr, uid, ids, vals, context=context)
+
 
 	# def _count_total(self,cr,uid,ids,fields_name,args,context={}):
 	# 	res={}

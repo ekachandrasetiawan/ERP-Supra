@@ -7,8 +7,8 @@
 			<field name="inherit_id" ref='quotation_form_view'/>
 			<field name="arch" type='xml'>
 				<header>
-					<button name="print_rfq" type="object" string="Print Quotation"/>
-					<button name="print_rfq_web" type="object" string="Print Quotation Web"/>
+					<button name="print_rfq" type="object" string="Print Quotation" icon="STOCK_PRINT"/>
+					<button name="print_rfq_web" type="object" string="Print Quotation Web" icon="STOCK_PRINT_PREVIEW"/>
 				</header>
 			</field>
 
