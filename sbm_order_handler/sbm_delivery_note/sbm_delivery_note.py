@@ -96,9 +96,11 @@ class delivery_note(osv.osv):
 				mount= rom[int(vals[2])]
 
 			dn = self.pool.get('delivery.note')
-			
-			saleid = self.pool.get('order.preparation').browse(cr, uid, val.prepare_id.id).sale_id.id
-			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
+			if val.prepare_id.id:
+				saleid = self.pool.get('order.preparation').browse(cr, uid, val.prepare_id.id).sale_id.id
+				usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
+			else:
+				usa = "FALSE"
 
 			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
 			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
