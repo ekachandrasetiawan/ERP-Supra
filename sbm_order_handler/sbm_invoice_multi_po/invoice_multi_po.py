@@ -283,13 +283,13 @@ class merge_pickings(osv.osv_memory):
 		# Valisasi Invoice Picking Cek Po apakah sudah ada Invoice
 		for x in picking_ids:
 			pick =pool_picking.browse(cr,uid,x)
-
-			cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [pick.purchase_id.id])
-			invoice = map(lambda x: x[0], cr.fetchall())
-			
-			if invoice:
-				raise osv.except_osv(_('Warning!'),
-				_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Dari Consolidate Picking'))
+			if data.type == 'in':
+				cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [pick.purchase_id.id])
+				invoice = map(lambda x: x[0], cr.fetchall())
+				
+				if invoice:
+					raise osv.except_osv(_('Warning!'),
+					_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Dari Consolidate Picking'))
 
 
 		
@@ -342,28 +342,29 @@ class merge_pickings(osv.osv_memory):
 			'picking_ids': [(6,0, picking_ids)]})
 		
 
-		# Daftarkan Ke Purchase Invoice Rel
-		add_po_id = []
-		for y in picking_ids:
-			pick2 =pool_picking.browse(cr,uid,y)
-			add_po_id += [pick2.purchase_id.id]
+		if data.type == 'in':
+			# Daftarkan Ke Purchase Invoice Rel
+			add_po_id = []
+			for y in picking_ids:
+				pick2 =pool_picking.browse(cr,uid,y)
+				add_po_id += [pick2.purchase_id.id]
 
-		
-		#convert list into set
-		cek_unique = set(add_po_id)
+			
+			#convert list into set
+			cek_unique = set(add_po_id)
 
-		#convert back to list
-		add_po_id = list(cek_unique)
+			#convert back to list
+			add_po_id = list(cek_unique)
 
-		# Filter PO ID yang sama, Handle jika Multi Picking dari PO yang sama
-		unique_list = [
-		e
-		for i, e in enumerate(add_po_id)
-			if add_po_id.index(e) == i
-		]
+			# Filter PO ID yang sama, Handle jika Multi Picking dari PO yang sama
+			unique_list = [
+			e
+			for i, e in enumerate(add_po_id)
+				if add_po_id.index(e) == i
+			]
 
-		for a in add_po_id:
-			cr.execute('insert into purchase_invoice_rel (purchase_id,invoice_id) values (%s,%s)', (a, invoice_id))
+			for a in add_po_id:
+				cr.execute('insert into purchase_invoice_rel (purchase_id,invoice_id) values (%s,%s)', (a, invoice_id))
 		
 		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
 			pool_picking.write(cr, uid, [picking.id], {'invoice_state': 'invoiced', 'invoice_id': invoice_id}) 
