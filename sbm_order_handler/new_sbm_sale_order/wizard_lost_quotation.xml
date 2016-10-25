@@ -39,7 +39,7 @@
 			<field name="inherit_id" ref="quotation_form_view"/>
 			<field name="arch" type="xml">
 				<header position="inside">
-					<button name='%(wizard_lost_quotation_form)d' type='action' string='Lost' groups="base.group_sales_supra,base.group_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}"/>
+					<button name='%(wizard_lost_quotation_form)d' type='action' string='Lost' groups="base.group_sales_supra,base.group_sales_admin,base.group_system" attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}" icon="STOCK_NO"/>
 				</header>
 			</field>
 		</record>
