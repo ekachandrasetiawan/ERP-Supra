@@ -232,6 +232,23 @@ class delivery_note(osv.osv):
 
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
+
+	def onchange_old_spk(self, cr, uid, ids, spk_id, context={}):
+		browse = self.browse(cr, uid, ids, context=context)[0]
+
+		spk = self.pool.get('perintah.kerja').browse(cr, uid, spk_id, context=context)
+		line = []
+		for spk_item in spk.perintah_lines:
+			line.append((0,0,{
+				'product_id':spk_item.product_id.id,
+				'name': spk_item.name,
+				'product_qty':spk_item.product_qty,
+				'product_uom':spk_item.product_uom.id,
+			}))
+
+		res['note_lines'] = line
+		return {'value':res}
+
 	""""Event On Change Order Packaging"""
 	def prepare_change(self, cr, uid, ids, pre):
 		res = super(delivery_note,self).prepare_change(cr, uid, ids, pre)
@@ -512,30 +529,30 @@ class delivery_note(osv.osv):
 		dn_material = self.pool.get('delivery.note.line.material')
 		stock_picking = self.pool.get('stock.picking')
 		stock_move = self.pool.get('stock.move')
+		if val.special!=True:
+			if val.prepare_id.state != 'done':
+				raise osv.except_osv(_('Error'),_('Error to Approve Delivery Note\nOrder Preparation Document state not Ready / Done yet.\n Maybe order in Re Packing\n'))
 
-		if val.prepare_id.state != 'done':
-			raise osv.except_osv(_('Error'),_('Error to Approve Delivery Note\nOrder Preparation Document state not Ready / Done yet.\n Maybe order in Re Packing\n'))
 
+			cek = dn_line.search(cr,uid, [('note_id','=', ids)])
+			hasil = dn_line.browse(cr, uid, cek)
+			for data in hasil:
+				product =[x.id for x in data.note_lines_material if x.id]
+				if product == []:
+					raise openerp.exceptions.Warning("Delivery Note Line Tidak Memiliki Material Lines")
+			# Jalankan Fungsi Asli Package Confirm
+			dn.package_confirm(cr,uid, ids,context=context)
+			self.validate(cr,uid,ids,context=context)
+			
 
-		cek = dn_line.search(cr,uid, [('note_id','=', ids)])
-		hasil = dn_line.browse(cr, uid, cek)
-		for data in hasil:
-			product =[x.id for x in data.note_lines_material if x.id]
-			if product == []:
-				raise openerp.exceptions.Warning("Delivery Note Line Tidak Memiliki Material Lines")
-		# Jalankan Fungsi Asli Package Confirm
-		dn.package_confirm(cr,uid, ids,context=context)
-		self.validate(cr,uid,ids,context=context)
-		
+			# Jalankan Fungsi Create Picking jika dn baru
+			if not val.prepare_id.picking_id:
+				dn.create_picking(cr, uid, ids)
+			else:
+				self.write(cr,uid,ids,{'picking_id':val.prepare_id.picking_id.id})
 
-		# Jalankan Fungsi Create Picking jika dn baru
-		if not val.prepare_id.picking_id:
-			dn.create_picking(cr, uid, ids)
-		else:
-			self.write(cr,uid,ids,{'picking_id':val.prepare_id.picking_id.id})
-
-		# Jalankan Fungsi Sequence No
-		dn.set_sequence_no(cr, uid, ids, False, context=context)
+			# Jalankan Fungsi Sequence No
+			dn.set_sequence_no(cr, uid, ids, False, context=context)
 
 		self.write(cr, uid, ids, {'state':'submited'}, context=context)
 

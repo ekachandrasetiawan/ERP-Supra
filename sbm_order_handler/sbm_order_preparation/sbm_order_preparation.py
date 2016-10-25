@@ -8,6 +8,10 @@ from osv import fields, osv
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 from openerp.addons.mail.tests.test_mail_base import TestMailBase
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class order_preparation(osv.osv):
 	_inherit = "order.preparation"
@@ -35,7 +39,7 @@ class order_preparation(osv.osv):
 
 	_order = "id desc"
 
-	def picking_change(self,cr,uid,ids,picking_id):
+	def picking_change(self,cr,uid,ids,picking_id,context={}):
 		res = False
 		if picking_id:
 			pick = self.pool.get('stock.picking').browse(cr,uid,picking_id)
@@ -45,31 +49,31 @@ class order_preparation(osv.osv):
 				for material in ol.material_lines:
 					is_so_has_material = True
 			# if so has material
-			if is_so_has_material:
-				# maybe its old so  but already partialed order
-				# means maybe in past some item has been delivered
-				# need check is moves has material line id
-				is_move_linked_to_material = False
-				for move in pick.move_lines:
-					if move.sale_material_id:
-						is_move_linked_to_material  = True
-				if not is_move_linked_to_material:
-					# if not linked it means so is old so,, so confirmed has picking
-					# then we need to rewrite sale order material line into stock move
+			# if is_so_has_material:
+			# 	# maybe its old so  but already partialed order
+			# 	# means maybe in past some item has been delivered
+			# 	# need check is moves has material line id
+			# 	is_move_linked_to_material = False
+			# 	for move in pick.move_lines:
+			# 		if move.sale_material_id:
+			# 			is_move_linked_to_material  = True
+			# 	if not is_move_linked_to_material:
+			# 		# if not linked it means so is old so,, so confirmed has picking
+			# 		# then we need to rewrite sale order material line into stock move
 
-					self.pool.get('sale.order').generate_material(cr,uid,move.sale_line_id.order_id.id,context=None)
-					# then we need to re call sale_change_id after material generated
-					return self.sale_change(cr, uid, ids, move.sale_line_id.order_id.id, False, context=context)
+			# 		self.pool.get('sale.order').generate_material(cr,uid,move.sale_line_id.order_id.id,context=None)
+			# 		# then we need to re call sale_change_id after material generated
+			# 		return self.sale_change(cr, uid, ids, move.sale_line_id.order_id.id, False, context=context)
 
-				else:
-					# if stock move has sale_material_id then it means its picking is partial on old so processing
-					# then we just only need to load line
-					print "aAAA"
+			# 	else:
+			# 		# if stock move has sale_material_id then it means its picking is partial on old so processing
+			# 		# then we just only need to load line
+			# 		print "aAAA"
 
-			else:
-				# if so does not has material
-				# it means old so,, and not delivered yet
-				print "BBBB"
+			# else:
+			# 	# if so does not has material
+			# 	# it means old so,, and not delivered yet
+			# 	print "BBBB"
 			res = super(order_preparation,self).picking_change(cr,uid,ids,picking_id)
 			if pick:
 				res['value']['partner_id'] = pick.sale_id.partner_id.id
@@ -435,6 +439,7 @@ class order_preparation(osv.osv):
 
 				
 				print res,"OP***********************************"
+				_logger.error((res,"............OPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",res))
 			return  {'value': res}
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
