@@ -195,89 +195,81 @@ class sale_order_material_line(osv.osv):
 		return res
 
 
-	# find stock move object related with sale order where not in draft, cancel or done
-	# if stock move not found
+	# def _count_process_qty(self,cr,uid,ids,name,args,context={}):
+	# 	res={}
+	# 	materials = self.browse(cr,uid,ids,context=context)
+	# 	sm = self.pool.get('stock.move')
+
+
+	# 	#Browse ke sale order material line #
+	# 	for item in materials:
+	# 		sale_obj = item.sale_order_line_id.order_id #browse record of sale.order related in material
+	# 		shipped_qty=0.0
+
+
+	# 		# start count from order preparation who does not had picking_id and not has delivery note
+	# 		s_opl = self.pool.get('order.preparation.line').search(cr, uid, [('preparation_id.state','not in',['cancel','draft']), ('preparation_id.sale_id','=',sale_obj.id), ('sale_line_id', '=', item.sale_order_line_id.id), ('sale_line_material_id', '=', item.id)])
+
+	# 		extra_count_op = False
+	# 		old_op_wkf = False
+
+	# 		if not s_opl:
+	# 			# if result none maybe op created on old workflow,, without sale_line_material_id
+	# 			s_opl = self.pool.get('order.preparation.line').search(cr, uid, [('preparation_id.state','not in',['cancel','draft']), ('preparation_id.sale_id','=',sale_obj.id), ('sale_line_id', '=', item.sale_order_line_id.id)])
+				
+	# 			for opl in s_opl:
+	# 				if not opl.sale_line_material_id:
+	# 					old_op_wkf = True #old workflow
+
+
+
+	# 		if s_opl and not old_op_wkf:
+	# 			extra_count_op = True
+	# 			if s_opl.prepation_id.delivery_lines:
+	# 				# op has delivery note
+	# 				# loop each delivery note
+	# 				for dn in s_opl.preparation_id.delivery_lines:
+	# 					if dn.state not in ['draft','cancel']:
+	# 						extra_count_op = False
+
+				
+	# 			if extra_count_op:
+	# 				shipped_qty += s_opl.product_qty
+	# 		criteria = [('sale_line_id', '=', item.sale_order_line_id.id), ('state', 'not in', ['done','draft','cancel']), ('sale_material_id', '=', item.id), ('type','like','out')]
+
+	# 		get_move_material = sm.search(cr, uid, criteria, context=context)
+	# 		material_not_found = False
+	# 		if get_move_material:
+	# 			moves = sm.browse(cr, uid, get_move_material, context=context)
+	# 		else:
+	# 			criteria = [('sale_line_id', '=', item.sale_order_line_id.id), ('state', 'not in', ['done','draft','cancel']), ('type','like','out')]
+	# 			moves = sm.browse(cr, uid, sm.search(cr, uid, criteria, context=context), context=context)
+	# 			material_not_found = True
+
+	# 		if moves:
+	# 			for move in moves:
+	# 				count_it = False
+	# 				if material_not_found:
+	# 					if item.product_id.id == move.product_id.id:
+	# 						count_it = True
+
+	# 				else:
+	# 					count_it = True
+	# 				if count_it:
+	# 						shipped_qty += move.product_qty
+
+	# 		res[item.id]=shipped_qty
+	# 	return res
+
 	def _count_process_qty(self,cr,uid,ids,name,args,context={}):
-		res={}
-		materials = self.browse(cr,uid,ids,context=context)
-		sm = self.pool.get('stock.move')
-
-
-		#Browse ke sale order material line #
-		for item in materials:
-			sale_obj = item.sale_order_line_id.order_id #browse record of sale.order related in material
-			shipped_qty=0.0
-
-
-			# start count from order preparation who does not had picking_id and not has delivery note
-			s_opl = self.pool.get('order.preparation.line').search(cr, uid, [('preparation_id.state','not in',['cancel','draft']), ('preparation_id.sale_id','=',sale_obj.id), ('sale_line_id', '=', item.sale_order_line_id.id), ('sale_line_material_id', '=', item.id)])
-
-			extra_count_op = False
-			old_op_wkf = False
-
-			if not s_opl:
-				# if result none maybe op created on old workflow,, without sale_line_material_id
-				s_opl = self.pool.get('order.preparation.line').search(cr, uid, [('preparation_id.state','not in',['cancel','draft']), ('preparation_id.sale_id','=',sale_obj.id), ('sale_line_id', '=', item.sale_order_line_id.id)])
-				
-				for opl in s_opl:
-					if not opl.sale_line_material_id:
-						old_op_wkf = True #old workflow
-
-
-
-			if s_opl and not old_op_wkf:
-				extra_count_op = True
-				if s_opl.prepation_id.delivery_lines:
-					# op has delivery note
-					# loop each delivery note
-					for dn in s_opl.preparation_id.delivery_lines:
-						if dn.state not in ['draft','cancel']:
-							extra_count_op = False
-
-				
-				if extra_count_op:
-					shipped_qty += s_opl.product_qty
-
-			
-
-
-			# first check picking_ids
-			criteria = [('sale_line_id', '=', item.sale_order_line_id.id), ('state', 'not in', ['done','draft','cancel']), ('sale_material_id', '=', item.id), ('type','like','out')]
-
-			get_move_material = sm.search(cr, uid, criteria, context=context)
-			material_not_found = False
-			if get_move_material:
-				moves = sm.browse(cr, uid, get_move_material, context=context)
-			else:
-				# try to browse without sale_material_id without sale_material_id comparation
-				criteria = [('sale_line_id', '=', item.sale_order_line_id.id), ('state', 'not in', ['done','draft','cancel']), ('type','like','out')]
-				moves = sm.browse(cr, uid, sm.search(cr, uid, criteria, context=context), context=context)
-				material_not_found = True
-
-
-			if moves:
-				for move in moves:
-					count_it = False
-
-					if material_not_found:
-						# if material not found or not filled in stock.move object
-						# it means old picking,, picking generated by so confirmed and move not has sale_material_id
-						# we need check by product id
-						# if product id same as product id in material then append shipped qty
-						if item.product_id.id == move.product_id.id:
-							count_it = True
-
-					else:
-						# if material found
-						# means that picking generated by sbm delivery note modules
-						count_it = True
-
-					if count_it:
-							shipped_qty += move.product_qty
-
-
-
-			res[item.id]=shipped_qty
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('order.preparation.line').search(cr,uid,[('sale_line_material_id', '=' ,item.id)])
+			hasil= 0
+			for data in  self.pool.get('order.preparation.line').browse(cr,uid,move):
+				if data.preparation_id.state <> 'cancel':
+					hasil += data.product_qty
+			res[item.id] = hasil
 		return res
 
 	def _date_order(self,cr,uid,ids,name,args,context={}):

@@ -94,7 +94,6 @@ class Sale_order(osv.osv):
 			for y in user_group_ho.users:
 				if uid == y.id:
 					status = True
-
 		if val.quotation_state == 'confirmed' and status == False:
 			raise osv.except_osv(('Warning..!!'), ('User Not Access Edit Quotation'))
 
@@ -212,7 +211,7 @@ class Sale_order(osv.osv):
 		newOrderId = self.create(cr,uid,prepareNewSO,context)
 
 		# set old order reference id
-		self._set_repeat_so_id(cr,uid,newOrderId,rec.id,context=context)
+		# self._set_repeat_so_id(cr,uid,newOrderId,rec.id,context=context)
 
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_order_handler', 'quotation_form_view')
@@ -573,13 +572,12 @@ class Sale_order(osv.osv):
 						}
 					# print material.product_uom.id,"<<<<<<<<<<<"
 					this_material.write(cr,uid,material.id,vals,context)
+				# else:
+				# 	raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
 				else:
 					# raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
 					print "Exist";
 			
-
-
-		
 
 		return res
 
