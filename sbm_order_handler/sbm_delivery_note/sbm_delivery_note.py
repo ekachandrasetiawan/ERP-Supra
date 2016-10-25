@@ -114,6 +114,7 @@ class delivery_note(osv.osv):
 		res = {}
 		self._getRequestDocNo(cr, uid, ids, field_name,args,context={})
 		for item in self.browse(cr,uid,ids,context=context):
+			print val.name,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,------PPPPPP",val.state
 			if val.state == 'draft':
 				RequestNo = '/'	
 			else:
@@ -529,7 +530,7 @@ class delivery_note(osv.osv):
 		dn_material = self.pool.get('delivery.note.line.material')
 		stock_picking = self.pool.get('stock.picking')
 		stock_move = self.pool.get('stock.move')
-		if val.special!=True:
+		if not val.special:
 			if val.prepare_id.state != 'done':
 				raise osv.except_osv(_('Error'),_('Error to Approve Delivery Note\nOrder Preparation Document state not Ready / Done yet.\n Maybe order in Re Packing\n'))
 
@@ -550,9 +551,14 @@ class delivery_note(osv.osv):
 				dn.create_picking(cr, uid, ids)
 			else:
 				self.write(cr,uid,ids,{'picking_id':val.prepare_id.picking_id.id})
-
 			# Jalankan Fungsi Sequence No
 			dn.set_sequence_no(cr, uid, ids, False, context=context)
+		else:
+			if not val.seq_no:
+				# set new no with old style
+				print "AAAAA"
+				dn.set_sequence_no(cr, uid, ids, False, context=context)
+
 
 		self.write(cr, uid, ids, {'state':'submited'}, context=context)
 

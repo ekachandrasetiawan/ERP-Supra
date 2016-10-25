@@ -88,14 +88,16 @@
 													<field name="name" colspan="4"/>
 														<field name="refunded_item" />
 														<field name="note_lines_material" colspan="4" nolabel="1" widget="one2many_list">
-																<tree>
-																	<field name="product_id"/>
-																	<field name="prodlot_id" widget="one2many_list"/>
-																	<field name="desc"/>
-																	<field name="qty"/>
-																	<field name="product_uom"/>
-																	<field name="refunded_item"/>
-																</tree>
+																<form>
+																	<group>
+																		<field name="product_id"/>
+																		<field name="prodlot_id" widget="one2many_list"/>
+																		<field name="desc"/>
+																		<field name="qty"/>
+																		<field name="product_uom"/>
+																		<field name="refunded_item"/>
+																	</group>
+																</form>
 															</field>
 												</form>
 												<tree string="Delviery Note Line" colors="red:state == 'donerefund'">

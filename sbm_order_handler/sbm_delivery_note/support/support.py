@@ -26,7 +26,7 @@ class delivery_note(osv.osv):
 		op = self.pool.get('order.preparation').browse(cr,uid,dn.prepare_id.id)#browse objek Order Preparation id dari dn.prepare_id.id
 		so = self.pool.get('sale.order').browse(cr,uid,op.sale_id.id)#browse objek sale order id dari op.sale_id.id
 		localtime = time.asctime( time.localtime(time.time()) )#waktu Local
-		local_month = "0"+str(time.localtime(time.time()).tm_mon)#waktu local month
+		local_month = time.strftime('%m')
 		
 
 		act_inv = self.pool.get('account.invoice') #objek account invoice
