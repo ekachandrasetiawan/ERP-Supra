@@ -573,13 +573,8 @@ class Sale_order(osv.osv):
 						}
 					# print material.product_uom.id,"<<<<<<<<<<<"
 					this_material.write(cr,uid,material.id,vals,context)
-				else:
-					raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
-			
-
-
-		
-
+				# else:
+				# 	raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
 		return res
 
 	def cancel_quotation(self,cr,uid,ids,context={}):
