@@ -2135,7 +2135,7 @@ class InternalMoveLine(osv.osv):
 		'name':fields.char('Name'),
 		'no':fields.integer('No',required=False),
 		'desc':fields.text('Description'),
-		'internal_move_id':fields.many2one('internal.move',string='Internal Move No',required=True,ondelete="CASCADE",onupdate="CASCADECR."),
+		'internal_move_id':fields.many2one('internal.move',string='Internal Move No',required=True,ondelete="CASCADE",onupdate="CASCADE"),
 		'internal_move_request_line_id':fields.many2one('internal.move.request.line',string="IM Req Line"),
 		'product_id':fields.many2one('product.product',string="Product",required=True),
 		'uom_id':fields.many2one('product.uom',string="UOM",required=True),
