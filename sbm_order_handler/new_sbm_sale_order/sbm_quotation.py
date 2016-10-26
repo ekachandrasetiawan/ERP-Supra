@@ -74,8 +74,9 @@ class Sale_order(osv.osv):
 	_inherit =['sale.order','mail.thread']
 
 	def write(self,cr,uid,ids,vals,context={}):
-		val = self.browse(cr, uid, ids, context={})[0]
-
+		cek=self.pool.get('sale.order').search(cr,uid,[('id', '=' ,ids)])
+		obj_so = self.pool.get('sale.order').browse(cr, uid, cek)[0]
+		
 		m  = self.pool.get('ir.model.data')
 		id_group = m.get_object(cr, uid, 'base', 'group_admin_support').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
@@ -94,7 +95,7 @@ class Sale_order(osv.osv):
 			for y in user_group_ho.users:
 				if uid == y.id:
 					status = True
-		if val.quotation_state == 'confirmed' and status == False:
+		if obj_so.quotation_state == 'confirmed' and status == False:
 			raise osv.except_osv(('Warning..!!'), ('User Not Access Edit Quotation'))
 
 		return super(Sale_order, self).write(cr, uid, ids, vals, context=context)

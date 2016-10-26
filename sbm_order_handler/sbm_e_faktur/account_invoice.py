@@ -356,27 +356,3 @@ class account_invoice_line(osv.osv):
 				return {'warning': warning}
 		return True
 
-	def product_id_change(self, cr, uid, ids, product, uom_id, qty=0, name='', type='out_invoice', partner_id=False, fposition_id=False, price_unit=False, currency_id=False, context=None, company_id=None):
-		# 'domain': {'uos_id': [('category_id', '=', 1)]}
-		res=super(account_invoice_line,self).product_id_change(cr, uid, ids, product, uom_id, qty=qty, name=name, type=type, partner_id=partner_id, fposition_id=fposition_id, price_unit=price_unit, currency_id=currency_id, context=context, company_id=company_id)
-		# print res 
-		# print 'iniiii ressssss'
-		# print context
-		product_obj = self.pool.get('product.product').browse(cr,uid,product,context=context) #dapetin product berdasarkan product id
-
-		if product == False:
-			return False
-		domain_uos	= ['|']
-		domain_uos.append(res['domain']['uos_id'][0])
-		
-		add_domain = ("id",'=',product_obj.uos_id.id)
-		domain_uos.append(add_domain)
-		# print domain_uos,"<<<<<domain"
-		res['domain']['uos_id'] = domain_uos
-
-		res['value']['uos_id'] = product_obj.uom_id.id
-
-		print res
-		return res
-
-
