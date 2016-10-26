@@ -64,14 +64,21 @@ class delivery_note(osv.osv):
 		#nilai yang akan di input di invoice
 		for note_lines in dn.note_lines:
 			# nilai yang akan di input ke invoice line
+			if note_lines.sale_line_id:
+				set_price_unit = note_lines.sale_line_id.price_unit
+			elif note_lines.op_line_id.sale_line_id:
+				set_price_unit = note_lines.op_line_id.sale_line_id.price_unit
+			else:
+				set_price_unit = note_lines.op_line_id.move_id.sale_line_id.price_unit
+
 			isi_noteline.append((0,0,{
 			'product_id':note_lines.product_id.id, #dari product account invoice line
 			'quantity':note_lines.product_qty, #dari qty account invoice line
-			'price_unit':note_lines.sale_line_id.price_unit, #dari price sale order line
+			'price_unit':set_price_unit, #dari price sale order line
 			'uos_id':note_lines.product_uom.id,#dari uom account invoice line
-			
-			'name':note_lines.product_id.name#dari nama  product di note_lines
-			})) 
+			'name':note_lines.name#dari nama  product di note_lines
+			}))
+
 		values_invoice={ 
 			'partner_id':dn.partner_id.id,# dari dn customer
 			'journal_id':1, #isinya sales journal idr
@@ -86,16 +93,10 @@ class delivery_note(osv.osv):
 			'name':dn.poc,# Customer Reference dari dn
 			'invoice_line':isi_noteline
 		}
-		
 		create_invoice =act_inv.create(cr, uid, values_invoice, context=None) # untuk membuat Invoice blm termasuk invoice line
 	
 		#perulangan untuk masuk ke delivery note_lines
-		
-		
 
-
-
-		
 		self.pool.get('stock.picking').write(cr,uid,dn.picking_id.id,{'invoice_id':create_invoice,'invoice_state':'invoiced'})
 		mod_obj = self.pool.get('ir.model.data') #objek ir_model_data
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')#mencari view id di objek ir.model.data
