@@ -102,7 +102,6 @@ class delivery_note(osv.osv):
 			else:
 				usa = "FALSE"
 
-			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
 			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
 			RequestNo  = 'C/SBM-ADM/'+usa+'-'+use+'/'+mount+'/'+val.doc_date[2:2 + 2]
 
@@ -114,7 +113,6 @@ class delivery_note(osv.osv):
 		res = {}
 		self._getRequestDocNo(cr, uid, ids, field_name,args,context={})
 		for item in self.browse(cr,uid,ids,context=context):
-			print val.name,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,------PPPPPP",val.state
 			if val.state == 'draft':
 				RequestNo = '/'	
 			else:
@@ -155,7 +153,6 @@ class delivery_note(osv.osv):
 			store={
 				'delivery.note': (lambda self, cr, uid, ids, c={}: ids, ['doc_date','state'], 20),
 			}),
-
 	}
 
 	_defaults = {
@@ -405,25 +402,6 @@ class delivery_note(osv.osv):
 	Return String 
 	delivery note sequence no
 	"""
-	def get_new_sequence_no(self, cr, uid, ids, context=None):
-		val = self.browse(cr, uid, ids, context={})[0]
-		dn = self.pool.get('delivery.note')
-		# Create No Delivery Note
-		if val.special==True:
-			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-			usa = 'SPC'
-			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-			dn_no =time.strftime('%y')+ vals[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(vals[2])]+'/'+vals[1]
-		else:    
-			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-			saleid = self.pool.get('order.preparation').browse(cr, uid, val.prepare_id.id).sale_id.id
-			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
-			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-			dn_no =time.strftime('%y')+ vals[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(vals[2])]+'/'+vals[1]
-
-		return dn_no
 
 	def get_seq_no(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
@@ -438,7 +416,6 @@ class delivery_note(osv.osv):
 			if not val.name or force or val.name == '/': #if name is None / False OR if allow to write new sequence no
 				self.write(cr, uid, ids,{
 										'seq_no':self.get_seq_no(cr,uid,ids,context=context),
-										'name':self.get_new_sequence_no(cr,uid,ids,context=context),
 										},context=context) #write name into new sequence
 		return True
 
