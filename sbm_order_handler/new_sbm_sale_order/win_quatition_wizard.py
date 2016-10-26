@@ -21,7 +21,6 @@ class win_quatition_wizard(osv.osv_memory):
 	def confirm(self,cr,uid,ids,context={}):
 		print context,'context----'
 		res = {}
-
 		# browse() untuk mining data dari database browse(cr,uid,ids,context) ids bisa list bisa integer
 		datas = self.browse(cr, uid, ids[0], context=context)
 		print ids,"======================================",datas.date_order
@@ -29,7 +28,13 @@ class win_quatition_wizard(osv.osv_memory):
 			raise osv.except_osv(_('Warning'),_('Periksa Date Order, Due Date, dan Delivery Date'))
 
 		# udpate account_invoice set cancel_reason='', cancel_stage='' where account_invoice.id=id
-		self.pool.get('sale.order').write(cr,uid,context['active_id'],{'date_order':datas.date_order,'client_order_ref':datas.client_order_ref,'due_date':datas.due_date,'delivery_date':datas.delivery_date,'quotation_state':'win'},context=context)
+		self.pool.get('sale.order').write(cr,uid,context['active_id'],{
+			'date_order':datas.date_order,
+			'client_order_ref':datas.client_order_ref,
+			'due_date':datas.due_date,
+			'delivery_date':datas.delivery_date,
+			'quotation_state':'win'
+			},context=context)
 		# print datas.cancel_reason
 		quotation_obj = self.pool.get("sale.order")
 		quotation_obj.action_button_confirm(cr, uid, [context['active_id']], context)
