@@ -356,22 +356,18 @@ class order_preparation(osv.osv):
 				active = [] #list of browse record
 				sale_material_id_generated = False
 				for picking in data.picking_ids:
-					print picking.id,"ISSSSSSSSSSSSSSSS-->",picking.state
 					if picking.state != 'cancel' and picking.state !='done':
-						print "Has active picking",picking
 						for move_line in picking.move_lines:
 							if move_line.sale_material_id:
 								sale_material_id_generated =True
 
 						active.append(picking)
-				print active,"<<<<<<"
 				if len(active)==1 and sale_material_id_generated == False:
 					so.generate_material(cr,uid,sale,context=context)
 					has_postpone_picking=True
-					# if only 1 active picking
-					# then wee need to add picking_id into order preparation
-					res['picking_id'] = active[0].id
-					return {'value':res}
+					self.pool.get('stock.picking').action_cancel(cr, uid, [active[0].id])
+					# res['picking_id'] = active[0].id
+					# return {'value':res}
 
 				res['poc'] = data.client_order_ref
 				res['partner_id'] = data.partner_id.id
@@ -389,8 +385,6 @@ class order_preparation(osv.osv):
 					so.generate_material(cr,uid,old_id,context=context)
 					so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
 				for x in data.order_line:
-					
-
 					# if loc:
 					# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
 					# else:
@@ -401,14 +395,12 @@ class order_preparation(osv.osv):
 
 					theNum=1
 					for y in so_material_line.browse(cr, uid, material_lines):
-						print y.id,"++"
 						# Cek Material Line Dengan OP Line
 						nilai= 0 #nilai yang sudah di ambil item nya ke dalam op.
 						op_line = []
 						curr_op_id=ids
 
 						op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','not in',curr_op_id)])
-						print op_line,"++--"
 						for l in obj_op_line.browse(cr, uid, op_line):
 							# Cek Status OP 
 							op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
@@ -423,7 +415,6 @@ class order_preparation(osv.osv):
 
 							if op.state <> 'cancel':
 								nilai += l.product_qty - product_return
-
 
 						if y.product_id.type <> 'service':
 							if nilai < y.qty:
@@ -448,42 +439,6 @@ class order_preparation(osv.osv):
 								})
 								theNum=theNum+1 #append nomor urut
 				res['prepare_lines'] = line
-
-				
-				print res,"OP***********************************"
-				_logger.error((res,"............OPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",res))
-			else:
-				# if not has picking
-				theNum = 1;
-				line = []
-
-				for order_line in data.order_line:
-					for material_line in order_line.material_lines:
-						if order_line.product_no_cus:
-							seq_no = order_line.product_no_cus
-						elif order_line.sequence:
-							seq_no = order_line.sequence
-						else:
-							seq_no = theNum
-						line.append({
-							'no': int(seq_no),
-							'product_id' : material_line.product_id.id,
-							'product_qty': material_line.qty - material_line.shipped_qty + material_line.returned_qty, #nilai yang material line minta - op yang sudah di proses
-							'product_uom': material_line.uom.id,
-							'name': material_line.desc,
-							'sale_line_material_id':material_line.id,
-							'sale_line_id':material_line.sale_order_line_id.id
-						})
-
-						theNum=theNum+1
-
-				res['poc'] = data.client_order_ref
-				res['partner_id'] = data.partner_id.id
-				res['duedate'] = data.delivery_date
-				res['partner_shipping_id'] = data.partner_shipping_id.id
-
-				res['prepare_lines'] = line
-
 			return  {'value': res}
 
 
