@@ -74,7 +74,11 @@ class Sale_order(osv.osv):
 	_inherit =['sale.order','mail.thread']
 
 	def write(self,cr,uid,ids,vals,context={}):
-		val = self.browse(cr, uid, ids, context={})[0]
+		if type(ids) ==list:
+			val = self.browse(cr, uid, ids, context={})[0]
+		else:
+			val = self.browse(cr, uid, ids, context={})
+		
 
 		m  = self.pool.get('ir.model.data')
 		id_group = m.get_object(cr, uid, 'base', 'group_admin_support').id

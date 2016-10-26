@@ -343,6 +343,7 @@ class order_preparation(osv.osv):
 		so = self.pool.get('sale.order')
 
 		if sale:
+			print "CALLLLLLLLLLLLLLLLLLLLLLLLLLLLL"
 			has_old_picking = False
 			has_postpone_picking=False
 			line = []
@@ -397,6 +398,8 @@ class order_preparation(osv.osv):
 
 					material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
 
+
+					theNum=1
 					for y in so_material_line.browse(cr, uid, material_lines):
 						print y.id,"++"
 						# Cek Material Line Dengan OP Line
@@ -424,10 +427,18 @@ class order_preparation(osv.osv):
 
 						if y.product_id.type <> 'service':
 							if nilai < y.qty:
+								
+
 								location += [y.picking_location.id]
+								if y.sale_order_line_id.product_no_cus:
+									seq_no = y.sale_order_line_id.product_no_cus
+								elif y.sale_order_line_id.sequence:
+									seq_no = y.sale_order_line_id.sequence
+								else:
+									seq_no = theNum
 
 								line.append({
-									'no': y.sale_order_line_id.sequence,
+									'no': seq_no,
 									'product_id' : y.product_id.id,
 									'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
 									'product_uom': y.uom.id,
@@ -435,12 +446,46 @@ class order_preparation(osv.osv):
 									'sale_line_material_id':y.id,
 									'sale_line_id':y.sale_order_line_id.id
 								})
+								theNum=theNum+1 #append nomor urut
 				res['prepare_lines'] = line
 
 				
 				print res,"OP***********************************"
 				_logger.error((res,"............OPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",res))
+			else:
+				# if not has picking
+				theNum = 1;
+				line = []
+
+				for order_line in data.order_line:
+					for material_line in order_line.material_lines:
+						if order_line.product_no_cus:
+							seq_no = order_line.product_no_cus
+						elif order_line.sequence:
+							seq_no = order_line.sequence
+						else:
+							seq_no = theNum
+						line.append({
+							'no': int(seq_no),
+							'product_id' : material_line.product_id.id,
+							'product_qty': material_line.qty - material_line.shipped_qty + material_line.returned_qty, #nilai yang material line minta - op yang sudah di proses
+							'product_uom': material_line.uom.id,
+							'name': material_line.desc,
+							'sale_line_material_id':material_line.id,
+							'sale_line_id':material_line.sale_order_line_id.id
+						})
+
+						theNum=theNum+1
+
+				res['poc'] = data.client_order_ref
+				res['partner_id'] = data.partner_id.id
+				res['duedate'] = data.delivery_date
+				res['partner_shipping_id'] = data.partner_shipping_id.id
+
+				res['prepare_lines'] = line
+
 			return  {'value': res}
+
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
