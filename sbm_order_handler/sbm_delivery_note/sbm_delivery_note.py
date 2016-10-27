@@ -11,6 +11,10 @@ import openerp.addons.decimal_precision as dp
 from openerp import netsvc
 from openerp.tools.float_utils import float_compare
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 class delivery_note(osv.osv):
 
 	def _get_years(self,cr,uid,ids,field_name,arg,context={}):
@@ -219,11 +223,17 @@ class delivery_note(osv.osv):
 			raise osv.except_osv(_("Error!!!"),_("Delivery Notes Already Exist. DN Doc. No = "+no))
 		vals['name'] ='/'
 		for lines in vals['note_lines']:
-			if(type(lines)==tuple):
+			# _logger.error((lines,"............NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN"))
+			# _logger.error((type(lines),"............XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
+			# _logger.error((lines[0],"............XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
+			if type(lines)==tuple:
+				got_line = lines[2]
+			elif type(lines) == list:
 				got_line = lines[2]
 			else:
 				got_line = lines
-				
+			# _logger.error((type(lines),"............XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
+			# _logger.error((got_line,"............DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"))
 			if got_line['product_qty'] == 0:
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
