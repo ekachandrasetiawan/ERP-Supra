@@ -229,8 +229,8 @@ class delivery_note(osv.osv):
 			if(type(lines)==tuple):
 				got_line = lines[2]
 			else:
-				got_line = lines
-				
+				got_line = lines[2]
+			
 			if got_line['product_qty'] == 0:
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
