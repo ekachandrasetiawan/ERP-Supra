@@ -66,6 +66,13 @@ class delivery_note(osv.osv):
 		res = [('name','ilike','%/'+str(filter_no))]
 		return res
 
+	def _search_name(self, cr, uid,obj, name, args, context={}):
+		print '=ssssssssssssssss=============================='
+		for x in args:
+			filter_no = x
+		res = [('name','ilike',filter_no)]
+		return res
+
 	def _getRequestDocNo(self,cr,uid,ids,field_name,args,context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
 		res = {}
@@ -148,7 +155,7 @@ class delivery_note(osv.osv):
 		'doc_year':fields.function(_get_years,fnct_search=_search_years,string='Doc Years',store=False),
 		'doc_month':fields.function(_get_month,fnct_search=_search_month,string='Doc Month',store=False),
 		'doc_date' : fields.date('Document Date',track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)], 'postpone': [('readonly', False)]}),
-		'name': fields.function(_getRequestName, method=True, track_visibility='onchange', string="No#",type="char",
+		'name': fields.function(_getRequestName, fnct_search=_search_name, method=True, track_visibility='onchange', string="No#",type="char",
 			store={
 				'delivery.note': (lambda self, cr, uid, ids, c={}: ids, ['doc_date','state'], 20),
 			}),
