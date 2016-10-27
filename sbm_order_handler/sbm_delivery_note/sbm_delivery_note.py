@@ -715,7 +715,7 @@ class delivery_note(osv.osv):
 				# Update Done Picking & Move
 				stock_picking.action_move(cr, uid, [val.picking_id.id])
 
-				self.write(cr, uid, ids, {'state': 'done'})
+				self.write(cr, uid, ids, {'state': 'done','tanggal':datetime.now()})
 			else:
 				# raise osv.except_osv('Error','EEEE2')
 				partial_data = {}
@@ -741,12 +741,12 @@ class delivery_note(osv.osv):
 				stock_picking.write(cr,uid, [done_picking_id], {'note_id': val.id})
 
 				# self.write(cr, uid, ids, {'state': 'done', 'picking_id': picking_do[0][1]['delivered_picking']})
-				self.write(cr, uid, ids, {'state': 'done', 'picking_id':done_picking_id}) #write done to self
+				self.write(cr, uid, ids, {'state': 'done', 'picking_id':done_picking_id,'tanggal':datetime.now()}) #write done to self
 		else:
 			# jika tidak ada picking_id di dn
 
 			self.pool.get('delivery.note').package_validate(cr, uid, ids)
-			self.write(cr, uid, ids, {'picking_id': val.prepare_id.picking_id.id})
+			self.write(cr, uid, ids, {'picking_id': val.prepare_id.picking_id.id, 'tanggal':datetime.now()})
 		# raise osv.except_osv('Error','EEEE')
 		return True
 		
