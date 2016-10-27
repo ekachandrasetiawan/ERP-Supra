@@ -429,7 +429,7 @@ class order_preparation(osv.osv):
 									seq_no = theNum
 
 								line.append({
-									'no': seq_no,
+									'no': int(seq_no),
 									'product_id' : y.product_id.id,
 									'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
 									'product_uom': y.uom.id,
