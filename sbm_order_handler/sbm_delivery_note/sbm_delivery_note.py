@@ -806,7 +806,7 @@ class packing_list_line(osv.osv):
 
 	def refresh(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
-		if val.note_id.picking_id.id:
+		if val.note_id.picking_id.id == False and val.note_id.state <>'done':
 			for y in val.note_id.note_lines:
 				for x in y.note_lines_material:
 					res = self.pool.get('product.list.line').create(cr, uid, {
