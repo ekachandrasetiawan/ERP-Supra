@@ -699,6 +699,8 @@
 			<field name="arch" type="xml">
 
 				<search string="Quotation State">
+					<field name="name" string="Multi Search" filter_domain="['|',('name','ilike', self),('quotation_no','ilike',self)]"/>
+
 					<filter icon="terp-dolar_ok!" string="Draft" domain="[('quotation_state','=','draft')]" help="Quotation Order Draft" name="filter_draft"/>
 					<filter icon="terp-dolar_ok!" string="Confirm" domain="[('quotation_state','=','confirmed')]" help="Quotation Order Confirm" name="filter_confirm"/>
 					<filter icon="terp-dolar_ok!" string="Win" domain="[('quotation_state','=','win')]" help="Quotation Order Win" name="filter_win"/>
