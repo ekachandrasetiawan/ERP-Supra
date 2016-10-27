@@ -8,13 +8,14 @@
             <field name="arch" type="xml">
                 <search string="Delivery Note">
                     <group expand="!" string="Filter By">
+                        <field name="name" string="Multi Search" filter_domain="['|',('name','ilike', self),('poc','ilike',self)]"/>
+                        <field name="doc_year" filter_domain="[('doc_year','=',self)]"/>
+                        <field name="doc_month" filter_domain="[('doc_month','=',self)]"/>
                         <filter string="Draft" name="draft" icon="terp-check" domain="[('state','=','draft')]"/>
                         <filter string="Approve" name="approve" icon="terp-check" domain="[('state','=','approve')]"/>
                         <filter string="Postpone" name="postpone" icon="terp-check" domain="[('state','=','postpone')]"/>
                         <filter string="Done" name="done" icon="terp-check" domain="[('state','=','done')]"/>
                         <filter string="Cancel" name="cancel" icon="terp-check" domain="[('state','=','cancel')]"/>
-                        <field name="doc_year" filter_domain="[('doc_year','=',self)]"/>
-                        <field name="doc_month" filter_domain="[('doc_month','=',self)]"/>
                     </group>
 
 	                <group string="Group By">
