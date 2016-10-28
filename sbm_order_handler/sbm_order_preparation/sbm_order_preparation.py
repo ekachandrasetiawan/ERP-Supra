@@ -423,12 +423,13 @@ class order_preparation(osv.osv):
 
 							location += [y.picking_location.id]
 							if y.sale_order_line_id.product_no_cus:
-								seq_no = y.sale_order_line_id.product_no_cus
+								seq_no = int(y.sale_order_line_id.product_no_cus)
 							elif y.sale_order_line_id.sequence:
 								seq_no = y.sale_order_line_id.sequence
 							else:
 								seq_no = theNum
 
+							print '===========seq_no===============',seq_no
 							line.append({
 								'no': seq_no,
 								'product_id' : y.product_id.id,

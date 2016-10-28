@@ -67,7 +67,6 @@ class delivery_note(osv.osv):
 		return res
 
 	def _search_name(self, cr, uid,obj, name, args, context={}):
-		print '=ssssssssssssssss=============================='
 		for x in args:
 			filter_no = x
 		res = [('name','ilike',filter_no)]
@@ -113,7 +112,9 @@ class delivery_note(osv.osv):
 			else:
 				usa = "FALSE"
 
-			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+
+			use = str(self.pool.get('res.users').browse(cr, uid, val.create_uid.id).initial)
+
 			RequestNo  = 'C/SBM-ADM/'+usa+'-'+use+'/'+mount+'/'+val.doc_date[2:2 + 2]
 
 			res[item.id] = RequestNo
@@ -230,16 +231,13 @@ class delivery_note(osv.osv):
 			raise osv.except_osv(_("Error!!!"),_("Delivery Notes Already Exist. DN Doc. No = "+no))
 		vals['name'] ='/'
 		for lines in vals['note_lines']:
-			# _logger.error((lines,"............NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN"))
-			# _logger.error((type(lines),"............XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
-			# _logger.error((lines[0],"............XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
 			if type(lines)==tuple:
 				got_line = lines[2]
 			elif type(lines) == list:
 				got_line = lines[2]
 			else:
 				got_line = lines
-				
+
 			if got_line['product_qty'] == 0:
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
@@ -527,7 +525,6 @@ class delivery_note(osv.osv):
 			if val.prepare_id.state != 'done':
 				raise osv.except_osv(_('Error'),_('Error to Approve Delivery Note\nOrder Preparation Document state not Ready / Done yet.\n Maybe order in Re Packing\n'))
 
-
 			cek = dn_line.search(cr,uid, [('note_id','=', ids)])
 			hasil = dn_line.browse(cr, uid, cek)
 			for data in hasil:
@@ -536,8 +533,7 @@ class delivery_note(osv.osv):
 					raise openerp.exceptions.Warning("Delivery Note Line Tidak Memiliki Material Lines")
 			# Jalankan Fungsi Asli Package Confirm
 			dn.package_confirm(cr,uid, ids,context=context)
-			self.validate(cr,uid,ids,context=context)
-			
+			self.validate(cr,uid,ids,context=context)	
 
 			# Jalankan Fungsi Create Picking jika dn baru
 			if not val.prepare_id.picking_id:
@@ -549,9 +545,7 @@ class delivery_note(osv.osv):
 		else:
 			if not val.seq_no:
 				# set new no with old style
-				print "AAAAA"
 				dn.set_sequence_no(cr, uid, ids, False, context=context)
-
 
 		self.write(cr, uid, ids, {'state':'submited'}, context=context)
 
