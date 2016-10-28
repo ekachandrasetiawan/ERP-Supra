@@ -22,6 +22,7 @@
 		'sbm_purchaseorder',
 		'sbm_e_tax_period',
 		'ad_account_finance',
+		'sale_set_to_draft',
 		],
 	'data': [
 		# 'new_sbm_sale_order/file.sql',
