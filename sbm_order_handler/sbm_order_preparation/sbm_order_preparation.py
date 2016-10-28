@@ -350,6 +350,7 @@ class order_preparation(osv.osv):
 			data = self.pool.get('sale.order').browse(cr, uid, sale)
 
 			# check if picking exist on Sale.Order object
+
 		# if data.picking_ids:
 			has_old_picking=True
 			# if picking ids then we need to check state
@@ -439,6 +440,7 @@ class order_preparation(osv.osv):
 							})
 							theNum=theNum+1 #append nomor urut
 			res['prepare_lines'] = line
+			
 			return  {'value': res}
 
 

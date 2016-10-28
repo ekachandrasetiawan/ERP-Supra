@@ -25,7 +25,7 @@
 				</field>
 			</record>
 
-		<record id="delivery_note_form" model="ir.ui.view">
+			<record id="delivery_note_form" model="ir.ui.view">
 					 <field name="name">delivery.note.form</field>
 					 <field name="model">delivery.note</field>
 					 <field name="type">form</field>
@@ -68,6 +68,7 @@
 							<button string="Return Products" position="replace">
 									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done" type="action" groups="stock.group_stock_user" confirm="Are you sure to Return Delivery Note"/>
 									<button name="print_dn_out_new" type="object" states="submited" string="Print Out DN" icon="gtk-dnd-multiple"/>
+									<button name="print_pack_list" type="object" states="submited" string="Print Pack List" icon="gtk-dnd-multiple"/>
 							</button>
 
 
@@ -98,6 +99,14 @@
 																		<field name="refunded_item"/>
 																	</group>
 																</form>
+																<tree>
+																	<field name="product_id"/>
+																	<field name="prodlot_id" widget="one2many_list"/>
+																	<field name="desc"/>
+																	<field name="qty"/>
+																	<field name="product_uom"/>
+																	<field name="refunded_item"/>
+																</tree>
 															</field>
 												</form>
 												<tree string="Delviery Note Line" colors="red:state == 'donerefund'">

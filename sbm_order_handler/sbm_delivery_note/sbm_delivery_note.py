@@ -11,6 +11,10 @@ import openerp.addons.decimal_precision as dp
 from openerp import netsvc
 from openerp.tools.float_utils import float_compare
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 class delivery_note(osv.osv):
 
 	def _get_years(self,cr,uid,ids,field_name,arg,context={}):
@@ -226,11 +230,16 @@ class delivery_note(osv.osv):
 			raise osv.except_osv(_("Error!!!"),_("Delivery Notes Already Exist. DN Doc. No = "+no))
 		vals['name'] ='/'
 		for lines in vals['note_lines']:
-			if(type(lines)==tuple):
+			# _logger.error((lines,"............NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN"))
+			# _logger.error((type(lines),"............XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
+			# _logger.error((lines[0],"............XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"))
+			if type(lines)==tuple:
+				got_line = lines[2]
+			elif type(lines) == list:
 				got_line = lines[2]
 			else:
-				got_line = lines[2]
-			
+				got_line = lines
+				
 			if got_line['product_qty'] == 0:
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
@@ -712,7 +721,7 @@ class delivery_note(osv.osv):
 				# Update Done Picking & Move
 				stock_picking.action_move(cr, uid, [val.picking_id.id])
 
-				self.write(cr, uid, ids, {'state': 'done'})
+				self.write(cr, uid, ids, {'state': 'done','tanggal':datetime.now()})
 			else:
 				# raise osv.except_osv('Error','EEEE2')
 				partial_data = {}
@@ -738,12 +747,12 @@ class delivery_note(osv.osv):
 				stock_picking.write(cr,uid, [done_picking_id], {'note_id': val.id})
 
 				# self.write(cr, uid, ids, {'state': 'done', 'picking_id': picking_do[0][1]['delivered_picking']})
-				self.write(cr, uid, ids, {'state': 'done', 'picking_id':done_picking_id}) #write done to self
+				self.write(cr, uid, ids, {'state': 'done', 'picking_id':done_picking_id,'tanggal':datetime.now()}) #write done to self
 		else:
 			# jika tidak ada picking_id di dn
 
 			self.pool.get('delivery.note').package_validate(cr, uid, ids)
-			self.write(cr, uid, ids, {'picking_id': val.prepare_id.picking_id.id})
+			self.write(cr, uid, ids, {'picking_id': val.prepare_id.picking_id.id, 'tanggal':datetime.now()})
 		# raise osv.except_osv('Error','EEEE')
 		return True
 		
