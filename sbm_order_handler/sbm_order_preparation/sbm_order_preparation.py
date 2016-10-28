@@ -350,95 +350,98 @@ class order_preparation(osv.osv):
 			data = self.pool.get('sale.order').browse(cr, uid, sale)
 
 			# check if picking exist on Sale.Order object
-			if data.picking_ids:
-				has_old_picking=True
-				# if picking ids then we need to check state
-				active = [] #list of browse record
-				sale_material_id_generated = False
-				for picking in data.picking_ids:
-					if picking.state != 'cancel' and picking.state !='done':
-						for move_line in picking.move_lines:
-							if move_line.sale_material_id:
-								sale_material_id_generated =True
 
-						active.append(picking)
-				if len(active)==1 and sale_material_id_generated == False:
-					so.generate_material(cr,uid,sale,context=context)
-					has_postpone_picking=True
-					self.pool.get('stock.picking').action_cancel(cr, uid, [active[0].id])
-					# res['picking_id'] = active[0].id
-					# return {'value':res}
+		# if data.picking_ids:
+			has_old_picking=True
+			# if picking ids then we need to check state
+			active = [] #list of browse record
+			sale_material_id_generated = False
+			for picking in data.picking_ids:
+				if picking.state != 'cancel' and picking.state !='done':
+					for move_line in picking.move_lines:
+						if move_line.sale_material_id:
+							sale_material_id_generated =True
 
-				res['poc'] = data.client_order_ref
-				res['partner_id'] = data.partner_id.id
-				res['duedate'] = data.delivery_date
-				res['partner_shipping_id'] = data.partner_shipping_id.id
+					active.append(picking)
+			if len(active)==1 and sale_material_id_generated == False:
+				so.generate_material(cr,uid,sale,context=context)
+				has_postpone_picking=True
+				self.pool.get('stock.picking').action_cancel(cr, uid, [active[0].id])
+				# res['picking_id'] = active[0].id
+				# return {'value':res}
 
-				location = []
-				old_so_doc_ids = []
-				for x in data.order_line:
-					if x.material_lines == []:
-						# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
-						old_so_doc_ids.append(x.order_id.id)
+			res['poc'] = data.client_order_ref
+			res['partner_id'] = data.partner_id.id
+			res['duedate'] = data.delivery_date
+			res['partner_shipping_id'] = data.partner_shipping_id.id
 
-				for old_id in old_so_doc_ids:
-					so.generate_material(cr,uid,old_id,context=context)
-					so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
-				for x in data.order_line:
-					# if loc:
-					# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
-					# else:
-					# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
+			location = []
+			old_so_doc_ids = []
+			for x in data.order_line:
+				if x.material_lines == []:
+					# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
+					old_so_doc_ids.append(x.order_id.id)
 
-					material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
+			for old_id in old_so_doc_ids:
+				so.generate_material(cr,uid,old_id,context=context)
+				so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
+			for x in data.order_line:
+				# if loc:
+				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
+				# else:
+				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
+
+				material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
 
 
-					theNum=1
-					for y in so_material_line.browse(cr, uid, material_lines):
-						# Cek Material Line Dengan OP Line
-						nilai= 0 #nilai yang sudah di ambil item nya ke dalam op.
-						op_line = []
-						curr_op_id=ids
+				theNum=1
+				for y in so_material_line.browse(cr, uid, material_lines):
+					# Cek Material Line Dengan OP Line
+					nilai= 0 #nilai yang sudah di ambil item nya ke dalam op.
+					op_line = []
+					curr_op_id=ids
 
-						op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','not in',curr_op_id)])
-						for l in obj_op_line.browse(cr, uid, op_line):
-							# Cek Status OP 
-							op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
-							product_return = 0
-							search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
-							if len(search_dn_lm):
-								search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , [search_dn_lm])])
-								# Cek DN Line Material Return
-								for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
-									if rn.stock_move_id.state == 'done':
-										product_return += rn.stock_move_id.product_qty
+					op_line = obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,y.id),('preparation_id','not in',curr_op_id)])
+					for l in obj_op_line.browse(cr, uid, op_line):
+						# Cek Status OP 
+						op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
+						product_return = 0
+						search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
+						if len(search_dn_lm):
+							search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , [search_dn_lm])])
+							# Cek DN Line Material Return
+							for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
+								if rn.stock_move_id.state == 'done':
+									product_return += rn.stock_move_id.product_qty
 
-							if op.state <> 'cancel':
-								nilai += l.product_qty - product_return
+						if op.state <> 'cancel':
+							nilai += l.product_qty - product_return
 
-						if y.product_id.type <> 'service':
-							if nilai < y.qty:
-								
+					if y.product_id.type <> 'service':
+						if nilai < y.qty:
+							
 
-								location += [y.picking_location.id]
-								if y.sale_order_line_id.product_no_cus:
-									seq_no = y.sale_order_line_id.product_no_cus
-								elif y.sale_order_line_id.sequence:
-									seq_no = y.sale_order_line_id.sequence
-								else:
-									seq_no = theNum
+							location += [y.picking_location.id]
+							if y.sale_order_line_id.product_no_cus:
+								seq_no = int(y.sale_order_line_id.product_no_cus)
+							elif y.sale_order_line_id.sequence:
+								seq_no = y.sale_order_line_id.sequence
+							else:
+								seq_no = theNum
 
-								line.append({
-									'no': int(seq_no),
-									'product_id' : y.product_id.id,
-									'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
-									'product_uom': y.uom.id,
-									'name': y.desc,
-									'sale_line_material_id':y.id,
-									'sale_line_id':y.sale_order_line_id.id
-								})
-								theNum=theNum+1 #append nomor urut
-				res['prepare_lines'] = line
+							print '===========seq_no===============',seq_no
+							line.append({
+								'no': seq_no,
+								'product_id' : y.product_id.id,
+								'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
+								'product_uom': y.uom.id,
+								'name': y.desc,
+								'sale_line_material_id':y.id,
+								'sale_line_id':y.sale_order_line_id.id
+							})
+							theNum=theNum+1 #append nomor urut
+			res['prepare_lines'] = line
+			
 			return  {'value': res}
 
 
