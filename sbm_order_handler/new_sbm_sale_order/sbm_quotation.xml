@@ -546,8 +546,6 @@
 			<field name="category_id" ref="base.module_category_sales_management"/>
 			<field name="menu_access" eval="[(6,0,[ref('sale.menu_sale_order'),ref('base.menu_base_partner')])]" />
 		</record> -->
-
-
 		<record id="inherit_new_order_line" model="ir.ui.view">
 			<field name="name">Order Lines</field>
 			<field name="model">sale.order</field>
@@ -561,7 +559,7 @@
 					<button name="generate_wo" type="object" string="Generate work Order" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure to Generate Work Order" />
 
 					<button name="cek_so" type="object" string="Cek Sale order"/>
-					 <button name="print_so_web" type="object" string="Print SO"/>
+					 <button name="print_so_web" type="object" string="Print SO" class="oe_highlight" icon="gtk-print"/>
 				</header>
 			  
 				<page string="Other Information" position="before">
