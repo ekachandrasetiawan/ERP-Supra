@@ -429,11 +429,12 @@ class order_preparation(osv.osv):
 							else:
 								seq_no = theNum
 
-							print '===========seq_no===============',seq_no
+
 							line.append({
 								'no': seq_no,
 								'product_id' : y.product_id.id,
-								'product_qty': y.qty - nilai, #nilai yang material line minta - op yang sudah di proses
+								# 'product_qty': y.qty - nilai,
+								'product_qty': (y.qty + y.returned_qty) - (y.on_process_qty + y.shipped_qty), #nilai yang material line minta - op yang sudah di proses
 								'product_uom': y.uom.id,
 								'name': y.desc,
 								'sale_line_material_id':y.id,

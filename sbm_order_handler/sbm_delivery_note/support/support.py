@@ -161,8 +161,8 @@ class sale_order_material_line(osv.osv):
 					if count_it:
 						if move.picking_id.type == 'out':
 							shipped_qty += move.product_qty
-						elif move.picking_id.type=='in':
-							shipped_qty -= move.product_qty
+						# elif move.picking_id.type=='in':
+						# 	shipped_qty -= move.product_qty
 					
 			res[item.id]=shipped_qty
 		return res
@@ -267,9 +267,18 @@ class sale_order_material_line(osv.osv):
 		for item in self.browse(cr,uid,ids,context=context):
 			move=self.pool.get('order.preparation.line').search(cr,uid,[('sale_line_material_id', '=' ,item.id)])
 			hasil= 0
-			for data in  self.pool.get('order.preparation.line').browse(cr,uid,move):
+			for data in self.pool.get('order.preparation.line').browse(cr,uid,move):
 				if data.preparation_id.state <> 'cancel':
-					hasil += data.product_qty
+					dn_line_material=self.pool.get('delivery.note.line.material').search(cr,uid,[('op_line_id', '=' ,data.id)])
+
+					for x_line in self.pool.get('delivery.note.line.material').browse(cr,uid,dn_line_material):
+						if x_line.note_line_id.state <> 'done':
+							hasil += 0
+						elif x_line.note_line_id.state <> 'cencel':
+							hasil += 0
+						elif x_line.note_line_id.state == 'torefund':
+							hasil += data.product_qty
+
 			res[item.id] = hasil
 		return res
 
