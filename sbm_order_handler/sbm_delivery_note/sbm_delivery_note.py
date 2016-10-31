@@ -95,13 +95,13 @@ class delivery_note(osv.osv):
 			elif val.doc_date[5:5 + 2] == '08':
 				mount = 'VIII'
 			elif val.doc_date[5:5 + 2] == '09':
-				mount = 'V'
+				mount = 'IX'
 			elif val.doc_date[5:5 + 2] == '10':
-				mount = 'VI'
+				mount = 'X'
 			elif val.doc_date[5:5 + 2] == '11':
-				mount = 'VII'
+				mount = 'XI'
 			elif val.doc_date[5:5 + 2] == '12':
-				mount = 'VIII'
+				mount = 'XII'
 			else:
 				mount= rom[int(vals[2])]
 

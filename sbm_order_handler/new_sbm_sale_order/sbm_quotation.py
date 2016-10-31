@@ -1,5 +1,6 @@
 from datetime import datetime
 from stock import stock
+from openerp.osv import fields, orm
 import math
 import time
 import webbrowser
@@ -12,6 +13,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+		
 class inherit_stock_picking_out(osv.osv):
 	_inherit = "stock.picking.out"
 	_columns = {
@@ -121,6 +123,14 @@ class Sale_order(osv.osv):
 	# 	# coba = test.name_get(cr, uid,ids, context)
 	# 	print super(Sale_order, test).name_get() , "testtttss"
 	# 	return super(Sale_order, test).name_get(cr, uid,ids, context=context)
+
+	def action_cancel(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		self.write(cr,uid,val.id,{'quotation_state':'cancel'})
+
+		return super(Sale_order, self).action_cancel(cr, uid, ids, context=None)
+
+
 	def copy_pure_quotation(self,cr,uid,ids,context=None):
 		# print "CALLEDDD",ids;
 		rec = self.browse(cr,uid,ids,context)[0]
