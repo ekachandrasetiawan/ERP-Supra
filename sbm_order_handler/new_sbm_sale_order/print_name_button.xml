@@ -11,25 +11,70 @@
 					<button name="print_rfq_web" type="object" string="Print Quotation Web" icon="STOCK_PRINT_PREVIEW"/>
 				</header>
 			</field>
-
-
-
 		</record>
 
-		<record id="button_print_name_sale_order" model='ir.ui.view'>
-			<field name="name">button print sale order</field>
-			<field name="model">sale.order</field>
-			<field name='type'>form</field>
-			<field name="inherit_id" ref='sale.view_order_form'/>
-			<field name="arch" type='xml'>
-				<header>
-					<button name="print_so" type="object" string="Print Sale Order"/>
-				</header>
-			</field>
-		<!-- <xpath expr="//field[@name='product_id']" position="before">
-					<field name="sequence" string="No"/>
-		</xpath> -->
-		</record>
-		
+		<record id="view_view_order_form_quotation" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="ad_perintah_kerja.view_order_form_quotation" />
+        <field name="arch" type="xml">
+			<xpath expr="//button[@string='Print Sales Order']" position="replace">
+				<button name="%(ad_perintah_kerja.form_salesorder_new)d" string="Print PDF" type="action" states="progress,manual" icon="gtk-print"/>
+			</xpath>
+			<xpath expr="//button[@string='New Copy of Quotation']" position="replace">
+				<button confirm="Are You Sure to Copy This Document Into a New Document?" name="copy_pure_quotation" string="Copy Quotation" type="object" icon="STOCK_COPY"/>
+			</xpath>
+			<xpath expr="//button[@string='Print Penawaran']" position="replace">
+				<button name="%(ad_perintah_kerja.form_quotation_new)d" string="Print Penawaran" type="action" states="draft,sent" icon="gtk-print"/>
+			</xpath>
+
+        </field>
+    	</record>
+
+    	<record id="inherit_view_order_form" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sbm_inherit.view_order_form" />
+        <field name="arch" type="xml">
+			<button name="action_cancel" position="replace">
+    			<button name="action_cancel" states="manual,progress" string="Cancel Order" type="object" groups="sbm_inherit.group_sale_order_cancel" icon="STOCK_CANCEL"/>
+    		</button>
+        </field>
+    	</record>
+
+    	<record id="inherit_view_sale_order_project" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="ad_sales_project.view_sale_order_project" />
+        <field name="arch" type="xml">
+        	<xpath expr="//button[@name='action_button_confirm']" position="replace">
+				<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager,base.group_sale_salesman_all_leads,base.group_user" icon="STOCK_APPLY"/>
+		    </xpath>
+        </field>
+    	</record>
+
+
+		<record id="inherit_button_view_order_form" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="arch" type="xml">
+        	<button name="print_quotation" position="replace"/>
+        	<button name="cancel" position="replace">
+        		<button name="cancel" states="draft,sent" string="Cancel Quotation" groups="base.group_user" icon="STOCK_CANCEL"/>
+        	</button>
+        </field>
+    	</record>
+
+    	<record id="inherit_saleorder_create_pb" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sbm_saleorder.saleorder_create_pb"/>
+        <field name="arch" type="xml">
+        	<button name="action_create_pb" position="replace">
+        		<button name="action_create_pb" states="progress,manual" string="Create PB" type="object" icon="STOCK_ADD"/>
+        	</button>
+        </field>
+    	</record>
 	</data>
 </openerp>

@@ -554,12 +554,13 @@
 
 			<field name="arch" type="xml">
 				<header> 
-					<button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}" />
+					<button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}" icon="STOCK_CONVERT" />
 
-					<button name="generate_wo" type="object" string="Generate work Order" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure to Generate Work Order" />
+					<button name="generate_wo" type="object" string="Generate work Order" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure to Generate Work Order" icon="STOCK_CONVERT"/>
 
-					<button name="cek_so" type="object" string="Cek Sale order"/>
-					 <button name="print_so_web" type="object" string="Print SO" class="oe_highlight" icon="gtk-print"/>
+					<button name="cek_so" type="object" string="Cek Sale order" icon="terp-check"/>
+					 <button name="print_so_web" type="object" string="Print Sales order" class="oe_highlight" icon="gtk-print"/>
+
 				</header>
 			  
 				<page string="Other Information" position="before">

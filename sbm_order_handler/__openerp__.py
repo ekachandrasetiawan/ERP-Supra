@@ -23,6 +23,8 @@
 		'sbm_e_tax_period',
 		'ad_account_finance',
 		'sale_set_to_draft',
+		'ad_perintah_kerja',
+		'ad_sales_project',
 		],
 	'data': [
 		# 'new_sbm_sale_order/file.sql',
