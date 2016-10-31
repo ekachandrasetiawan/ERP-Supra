@@ -25,11 +25,11 @@ Purchase_Order_Line()
 
 
 class Purchase_Order(osv.osv):
-	def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
-		# if has default order in context
-		if "default_order" in context:
-			order = context['default_order']
-		return super(Purchase_Order, self).search(cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count)
+	# def search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False):
+	# 	# if has default order in context
+	# 	if "default_order" in context:
+	# 		order = context['default_order']
+	# 	return super(Purchase_Order, self).search(cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count)
 
 
 	_inherit = 'purchase.order'
@@ -43,7 +43,21 @@ class Purchase_Order(osv.osv):
 	_defaults ={
 		'rev_counter':0,
 	}
-	
+
+	def create(self, cr, uid, vals, context=None):
+		obj_po = self.pool.get('purchase.order')
+		name = vals['name'].replace(" ","")[:6]
+		cek = obj_po.search(cr ,uid, [('name','ilike',name)])
+
+		for x in obj_po.browse(cr ,uid, cek):
+			if name == x.name[:6]:
+				raise osv.except_osv(
+						_('Information'),
+						_('Order Reference must be unique per Company!'))
+
+		order =  super(Purchase_Order, self).create(cr, uid, vals, context=context)
+		return order
+
 	def template_email_confirm(self, cr, uid, ids, user, no_po, url, context={}):
 		res = """\
 		<html>
@@ -78,6 +92,18 @@ class Purchase_Order(osv.osv):
 
 	def wkf_confirm_order(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
+		obj_po = self.pool.get('purchase.order')
+		x_name = val.name
+		
+		name = x_name.replace(" ","")[:6]
+		cek = obj_po.search(cr ,uid, [('name','ilike',name)])
+
+		for x in obj_po.browse(cr ,uid, cek):
+			if name == x.name[:6]:
+				raise osv.except_osv(
+						_('Information'),
+						_('Order Reference must be unique per Company!'))
+
 		res = super(Purchase_Order, self).wkf_confirm_order(cr, uid, ids, context=None)
 		return True
 
