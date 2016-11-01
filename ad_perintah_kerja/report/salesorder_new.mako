@@ -277,7 +277,16 @@ table.main tr td { padding: 5px;}
 					<td width="5%" class="alignTop">${i}</td>
 					<td width="10%" class="alignCenter alignTop">${line.product_uom_qty}</td>
 					<td width="7%" class="alignCenter alignTop">${line.product_uom.name}</td>
-					<td width="47%" class="alignTop">${line.name}</td>
+					<td width="47%" class="alignTop">
+						%if line.name==False:
+						 [	${line.product_id.default_code} ]<br/>
+						 	${line.product_id.name}
+						%else:
+					     [  ${line.product_id.default_code} ]<br/>
+						 	${line.product_id.name}<br/>
+						 	${line.name}<br/>
+						%endif
+					</td>
 					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit),digits=2)}</td>
 					<td width="15%" class="alignRight alignTop">${formatLang(float(line.price_subtotal),digits=2)}</td>
 					<!-- <td width="15%" class="alignRight alignTop">${formatLang(float(line.price_unit*line.product_uom_qty),digits=2)}</td> -->

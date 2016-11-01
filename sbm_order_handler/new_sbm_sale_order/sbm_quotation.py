@@ -218,9 +218,9 @@ class Sale_order(osv.osv):
 		for sTerm in rec.term_condition:
 			ListTerms.append(sTerm.id)
 
-		prepareNewSO['scope_work_supra'] = [(6,0,ListScope1)]
-		prepareNewSO['scope_work_customer'] = [(6,0,ListScope2)]
-		prepareNewSO['term_condition'] = [(6,0,ListTerms)]
+		prepareNewSO['scope_work_supra'] = False
+		prepareNewSO['scope_work_customer'] = False
+		prepareNewSO['term_condition'] = False
 
 		newOrderId = self.create(cr,uid,prepareNewSO,context)
 
@@ -440,7 +440,7 @@ class Sale_order(osv.osv):
 	def print_so_web(self,cr,uid,ids,context={}):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"print-sale-order/sale_order&id="+str(ids[0])
+		urlTo = str(browseConf.value)+"print-sale-order/saleorder&id="+str(ids[0])
 		
 		return {
 			'type'  : 'ir.actions.client',
