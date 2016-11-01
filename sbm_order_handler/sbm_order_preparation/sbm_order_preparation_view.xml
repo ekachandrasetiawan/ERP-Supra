@@ -82,12 +82,17 @@
 					<field name="partner_shipping_id" position="after">
 						<field name="duedate"/>
 					</field>
-
+					<field name="partner_shipping_id" position="replace">
+						<field name="partner_shipping_id" required="True"/>
+					</field>
 					<field name="sale_id" position="replace">
-						<field name="sale_id" on_change="sale_change(sale_id, location_id)"/> 
+						<field name="sale_id" on_change="sale_change(sale_id, location_id)" required="True"/> 
 						<field name="sbm_wo_id" on_change="sbm_wo_change(sbm_wo_id)"/> 
 					</field>
 
+					<field name="partner_id" position="replace">
+						<field name="partner_id" on_change="sale_change(sale_id, location_id)" required="True"/> 
+					</field>
 					<xpath expr="//page[@string='Notes']" position="after">
 							<page string="Others">
 									<group>
