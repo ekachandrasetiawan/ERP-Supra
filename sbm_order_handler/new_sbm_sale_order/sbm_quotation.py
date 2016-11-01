@@ -1038,7 +1038,7 @@ class sale_order_line(osv.osv):
 	
 	def onchange_product_quotation_qty(self,cr,uid,ids,product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines_object,context={}):
 		res={}
-		print material_lines_object,"cek------------------------------>"
+		
 		if product_uom_qty == False or product_uom_qty<1:
 			res["warning"]={'title':"Error",'message':'Quantity tidak boleh kosong'}
 			res['value'] = {
@@ -1058,7 +1058,6 @@ class sale_order_line(osv.osv):
 				
 				product = self.pool.get('product.product').browse(cr,uid,product_id,{})
 				
-			
 				all_values_without_bom =[]
 				print "ini tidak ada bom"
 				change_applied = True
@@ -1085,6 +1084,7 @@ class sale_order_line(osv.osv):
 					# 	all_values_without_bom.append((1,material[1],{'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
 					# 	print "menambahkan data dari yang sudah ada"
 					# 	masih_bisa = False
+					print '======================================',material[0]
 					if material[0]==0:
 						# new record
 						print "New Record"
@@ -1097,17 +1097,15 @@ class sale_order_line(osv.osv):
 							'is_loaded_from_change':False
 						}
 						if material[2].get('is_loaded_from_change',False):
-							
 							update_values['qty'] = product_uom_qty
 							update_values['is_loaded_from_change'] = True
 						else:
 							update_values['qty'] = material[2].get('qty',0.0)
-
 						all_values_without_bom.append((0,0,update_values))
 					elif material[0]==1:
 						# update record
 						print "Update Record"
-						
+						print '============xxxxxxxxxxxxxxxxxxxxxxx===================='
 						updated_val = {
 							'qty':material[2].get('qty',old_material.qty),
 							'is_loaded_from_change':False,
@@ -1146,8 +1144,7 @@ class sale_order_line(osv.osv):
 						print "Delete Record"
 					elif material[0]==4:
 						# existing data tinggal add
-						print "Exist Record"
-						print "Change applied--->",change_applied,">>>>",old_material.is_loaded_from_change
+						print "Change applied--->",change_applied,">>>>",product_uom_qty
 						update_values = {
 							'desc':old_material.desc,
 							'product_id':old_material.product_id.id,
@@ -1156,32 +1153,17 @@ class sale_order_line(osv.osv):
 							"picking_location":seq_id,
 							'is_loaded_from_change':False
 						}
-						if old_material.is_loaded_from_change:
-							all_values_without_bom.append((1,material[1],update_values))
-							update_values['is_loaded_from_change'] = True
-						else:
-							all_values_without_bom.append((4,material[1],False))
 
-						# if old_material.product_id.id == product_id:
-						# 	# jika product sama
-							
-						# 	if change_applied:
-						# 		all_values_without_bom.append((1,material[1],{'qty':product_uom_qty}))
-						# 		change_applied = False
-								
-						# 	else:
-						# 		all_values_without_bom.append((4,material[1],False))
+						all_values_without_bom.append((0,0,update_values))				
+						# if old_material.is_loaded_from_change:
+						# 	all_values_without_bom.append((1,material[1],update_values))
+						# 	update_values['is_loaded_from_change'] = True
+
 						# else:
+						# 	all_values_without_bom.append((4,material[1],update_values))
+						# 	update_values['is_loaded_from_change'] = True
 
-						# 	all_values_without_bom.append((4,material[1],False))
-
-
-
-							
-
-
-
-						
+					print '========xxxxxxxxxxxxxxxxxxxx============',all_values_without_bom
 					res['value']={
 					"material_lines":all_values_without_bom,
 					"base_total":base_total,
