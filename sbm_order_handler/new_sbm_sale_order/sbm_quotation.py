@@ -1060,31 +1060,14 @@ class sale_order_line(osv.osv):
 				
 			
 				all_values_without_bom =[]
-				print "ini tidak ada bom"
+				# _logger.error(('Tesssssssssssssssssss', material_lines_object))
 				change_applied = True
 				for material in material_lines_object:
 					old_material = self.pool.get("sale.order.material.line").browse(cr,uid,material[1],context=context)
-					# if material[0]==0 and material[2]['product_id']==product_id and masih_bisa==True:
-					# 	all_values_without_bom.append((0,0,{'desc':material[2].get('desc',False),'product_id':material[2]['product_id'],"qty":product_uom_qty,'uom':material[2]["uom"],"picking_location":seq_id}))
-					# 	print "record baru tapi"
-					# 	masih_bisa = False
-					# elif material[0]==0:
-					# 	print "record baru"
-					# 	all_values_without_bom.append((0,0,{'desc':material[2].get('desc',False),'product_id':material[2]['product_id'],"qty":material[2]["qty"],'uom':material[2]["uom"],"picking_location":seq_id}))
-					# elif material[0]==1 and masih_bisa==True:
-					# 	masih_bisa = False		
-					# 	print "update tapi"
-					# 	all_values_without_bom.append((1,material[1],{'desc':material[2].get('desc',old_material.desc),'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
-					# elif material[0]==1:
-					# 	all_values_without_bom.append((1,material[1],{'product_id':material[2]['product_id'],'qty':material[2]['qty'],'uom':material[2]['uom'],'picking_location':seq_id}))
-					# 	print "update record"
-					# elif material[0]==2:
-					# 	print "hapus record"
-					# 	all_values_without_bom.append((2,material[1]))
-					# elif material[0]==4 and masih_bisa==True:
-					# 	all_values_without_bom.append((1,material[1],{'product_id':product_id,'qty':product_uom_qty,'uom':product.uom_id.id,'picking_location':seq_id}))
-					# 	print "menambahkan data dari yang sudah ada"
-					# 	masih_bisa = False
+					
+					# _logger.error(('debuging material -------------------------------------------- ',material[0]))
+					# _logger.error(('debuging material --------------------------------------------2 ',material))
+
 					if material[0]==0:
 						# new record
 						print "New Record"
@@ -1100,16 +1083,23 @@ class sale_order_line(osv.osv):
 							
 							update_values['qty'] = product_uom_qty
 							update_values['is_loaded_from_change'] = True
+							# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 10001')
 						else:
 							update_values['qty'] = material[2].get('qty',0.0)
-
+							# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 10000')
 						all_values_without_bom.append((0,0,update_values))
 					elif material[0]==1:
 						# update record
 						print "Update Record"
-						
+						# _logger.error(("<><><><><><><><>",material[2]))
+						diff1 = material[2].get('qty',old_material.qty)
+						diff2 = product_uom_qty
+						theQty = diff1
+						if diff1!=diff2:
+							theQty = diff2
+
 						updated_val = {
-							'qty':material[2].get('qty',old_material.qty),
+							'qty':theQty,
 							'is_loaded_from_change':False,
 							'product_id':material[2].get('product_id',old_material.product_id.id),
 							'desc':material[2].get('desc',old_material.desc),
@@ -1120,31 +1110,24 @@ class sale_order_line(osv.osv):
 
 						}
 
+
 						if old_material.is_loaded_from_change:
 							updated_val['qty'] = product_uom_qty
 							all_values_without_bom.append((1,material[1],updated_val))
 							updated_val['is_loaded_from_change'] = True
+							# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 1')
 						else:
+							# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 2')
 							all_values_without_bom.append((1,material[1],updated_val))
-
-
-						# if old_material.product_id.id == product_id:
-						# 	if change_applied:
-						# 		updated_val['qty'] = product_uom_qty
-								
-						# 		all_values_without_bom.append((1,material[1],updated_val))
-						# 		change_applied = False
-						# 	else:
-						# 		all_values_without_bom.append((1,material[1],updated_val))
-						# else:
-						# 	all_values_without_bom.append((1,material[1],updated_val))
 
 
 					elif material[0]==2:
 						all_values_without_bom.append((2,material[1]))
 						# delete
+						# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 3')
 						print "Delete Record"
 					elif material[0]==4:
+						# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 4')
 						# existing data tinggal add
 						print "Exist Record"
 						print "Change applied--->",change_applied,">>>>",old_material.is_loaded_from_change
@@ -1159,28 +1142,11 @@ class sale_order_line(osv.osv):
 						if old_material.is_loaded_from_change:
 							all_values_without_bom.append((1,material[1],update_values))
 							update_values['is_loaded_from_change'] = True
+							# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 41')
 						else:
-							all_values_without_bom.append((4,material[1],False))
+							all_values_without_bom.append((1,material[1],update_values))
 
-						# if old_material.product_id.id == product_id:
-						# 	# jika product sama
-							
-						# 	if change_applied:
-						# 		all_values_without_bom.append((1,material[1],{'qty':product_uom_qty}))
-						# 		change_applied = False
-								
-						# 	else:
-						# 		all_values_without_bom.append((4,material[1],False))
-						# else:
-
-						# 	all_values_without_bom.append((4,material[1],False))
-
-
-
-							
-
-
-
+							# _logger.error(('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 42', update_values))
 						
 					res['value']={
 					"material_lines":all_values_without_bom,
@@ -1188,7 +1154,7 @@ class sale_order_line(osv.osv):
 					"price_subtotal":subtotal_,
 					"amount_tax":taxes_total
 					}
-
+		_logger.error(("---------------------------------------------------------------------",res))
 		return res
 
 
