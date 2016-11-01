@@ -2440,6 +2440,55 @@ class sale_advance_payment_inv(osv.osv_memory):
 	_inherit = "sale.advance.payment.inv"
 	_description = "Sales Advance Payment Invoice"
 
+
+	def create_invoices(self, cr, uid, ids, context=None):
+		sale_obj = self.pool.get('sale.order')
+		invoice_obj = self.pool.get('account.invoice')
+		invoice_line_obj = self.pool.get('account.invoice.line')
+		wizard = self.browse(cr, uid, ids[0], context)
+
+		sale_ids = context.get('active_ids', [])
+
+		so = sale_obj.browse(cr, uid, sale_ids)[0]
+
+		cr.execute("SELECT invoice_id FROM sale_order_invoice_rel WHERE order_id = %s", sale_ids)
+		invoice = map(lambda x: x[0], cr.fetchall())
+
+		dp_percentage = 0
+		amount_total = 0
+		
+		for x in invoice:
+			inv = invoice_obj.browse(cr, uid, x)
+			
+			dp_percentage += inv.dp_percentage
+			amount_total += inv.amount_total
+
+			if inv.state == 'draft':
+				raise osv.except_osv(_('Informasi!'),
+				_('Has been found to invoice with draft status'))
+
+			if inv.picking_ids:
+				raise osv.except_osv(_('Informasi!'),
+				_('Invoice has been created from picking Consolidate'))
+
+		if dp_percentage == 100:
+			raise osv.except_osv(_('Informasi'),
+				_('Invoice Complate'))
+		elif dp_percentage == 0 and amount_total >= so.amount_total:
+			raise osv.except_osv(_('Informasi'),
+				_('Invoice Complate'))
+		elif amount_total >= so.amount_total:
+			raise osv.except_osv(_('Informasi'),
+				_('Invoice Complate'))
+		elif dp_percentage + wizard.amount > 100:
+			raise osv.except_osv(_('Warning'),
+				_('invoice can not be in the process, the percentage is too large'))
+		else:
+			print '==========ok===='
+
+		res = super(sale_advance_payment_inv,self).create_invoices(cr,uid,ids,context=context)
+		return res
+
 	def _check_is_invoice_by_delivery_note_exist(self,cr,uid,ids,sale_obj):
 		
 		return True
