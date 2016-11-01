@@ -278,6 +278,8 @@ class sale_order_material_line(osv.osv):
 							hasil += 0
 						elif x_line.note_line_id.state == 'torefund':
 							hasil += data.product_qty
+						else:
+							hasil += data.product_qty
 
 			res[item.id] = hasil
 		return res
