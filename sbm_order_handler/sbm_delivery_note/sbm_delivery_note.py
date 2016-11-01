@@ -126,7 +126,10 @@ class delivery_note(osv.osv):
 		self._getRequestDocNo(cr, uid, ids, field_name,args,context={})
 		for item in self.browse(cr,uid,ids,context=context):
 			if val.state == 'draft':
-				RequestNo = '/'	
+				if val.name:
+					RequestNo = val.name
+				else:
+					RequestNo = '/'
 			else:
 				if val.seq_no:
 					RequestNo = val.seq_no+val.request_doc_no
