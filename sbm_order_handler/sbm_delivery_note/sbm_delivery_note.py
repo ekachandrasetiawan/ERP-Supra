@@ -467,12 +467,13 @@ class delivery_note(osv.osv):
 					})
 
 		# Create Stock Move
+		if val.prepare_id.id:
+			loc_id =val.prepare_id.location_id.id
+		else:
+			loc_id = 12
+
 		for line in val.note_lines:
 			for x in line.note_lines_material:
-				if x.location_id.id:
-					loc_id =x.location_id.id
-				else:
-					loc_id = 12
 				sale_line_id = False
 				# if sale order line with material
 				# if x.op_line_id.sale_line_material_id:

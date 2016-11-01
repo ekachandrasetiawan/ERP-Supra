@@ -74,7 +74,7 @@
 							
 
 					<field name="poc" position="after">
-						<field name="location_id" on_change="sale_change(sale_id,location_id)"/>
+						<field name="location_id" on_change="sale_change(sale_id,location_id)" required="True"/>
 					</field>
 					
 					<field name="duedate" position="replace"/>
