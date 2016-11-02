@@ -26,6 +26,7 @@ class order_preparation(osv.osv):
 		'state': fields.selection([('draft', 'Draft'), ('submited','Submited'), ('approve', 'Approved'), ('cancel', 'Cancel'), ('done', 'Done')], 'State', readonly=True, track_visibility='onchange'),
 		'warehouse_notes':fields.text('Warehouse Notes', readonly=True),
 		'sbm_wo_id':fields.many2one('sbm.work.order', 'W.O/SPK', track_visibility="onchange", readonly=True, states={'draft': [('readonly', False)]}),
+		'is_postpone':fields.boolean(string='Is Postpone', track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)]}),
 	}
 
 	_track = {
@@ -247,16 +248,25 @@ class order_preparation(osv.osv):
 
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
-		
+		dn_obj = self.pool.get('delivery.note')
+
+
+
 		# Send Email
 		subject = 'Order Preparation no' + val.name + ' Validate'
 		self.send_email(cr, uid, ids, subject, context=None)
 
 		self._set_message_unread(cr, uid, ids, context=None)
-		return super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
+		res = super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
+		if val.is_postpone == True:
+			id_dn = self.create_delivery_note(cr, uid, ids, context=None)
+			dn_obj.submit(cr, uid, id_dn, context=None)
+			dn_obj.package_postpone(cr, uid, id_dn, context=None)
+			
+		return res
 
-	def set_delivery_notes(self, cr, uid, ids, context=None):
+	def create_delivery_note(self, cr, uid, ids, context=None):
 		res = False
 		ops = self.browse(cr, uid, ids, context=context)
 		dn_obj = self.pool.get('delivery.note')
@@ -265,13 +275,17 @@ class order_preparation(osv.osv):
 		for op in ops:
 			prep_dn = {}
 			evt_prepare_change = dn_obj.prepare_change(cr, uid, ids, op.id)
-			print evt_prepare_change,"EVTTTTTTTT"
 			prep_dn = evt_prepare_change['value']
 			prep_dn['prepare_id']=op.id
 			prep_dn['special']=False
 
-			print prep_dn,"...............................,,,,,,,,,,,,,<<<<<<<<<<<<<<<"
 			new_dn_ids.append(dn_obj.create(cr, uid, prep_dn, context=context))
+
+		return new_dn_ids
+
+	def set_delivery_notes(self, cr, uid, ids, context=None):
+
+		new_dn_ids = self.create_delivery_note(cr, uid, ids, context=None)
 
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'ad_delivery_note', 'view_delivery_note_form')
 
@@ -281,7 +295,6 @@ class order_preparation(osv.osv):
 			'active_id': len(new_dn_ids) and new_dn_ids[0] or False
 		})
 
-		# print context,"Coooooontext"
 		res = {
 			'name': _('Delivery Note'),
 			'view_type': 'form',
