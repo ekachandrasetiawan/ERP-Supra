@@ -1164,6 +1164,8 @@ class sale_order_line(osv.osv):
 class account_invoice_line(osv.osv):
 	_inherit='account.invoice.line'
 	_columns={
+		'product_id': fields.many2one('product.product', 'Product', ondelete='set null', select=True, required=True),
+		'name': fields.text('Description', required=False),
 		'sale_order_lines': fields.many2many('sale.order.line', 'sale_order_line_invoice_rel', 'invoice_id', 'order_line_id', 'Order Lines', readonly=True),
 	}
 
