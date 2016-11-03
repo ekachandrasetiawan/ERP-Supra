@@ -224,7 +224,24 @@ class order_preparation(osv.osv):
 
 		return True
 
+	def validasi_create(self, cr, uid, vals, context=None):
+		if 'prepare_lines' in vals:
+			for x in vals['prepare_lines']:
+				if x[2]:
+					qty_note_line =  x[2]['product_qty']
+
+					if x[2]['prodlot_id']:
+						qty_bacth = 0
+						for y in x[2]['prodlot_id']:
+							qty_bacth += y[2]['qty']
+
+						if qty_bacth < qty_note_line:
+							raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product Bacth'))
+		return True
+
 	def create(self, cr, uid, vals, context=None):
+		self.validasi_create(cr, uid, vals, context=None)
+
 		res = super(order_preparation, self).create(cr, uid, vals, context=context)
 		self._set_op_followers(cr, uid, res, context=None)
 		return res
@@ -248,9 +265,11 @@ class order_preparation(osv.osv):
 
 	def preparation_done(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
+		op_line_obj = self.pool.get('order.preparation.line')
 		dn_obj = self.pool.get('delivery.note')
-
-
+		dn_line_obj = self.pool.get('delivery.note.line')
+		op_line_obj = self.pool.get('order.preparation.line')
+		op_line_material_obj = self.pool.get('delivery.note.line.material')
 
 		# Send Email
 		subject = 'Order Preparation no' + val.name + ' Validate'
@@ -259,11 +278,26 @@ class order_preparation(osv.osv):
 		self._set_message_unread(cr, uid, ids, context=None)
 		res = super(order_preparation, self).preparation_done(cr, uid, ids, context=context)
 
-		if val.is_postpone == True:
+		dn_exist = dn_obj.search(cr, uid, [('prepare_id','=',[val.id])],context=None)
+
+		
+
+		if not dn_exist and val.is_postpone == True:
 			id_dn = self.create_delivery_note(cr, uid, ids, context=None)
 			dn_obj.submit(cr, uid, id_dn, context=None)
 			dn_obj.package_postpone(cr, uid, id_dn, context=None)
-			
+		elif dn_exist and val.is_postpone == False:
+			prep_dn = {}
+			evt_prepare_change = dn_obj.prepare_change(cr, uid, ids, val.id, validasi=True)
+			prep_dn = evt_prepare_change['value']
+
+			data_dn = dn_obj.browse(cr, uid, dn_exist, context=None)[0]
+
+			for x in data_dn.note_lines:
+				dn_line_obj.unlink(cr,uid,[x.id])
+				
+			dn_obj.write(cr,uid,dn_exist,prep_dn)
+
 		return res
 
 	def create_delivery_note(self, cr, uid, ids, context=None):
@@ -274,7 +308,7 @@ class order_preparation(osv.osv):
 		new_dn_ids = []
 		for op in ops:
 			prep_dn = {}
-			evt_prepare_change = dn_obj.prepare_change(cr, uid, ids, op.id)
+			evt_prepare_change = dn_obj.prepare_change(cr, uid, ids, op.id, validasi=False)
 			prep_dn = evt_prepare_change['value']
 			prep_dn['prepare_id']=op.id
 			prep_dn['special']=False

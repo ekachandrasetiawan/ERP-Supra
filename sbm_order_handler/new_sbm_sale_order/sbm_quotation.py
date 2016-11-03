@@ -1211,21 +1211,19 @@ class sale_order_invoice(osv.osv):
 					else:
 						description	=""
 					material_invoice.append(
-						"["
-						+material.product_id.default_code
-						+"]"
+						"["+material.product_id.default_code+"]"
 						+material.product_id.name
-						+" ("
-						+str(float(material.qty))
-						+" "
-						+material.uom.name
-						+")"
+						+" (" +str(float(material.qty)) +""
+						+material.uom.name+")"
 						+description)
+
+					desc = "["+material.product_id.default_code+"] "+material.product_id.name
 				if material_invoice:
 					material ='\nConsist Of\n'+"\n".join(material_invoice)
 				else:
 					material =""
-				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':inv_line.name+material})
+
+				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':desc })
 		
 				
 		return idInvoice

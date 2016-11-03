@@ -1129,12 +1129,12 @@ class delivery_note(osv.osv):
 		return super(delivery_note, self).unlink(cr, uid, ids, context=context)
 	
 	#check is prepare id has active dn document to process
-	def check_is_processed_queue(self, cr, uid, prepare_id, special=False, context={}):
+	def check_is_processed_queue(self, cr, uid, prepare_id, special=False, validasi=False, context={}):
 		res=True
 		# validate dn input
 		prepareExists = self.search(cr,uid,[('prepare_id','=',prepare_id),('state','not in',['cancel'])])
 		
-		if prepareExists and special==False:
+		if prepareExists and special==False and validasi==False:
 			no = ""
 			for nt in self.browse(cr,uid,prepareExists,context):
 				no += "["+nt.name+"]\n"
@@ -1143,7 +1143,7 @@ class delivery_note(osv.osv):
 		return res
 
 	def prepare_change(self, cr, uid, ids, pre):
-		self.check_is_processed_queue(cr, uid, pre, False, {}) #special still static, please fix it
+		# self.check_is_processed_queue(cr, uid, pre, False, {}) #special still static, please fix it
 
 		if pre :
 			res = {}; line = []

@@ -281,15 +281,18 @@ class merge_pickings(osv.osv_memory):
 		partner_obj = data['partner_id']
 
 		# Valisasi Invoice Picking Cek Po apakah sudah ada Invoice
+		
 		for x in picking_ids:
 			pick =pool_picking.browse(cr,uid,x)
 			if data.type == 'in':
 				cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [pick.purchase_id.id])
 				invoice = map(lambda x: x[0], cr.fetchall())
 				
-				if invoice:
-					raise osv.except_osv(_('Warning!'),
-					_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Dari Consolidate Picking'))
+				for i in invoice:
+					d_pick = pool_invoice.browse(cr, uid, i, context=None)
+					if d_pick.picking_ids == False:
+						raise osv.except_osv(_('Warning!'),
+						_('Picking '+ pick.name +' dari PO ' + pick.purchase_id.name[:6] + ' Tidak Dapat Di Buat Invoice Dari Consolidate Picking'))
 
 
 		
