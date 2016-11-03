@@ -585,6 +585,7 @@ class Sale_order(osv.osv):
 						
 						}
 					# print material.product_uom.id,"<<<<<<<<<<<"
+					_logger.error(("<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>--------------------",vals))
 					this_material.write(cr,uid,material.id,vals,context)
 				# else:
 				# 	raise osv.except_osv(_('Warning'),_('Material Item sudah ada !!!'))
@@ -1052,7 +1053,7 @@ class sale_order_line(osv.osv):
 				discount_n = self._count_discount_nominal(base_total,discount)
 				subtotal_ = self._count_price_subtotal(base_total,discount_n)
 				taxes_total = self._count_amount_tax(cr,uid,subtotal_,tax_id[0][2])
-				seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
+				seq_id = self.pool.get('stock.location').search(cr, uid, [('code','=','HO')])
 				if len(seq_id):
 					seq_id = seq_id[0]
 				
