@@ -341,9 +341,10 @@ class order_preparation(osv.osv):
 		obj_move = self.pool.get('stock.move')
 
 		so = self.pool.get('sale.order')
-
+		_logger.error(('Tesss1---------------------',sale))
 		if sale:
-			print "CALLLLLLLLLLLLLLLLLLLLLLLLLLLLL"
+			_logger.error(('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK'))
+			
 			has_old_picking = False
 			has_postpone_picking=False
 			line = []
@@ -378,11 +379,14 @@ class order_preparation(osv.osv):
 			location = []
 			old_so_doc_ids = []
 			for x in data.order_line:
+				_logger.error(('LOop Order Line ++++++++++++++++++++++++', x))
 				if x.material_lines == []:
+					_logger.error(('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK IFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF x material lines'))
 					# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
 					old_so_doc_ids.append(x.order_id.id)
 
 			for old_id in old_so_doc_ids:
+				_logger.error(('GNERATING MATERIAL--------------------<<<<<<<<<<<<<<<<<<<'))
 				so.generate_material(cr,uid,old_id,context=context)
 				so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
 			for x in data.order_line:
@@ -418,8 +422,14 @@ class order_preparation(osv.osv):
 							nilai += l.product_qty - product_return
 
 					if y.product_id.type <> 'service':
-						if nilai < y.qty:
-							
+						nilai = y.qty-y.shipped_qty-y.on_process_qty+y.returned_qty
+
+						_logger.error(('bukan serviceEEEEEEEEEEEEEE--------------------<<<<<<<<<<<<<<<<<<<'))
+						_logger.error(('Material QTY-------------',y.qty,y.shipped_qty,y.on_process_qty,y.returned_qty))
+						_logger.error(('Nilai Nilai-------------',nilai))
+						_logger.error(('Nilai QTY-------------',y.qty))
+						if nilai:
+							_logger.error(('Nilai <<<<<< QTYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY'))
 
 							location += [y.picking_location.id]
 							if y.sale_order_line_id.product_no_cus:
@@ -442,7 +452,7 @@ class order_preparation(osv.osv):
 							})
 							theNum=theNum+1 #append nomor urut
 			res['prepare_lines'] = line
-			
+			_logger.error(('------------------------------------------------------Tesss2---------------------',res))
 			return  {'value': res}
 
 
@@ -504,7 +514,7 @@ class order_preparation(osv.osv):
 			context['location'] = val.location_id.id
 			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 			if not product.active:
-				if not re.match(r'service',product.categ_id.name,re.M|re.I):
+				if not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
 					notActiveProducts.append(product.default_code)	
 
 			if product.not_stock == False:
