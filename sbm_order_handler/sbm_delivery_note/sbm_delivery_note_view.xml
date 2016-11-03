@@ -151,6 +151,18 @@
 				 </record>
 
 				<menuitem name="Delivery Note" parent="base.menu_sales" id="sale_delivery_note" action="ad_delivery_note.action_delivery_note_form" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_warehouse"/>
-				 
+				
+
+				<record id="seq_porstpone_delivery_note" model="ir.sequence.type">
+					<field name="name">Postpone Delivery Note</field>
+					<field name="code">delivery.note.postpone</field>
+				</record>
+
+				<record id="seq_postpone_delivery_note_request" model="ir.sequence">
+					<field name="name">Postpone Delivery Note</field>
+					<field name="code">delivery.note.postpone</field>
+					<field name="prefix">POSTPONE/%(y)s/</field>
+					<field name="padding">4</field>
+				</record>			 
 	</data>
 </openerp>

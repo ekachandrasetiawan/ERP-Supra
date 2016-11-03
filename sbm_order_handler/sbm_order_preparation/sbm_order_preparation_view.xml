@@ -71,7 +71,6 @@
 					</button>
 
 					<field name="picking_id" position="replace" />
-							
 
 					<field name="poc" position="after">
 						<field name="location_id" on_change="sale_change(sale_id,location_id)" required="True"/>
@@ -81,6 +80,7 @@
 
 					<field name="partner_shipping_id" position="after">
 						<field name="duedate"/>
+						<field name="is_postpone"/>
 					</field>
 					<field name="partner_shipping_id" position="replace">
 						<field name="partner_shipping_id" required="True"/>

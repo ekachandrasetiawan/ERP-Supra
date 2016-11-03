@@ -141,7 +141,6 @@ class delivery_note(osv.osv):
 						self.write(cr, uid, ids, {'seq_no':val.name[:6]})
 					else:
 						raise osv.except_osv(_('Error'), _("Failed to update name code on Delivery Note,, Please Contat System Administrator!"))
-				
 			res[item.id] = RequestNo
 		return res
 
@@ -161,7 +160,7 @@ class delivery_note(osv.osv):
 		'doc_date' : fields.date('Document Date',track_visibility='onchange',readonly=True, states={'draft': [('readonly', False)], 'postpone': [('readonly', False)]}),
 		'name': fields.function(_getRequestName, fnct_search=_search_name, method=True, track_visibility='onchange', string="No#",type="char",
 			store={
-				'delivery.note': (lambda self, cr, uid, ids, c={}: ids, ['doc_date','state'], 20),
+				'delivery.note': (lambda self, cr, uid, ids, c={}: ids, ['doc_date','state','seq_no'], 20),
 			}),
 		'seq_no':fields.char('Seq No Delivery Note'),
 		'request_doc_no': fields.function(_getRequestDocNo, track_visibility='onchange', method=True, string="Request No",type="char",
@@ -423,17 +422,32 @@ class delivery_note(osv.osv):
 	def get_seq_no(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		dn = self.pool.get('delivery.note')
-		vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-		dn_no =time.strftime('%y')+ vals[-1]
+
+		if val.prepare_id.is_postpone == False:
+			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			dn_no =time.strftime('%y')+ vals[-1]
+		else:
+			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.postpone').split('/')
+			dn_no =time.strftime('%y')+ vals[-1] + '/POSTPONE'
 		return dn_no
 
 	def set_sequence_no(self, cr, uid, ids, force=False,context=None):
 		vals = self.browse(cr,uid,ids,context=context)
 		for val in vals:
+			if 'POSTPONE' in val.name:
+				no = self.get_seq_no(cr,uid,ids,context=context)
+			else:
+				no = val.name
+				
+
 			if not val.name or force or val.name == '/': #if name is None / False OR if allow to write new sequence no
 				self.write(cr, uid, ids,{
-										'seq_no':self.get_seq_no(cr,uid,ids,context=context),
+										'seq_no':no,
 										},context=context) #write name into new sequence
+			else:
+				self.write(cr, uid, ids,{
+										'seq_no':no,
+										},context=context) #write name into new sequence				
 		return True
 
 	def set_new_sequence_no(self,cr,uid,ids,context={}):
