@@ -1065,10 +1065,6 @@ class sale_order_line(osv.osv):
 				change_applied = True
 				for material in material_lines_object:
 					old_material = self.pool.get("sale.order.material.line").browse(cr,uid,material[1],context=context)
-					
-					# _logger.error(('debuging material -------------------------------------------- ',material[0]))
-					# _logger.error(('debuging material --------------------------------------------2 ',material))
-
 					if material[0]==0:
 						# new record
 						print "New Record"
