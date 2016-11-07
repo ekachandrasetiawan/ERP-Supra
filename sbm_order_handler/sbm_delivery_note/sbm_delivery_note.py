@@ -439,8 +439,18 @@ class delivery_note(osv.osv):
 			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
 			dn_no =time.strftime('%y')+ vals[-1]
 		else:
-			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.postpone').split('/')
-			dn_no =time.strftime('%y')+ vals[-1] + '/PS/'
+			if val.special:
+				vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+				dn_no =time.strftime('%y')+ vals[-1]
+			else:
+				
+				if val.prepare_id.is_postpone == True:
+					vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.postpone').split('/')
+					dn_no =time.strftime('%y')+ vals[-1] + '/PS/'
+				else:
+					vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+					dn_no =time.strftime('%y')+ vals[-1]
+					
 		return dn_no
 
 	def set_sequence_no(self, cr, uid, ids, force=False,context=None):
