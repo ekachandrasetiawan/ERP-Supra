@@ -1064,27 +1064,31 @@ class sale_order_line(osv.osv):
 				for material in material_lines_object:
 					old_material = self.pool.get("sale.order.material.line").browse(cr,uid,material[1],context=context)
 
-					bom_id = mrp_obj.search(cr,uid,[('product_id', '=' ,product_id)])[0]
+					bom_id = mrp_obj.search(cr,uid,[('product_id', '=' ,product_id)])
+					material_id = mrp_obj.browse(cr,uid,bom_id)
+					qty_bom = 1
+					for x in material_id:
 
-					bom_material = mrp_obj.search(cr,uid,[('bom_id', '=' , bom_id), ('product_id', '=' , material[2]['product_id'])])
-					browse_mrp  = mrp_obj.browse(cr, uid, bom_material)[0]
+						bom_material = mrp_obj.search(cr,uid,[('bom_id', '=' , x.id), ('product_id', '=' , material[2]['product_id'])])
+						browse_mrp  = mrp_obj.browse(cr, uid, bom_material)[0]
 
-					# print '============product_uom_qty=============',product_uom_qty,'=================',browse_mrp.product_qty
-					# product_uom_qty = product_uom_qty + browse_mrp.product_qty
+						qty_bom = browse_mrp.product_qty
+
+
 					if material[0]==0:
 						# new record
 						print "New Record"
 						update_values = {
 							'desc':material[2].get('desc',False),
 							'product_id':material[2]['product_id'],
-							"qty":product_uom_qty * browse_mrp.product_qty,
+							"qty":product_uom_qty * qty_bom,
 							'uom':material[2]["uom"],
 							"picking_location":seq_id,
 							'is_loaded_from_change':False
 						}
 						if material[2].get('is_loaded_from_change',False):
 							
-							update_values['qty'] = product_uom_qty * browse_mrp.product_qty
+							update_values['qty'] = product_uom_qty * qty_bom
 							update_values['is_loaded_from_change'] = True
 							# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 10001')
 						else:
@@ -1096,13 +1100,13 @@ class sale_order_line(osv.osv):
 						print "Update Record"
 						# _logger.error(("<><><><><><><><>",material[2]))
 						diff1 = material[2].get('qty',old_material.qty)
-						diff2 = product_uom_qty * browse_mrp.product_qty
+						diff2 = product_uom_qty * qty_bom
 						theQty = diff1
 						if diff1!=diff2:
 							theQty = diff2
 
 						updated_val = {
-							'qty':theQty * browse_mrp.product_qty,
+							'qty':theQty * qty_bom,
 							'is_loaded_from_change':False,
 							'product_id':material[2].get('product_id',old_material.product_id.id),
 							'desc':material[2].get('desc',old_material.desc),
@@ -1115,7 +1119,7 @@ class sale_order_line(osv.osv):
 
 
 						if old_material.is_loaded_from_change:
-							updated_val['qty'] = product_uom_qty * browse_mrp.product_qty
+							updated_val['qty'] = product_uom_qty * qty_bom
 							all_values_without_bom.append((1,material[1],updated_val))
 							updated_val['is_loaded_from_change'] = True
 							# _logger.error('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKk 1')
@@ -1137,7 +1141,7 @@ class sale_order_line(osv.osv):
 						update_values = {
 							'desc':old_material.desc,
 							'product_id':old_material.product_id.id,
-							"qty":product_uom_qty * browse_mrp.product_qty,
+							"qty":product_uom_qty * qty_bom,
 							'uom':old_material.uom.id,
 							"picking_location":seq_id,
 							'is_loaded_from_change':False
