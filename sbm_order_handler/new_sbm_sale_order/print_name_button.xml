@@ -102,25 +102,5 @@
         </field>
     	</record>
 
-
-        <record id="sales_order_inherit_page" model="ir.ui.view">
-        <field name="name">sale.order.form</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="ad_sales_project.view_sale_order_project"/>
-        <field name="arch" type="xml">
-               <xpath expr="/form/sheet/notebook/page[@string='Terms Of Payment']" position="replace"/>
-        </field>
-        </record>
-
-
-        <record id="dn_replace_sale_order" model="ir.ui.view">
-        <field name="name">sale.order.form</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="ad_delivery_note.view_inherit_sale_order"/>
-        <field name="arch" type="xml">
-               <xpath expr="/form/sheet/notebook/page[@string='Terms Condition']" position="replace"/>
-        </field>
-        </record>
-
 	</data>
 </openerp>
