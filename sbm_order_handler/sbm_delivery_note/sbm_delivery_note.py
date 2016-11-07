@@ -243,22 +243,32 @@ class delivery_note(osv.osv):
 			if got_line['product_qty'] == 0:
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
-
+		print vals,"______________________________"
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 
 	def onchange_old_spk(self, cr, uid, ids, spk_id, context={}):
-		browse = self.browse(cr, uid, ids, context=context)[0]
+		# browse = self.pool.get('perintah.key')browse(cr, uid, ids, context=context)
 
 		spk = self.pool.get('perintah.kerja').browse(cr, uid, spk_id, context=context)
 		line = []
+		res = {}				
 		for spk_item in spk.perintah_lines:
-			line.append((0,0,{
+			item = {
 				'product_id':spk_item.product_id.id,
 				'name': spk_item.name,
 				'product_qty':spk_item.product_qty,
 				'product_uom':spk_item.product_uom.id,
-			}))
+			}
+
+			item['note_lines_material'] = [(0,0,{
+				'product_id':spk_item.product_id.id,
+				'name': spk_item.name,
+				'qty':spk_item.product_qty,
+				'product_uom':spk_item.product_uom.id,
+			})]
+			print item['note_lines_material'],'+++++++++++++++++++++++++++++++++++++++++++++++++++++++='
+			line.append((0,0,item))
 
 		res['note_lines'] = line
 		return {'value':res}
@@ -476,26 +486,56 @@ class delivery_note(osv.osv):
 		m  = self.pool.get('ir.model.data')
 		id_loc = m.get_object(cr, uid, 'stock', 'stock_location_customers').id
 
-		# Create Stock Picking 
-		picking = stock_picking.create(cr, uid, {
-					'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
-					'origin':val.prepare_id.sale_id.name,
-					'partner_id':val.partner_id.id,
-					'stock_journal_id':1,
-					'move_type':'direct',
-					'invoice_state':'2binvoiced',
-					'auto_picking':False,
-					'type':picking_type,
-					'sale_id':val.prepare_id.sale_id.id,
-					'note_id':val.id,
-					'state':'draft'
-					})
+		# Create Stock Picking
+		if val.special:
+			origin =""
+			if val.work_order_id:
+				origin  = val.work_order_id.pr_id.name
+
+			if val.work_order_in:
+				origin = val.work_order_in.no_pb
+
+			picking = stock_picking.create(cr, uid, {
+				'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+				'origin':origin,
+				'partner_id':val.partner_id.id,
+				'stock_journal_id':1,
+				'move_type':'direct',
+				'invoice_state':'2binvoiced',
+				'auto_picking':False,
+				'type':picking_type,
+				'sale_id':False,
+				'note_id':val.id,
+				'state':'draft'
+			})	
+		else:
+
+			picking = stock_picking.create(cr, uid, {
+						'name':self.pool.get('ir.sequence').get(cr, uid, seq_obj_name),
+						'origin':val.prepare_id.sale_id.name,
+						'partner_id':val.partner_id.id,
+						'stock_journal_id':1,
+						'move_type':'direct',
+						'invoice_state':'2binvoiced',
+						'auto_picking':False,
+						'type':picking_type,
+						'sale_id':val.prepare_id.sale_id.id,
+						'note_id':val.id,
+						'state':'draft'
+						})
 
 		# Create Stock Move
-		if val.prepare_id.id:
-			loc_id =val.prepare_id.location_id.id
+		if val.special:
+			loc_id=14
 		else:
-			loc_id = 12
+			if val.prepare_id.id:
+				loc_id =val.prepare_id.location_id.id
+			else:
+				if val.special:
+					loc_id = 14
+				else:
+					loc_id = 14
+		print "loccccc----------------",loc_id
 
 		for line in val.note_lines:
 			for x in line.note_lines_material:
@@ -507,29 +547,51 @@ class delivery_note(osv.osv):
 				# elif  x.op_line_id.move_id and x.op_line_id.move_id.sale_line_id:
 				# 	# if old op not has sale_line_material_id on order_preparation_line object
 				# 	sale_line_id = x.op_line_id.move_id.sale_line_id.id
-				sale_line_id = x.op_line_id.sale_line_id.id
 				
-				move_id = stock_move.create(cr,uid,{
-					'name' : x.product_id.name,
-					'origin':val.prepare_id.sale_id.name,
-					'product_uos_qty':x.qty,
-					'product_uom':x.product_uom.id,
-					'prodlot_id':x.prodlot_id.id,
-					'product_qty':x.qty,
-					'product_uos':x.product_uom.id,
-					'partner_id':val.partner_id.id,
-					'product_id':x.product_id.id,
-					'auto_validate':False,
-					'location_id' :loc_id,
-					'company_id':1,
-					'picking_id': picking,
-					'state':'draft',
-					'location_dest_id' :id_loc,
-					'sale_line_id': sale_line_id,
-					'sale_material_id':x.op_line_id.sale_line_material_id.id,
-					},context=context)
+				if val.special:
+					sale_line_id = False
+					move_id = stock_move.create(cr,uid,{
+						'name' : x.product_id.name,
+						'origin':origin,
+						'product_uos_qty':x.qty,
+						'product_uom':x.product_uom.id,
+						'prodlot_id':x.prodlot_id.id,
+						'product_qty':x.qty,
+						'product_uos':x.product_uom.id,
+						'partner_id':val.partner_id.id,
+						'product_id':x.product_id.id,
+						'auto_validate':False,
+						'location_id' :loc_id,
+						'company_id':1,
+						'picking_id': picking,
+						'state':'draft',
+						'location_dest_id' :id_loc,
+						'sale_line_id': False,
+						'sale_material_id':False,
+						},context=context)
+				else:
+					sale_line_id = x.op_line_id.sale_line_id.id
+					move_id = stock_move.create(cr,uid,{
+						'name' : x.product_id.name,
+						'origin':val.prepare_id.sale_id.name,
+						'product_uos_qty':x.qty,
+						'product_uom':x.product_uom.id,
+						'prodlot_id':x.prodlot_id.id,
+						'product_qty':x.qty,
+						'product_uos':x.product_uom.id,
+						'partner_id':val.partner_id.id,
+						'product_id':x.product_id.id,
+						'auto_validate':False,
+						'location_id' :loc_id,
+						'company_id':1,
+						'picking_id': picking,
+						'state':'draft',
+						'location_dest_id' :id_loc,
+						'sale_line_id': sale_line_id,
+						'sale_material_id':x.op_line_id.sale_line_material_id.id,
+						},context=context)
 
-				# Update DN Line Material Dengan ID Move
+					# Update DN Line Material Dengan ID Move
 				dn_material.write(cr,uid,x.id,{'stock_move_id':move_id})
 
 		# Update Picking id di DN
@@ -572,6 +634,7 @@ class delivery_note(osv.osv):
 			if not val.seq_no:
 				# set new no with old style
 				dn.set_sequence_no(cr, uid, ids, False, context=context)
+			dn.create_picking(cr, uid, ids)
 
 		self.write(cr, uid, ids, {'state':'submited'}, context=context)
 
