@@ -183,6 +183,33 @@ class delivery_note(osv.osv):
 		'prepare_id':{}
 	}
 
+
+
+
+	def validasi_stock(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		loc = 12
+
+		if val.prepare_id.location_id.id:
+			loc = val.prepare_id.location_id.id
+
+		for line in val.note_lines:
+			for x in line.note_lines_material:
+				if not context:
+					context = {}
+				context['location'] = loc
+
+				product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
+
+				if x.qty > product.qty_available:
+					mm = ' ' + product.default_code + ' '
+					stock = ' ' + str(product.qty_available) + ' '
+					msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
+
+					raise openerp.exceptions.Warning(msg)
+
+		return True
+
 	"""
 	:return boolean True or False
 	It wil raise an exception if abnormal / false function data
@@ -573,6 +600,9 @@ class delivery_note(osv.osv):
 				# set new no with old style
 				dn.set_sequence_no(cr, uid, ids, False, context=context)
 
+		# Cek Validasi Stock By Picking Location 
+		self.validasi_stock(cr, uid, ids, context=context)
+
 		self.write(cr, uid, ids, {'state':'submited'}, context=context)
 
 		return True
@@ -582,6 +612,9 @@ class delivery_note(osv.osv):
 
 		if val.prepare_id.is_postpone == True:
 			raise osv.except_osv(_('Warning'),_('Error to Approve Delivery Note\nOrder Preparation Document state not Ready / Done yet.\n Maybe order in Re Packing status is postpone\n'))
+
+		# Cek Validasi Stock By Picking Location 
+		self.validasi_stock(cr, uid, ids, context=context)
 
 		return self.write(cr, uid, ids, {'state':'approve'},context=context)
 
@@ -726,13 +759,19 @@ class delivery_note(osv.osv):
 		val = self.browse(cr, uid, ids, context={})[0]
 		stock_picking = self.pool.get('stock.picking')
 		old_picking = False #flag to check if old document
+		
+		# Cek Validasi Stock By Picking Location 
+		self.validasi_stock(cr, uid, ids, context=context)
+
+
 		if val.prepare_id.picking_id:
 			# print "INNNNNN",val.prepare_id.prepare_lines[0].sale_line_material_id
 			if not val.prepare_id.prepare_lines[0].sale_line_material_id:
 				old_picking = True
 		# jika ada picking_id di dn
 
-		print old_picking,">>>>>>>>>>>>>>>>>>"
+
+
 		if val.picking_id.id:
 			# if 
 			if not old_picking:
