@@ -558,7 +558,7 @@ class Sale_order(osv.osv):
 					product=self.pool.get('product.product').browse(cr,uid,material.product_id.id,context)
 					this_material = self.pool.get('sale.order.line')
 
-					seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
+					seq_id = self.pool.get('stock.location').search(cr, uid, [('code','=','HO')])
 
 					if len(seq_id):
 						seq_id = seq_id[0]
