@@ -25,10 +25,11 @@
 				<header>
 					<button name="print_so" type="object" string="Print Sale Order"/>
 				</header>
+				<xpath expr="//field[@name='note']" position="after">
+		    		<field name="order_policy"/>
+		    	</xpath>
 			</field>
-		<!-- <xpath expr="//field[@name='product_id']" position="before">
-					<field name="sequence" string="No"/>
-		</xpath> -->
+		
 		</record>
 		
 	</data>

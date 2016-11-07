@@ -63,6 +63,31 @@
         	<button name="cancel" position="replace">
         		<button name="cancel" states="draft,sent" string="Cancel Quotation" groups="base.group_user" icon="STOCK_CANCEL"/>
         	</button>
+            <xpath expr="//group[@name='sale_total']" position="after">
+                <group style="width: 65%%">
+                        <label for="payment_term"/>
+                        <div>
+                            <field name="payment_term"/>
+                        </div>
+
+                        <label for="order_policy"/>
+                        <div>
+                            <field name="order_policy"/>
+                        </div>
+                        <label for="internal_notes" string="Terms And Conditions"/>
+                        <div>
+                            <field name="internal_notes" string="Terms And Conditions"/>
+                        </div>
+                </group>
+            </xpath>
+            <xpath expr="//field[@name='note']" position="replace">
+                <group style="width: 65%%">
+                    <label for="note" string="Notes"/>
+                    <div>
+                        <field name="note" string="Note"/>
+                    </div>
+                </group>
+            </xpath>
         </field>
     	</record>
 
@@ -76,5 +101,26 @@
         	</button>
         </field>
     	</record>
+
+
+        <record id="sales_order_inherit_page" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="ad_sales_project.view_sale_order_project"/>
+        <field name="arch" type="xml">
+               <xpath expr="/form/sheet/notebook/page[@string='Terms Of Payment']" position="replace"/>
+        </field>
+        </record>
+
+
+        <record id="dn_replace_sale_order" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="ad_delivery_note.view_inherit_sale_order"/>
+        <field name="arch" type="xml">
+               <xpath expr="/form/sheet/notebook/page[@string='Terms Condition']" position="replace"/>
+        </field>
+        </record>
+
 	</data>
 </openerp>

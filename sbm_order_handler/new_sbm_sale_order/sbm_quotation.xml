@@ -753,6 +753,8 @@
 
 							<field name="group_id" attrs="{'readonly':[('quotation_state','not in',['draft','confirmed'])]}" domain="[('is_main_group','=',True)]"/>
 
+							<field name="client_order_ref" attrs="{'readonly':True}"/>
+
 							<field name="repeat_so_id" readonly="1" attrs="{'invisible':[('repeat_so_id','=',False)]}" />
 						</group>
 						
