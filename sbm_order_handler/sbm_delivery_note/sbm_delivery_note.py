@@ -264,7 +264,10 @@ class delivery_note(osv.osv):
 		return {'value':res}
 
 	""""Event On Change Order Packaging"""
-	def prepare_change(self, cr, uid, ids, pre):
+	def prepare_change(self, cr, uid, ids, pre, validasi=False):
+
+
+		self.check_is_processed_queue(cr, uid, pre, False, validasi, {})
 		res = super(delivery_note,self).prepare_change(cr, uid, ids, pre)
 		if pre :
 			res = {}; line = []
@@ -377,7 +380,6 @@ class delivery_note(osv.osv):
 
 		return  {'value': res}
 
-
 	"""
 		Will re write tuple of line data of delivery note line material
 		It will re count delivery note line material -> product_qty to count line set/lot qty from formula
@@ -428,17 +430,23 @@ class delivery_note(osv.osv):
 			dn_no =time.strftime('%y')+ vals[-1]
 		else:
 			vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.postpone').split('/')
-			dn_no =time.strftime('%y')+ vals[-1] + '/POSTPONE'
+			dn_no =time.strftime('%y')+ vals[-1] + '/PS/'
 		return dn_no
 
 	def set_sequence_no(self, cr, uid, ids, force=False,context=None):
 		vals = self.browse(cr,uid,ids,context=context)
+		
 		for val in vals:
-			if 'POSTPONE' in val.name:
+			if 'PS' in val.name and val.prepare_id.is_postpone == True:
 				no = self.get_seq_no(cr,uid,ids,context=context)
-			else:
+			elif 'PS' in val.name and val.prepare_id.is_postpone == False:
+				no = self.get_seq_no(cr,uid,ids,context=context)
+			elif val.state == 'draft':
+				no = self.get_seq_no(cr,uid,ids,context=context)
+			elif val.state == 'postpone':
+				no = self.get_seq_no(cr,uid,ids,context=context)
+			elif val.prepare_id.is_postpone == True:
 				no = val.name
-				
 
 			if not val.name or force or val.name == '/': #if name is None / False OR if allow to write new sequence no
 				self.write(cr, uid, ids,{
@@ -570,6 +578,10 @@ class delivery_note(osv.osv):
 		return True
 
 	def approve_note(self, cr, uid, ids, context={}):
+		val = self.browse(cr, uid, ids)[0]
+
+		if val.prepare_id.is_postpone == True:
+			raise osv.except_osv(_('Warning'),_('Error to Approve Delivery Note\nOrder Preparation Document state not Ready / Done yet.\n Maybe order in Re Packing status is postpone\n'))
 
 		return self.write(cr, uid, ids, {'state':'approve'},context=context)
 

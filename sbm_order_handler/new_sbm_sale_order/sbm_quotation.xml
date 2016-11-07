@@ -541,11 +541,6 @@
 				<field name="menu_access" eval="[(6,0,[ref('sale.menu_sale_order'),ref('base.menu_base_partner')])]" />
 			</record>
 
-	<!-- 	<record model="res.groups" id="group_sales_supra">
-			<field name="name">Sales Supra</field>
-			<field name="category_id" ref="base.module_category_sales_management"/>
-			<field name="menu_access" eval="[(6,0,[ref('sale.menu_sale_order'),ref('base.menu_base_partner')])]" />
-		</record> -->
 		<record id="inherit_new_order_line" model="ir.ui.view">
 			<field name="name">Order Lines</field>
 			<field name="model">sale.order</field>
@@ -575,6 +570,7 @@
 												  <label for="product_uom_qty"/>
 											<div>
 												<field context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'shop':parent.shop_id, 'uom':product_uom}" name="product_uom_qty" class="oe_inline" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines)" />
+												
 												<field name="product_uom" groups="product.group_uom" on_change="onchange_product_uom(product_id,product_uom)" class="oe_inline oe_no_button"/>
 											</div>
 											</group>
@@ -627,18 +623,11 @@
 									<field name="state" invisible="1" />
 								</tree>
 							</field>
-						   
-						</page>
+				</page>
 			</field>
 		</record>
 			
 
-
-<!-- 		<record model="res.groups" id="group_sales_admin">
-			<field name="name">Sales Admin</field>
- 			<field name="category_id" ref="base.module_category_sales_management"/>
- 			<field name="menu_access" eval="[(6,0,[529,531,ref('sbm_inherit.mr_menu_sales'),ref('base.menu_sales'),ref('sale.menu_sale_order'),ref('base.menu_base_partner'),ref('product.menu_products'),ref('stock.menu_action_picking_tree4'),ref('sbm_inherit.mr_menu_ws'),ref('stock.menu_action_picking_tree'),ref('sbm_inherit.internal_move_req_sales_menu'),ref('ad_delivery_note.sale_minta_barang'),ref('sbm_inherit.speial_work_order_menu'),ref('sbm_inherit.speial_dn_menu'),ref('ad_perintah_kerja.sale_perintah_kerja'),ref('sbm_inherit.internal_move_sales_menu'),ref('ad_delivery_note.sale_delivery_note'),ref('base.menu_product')])]" />
- 		</record> -->
 
 		<record id="base_group_rmpsm" model="ir.model.data">
 				<field name="name">group_rmpsm</field>

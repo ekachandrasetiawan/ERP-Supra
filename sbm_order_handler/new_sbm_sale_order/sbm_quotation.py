@@ -1065,10 +1065,6 @@ class sale_order_line(osv.osv):
 				change_applied = True
 				for material in material_lines_object:
 					old_material = self.pool.get("sale.order.material.line").browse(cr,uid,material[1],context=context)
-					
-					# _logger.error(('debuging material -------------------------------------------- ',material[0]))
-					# _logger.error(('debuging material --------------------------------------------2 ',material))
-
 					if material[0]==0:
 						# new record
 						print "New Record"
@@ -1164,6 +1160,8 @@ class sale_order_line(osv.osv):
 class account_invoice_line(osv.osv):
 	_inherit='account.invoice.line'
 	_columns={
+		'product_id': fields.many2one('product.product', 'Product', ondelete='set null', select=True, required=True),
+		'name': fields.text('Description', required=False),
 		'sale_order_lines': fields.many2many('sale.order.line', 'sale_order_line_invoice_rel', 'invoice_id', 'order_line_id', 'Order Lines', readonly=True),
 	}
 
@@ -1209,21 +1207,19 @@ class sale_order_invoice(osv.osv):
 					else:
 						description	=""
 					material_invoice.append(
-						"["
-						+material.product_id.default_code
-						+"]"
+						"["+material.product_id.default_code+"]"
 						+material.product_id.name
-						+" ("
-						+str(float(material.qty))
-						+" "
-						+material.uom.name
-						+")"
+						+" (" +str(float(material.qty)) +""
+						+material.uom.name+")"
 						+description)
+
+					desc = "["+material.product_id.default_code+"] "+material.product_id.name
 				if material_invoice:
 					material ='\nConsist Of\n'+"\n".join(material_invoice)
 				else:
 					material =""
-				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':inv_line.name+material})
+
+				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':desc })
 		
 				
 		return idInvoice
