@@ -658,8 +658,10 @@
 				   <field name="message_unread" invisible="1" modifiers="{'readonly': true, 'tree_invisible': true}"/>
 					<field name="state" invisible="1"/>
 					<field name="quotation_no" string="Quotation Number"/>
+					<field name="name"/>
 					<field name="date_order"/>
 					<field name="partner_id"/>
+					<field name="client_order_ref"/>
 					<field name="user_id"/>
 					<field name="amount_total" sum="Total Tax Included"/>
 					<field name="quotation_state"/>
