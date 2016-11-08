@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import time
+import re
 import openerp.exceptions
 from lxml import etree
 from openerp import pooler
@@ -201,7 +202,7 @@ class delivery_note(osv.osv):
 
 				product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 
-				if x.qty > product.qty_available:
+				if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
 					mm = ' ' + product.default_code + ' '
 					stock = ' ' + str(product.qty_available) + ' '
 					msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
