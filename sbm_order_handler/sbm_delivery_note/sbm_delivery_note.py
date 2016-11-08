@@ -666,9 +666,10 @@ class delivery_note(osv.osv):
 			else:
 				self.write(cr,uid,ids,{'picking_id':val.prepare_id.picking_id.id})
 			# Jalankan Fungsi Sequence No
-			dn.set_sequence_no(cr, uid, ids, False, context=context)
+			if val.name == '/' or val.seq_no==False:
+				dn.set_sequence_no(cr, uid, ids, False, context=context)
 		else:
-			if not val.seq_no:
+			if val.seq_no==False or val.name=='/':
 				# set new no with old style
 				dn.set_sequence_no(cr, uid, ids, False, context=context)
 			dn.create_picking(cr, uid, ids)
