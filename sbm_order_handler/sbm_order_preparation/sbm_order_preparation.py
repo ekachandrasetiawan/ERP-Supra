@@ -168,14 +168,14 @@ class order_preparation(osv.osv):
 						<html>
 						  <head></head>
 						  <body>
-						    <p>
-						    	Dear %s!<br/><br/>
+							<p>
+								Dear %s!<br/><br/>
 								%s Telah Mensubmit Order Preparation <b> %s </b><br/>
 								<br/>
 								Silahkan klik Link ini untuk melihat detail Order Preparation. <a href="%s">View Order Preparation</a>
-						    </p>
-						    <br/>
-						    Best Regards,<br/>
+							</p>
+							<br/>
+							Best Regards,<br/>
 							Administrator ERP
 						  </body>
 						</html>
@@ -199,14 +199,14 @@ class order_preparation(osv.osv):
 					<html>
 					  <head></head>
 					  <body>
-					    <p>
-					    	Dear %s!<br/><br/>
+						<p>
+							Dear %s!<br/><br/>
 							%s Telah Memproses Order Preparation <b> %s </b> dan siap untuk dibuatkan surat jalan / Delivery Notes <br/>
 							<br/>
 							Silahkan klik Link ini untuk melihat detail Order Preparation.  <a href="%s">View Order Preparation</a>
-					    </p>
-					    <br/>
-					    Best Regards,<br/>
+						</p>
+						<br/>
+						Best Regards,<br/>
 						Administrator ERP
 					  </body>
 					</html>
@@ -581,6 +581,7 @@ class order_preparation(osv.osv):
 					raise openerp.exceptions.Warning(msg)
 					return False
 
+				# Validasi Stock
 				if product.track_outgoing:
 					for batch in x.prodlot_id:
 						prodlot_browse = self.pool.get('stock.production.lot').browse(cr, uid, batch.name.id, context=context)
@@ -591,7 +592,20 @@ class order_preparation(osv.osv):
 							msg = 'Stock Product' + mm + ' '+batch.name.name+' Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 							raise openerp.exceptions.Warning(msg)
 							return False
-					
+
+				# Validasi Jika Product Bacth tidak di input dan QTy tidak sama
+				if product.track_production == True or product.track_outgoing == True or product.track_incoming == True:
+					qty_note_line =  x.product_qty
+					if x.prodlot_id:
+						qty_bacth = 0
+						for line_batch in x.prodlot_id:
+							qty_bacth += line_batch.qty
+
+						if qty_bacth < qty_note_line:
+							raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product Bacth'))
+					else:
+						raise osv.except_osv(('Warning..!!'), ('Please Input Batch Product'))
+
 		if len(notActiveProducts) > 0:
 			m_p_error = ""
 			for pNon in notActiveProducts:
