@@ -271,15 +271,14 @@ class sale_order_material_line(osv.osv):
 				if data.preparation_id.state <> 'cancel':
 					dn_line_material=self.pool.get('delivery.note.line.material').search(cr,uid,[('op_line_id', '=' ,data.id)])
 
-					for x_line in self.pool.get('delivery.note.line.material').browse(cr,uid,dn_line_material):
-						if x_line.note_line_id.state <> 'done':
-							hasil += 0
-						elif x_line.note_line_id.state <> 'cencel':
-							hasil += 0
-						elif x_line.note_line_id.state == 'torefund':
-							hasil += data.product_qty
-						else:
-							hasil += data.product_qty
+					if dn_line_material:
+						for x_line in self.pool.get('delivery.note.line.material').browse(cr,uid,dn_line_material):
+							if x_line.note_line_id.state == 'done' or x_line.note_line_id.state == 'cancel' or x_line.note_line_id.state == 'torefund' or x_line.note_line_id.state == 'refunded':
+								hasil += 0
+							else:
+								hasil += data.product_qty
+					else:
+						hasil += data.product_qty
 
 			res[item.id] = hasil
 		return res
