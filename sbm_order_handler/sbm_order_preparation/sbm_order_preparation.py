@@ -225,18 +225,26 @@ class order_preparation(osv.osv):
 		return True
 
 	def validasi_create(self, cr, uid, vals, context=None):
+		
 		if 'prepare_lines' in vals:
 			for x in vals['prepare_lines']:
 				if x[2]:
-					qty_note_line =  x[2]['product_qty']
 
-					if x[2]['prodlot_id']:
-						qty_bacth = 0
-						for y in x[2]['prodlot_id']:
-							qty_bacth += y[2]['qty']
+					product = self.pool.get('product.product').browse(cr, uid, x[2]['product_id'])
 
-						if qty_bacth < qty_note_line:
-							raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product Bacth'))
+					# Check Apakah Product Batch
+					if product.track_production == True or product.track_outgoing == True or product.track_incoming == True:
+						qty_note_line =  x[2]['product_qty']
+
+						if x[2]['prodlot_id']:
+							qty_bacth = 0
+							for y in x[2]['prodlot_id']:
+								qty_bacth += y[2]['qty']
+
+							if qty_bacth < qty_note_line:
+								raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product Bacth'))
+						else:
+							raise osv.except_osv(('Warning..!!'), ('Please Input Batch Product'))
 		return True
 
 	def create(self, cr, uid, vals, context=None):
