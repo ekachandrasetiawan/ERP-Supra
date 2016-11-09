@@ -190,24 +190,24 @@ class delivery_note(osv.osv):
 	def validasi_stock(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		loc = 12
+		if not val.special:
+			if val.prepare_id.location_id.id:
+				loc = val.prepare_id.location_id.id
 
-		if val.prepare_id.location_id.id:
-			loc = val.prepare_id.location_id.id
+			for line in val.note_lines:
+				for x in line.note_lines_material:
+					if not context:
+						context = {}
+					context['location'] = loc
 
-		for line in val.note_lines:
-			for x in line.note_lines_material:
-				if not context:
-					context = {}
-				context['location'] = loc
+					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 
-				product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
+					if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
+						mm = ' ' + product.default_code + ' '
+						stock = ' ' + str(product.qty_available) + ' '
+						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
 
-				if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
-					mm = ' ' + product.default_code + ' '
-					stock = ' ' + str(product.qty_available) + ' '
-					msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
-
-					raise openerp.exceptions.Warning(msg)
+						raise openerp.exceptions.Warning(msg)
 
 		return True
 
