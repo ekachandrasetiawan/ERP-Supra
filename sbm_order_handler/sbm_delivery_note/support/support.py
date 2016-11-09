@@ -70,13 +70,21 @@ class delivery_note(osv.osv):
 				set_price_unit = note_lines.op_line_id.sale_line_id.price_unit
 			else:
 				set_price_unit = note_lines.op_line_id.move_id.sale_line_id.price_unit
+			
+			desc = note_lines.name + '\n'
+
+			for x in note_lines.note_lines_material:
+				if x.desc:
+					desc += '[ ' + x.product_id.default_code + ' ]' + x.product_id.name + '\n' + x.desc + '(' +  str(x.qty) + ' ' + x.product_uom.name + ')'
+				else:
+					desc += '[ ' + x.product_id.default_code + ' ]' + x.product_id.name + '(' +  str(x.qty) + ' ' + x.product_uom.name + ')' + '\n'
 
 			isi_noteline.append((0,0,{
 			'product_id':note_lines.product_id.id, #dari product account invoice line
 			'quantity':note_lines.product_qty, #dari qty account invoice line
 			'price_unit':set_price_unit, #dari price sale order line
 			'uos_id':note_lines.product_uom.id,#dari uom account invoice line
-			'name':note_lines.name#dari nama  product di note_lines
+			'name':desc #dari nama  product di note_lines
 			}))
 
 		values_invoice={ 
