@@ -304,7 +304,7 @@ class delivery_note(osv.osv):
 	""""Event On Change Order Packaging"""
 	def prepare_change(self, cr, uid, ids, pre, validasi=False):
 
-
+		recount = False
 		self.check_is_processed_queue(cr, uid, pre, False, validasi, {})
 		res = super(delivery_note,self).prepare_change(cr, uid, ids, pre)
 		if pre :
@@ -360,8 +360,6 @@ class delivery_note(osv.osv):
 						if qty_dn.product_id.id == y.product_id.id:
 							op_qty = self.pool.get('order.preparation.line').search(cr, uid, [('sale_line_material_id', 'in', [qty_dn.id]), ('preparation_id', '=', [pre])])
 							qty_op = self.pool.get('order.preparation.line').browse(cr, uid, op_qty)[0]
-							
-							# Set Product Qty yang bukan Set
 							qty_dn_line = qty_op.product_qty
 				# else:
 				for dline in data_material_line:
@@ -377,6 +375,7 @@ class delivery_note(osv.osv):
 
 							if data_batch:
 								# Jika Ada Batch Maka Tampilkan Batch
+								qty_dn_line = 0
 								for xbatch in data_batch:
 									material_line.append((0,0,{
 										'product_id':dopline.product_id.id,
@@ -387,6 +386,8 @@ class delivery_note(osv.osv):
 										'location_id':dline.picking_location.id,
 										'op_line_id':dopline.id
 									}))
+									qty_dn_line += xbatch.qty
+									recount = True
 							else:
 								material_line.append((0,0,{
 									'name':dopline.name,
@@ -397,6 +398,7 @@ class delivery_note(osv.osv):
 									'location_id':dline.picking_location.id,
 									'op_line_id':dopline.id
 									}))
+
 				line.append((0,0,{
 					'no': y.sequence,
 					'product_id' : y.product_id.id,
@@ -407,7 +409,7 @@ class delivery_note(osv.osv):
 					'sale_line_id': y.id,
 					}))
 
-			self._qty_recount(cr,uid,ids,line,{})
+			self._qty_recount(cr,uid,ids,line, recount, {})
 
 			res['note_lines'] = line
 			res['poc'] = data.sale_id.client_order_ref
@@ -422,7 +424,7 @@ class delivery_note(osv.osv):
 		Will re write tuple of line data of delivery note line material
 		It will re count delivery note line material -> product_qty to count line set/lot qty from formula
 	"""
-	def _qty_recount(self,cr,uid,ids,lines,context={}):
+	def _qty_recount(self,cr,uid,ids,lines, recount=False, context={}):
 		res = {}
 		
 		for line in lines:
@@ -451,7 +453,8 @@ class delivery_note(osv.osv):
 				avgList.append(avgM)
 
 			avg = (sum(avgList)/len(avgList))
-			data['product_qty'] = fullorder*(avg/100.00)
+			if recount == False:
+				data['product_qty'] = fullorder*(avg/100.00)
 		return True
 
 	"""
