@@ -439,6 +439,32 @@ class account_invoice_line(osv.osv):
 		'state':fields.related('invoice_id','state',type='char',store=False,string="State"),
 	}
 
+
+	def move_line_get_item(self, cr, uid, line, context=None):
+
+		if line.name:
+			a = line.name
+		else:
+			a = '[ ' + line.product_id.default_code + ' ] ' + line.product_id.name 
+
+		desc = a.split('\n')[0][:64]
+
+		return {
+			'type':'src',
+			'name': desc,
+			'price_unit':line.price_unit,
+			'quantity':line.quantity,
+			'price':line.price_subtotal,
+			'account_id':line.account_id.id,
+			'product_id':line.product_id.id,
+			'uos_id':line.uos_id.id,
+			'account_analytic_id':line.account_analytic_id.id,
+			'taxes':line.invoice_line_tax_id,
+		}
+
+		
+account_invoice_line()
+
 # INHERIT CLASS FOR ACCOUNT BANK STATEMENT LINE
 # For Bank Statment Size
 class account_bank_statement_line(osv.osv):
