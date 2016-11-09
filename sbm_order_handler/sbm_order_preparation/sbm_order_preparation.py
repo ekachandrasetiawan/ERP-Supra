@@ -248,6 +248,27 @@ class order_preparation(osv.osv):
 		return True
 
 	def create(self, cr, uid, vals, context=None):
+		# check = self.search(cr,uid,[('sale_id','=',vals['sale_id']),('state','in',('draft','approve','submited'))])
+		check = self.search(cr,uid,[('sale_id','=',vals['sale_id'])])
+		OPs = self.browse(cr,uid,check,context=None)
+
+		allOp = []
+		for op in OPs:
+			if op.state == 'draft' or op.state == 'approve' or op.state == 'submited':
+				allOp.append(op.name)
+				
+				mm = '\n==> '.join(allOp)
+				msg = 'You cannot create an Order Package which is has been exist.\n\n===> '+mm
+				
+				raise openerp.exceptions.Warning(msg)
+			elif op.state == 'done':
+				obj_dn = self.pool.get('delivery.note').search(cr, uid ,[('prepare_id', '=', op.id)])
+				if obj_dn:
+					dn = self.pool.get('delivery.note').browse(cr, uid, obj_dn)[0]
+					if dn.state == 'draft' or dn.state == 'submited' or dn.state == 'approve':
+						msg = 'Please to complete the process of Delivery Note with No' + dn.name
+						raise openerp.exceptions.Warning(msg)
+
 		self.validasi_create(cr, uid, vals, context=None)
 
 		res = super(order_preparation, self).create(cr, uid, vals, context=context)
@@ -384,9 +405,10 @@ class order_preparation(osv.osv):
 				raise osv.except_osv(_('Perhatian!'), _('Sales Order Not Found'))
 		return {'value': res}
 
-	def sale_change(self, cr, uid, ids, sale, loc=False, context=None):
+	def sale_change(self, cr, uid, ids, sale, loc=False, reload=False, context=None):
 		# default 
 		res = {}
+		vals = {}
 		res['picking_id'] = False
 		so_material_line = self.pool.get('sale.order.material.line')
 		obj_op_line = self.pool.get('order.preparation.line')
@@ -396,20 +418,14 @@ class order_preparation(osv.osv):
 		obj_move = self.pool.get('stock.move')
 
 		so = self.pool.get('sale.order')
-		_logger.error(('Tesss1---------------------',sale))
 		if sale:
-			_logger.error(('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK'))
-			
 			has_old_picking = False
 			has_postpone_picking=False
 			line = []
 			data = self.pool.get('sale.order').browse(cr, uid, sale)
 
-			# check if picking exist on Sale.Order object
-
 		# if data.picking_ids:
 			has_old_picking=True
-			# if picking ids then we need to check state
 			active = [] #list of browse record
 			sale_material_id_generated = False
 			for picking in data.picking_ids:
@@ -434,22 +450,14 @@ class order_preparation(osv.osv):
 			location = []
 			old_so_doc_ids = []
 			for x in data.order_line:
-				_logger.error(('LOop Order Line ++++++++++++++++++++++++', x))
 				if x.material_lines == []:
-					_logger.error(('MASUKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK IFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF x material lines'))
 					# raise openerp.exceptions.Warning("SO Material Belum di Definisikan")
 					old_so_doc_ids.append(x.order_id.id)
 
 			for old_id in old_so_doc_ids:
-				_logger.error(('GNERATING MATERIAL--------------------<<<<<<<<<<<<<<<<<<<'))
 				so.generate_material(cr,uid,old_id,context=context)
 				so.log(cr,uid,old_id,_('Automatic Generate Material by OP Sale Change!'))
 			for x in data.order_line:
-				# if loc:
-				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id), ('picking_location', '=' , loc)])
-				# else:
-				# 	material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
-
 				material_lines=so_material_line.search(cr,uid,[('sale_order_line_id', '=' ,x.id)])
 
 
@@ -477,15 +485,12 @@ class order_preparation(osv.osv):
 							nilai += l.product_qty - product_return
 
 					if y.product_id.type <> 'service':
-						nilai = y.qty-y.shipped_qty-y.on_process_qty+y.returned_qty
+						# nilai = y.qty-y.shipped_qty-y.on_process_qty+y.returned_qty
+						nilai = (y.qty + y.returned_qty) - y.shipped_qty
 
-						_logger.error(('bukan serviceEEEEEEEEEEEEEE--------------------<<<<<<<<<<<<<<<<<<<'))
-						_logger.error(('Material QTY-------------',y.qty,y.shipped_qty,y.on_process_qty,y.returned_qty))
-						_logger.error(('Nilai Nilai-------------',nilai))
-						_logger.error(('Nilai QTY-------------',y.qty))
+						
 						if nilai:
-							_logger.error(('Nilai <<<<<< QTYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY'))
-
+							print '==========sssssssssss======',nilai
 							location += [y.picking_location.id]
 							if y.sale_order_line_id.product_no_cus:
 								seq_no = int(y.sale_order_line_id.product_no_cus)
@@ -494,21 +499,51 @@ class order_preparation(osv.osv):
 							else:
 								seq_no = theNum
 
+							if reload == True:
+								set_qty = (y.qty + y.returned_qty) - y.shipped_qty
+							else:
+								set_qty = (y.qty + y.returned_qty) - (y.on_process_qty + y.shipped_qty)
 
-							line.append({
-								'no': seq_no,
-								'product_id' : y.product_id.id,
-								# 'product_qty': y.qty - nilai,
-								'product_qty': (y.qty + y.returned_qty) - (y.on_process_qty + y.shipped_qty), #nilai yang material line minta - op yang sudah di proses
-								'product_uom': y.uom.id,
-								'name': y.desc,
-								'sale_line_material_id':y.id,
-								'sale_line_id':y.sale_order_line_id.id
-							})
+							if set_qty > 0:
+								line.append({
+									'no': seq_no,
+									'product_id' : y.product_id.id,
+									'product_qty': set_qty, #nilai yang material line minta - op yang sudah di proses
+									'product_uom': y.uom.id,
+									'name': y.desc,
+									'sale_line_material_id':y.id,
+									'sale_line_id':y.sale_order_line_id.id
+								})
+
+							if reload == True:
+								if context is None:
+									context = {}
+								active_id=context.get('active_id',ids)
+
+								vals ={
+									'prepare_lines':[
+										(0,0,{
+										'no': seq_no,
+										'product_id' : y.product_id.id,
+										'product_qty': set_qty,
+										'product_uom': y.uom.id,
+										'name': y.desc,
+										'sale_line_material_id':y.id,
+										'sale_line_id':y.sale_order_line_id.id
+										})
+									]
+								}
+
+
+								self.pool.get('order.preparation').reload_line(cr, uid, active_id, vals, context=None)
+
 							theNum=theNum+1 #append nomor urut
 			res['prepare_lines'] = line
-			_logger.error(('------------------------------------------------------Tesss2---------------------',res))
-			return  {'value': res}
+
+			if reload == True:
+				return True
+			else:
+				return  {'value': res}
 
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
@@ -650,6 +685,32 @@ class order_preparation(osv.osv):
 			'context': context,
 			'nodestroy': True,
 		}
+
+
+	def reload_line(self, cr, uid, ids, vals, context=None):
+		return self.write(cr, uid, ids, vals)
+		return True
+
+	def reload_sale_order(self, cr, uid, ids, sale, loc=False, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		res={}
+		vals = {}
+		if type(ids) != list:
+			ids = [ids]
+
+
+		if val.location_id.id:
+			loc = val.location_id.id
+		else:
+			loc = False
+
+		for x in val.prepare_lines:
+			self.pool.get('order.preparation.line').unlink(cr,uid,[x.id])
+
+		evt_sale_change = self.sale_change(cr, uid, ids, val.sale_id.id, loc, reload=True, context=None)
+
+
+		return True
 
 order_preparation()
 

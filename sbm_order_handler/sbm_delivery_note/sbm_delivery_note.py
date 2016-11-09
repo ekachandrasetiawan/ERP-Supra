@@ -474,7 +474,7 @@ class delivery_note(osv.osv):
 				
 				if val.prepare_id.is_postpone == True:
 					vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.postpone').split('/')
-					dn_no =time.strftime('%y')+ vals[-1] + '/PS/'
+					dn_no =time.strftime('%y')+ vals[-1] + 'PS/'
 				else:
 					vals = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
 					dn_no =time.strftime('%y')+ vals[-1]
@@ -669,10 +669,15 @@ class delivery_note(osv.osv):
 			# Jalankan Fungsi Sequence No
 			if val.name == '/' or val.seq_no==False:
 				dn.set_sequence_no(cr, uid, ids, False, context=context)
+			elif 'PS' in val.name and val.prepare_id.is_postpone == False:
+				dn.set_sequence_no(cr, uid, ids, False, context=context)
 		else:
 			if val.seq_no==False or val.name=='/':
 				# set new no with old style
 				dn.set_sequence_no(cr, uid, ids, False, context=context)
+			else:
+				dn.set_sequence_no(cr, uid, ids, False, context=context)
+
 			dn.create_picking(cr, uid, ids)
 
 		# Cek Validasi Stock By Picking Location 
@@ -819,6 +824,14 @@ class delivery_note(osv.osv):
 		val = self.browse(cr, uid, ids, context={})[0]
 		stock_picking = self.pool.get('stock.picking')
 		stock_move = self.pool.get('stock.move')
+		op = self.pool.get('order.preparation')
+
+		# Proses di 
+		op.write(cr, uid, [val.prepare_id.id], {'is_postpone': False})
+		# Jalankan Fungsi OP Done
+		op.preparation_done(cr, uid, [val.prepare_id.id], context=None)
+
+		self.submit(cr, uid, ids, context=None)
 
 		if val.postpone_picking:
 			stock_picking.write(cr,uid,val.postpone_picking.id,{'state':'cancel'})
