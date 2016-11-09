@@ -1070,9 +1070,13 @@ class sale_order_line(osv.osv):
 					for x in material_id:
 
 						bom_material = mrp_obj.search(cr,uid,[('bom_id', '=' , x.id), ('product_id', '=' , material[2]['product_id'])])
-						browse_mrp  = mrp_obj.browse(cr, uid, bom_material)[0]
+						browse_mrp  = mrp_obj.browse(cr, uid, bom_material)
+						if browse_mrp:
+							browse_mrp = browse_mrp[0]
 
-						qty_bom = browse_mrp.product_qty
+							qty_bom = browse_mrp.product_qty
+						else:
+							qty_bom = 1
 
 
 					if material[0]==0:
