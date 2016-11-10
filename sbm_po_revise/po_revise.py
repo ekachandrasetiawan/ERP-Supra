@@ -99,10 +99,12 @@ class Purchase_Order(osv.osv):
 		cek = obj_po.search(cr ,uid, [('name','ilike',name)])
 
 		for x in obj_po.browse(cr ,uid, cek):
-			if name == x.name[:6]:
-				raise osv.except_osv(
-						_('Information'),
-						_('Order Reference must be unique per Company!'))
+			for i in ids:
+				if i <> x.id:
+					if name == x.name[:6]:
+						raise osv.except_osv(
+								_('Information'),
+								_('Order Reference must be unique per Company!'))
 
 		res = super(Purchase_Order, self).wkf_confirm_order(cr, uid, ids, context=None)
 		return True
