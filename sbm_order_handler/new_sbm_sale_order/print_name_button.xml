@@ -41,6 +41,16 @@
     		</button>
         </field>
     	</record>
+        
+        <record id="replace_payment_term" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="arch" type="xml">
+            <field name="payment_term"  position="replace"/>
+        </field>
+        </record>
+
 
     	<record id="inherit_view_sale_order_project" model="ir.ui.view">
         <field name="name">sale.order.form</field>
@@ -102,5 +112,13 @@
         </field>
     	</record>
 
+        <record id="dn_replace_sale_order" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="ad_delivery_note.view_inherit_sale_order"/>
+        <field name="arch" type="xml">
+               <xpath expr="/form/sheet/notebook/page[@string='Terms Condition']" position="replace"/>
+        </field>
+        </record>
 	</data>
 </openerp>
