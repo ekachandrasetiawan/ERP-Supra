@@ -706,7 +706,8 @@ class sale_order_material_line(osv.osv):
 
 	_name = 'sale.order.material.line'
 	_description = 'Sale order material line'
-
+	_order = "no asc"
+	
 	# def _state(self,cr,uid,ids,name,args,context={}):
 	# 	name1=self.browse(cr,uid,ids)
 	# 	res={}
@@ -720,6 +721,7 @@ class sale_order_material_line(osv.osv):
 
 
 	_columns = {
+		'no':fields.integer('No'),
 		'sale_order_line_id':fields.many2one('sale.order.line',string="Sale Order Line", onupdate="CASCADE", ondelete="CASCADE"),
 		'product_id':fields.many2one('product.product',string="Product", required=True, domain=[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')], active=True),
 		'desc':fields.text(string="Description"),

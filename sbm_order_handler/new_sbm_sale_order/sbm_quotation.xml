@@ -594,6 +594,7 @@
 											<page string="Material Line">
 												<field name="material_lines">
 													<tree editable="buttom">
+														<field name="no"/>
 														<field name="product_id" string="Material Item" on_change="onchange_product_material(product_id)"/>
 														<field name="desc" string="Description" />
 														<field name="qty" />
@@ -803,6 +804,7 @@
 											<page string="Material Line">
 												<field name="material_lines">
 													<tree editable="buttom">
+														<field name="no"/>
 														<field name="product_id" string="Material Item" on_change="onchange_product_material(product_id)"/>
 														<field name="desc" string="Description" />
 														<field name="qty" />
