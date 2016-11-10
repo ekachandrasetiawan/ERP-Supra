@@ -285,7 +285,9 @@ class order_preparation(osv.osv):
 				raise osv.except_osv(('Warning'), ('Delivery Order Status Cancel, Please Refresh Delivery Order '))
 
 		res = False
-		if self.validasi(cr, uid, ids, context=context):
+		validasi  = self.validasi(cr, uid, ids, context=None)
+		if validasi == True:
+
 			res = self.write(cr, uid, ids, {'state':'submited'}, context=context)
 			subject = 'Order Preparation no' + val.name + ' Submited'
 
@@ -309,12 +311,14 @@ class order_preparation(osv.osv):
 
 		dn_exist = dn_obj.search(cr, uid, [('prepare_id','=',[val.id])],context=None)
 
-		
-
-		if not dn_exist and val.is_postpone == True:
+		# Delivery Note Tidak Ada & is Postpone True
+		if not dn_exist and val.is_postpone == True: 
 			id_dn = self.create_delivery_note(cr, uid, ids, context=None)
 			dn_obj.submit(cr, uid, id_dn, context=None)
 			dn_obj.package_postpone(cr, uid, id_dn, context=None)
+
+		# Ada Delivery Note & is Postpone False
+		# Maka DN di load ulang dan status DN di draft
 		elif dn_exist and val.is_postpone == False:
 			prep_dn = {}
 			evt_prepare_change = dn_obj.prepare_change(cr, uid, ids, val.id, validasi=True)
@@ -326,6 +330,22 @@ class order_preparation(osv.osv):
 				dn_line_obj.unlink(cr,uid,[x.id])
 				
 			dn_obj.write(cr,uid,dn_exist,prep_dn)
+
+		# Ada Delivery Note & is Postpone True
+		# Maka DN di load ulang dan status DN di proses Submit & di Postpone
+		elif dn_exist and val.is_postpone == True:
+			prep_dn = {}
+			evt_prepare_change = dn_obj.prepare_change(cr, uid, ids, val.id, validasi=True)
+			prep_dn = evt_prepare_change['value']
+
+			data_dn = dn_obj.browse(cr, uid, dn_exist, context=None)[0]
+
+			for x in data_dn.note_lines:
+				dn_line_obj.unlink(cr,uid,[x.id])
+				
+			dn_obj.write(cr,uid,dn_exist,prep_dn)
+			dn_obj.submit(cr, uid, dn_exist, context=None)
+			dn_obj.package_postpone(cr, uid, dn_exist, context=None)
 
 		return res
 
