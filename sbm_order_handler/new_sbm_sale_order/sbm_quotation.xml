@@ -722,6 +722,7 @@
 			<field name="name">quotation.form</field>
 			<field name="model">sale.order</field>
 			<field name="type">form</field>
+			<field name="priority">19</field>
 			<field name="arch" type="xml">
 				<form string="quotation" version="7.0">
 					<header>
