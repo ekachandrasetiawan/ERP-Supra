@@ -70,8 +70,10 @@ class delivery_note(osv.osv):
 				set_price_unit = note_lines.op_line_id.sale_line_id.price_unit
 			else:
 				set_price_unit = note_lines.op_line_id.move_id.sale_line_id.price_unit
-			
-			desc = note_lines.name + '\n'
+
+			desc = ""
+			if note_lines.name:
+				desc =  note_lines.name+ '\n'
 
 			for x in note_lines.note_lines_material:
 				if x.desc:
