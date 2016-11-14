@@ -46,16 +46,18 @@ class Purchase_Order(osv.osv):
 
 	def create(self, cr, uid, vals, context=None):
 		obj_po = self.pool.get('purchase.order')
-		name = vals['name'].replace(" ","")[:6]
-		cek = obj_po.search(cr ,uid, [('name','ilike',name)])
+		if 'force_unique' not in context:
+			if vals['name']:
+				name = str(vals['name']).replace(" ","")[:6]
+				cek = obj_po.search(cr ,uid, [('name','ilike',name)])
 
-		for x in obj_po.browse(cr ,uid, cek):
-			if name == x.name[:6]:
-				raise osv.except_osv(
-						_('Information'),
-						_('Order Reference must be unique per Company!'))
+				for x in obj_po.browse(cr ,uid, cek):
+					if name == x.name[:6]:
+						raise osv.except_osv(
+								_('Information'),
+								_('Order Reference must be unique per Company!'))
 
-		order =  super(Purchase_Order, self).create(cr, uid, vals, context=context)
+		order = super(Purchase_Order, self).create(cr, uid, vals, context=context)
 		return order
 
 	def template_email_confirm(self, cr, uid, ids, user, no_po, url, context={}):
@@ -487,7 +489,7 @@ class Purchase_Order_Revision(osv.osv):
 		return res 
 
 
-	def create_purchase_order(self, cr, uid, ids,fiscal_position_id=False, context=None):
+	def create_purchase_order(self, cr, uid, ids,fiscal_position_id=False, context={}):
 		val = self.browse(cr, uid, ids, context={})[0]
 		obj_purchase = self.pool.get('purchase.order')
 		obj_purchase_line = self.pool.get('purchase.order.line')
@@ -530,7 +532,7 @@ class Purchase_Order_Revision(osv.osv):
 										'print_line':po.po_source.print_line,
 										'po_revision_id':val.id,
 										'rev_counter':val.rev_counter
-									   })
+									   },context={'force_unique':True})
 		noline=1
 		for line in po.po_source.order_line:
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.product_id.supplier_taxes_id))
