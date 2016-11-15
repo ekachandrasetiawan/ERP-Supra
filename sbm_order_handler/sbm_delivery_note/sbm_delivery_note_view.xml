@@ -54,7 +54,7 @@
 							</button>
 
 							<button name="package_confirm" position="replace">
-									<button name="approve_note" type="object" states="submited" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Delivery Note" groups="sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_ho"/>
+									<button name="approve_note" type="object" states="submited" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Delivery Note" groups="sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_warehouse,stock.group_stock_user"/>
 							</button>
 
 							<button name="package_validate" position="replace">
