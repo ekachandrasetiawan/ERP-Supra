@@ -210,6 +210,7 @@ class delivery_note(osv.osv):
 						raise openerp.exceptions.Warning(msg)
 
 		return True
+	
 
 	"""
 	:return boolean True or False
@@ -831,18 +832,19 @@ class delivery_note(osv.osv):
 
 		# Proses di 
 		op.write(cr, uid, [val.prepare_id.id], {'is_postpone': False})
-		# Jalankan Fungsi OP Done
-		op.preparation_done(cr, uid, [val.prepare_id.id], context=None)
-
-		self.submit(cr, uid, ids, context=None)
+		
 
 		if val.postpone_picking:
 			stock_picking.write(cr,uid,val.postpone_picking.id,{'state':'cancel'})
 
 			for move_line in val.postpone_picking.move_lines:
 				stock_move.write(cr,uid,move_line.id,{'state':'cancel'})
+		# Jalankan Fungsi OP Done
+		op.preparation_done(cr, uid, [val.prepare_id.id], context=None)
 
-		self.write(cr, uid, ids, {'state': 'approve'})
+		self.submit(cr, uid, ids, context=None)
+		
+		# self.write(cr, uid, ids, {'state': 'approve'})
 		return True
 
 
