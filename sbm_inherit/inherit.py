@@ -2486,16 +2486,17 @@ class sale_advance_payment_inv(osv.osv_memory):
 		for x in invoice:
 			inv = invoice_obj.browse(cr, uid, x)
 			
-			dp_percentage += inv.dp_percentage
-			amount_total += inv.amount_total
+			if inv.state <> 'cancel':
+				dp_percentage += inv.dp_percentage
+				amount_total += inv.amount_total
 
-			if inv.state == 'draft':
-				raise osv.except_osv(_('Informasi!'),
-				_('Has been found to invoice with draft status'))
+				if inv.state == 'draft':
+					raise osv.except_osv(_('Informasi!'),
+					_('Has been found to invoice with draft status'))
 
-			if inv.picking_ids:
-				raise osv.except_osv(_('Informasi!'),
-				_('Invoice has been created from picking Consolidate'))
+				if inv.picking_ids:
+					raise osv.except_osv(_('Informasi!'),
+					_('Invoice has been created from picking Consolidate'))
 
 		if dp_percentage == 100:
 			raise osv.except_osv(_('Informasi'),
