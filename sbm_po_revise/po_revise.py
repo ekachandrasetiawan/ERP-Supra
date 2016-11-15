@@ -44,7 +44,7 @@ class Purchase_Order(osv.osv):
 		'rev_counter':0,
 	}
 
-	def create(self, cr, uid, vals, context=None):
+	def create(self, cr, uid, vals, context={}):
 		obj_po = self.pool.get('purchase.order')
 		if 'force_unique' not in context:
 			if vals['name']:
