@@ -938,6 +938,10 @@ class account_invoice(osv.osv):
 		else:
 			return False
 
+	def invoice_submit(self, cr, uid, ids, context=None):
+
+		return self.write(cr,uid,ids,{'state':'submited'})
+
 account_invoice()
 
 

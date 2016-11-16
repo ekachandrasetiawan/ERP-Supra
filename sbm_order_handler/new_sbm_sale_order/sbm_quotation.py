@@ -33,8 +33,6 @@ class res_partner_extention(osv.osv):
 		tmp = 0
 		for index, result in results:
 			record_partner = self.browse(cr,uid,index,context=context) #siapin data object
-			# print index,"<<<<<<<",result
-			# print record_partner
 			tmp = index
 			if record_partner.city:
 				city=" "+record_partner.city
@@ -49,9 +47,7 @@ class res_partner_extention(osv.osv):
 				# kalo ada konteks attention
 				# print context,"attention"
 				res_name = "%s"%(record_partner.name)
-				# print res_name,"ase"
 				res.append((index,res_name))
-				# print "--------------------------------------------------------",res_name
 
 			elif context.get('address_delivery'):
 				# print context,"delivery address"
@@ -61,11 +57,9 @@ class res_partner_extention(osv.osv):
 				
 				res.append((index,res_name))
 			elif context.get('address_invoice'):
-				# print context,"delivery address"
 				res_name = "%s"%(record_partner.name)+city+state_id
 				res.append((index,res_name))
 			else:
-				# print "--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",context
 				res.append((index,result))
 
 		return res
@@ -105,31 +99,11 @@ class Sale_order(osv.osv):
 
 		return super(Sale_order, self).write(cr, uid, ids, vals, context=context)
 
-
-	# def _count_total(self,cr,uid,ids,fields_name,args,context={}):
-	# 	res={}
-	# 	order_line = self.browser(cr,uid,ids,context=context)
-	# 	print order_line,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-	# 	# for line in order_line:
-	# 	# 	print line ,"oaooooo+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-	# 	# 	res[line.id] = {
-	# 	# 	"base_total":2323,
-	# 	# 	}
-		
-	# 	return res
-	
-	# def name_get(self,cr,uid,ids,context=None):
-	# 	test=self.pool.get('res.partner')
-	# 	# coba = test.name_get(cr, uid,ids, context)
-	# 	print super(Sale_order, test).name_get() , "testtttss"
-	# 	return super(Sale_order, test).name_get(cr, uid,ids, context=context)
-
 	def action_cancel(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		self.write(cr,uid,val.id,{'quotation_state':'cancel'})
 
 		return super(Sale_order, self).action_cancel(cr, uid, ids, context=None)
-
 
 	def copy_pure_quotation(self,cr,uid,ids,context=None):
 		# print "CALLEDDD",ids;
@@ -177,7 +151,6 @@ class Sale_order(osv.osv):
 				'product_uom':line.product_uom.id
 				}))
 
-			# print isi_line,"ini isiiiiiiiiiiiiiiiiiiiiiiiiiii lineeeeeeeeeeeeeeeeee"
 		prepareNewSO = {
 			'origin':rec.origin,
 			'order_policy':rec.order_policy,
@@ -223,10 +196,6 @@ class Sale_order(osv.osv):
 		prepareNewSO['term_condition'] = False
 
 		newOrderId = self.create(cr,uid,prepareNewSO,context)
-
-		# set old order reference id
-		# self._set_repeat_so_id(cr,uid,newOrderId,rec.id,context=context)
-
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_order_handler', 'quotation_form_view')
 		return {
@@ -246,9 +215,7 @@ class Sale_order(osv.osv):
 		return self.write(cr,uid,ids,{'repeat_so_id':old_so_id},context)
 
 	def _check_before_save(self,cr,uid,order_line):
-		# print order_line, "<.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.>"
 		for material in order_line:
-			print material,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 			material_lines = material[2]['material_lines']
 		if order_line and material_lines:
 			res = True
@@ -270,14 +237,26 @@ class Sale_order(osv.osv):
 	def _count_total(self, cr, uid, ids, name, args, context={}):
 		res = {}
 		sale_order = self.browse(cr,uid,ids,context=context)
-		# print sale_order
 		total_base_total=0
 		for i in sale_order:
 			for r in i.order_line:
-				print r.id,"-----",r.base_total
-				total_base_total += r.base_total
+				
+				if r.discount_nominal <> 0.0 and r.discount == 0.0:
+					count = r.base_total - r.discount_nominal
+					total_base_total += count
+				elif r.discount <> 0.0 and r.discount_nominal == 0.0:
+					count = (r.base_total * r.discount) / 100 
+					total_base_total += count
+				elif r.discount <> 0.0 and r.discount_nominal <> 0.0:
+					disc = (r.base_total * r.discount) / 100 
+					count = disc - r.discount_nominal
+					total_base_total += count
+				else:
+					total_base_total += r.base_total
+
+			total_base_total = int(total_base_total)
+
 			res[i.id] = {"base_total":total_base_total,}
-		print total_base_total
 		return res
 
 	def _count_tax(self,cr,uid,ids,fields_name,args,context={}):
@@ -799,13 +778,57 @@ class sale_order_material_line(osv.osv):
 
 class sale_order_line(osv.osv):	
 	_inherit ='sale.order.line'
-	def _count_base_total(self,product_uom_qty,price_unit):
+
+	def _amount_line(self, cr, uid, ids, field_name, arg, context=None):
+		res = super(sale_order_line, self)._amount_line(cr,uid,ids, field_name, arg, context=None)
+
+		tax_obj = self.pool.get('account.tax')
+		cur_obj = self.pool.get('res.currency')
 		
-		return product_uom_qty*price_unit
+		user_obj = self.pool.get('res.users')
+		currency_obj = self.pool.get('res.currency')
+		user = user_obj.browse(cr, uid, uid, context=context)
+
+		res = {}
+		if context is None:
+			context = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			price = line.price_unit
+			taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
+			cur = line.order_id.pricelist_id.currency_id
+			if (line.order_id.pricelist_id.currency_id.id==user.company_id.currency_id.id):
+				# res[line.id] = cur_obj.round(cr, uid, cur, taxes['total']- line.discount_nominal)
+				res[line.id] = int(taxes['total'] - line.discount_nominal)
+			else:
+				# res[line.id] = cur_obj.round(cr, uid, cur, taxes['total']-line.discount_nominal)
+				res[line.id] = int(taxes['total'] - line.discount_nominal)
+				
+		return res
+
+
+	def _count_base_total(self,product_uom_qty,price_unit,discount, discount_nominal):
+		nilai = product_uom_qty*price_unit
+		if discount <> 0.0 and discount_nominal == 0.0:
+			nilai = (nilai * discount) / 100
+		elif  discount == 0.0 and discount_nominal <> 0.0:
+			nilai = nilai - discount_nominal
+		elif discount <> 0.0 and discount_nominal <> 0.0:
+			disc = (nilai * discount) / 100 
+			nilai = disc - discount_nominal
+		else:
+			nilai = nilai
+
+		count =  int(nilai)
+
+		return count
+
 	def _count_discount_nominal(self,base_total,discount):
-		return base_total * discount/100.0
+		count = int(base_total * discount/100.0)
+		return count
+
 	def _count_price_subtotal(self,base_total,discount_n):
-		return base_total-discount_n
+		count = int(base_total)
+		return count
 	"""
 	@tax_ids harus diisi sama list yang isinya integer id tax cth: [1,2,3,4,5]
 	"""
@@ -828,7 +851,7 @@ class sale_order_line(osv.osv):
 		
 		for line in order_lines:
 			
-			base_total	= self._count_base_total(line.product_uom_qty,line.price_unit)
+			base_total	= self._count_base_total(line.product_uom_qty,line.price_unit,line.discount,line.discount_nominal)
 			discount_n = self._count_discount_nominal(base_total,line.discount)
 			subtotal_ = self._count_price_subtotal(base_total,discount_n)
 			list_tax_id	= []
@@ -836,16 +859,17 @@ class sale_order_line(osv.osv):
 				
 				list_tax_id.append(t.id)
 			taxes_total= self._count_amount_tax(cr,uid,subtotal_,list_tax_id)
-			
-			res[line.id] = {"base_total":base_total,
+
+			res[line.id] = {"base_total":int(base_total),
 							"discount_nominal":discount_n,
-							"price_subtotal":subtotal_,
+							"price_subtotal":int(subtotal_),
 							"amount_tax":taxes_total}
 
 						
 
 		return res
 	_columns = {
+		'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
 		'base_total':fields.function(
 			_count_amount_line,
 			type="float",
@@ -882,7 +906,7 @@ class sale_order_line(osv.osv):
 		}
 		
 		if product_uom_qty and price_unit:
-			base_total	= self._count_base_total(product_uom_qty,price_unit)
+			base_total	= self._count_base_total(product_uom_qty,price_unit,discount,discount_nominal)
 			discount_n = self._count_discount_nominal(base_total,discount)
 			subtotal_ = self._count_price_subtotal(base_total,discount_n)
 			taxes_total = self._count_amount_tax(cr,uid,subtotal_,tax_id[0][2])
@@ -902,7 +926,7 @@ class sale_order_line(osv.osv):
 			'amount_tax':0.0
 			}
 		if product_uom_qty and price_unit:
-			base_total	= self._count_base_total(product_uom_qty,price_unit)
+			base_total	= self._count_base_total(product_uom_qty,price_unit,discount,discount_nominal)
 			discount_n = discount_nominal
 			subtotal_ = self._count_price_subtotal(base_total,discount_n)
 			
@@ -1051,7 +1075,8 @@ class sale_order_line(osv.osv):
 							}
 		else:
 			if product_id:
-				base_total	= self._count_base_total(product_uom_qty,price_unit)
+				discount_nominal = 0
+				base_total	= self._count_base_total(product_uom_qty,price_unit,discount,discount_nominal)
 				discount_n = self._count_discount_nominal(base_total,discount)
 				subtotal_ = self._count_price_subtotal(base_total,discount_n)
 				taxes_total = self._count_amount_tax(cr,uid,subtotal_,tax_id[0][2])

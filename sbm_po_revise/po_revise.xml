@@ -322,5 +322,26 @@
 
     <menuitem name="Order Receive Status" parent="purchase.menu_procurement_management" id="order_receive_status_id" action="action_order_receive_status"/>
 
+
+
+     <record id="inherit_view_invoice_form" model="ir.ui.view">
+       <field name="name">account.invoice.form</field>
+       <field name="model">account.invoice</field>
+       <field name="type">form</field>
+       <field name="inherit_id" ref="account.invoice_supplier_form"/>
+       <field name="arch" type="xml">
+        <button string="Validate" position="after">
+            <button name="invoice_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are You Sure to Submit Invoice ?"/>
+        </button>
+        <button string="Validate" position="replace">
+            <button name="invoice_open" states="submited,proforma2" string="Validate" class="oe_highlight" groups="account.group_account_invoice"/>
+        </button>
+        
+        <xpath expr="//form/header/button[@name='action_cancel_draft']"  position="replace">
+            <button name="action_cancel_draft" states="cancel,proforma2,submited" string="Reset to Draft" type="object" groups="sbm_inherit.group_customer_invoice_administrator,sbm_inherit.group_customer_invoice_set_to_draft"/>
+        </xpath>
+       </field>
+    </record>
+        
     </data>
 </openerp>
