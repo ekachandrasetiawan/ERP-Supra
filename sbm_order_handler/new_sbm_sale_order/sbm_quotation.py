@@ -1069,10 +1069,9 @@ class sale_order_line(osv.osv):
 
 		if product_uom_qty == False or product_uom_qty<1:
 			res["warning"]={'title':"Error",'message':'Quantity tidak boleh kosong'}
-			res['value'] = {
-								
-								"product_uom_qty":1
-							}
+			res['value'] = {				
+				"product_uom_qty":1
+			}
 		else:
 			if product_id:
 				discount_nominal = 0
@@ -1094,16 +1093,17 @@ class sale_order_line(osv.osv):
 					bom_id = mrp_obj.search(cr,uid,[('product_id', '=' ,product_id)])
 					material_id = mrp_obj.browse(cr,uid,bom_id)
 					qty_bom = 1
-					for x in material_id:
+					if material[2]:
+						for x in material_id:
 
-						bom_material = mrp_obj.search(cr,uid,[('bom_id', '=' , x.id), ('product_id', '=' , material[2]['product_id'])])
-						browse_mrp  = mrp_obj.browse(cr, uid, bom_material)
-						if browse_mrp:
-							browse_mrp = browse_mrp[0]
+							bom_material = mrp_obj.search(cr,uid,[('bom_id', '=' , x.id), ('product_id', '=' , material[2]['product_id'])])
+							browse_mrp  = mrp_obj.browse(cr, uid, bom_material)
+							if browse_mrp:
+								browse_mrp = browse_mrp[0]
 
-							qty_bom = browse_mrp.product_qty
-						else:
-							qty_bom = 1
+								qty_bom = browse_mrp.product_qty
+							else:
+								qty_bom = 1
 
 
 					if material[0]==0:
