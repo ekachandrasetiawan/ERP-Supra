@@ -3,6 +3,7 @@ from stock import stock
 from openerp.osv import fields, orm
 import math
 import time
+import decimal
 import webbrowser
 import netsvc
 import openerp.exceptions
@@ -241,18 +242,18 @@ class Sale_order(osv.osv):
 		for i in sale_order:
 			for r in i.order_line:
 				
-				if r.discount_nominal <> 0.0 and r.discount == 0.0:
-					count = r.base_total - r.discount_nominal
-					total_base_total += count
-				elif r.discount <> 0.0 and r.discount_nominal == 0.0:
-					count = (r.base_total * r.discount) / 100 
-					total_base_total += count
-				elif r.discount <> 0.0 and r.discount_nominal <> 0.0:
-					disc = (r.base_total * r.discount) / 100 
-					count = disc - r.discount_nominal
-					total_base_total += count
-				else:
-					total_base_total += r.base_total
+				# if r.discount_nominal <> 0.0 and r.discount == 0.0:
+				# 	count = r.base_total - r.discount_nominal
+				# 	total_base_total += count
+				# elif r.discount <> 0.0 and r.discount_nominal == 0.0:
+				# 	count = (r.base_total * r.discount) / 100 
+				# 	total_base_total += count
+				# elif r.discount <> 0.0 and r.discount_nominal <> 0.0:
+				# 	disc = (r.base_total * r.discount) / 100 
+				# 	count = disc - r.discount_nominal
+				# 	total_base_total += count
+				# else:
+				total_base_total += r.base_total
 
 			total_base_total = int(total_base_total)
 
@@ -278,10 +279,10 @@ class Sale_order(osv.osv):
 		total_discount_nominal=0
 		for i in sale_order:
 			for r in i.order_line:
-				print r.id,"-----",r.discount_nominal
 				total_discount_nominal += r.discount_nominal
-			res[i.id] = {"total_amount_discount":total_discount_nominal,}
-		print total_discount_nominal
+
+			res[i.id] = {"total_amount_discount":int(total_discount_nominal),}
+
 		return res
 
 	def _get_years(self,cr,uid,ids,name,args,context={}):
@@ -789,45 +790,49 @@ class sale_order_line(osv.osv):
 		currency_obj = self.pool.get('res.currency')
 		user = user_obj.browse(cr, uid, uid, context=context)
 
+
 		res = {}
 		if context is None:
 			context = {}
 		for line in self.browse(cr, uid, ids, context=context):
+			sb_total = line.base_total - line.discount_nominal
+
 			price = line.price_unit
 			taxes = tax_obj.compute_all(cr, uid, line.tax_id, price, line.product_uom_qty, line.product_id, line.order_id.partner_id)
 			cur = line.order_id.pricelist_id.currency_id
+
 			if (line.order_id.pricelist_id.currency_id.id==user.company_id.currency_id.id):
-				# res[line.id] = cur_obj.round(cr, uid, cur, taxes['total']- line.discount_nominal)
-				res[line.id] = int(taxes['total'] - line.discount_nominal)
+				total =  decimal.Decimal(taxes['total']).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
+				# res[line.id] = cur_obj.round(cr, uid, cur, float(total)- line.discount_nominal)
+				# res[line.id] = cur_obj.round(cr, uid, cur, float(sb_total))
+				res[line.id] = float(sb_total)
 			else:
-				# res[line.id] = cur_obj.round(cr, uid, cur, taxes['total']-line.discount_nominal)
-				res[line.id] = int(taxes['total'] - line.discount_nominal)
-				
+				res[line.id] = cur_obj.round(cr, uid, cur, taxes['total']-line.discount_nominal)
+		
 		return res
 
 
 	def _count_base_total(self,product_uom_qty,price_unit,discount, discount_nominal):
 		nilai = product_uom_qty*price_unit
-		if discount <> 0.0 and discount_nominal == 0.0:
-			nilai = (nilai * discount) / 100
-		elif  discount == 0.0 and discount_nominal <> 0.0:
-			nilai = nilai - discount_nominal
-		elif discount <> 0.0 and discount_nominal <> 0.0:
-			disc = (nilai * discount) / 100 
-			nilai = disc - discount_nominal
-		else:
-			nilai = nilai
+		# if discount <> 0.0 and discount_nominal == 0.0:
+		# 	nilai = (nilai * discount) / 100
+		# elif  discount == 0.0 and discount_nominal <> 0.0:
+		# 	nilai = nilai - discount_nominal
+		# elif discount <> 0.0 and discount_nominal <> 0.0:
+		# 	nilai = nilai - discount_nominal
+		# else:
+		# 	nilai = nilai
+		count =  decimal.Decimal(nilai).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
 
-		count =  int(nilai)
-
-		return count
+		return float(count)
 
 	def _count_discount_nominal(self,base_total,discount):
-		count = int(base_total * discount/100.0)
+		nilai = base_total * discount/100.0
+		count = float(decimal.Decimal(nilai).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN))
 		return count
 
 	def _count_price_subtotal(self,base_total,discount_n):
-		count = int(base_total)
+		count = base_total - discount_n
 		return count
 	"""
 	@tax_ids harus diisi sama list yang isinya integer id tax cth: [1,2,3,4,5]
@@ -835,17 +840,16 @@ class sale_order_line(osv.osv):
 	def _count_amount_tax(self,cr,uid,subtotal,tax_ids):
 		list_tax = tax_ids
 		amount_tax_total=0
-				
+
 		for i in list_tax:
 			tax_bro = self.pool.get("account.tax").browse(cr,uid,i)
-		
-			amount_tax= subtotal* tax_bro.amount
-			amount_tax_total+=amount_tax
+
+			amount_tax = subtotal * tax_bro.amount
+			amount_tax_total += amount_tax
 		
 		return amount_tax_total
 
 	def _count_amount_line(self, cr, uid, ids, name, args, context={}):
-		# print "PANGGIL _count_amount_line ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 		res = {}
 		order_lines = self.browse(cr,uid,ids,context=context)
 		
@@ -854,27 +858,39 @@ class sale_order_line(osv.osv):
 			base_total	= self._count_base_total(line.product_uom_qty,line.price_unit,line.discount,line.discount_nominal)
 			discount_n = self._count_discount_nominal(base_total,line.discount)
 			subtotal_ = self._count_price_subtotal(base_total,discount_n)
+
 			list_tax_id	= []
 			for t in line.tax_id:
 				
 				list_tax_id.append(t.id)
+
+			subtotal_ = float(decimal.Decimal(subtotal_).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN))
+
 			taxes_total= self._count_amount_tax(cr,uid,subtotal_,list_tax_id)
-
-			res[line.id] = {"base_total":int(base_total),
+			taxes_total = decimal.Decimal(taxes_total).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
+			res[line.id] = {"base_total":base_total,
 							"discount_nominal":discount_n,
-							"price_subtotal":int(subtotal_),
+							"price_subtotal":subtotal_,
 							"amount_tax":taxes_total}
-
-						
-
 		return res
+
+	def replace_discount(self,cr,uid,ids,qty,price, disc):
+
+		subtotal = qty*price
+		nilai = (subtotal*disc)/100.00
+
+		x = decimal.Decimal(nilai).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
+		self._count_base_total(qty, price, disc, nilai)
+		return {'value':{ 'discount_nominal':x} }
+
+
 	_columns = {
 		'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute= dp.get_precision('Account')),
 		'base_total':fields.function(
 			_count_amount_line,
 			type="float",
 			store={
-				'sale.order.line': (lambda self, cr, uid, ids, c={}: ids, ['price_unit','product_uom_qty'], 1),
+				'sale.order.line': (lambda self, cr, uid, ids, c={}: ids, ['price_unit','product_uom_qty','discount','discount_nominal'], 1),
 
 			},
 			string="Base Total",
@@ -884,7 +900,7 @@ class sale_order_line(osv.osv):
 			_count_amount_line,
 			type="float",
 			store={
-				'sale.order.line': (lambda self, cr, uid, ids, c={}: ids, ['base_total','tax_id'], 1),
+				'sale.order.line': (lambda self, cr, uid, ids, c={}: ids, ['base_total','tax_id','discount','discount_nominal'], 1),
 			},
 			string="Tax Amount",
 			multi="line_total"
@@ -974,8 +990,6 @@ class sale_order_line(osv.osv):
 			for material in line.material_lines:
 				old_material_ids.append(material.id)
 
-		print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
-
 		if product_id:
 			seq_id = self.pool.get('sale.order.material.line')._get_ho_location(cr,uid,ids,context={})
 
@@ -995,10 +1009,8 @@ class sale_order_line(osv.osv):
 					mtr_lines = res['value']['material_lines']
 
 					for old_mtr in old_material_ids:
-						print "-------------------->>>>>>>>>>>>>>",mtr_lines
 						lr = (2,old_mtr)
 						mtr_lines.append(lr)
-						print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 					res['value']['material_lines'] = mtr_lines
 
 			else:
@@ -1014,10 +1026,8 @@ class sale_order_line(osv.osv):
 				mtr_lines = res['value']['material_lines']
 
 				for old_mtr in old_material_ids:
-					print "-------------------->>>>>>>>>>>>>>",mtr_lines
 					lr = (2,old_mtr)
 					mtr_lines.append(lr)
-					print "-------------------->>>>>>>>>>>>>><<<<<<<<<<<<<<<<<",mtr_lines
 				res['value']['material_lines'] = mtr_lines
 			if product.description_sale:
 				res['value']['name']=product.description_sale
@@ -1028,7 +1038,6 @@ class sale_order_line(osv.osv):
 				for i in product.supplier_taxes_id:
 					print i.id
 					tax.append(i.id)
-				print tax,"++++++++++++++++++++++++++++++++++"
 				res['value']['tax_id']=tax
 			else:
 				res['value']['tax_id']=False
