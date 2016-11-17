@@ -445,6 +445,9 @@ class hr_attendance_machine(osv.osv):
 		# user_ids = self.pool.get('res.users').search(cr,uid,uid,context=context)
 		userBrowse = self.pool.get('res.users').browse(cr,uid,uid,context=context)
 
+		if not userBrowse.employee_ids:
+			raise Warning(_('Please contact Your System Administrator to tell this error messege!\n\nUser not related to any employee!'))
+			
 		employee = userBrowse.employee_ids[0]
 
 		work_addr = employee.address_id.id
