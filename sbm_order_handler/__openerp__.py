@@ -25,6 +25,7 @@
 		'sale_set_to_draft',
 		'ad_perintah_kerja',
 		'ad_sales_project',
+		'sbm_users',
 		],
 	'data': [
 		# 'new_sbm_sale_order/file.sql',

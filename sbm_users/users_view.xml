@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    	<record model="res.groups" id="group_using_public_ip_address">
+            <field name="name">Using Public IP Address</field>
+        </record>
+    </data>
+</openerp>
