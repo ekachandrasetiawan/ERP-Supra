@@ -93,7 +93,7 @@ class delivery_note(osv.osv):
 			'partner_id':dn.partner_id.id,# dari dn customer
 			'journal_id':1, #isinya sales journal idr
 			'account_id':56, # isinya 111401 Piutang usaha
-			'currency_id':so.pricelist_id.id, # dari so Currency nya
+			'currency_id':so.pricelist_id.currency_id.id, # dari so Currency nya
 			'date_invoice':localtime, # waktu hari ini di local komputer
 			'tax_period':local_month,# waktu bulan ini
 			'company_id':1,# default PT SupraBakti Mandiri
