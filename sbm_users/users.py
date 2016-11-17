@@ -6,11 +6,11 @@ from openerp.tools.translate import _
 import openerp.exceptions
 
 
-class Public_Ip_Address(osv.osv):
+class res_users(osv.osv):
 	
-	_name = "public.ip.address"
+	_inherit = "res.users"
 
-	def redirect(self, cr, uid, ids, context=None):
+	def get_print_url(self, cr, uid, ids, context=None):
 		m  = self.pool.get('ir.model.data')
 		id_group = m.get_object(cr, uid, 'sbm_users', 'group_using_public_ip_address').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
@@ -30,4 +30,4 @@ class Public_Ip_Address(osv.osv):
 
 		return res
 
-Public_Ip_Address()
+res_users()

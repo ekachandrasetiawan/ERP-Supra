@@ -365,7 +365,7 @@ class Sale_order(osv.osv):
 		}
 		
 	def print_rfq_web(self,cr,uid,ids,context={}):
-		url = self.pool.get('public.ip.address').redirect(cr, uid, ids, context=None)
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
 		urlTo = url+"print-sale-order/rfq&id="+str(ids[0])
 		
 		return {
@@ -378,7 +378,7 @@ class Sale_order(osv.osv):
 		}
 
 	def print_so_web(self,cr,uid,ids,context={}):
-		url = self.pool.get('public.ip.address').redirect(cr, uid, ids, context=None)
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
 		urlTo = url+"print-sale-order/saleorder&id="+str(ids[0])
 		
 		return {

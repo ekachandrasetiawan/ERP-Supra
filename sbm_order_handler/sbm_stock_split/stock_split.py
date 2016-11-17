@@ -351,7 +351,7 @@ class stock_split(osv.osv):
 
 
 	def print_stock_split(self,cr,uid,ids,context=None):
-		url = self.pool.get('public.ip.address').redirect(cr, uid, ids, context=None)
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
 		urlTo = url+"stock-split/print&id="+str(ids[0])+"&uid="+str(uid)
 		return {
 			'type'	: 'ir.actions.client',

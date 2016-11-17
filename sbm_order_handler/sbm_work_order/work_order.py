@@ -129,7 +129,7 @@ class SBM_Adhoc_Order_Request(osv.osv):
 		return res
 
 	def print_adhoc_order_request(self,cr,uid,ids,context=None):
-		url = self.pool.get('public.ip.address').redirect(cr, uid, ids, context=None)
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
 		urlTo = url+"sbm-adhoc-order-request/print&id="+str(ids[0])+"&uid="+str(uid)
 		return {
 			'type'	: 'ir.actions.client',
@@ -838,7 +838,7 @@ class SBM_Work_Order(osv.osv):
 
 
 	def print_work_order(self,cr,uid,ids,context=None):
-		url = self.pool.get('public.ip.address').redirect(cr, uid, ids, context=None)
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
 		urlTo = url+"sbm-work-order/print&id="+str(ids[0])+"&uid="+str(uid)
 		return {
 			'type'	: 'ir.actions.client',

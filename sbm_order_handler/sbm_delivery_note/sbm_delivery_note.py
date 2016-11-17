@@ -240,7 +240,7 @@ class delivery_note(osv.osv):
 		return True
 
 	def print_dn_out_new(self,cr,uid,ids,context=None):
-		url = self.pool.get('public.ip.address').redirect(cr, uid, ids, context=None)
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
 		
 		urlTo = url+"delivery-note/printnew&id="+str(ids[0])+"&uid="+str(uid)
 		return {
