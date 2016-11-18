@@ -6,8 +6,6 @@ from osv import osv, fields
 
 class Purchase_Order_Sbm(osv.osv):
 	_inherit = 'purchase.order'
-
-
 	# CONTOH FIELD FUNCTION
 	def _getStateAlert(self, cr, uid, ids, fields, arg, context):
 		x={}
@@ -16,8 +14,6 @@ class Purchase_Order_Sbm(osv.osv):
 		valDate = now.strftime('%Y-%m-%d')
 		# print "**************************************************",type(now)
 		# todayIs = datetime.datetime.strptime(, "%Y-%m-%d")
-
-		
 
 		for record in self.browse(cr, uid, ids):
 			if record.duedate :
@@ -38,6 +34,9 @@ class Purchase_Order_Sbm(osv.osv):
 		'type_permintaan':fields.selection([('1','umum'),('2','rental'),('3','Sub Count')],'Type Permintaan',required=True,states={'confirmed':[('readonly',True)], 'approved':[('readonly',True)],'done':[('readonly',True)]},),
 		'detail_po_ids': fields.many2many('detail.pb','wizard_pb_rel','detail_pb_id','wizard_id','List Permintaan Barang'),
 		'print_line':fields.integer('Line Print'),
+		'shipment_to_product':fields.many2one('stock.location','Stock Location'),
+		'submit_no':fields.char('Submit No'),
+		'jenis': fields.selection([('loc', 'Local Regular'),('loc-petty', 'Local Regular Petty'), ('impj', 'Import J'), ('imps', 'Import S')], 'Type', readonly=True,required=True, states={'draft':[('readonly',False)]}, select=True),
 		'stateAlert': fields.function(
 			_getStateAlert,
 			string="Due Date Month",type="char"
@@ -47,13 +46,16 @@ class Purchase_Order_Sbm(osv.osv):
 	_defaults ={
 		'location_id':12,
 		'print_line':10,
-		'name':int(time.time()),
-		# 'duedate' : time.strftime('%Y-%m-%d')
 	}
 	
 	def create(self, cr, uid, vals, context=None):
-		order =  super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
-		return order
+		
+		if vals['jenis'] == 'loc-petty':
+			vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.petty')
+		else:
+			vals['name']=int(time.time())
+
+		return super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
 
 	def print_po_out(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
@@ -112,9 +114,9 @@ class Purchase_Order_Sbm(osv.osv):
 						detail_pb_cek=self.pool.get('detail.pb').search(cr,uid,[('id', '=' ,z.line_pb_general_id.id)])
 						
 						valdetailpb = self.pool.get('detail.pb').browse(cr,uid,detail_pb_cek[0])
-						self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'qty_available': valdetailpb.jumlah_diminta-z.product_qty})
-
-						if valdetailpb.jumlah_diminta-z.product_qty == 0:
+						#  Cek Qty Available Detail PB, Jika hasil nya 0 maka update state Detail PB
+						print '=====================',valdetailpb.qty_available
+						if valdetailpb.qty_available == 0.0:
 							self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'state':'proses'})
 			elif po.type_permintaan == '2':
 				# loop each order line
@@ -126,11 +128,7 @@ class Purchase_Order_Sbm(osv.osv):
 				for line in po.order_line:
 					if line.line_pb_subcont_id:
 						self.pool.get('purchase.requisition.subcont.line').write(cr,uid,[line.line_pb_subcont_id.id],{'state_line':'po'})
-			
 
-
-		# self.write(cr, uid, ids, {'state': 'approved', 'date_approve': fields.date.context_today(self,cr,uid,context=context)})
-		
 		return super(Purchase_Order_Sbm,self).wkf_approve_order(cr,uid,ids,context=context)
 	
 	def _create_pickings(self, cr, uid, order, order_lines, picking_id=False, context=None):
@@ -144,7 +142,7 @@ class Purchase_Order_Sbm(osv.osv):
 		if order_line.part_number == False:
 			nameproduct = order_line.name or ''
 		else:
-			nameproduct = order_line.name + ' ' + order_line.part_number or ''
+			nameproduct = order_line.name + ' '  +  '[' + order_line.part_number + ']' or ''
 
 		return {
 			'name': nameproduct,
@@ -168,6 +166,7 @@ class Purchase_Order_Sbm(osv.osv):
 		}
 		
 	def action_cancel(self, cr, uid, ids, context=None):
+
 		wf_service = netsvc.LocalService("workflow")
 		for purchase in self.browse(cr, uid, ids, context=context):
 			cek=self.pool.get('detail.order.line').search(cr,uid,[('order_line_id', '=' ,ids)])
@@ -175,7 +174,6 @@ class Purchase_Order_Sbm(osv.osv):
 			for val in order_line:
 				# ================== Update Detail PB menjadi Confirm ===================
 				self.pool.get('detail.pb').write(cr, uid, [val.detail_pb_id], {'state':'onproses'})
-				
 				# ================== Cek Qty Detail PB =================================
 				Qty_PB=self.pool.get('detail.pb').search(cr,uid,[('id', '=' ,val.detail_pb_id)])
 				QtyDetail = self.pool.get('detail.pb').browse(cr,uid, Qty_PB[0])
@@ -195,12 +193,19 @@ class Purchase_Order_Sbm(osv.osv):
 						_('You must first cancel all receptions related to this purchase order.'))
 				if inv:
 					wf_service.trg_validate(uid, 'account.invoice', inv.id, 'invoice_cancel', cr)
-					
-				#self.write(cr,uid,ids,{'state':'approved'})
 				self.write(cr,uid,ids,{'state':'cancel'})
 				
 			for (id, name) in self.name_get(cr, uid, ids):
 				wf_service.trg_validate(uid, 'purchase.order', id, 'purchase_cancel', cr)
+
+
+		# Cancel Purchase Order Line
+		po_line=self.pool.get('purchase.order.line').search(cr,uid,[('order_id', '=' ,ids)])
+		order_line =self.pool.get('purchase.order.line').browse(cr,uid,po_line)
+		for x in order_line:
+			self.pool.get('purchase.order.line').write(cr, uid, [x.id], {'state':'cancel'})
+
+
 		return True
 	
 	def setdraft(self,cr,uid,ids,context=None):
@@ -222,7 +227,56 @@ class Purchase_Order_Sbm(osv.osv):
 
 Purchase_Order_Sbm()
 
+
+class purchase_order_patty(osv.osv):
+    _name = "purchase.order.petty"
+    _inherit = "purchase.order"
+    _table = "purchase_order"
+    _description = "Purchase Order Petty"
+
+    _columns = {
+    		'jenis':fields.selection([('loc','Local Regular'),('loc-petty','Local Regular Petty'),('impj','Import J'),('imps','Import S')],'Jenis'),
+    }
+
+
+purchase_order_patty()
+
+
+
+
 class purchase_order_line_detail(osv.osv):
+	
+	def _get_received(self,cr,uid,ids,field_name,args,context={}):		
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('stock.move').search(cr,uid,[('purchase_line_id', '=' ,item.id), ('state', '=', 'done')])
+			hasil= 0
+			for data in  self.pool.get('stock.move').browse(cr,uid,move):
+				hasil += data.product_qty
+			res[item.id] = hasil
+		return res
+
+	def _get_supplied_items(self,cr,uid,ids,field_name,args,context={}):		
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('order.requisition.delivery.line.po').search(cr,uid,[('po_line_id', '=' ,item.id)])
+			hasil= 0
+			for data in  self.pool.get('order.requisition.delivery.line.po').browse(cr,uid,move):
+				hasil += data.qty
+			res[item.id] = hasil
+		return res
+
+	def _get_qty_available_to_pick(self,cr,uid,ids,field_name,args,context={}):		
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('purchase.order.line').search(cr,uid,[('id', '=' ,item.id)])
+			hasil= 0
+			for data in  self.pool.get('purchase.order.line').browse(cr,uid,move):
+				hasil += data.received_items-data.supplied_items
+			res[item.id] = hasil
+		return res
+		
+
 	_inherit = 'purchase.order.line'
 	_columns = {
 		'no':fields.integer('No'),
@@ -232,6 +286,9 @@ class purchase_order_line_detail(osv.osv):
 		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True),
 		'variants':fields.many2one('product.variants','variants'),
 		'date_planned':fields.date('Scheduled Date', select=True),
+		'received_items': fields.function(_get_received,string="Received Items",type="float",store=False, readonly=False),
+		'supplied_items': fields.function(_get_supplied_items,string="Supplied Items",type="float",store=False, readonly=False),
+		'qty_available_to_pick': fields.function(_get_qty_available_to_pick,string="Available To Pick",type="float",store=False, readonly=False),
 		}
 
 	_defaults ={
@@ -276,4 +333,4 @@ class purchase_order_line_detail(osv.osv):
 		return {'value':{'product_uom':uom}}
 
 		
-purchase_order_line_detail()
+purchase_order_line_detail() 
