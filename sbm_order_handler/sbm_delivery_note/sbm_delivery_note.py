@@ -240,9 +240,9 @@ class delivery_note(osv.osv):
 		return True
 
 	def print_dn_out_new(self,cr,uid,ids,context=None):
-		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
-		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"delivery-note/printnew&id="+str(ids[0])+"&uid="+str(uid)
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
+		
+		urlTo = url+"delivery-note/printnew&id="+str(ids[0])+"&uid="+str(uid)
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',

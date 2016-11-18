@@ -86,19 +86,19 @@ class sale_order(osv.osv):
 	_columns = {       
 		'amount_untaxed': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Untaxed Amount',
 			store={
-				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 10),
+				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line','pricelist_id'], 10),
 				'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
 			},
 			multi='sums', help="The amount without tax.", track_visibility='always'),
 		'amount_tax': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Taxes',
 			store={
-				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 10),
+				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line','pricelist_id'], 10),
 				'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
 			},
 			multi='sums', help="The tax amount."),
 		'amount_total': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Total',
 			store={
-				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 10),
+				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line','pricelist_id'], 10),
 				'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
 			},
 			multi='sums', help="The total amount."),
