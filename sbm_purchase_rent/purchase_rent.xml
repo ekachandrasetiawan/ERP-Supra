@@ -26,6 +26,13 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">form</field>
 		</record>
+
+		<record id="action_subcont_requisition" model="ir.actions.act_window">
+			<field name="name">Subcont Requisition</field>
+			<field name="res_model">purchase.requisition.subcont</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+		</record>
 		
 
 		<!-- ACTION PO RENT TREE BARU UNTUK COLOR TREE-->
@@ -161,9 +168,10 @@
 						-->
 						<!-- untuk button report perlu tag report diatas -->
 						<button class="oe_highlight" icon="gtk-print" name="%(printRentRequisition)d" states="purchase" string="Print" type="action"/>
-						<button class="oe_highlight" icon="gtk-apply" name="setCheck" states="draft" string="Confirm This Requisition" type="object"/>
-						<button name="confirm2" states="confirm" string="Approve" type="object" class="oe_highlight"/>
-						<button class="oe_highlight" icon="gtk-apply" name="setConfirm" states="check" string="Approve" type="object"/>
+						<button class="oe_highlight" icon="gtk-apply" name="setCheck" states="draft" string="Confirm This Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief"/>
+
+						<button name="confirm2" states="confirm" string="Validate" type="object" class="oe_highlight" groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
+						<button class="oe_highlight" icon="gtk-apply" name="setConfirm" states="check" string="Approve" type="object" groups="sbm_purchase.group_jobdesc_position_dept_manager"/>
 
 						<field name="state" statusbar_visible="draft, check, confirm, purchase, done" widget="statusbar"/>
 					</header>
@@ -251,17 +259,6 @@
 			<field name="view_id" ref="view_wizard_po_rent_form"/>
 		</record>
 		<!-- <menuitem action="wizard_rent_list_action" id="wizard_po_rent" name="Wizard Rent Order" parent="purchase_rent_menu"/> -->
-
-
-
-
-
-
-
-
-
-
-
 
 	</data>
 </openerp>

@@ -7,14 +7,15 @@
 			<pageGraphics>
 				<setFont name="Helvetica" size="10"/>
 				<drawString x="19.0cm" y="1cm">Hal <pageNumber/></drawString>
-				<image x="1.8cm" y="26.4cm" height="60.0" >[[ company.logo or removeParentNode('image') ]]</image>
+				<image x="1.3cm" y="26.4cm" height="60.0" >[[ company.logo or removeParentNode('image') ]]</image>
 				<setFont name="Helvetica-Bold" size="12"/>
-				<drawString x="9.5cm" y="27.6cm">PEMBELIAN BARANG</drawString>
+				<drawString x="8.8cm" y="27.6cm">PEMBELIAN BARANG</drawString>
 				<setFont name="Helvetica" size="7"/>
 			</pageGraphics>
 		</header>
     </pageTemplate>
   </template>
+  
   <stylesheet>
     <blockTableStyle id="Standard_Outline">
       <blockAlignment value="LEFT"/>
@@ -531,24 +532,24 @@
     <para style="terp_default_8">[[ repeatIn(objects,'o') ]]</para>
     		      <para style="terp_tblheader_Details_right"><font color="white">.</font></para>
     		       <para style="terp_tblheader_Details_right"><font color="white">.</font></para>
-				<blockTable colWidths="500.0" style="Table_Partner_Address">
+				<blockTable colWidths="700.0" style="Table_Partner_Address">
 				<tr>
 				<td>
 				<para style="terp_tblheader_Details_Centre">No.PB : [[ o.name ]]</para>
 				</td>
 				</tr>
 			</blockTable>
-        <para style="terp_default_8"><font color="white"> </font></para>
+        <para style="terp_default_8"><font color="white">. </font></para>
+        <para style="terp_default_8"><font color="white">. </font></para>
 			
     	   <blockTable colWidths="600.0" style="Table_Partner_Address">
 		    <tr>
 		    <td>
-		      <para style="terp_default_Bold_88">SBM-F-PCH-01/02</para>
-		      <para style="terp_default_Bold_89">[[ time.strftime('%d/%m/%Y') ]]</para>
+		      <para style="terp_default_Bold_88"><font color="white">... </font>SBM-F-PCH-01/02</para>
+		      <para style="terp_default_Bold_89"><font color="white">............ </font>[[ time.strftime('%d/%m/%Y') ]]</para>
 		    </td>
 		    </tr>
 		    </blockTable>
-	
     <pto_header>
     
     <blockTable colWidths="25.0,130.0,150.0,60.0,80.0,110.0" style="Table_Invoice_General_Header">
@@ -568,7 +569,8 @@
         <td> <para style="terp_default_Bold_18">Tanggal.</para></td>
         <td> <para style="terp_default_Bold_18"> [[ time.strftime('%d/%m/%Y', time.strptime(o.tanggal,'%Y-%m-%d')) ]]</para></td>
         <td> <para style="terp_default_Bold_18">Proyek</para></td>
-        <td> <para style="terp_default_Bold_18"> [[ o.customer ]] </para></td>
+        <td> <para style="terp_default_Bold_18">  </para></td>
+        <!-- <td> <para style="terp_default_Bold_18"> [[ o.customer ]] </para></td> -->
     </tr>
     </blockTable>
     <blockTable colWidths="80.0,130.0,80.0,80.0,100.0,75.0" style="Table001">
@@ -582,11 +584,11 @@
    </tr>
     </blockTable>
     
-    <para style="terp_default_8"><font color="white"> </font></para>
+    <para style="terp_default_8"><font color="white">. </font></para>
 
-    <blockTable colWidths="25.0,265.0,70.0,40.0,50.0,95.0" style="Table001">
+    <blockTable colWidths="25.0,265.0,60.0,50.0,50.0,95.0" style="Table001">
     <tr>
-        <td> <para style="terp_default_Bold_Centre_8">No. </para> </td>
+        <td> <para style="terp_default_Bold_Centre_8">No </para> </td>
         <td> 
           <para style="terp_default_Bold_Centre_8">Deskripsi Barang</para>
           <para style="terp_default_Bold_8_Italic">(harus diisi lengkap,spt : merk, type, dimensi, warna dll.</para>
@@ -602,22 +604,22 @@
     
     <section>
     <para style="terp_default_1">[[repeatIn(get_lines(o),'lines')]]</para>
-    <blockTable colWidths="25.0,265.0,70.0,40.0,50.0,95.0" style="Table001">
+    <blockTable colWidths="25.0,265.0,60.0,50.0,50.0,95.0" style="Table001">
     <tr>
       <td><para style="terp_default_8">[[ lines['no'] ]]</para></td>
-      <td><para style="terp_default_8">[[ lines['name'].name ]]</para></td>
+      <td><para style="terp_default_8">[[ lines['name'] ]] </para></td>
       <td><para style="terp_default_8">[[ lines['part_no'] ]]</para></td>
       <td><para style="terp_default_Right_8">[[ lines['jumlah_diminta'] ]] [[ lines['satuan'].name ]]</para></td>
       <td><para style="terp_default_Right_8">[[ lines['stok'] ]]</para></td>
-      <td><para style="terp_default_Right_8">[[ lines['keterangan'] ]]</para></td>
+      <td><para style="terp_default_Right_8">[[ lines['keterangan'] ]] [[ lines['so_name'] ]]</para></td>
     </tr>
     </blockTable>
     </section>
 
-	<para style="terp_default_8"><font color="white"> </font></para>  
-	<para style="terp_default_8"><font color="white"> </font></para>
-	<para style="terp_default_8"><font color="white"> </font></para>  
-	<para style="terp_default_8"><font color="white"> </font></para>
+	<para style="terp_default_8"><font color="white"> .</font></para>  
+	<para style="terp_default_8"><font color="white"> .</font></para>
+	<para style="terp_default_8"><font color="white"> .</font></para>  
+	<para style="terp_default_8"><font color="white"> .</font></para>
 	
     <blockTable colWidths="20.0,130.0,150.0,170.0,120.0" style="Table_Partner_Address">
     <tr>
@@ -625,14 +627,14 @@
     		<blockTable colWidths="20.0">
              <tr>
                 <td>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
                 </td>
              </tr>
             </blockTable>
@@ -642,15 +644,15 @@
              <tr>
                 <td>
                  <para style="terp_default_8">Diminta Oleh :</para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_8">Nama / Paraf</para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white">. </font></para>
+                 <para style="terp_default_5"><font color="white">. </font></para>
+                 <para style="terp_default_5"><font color="white">. </font></para>
+                 <para style="terp_default_5"><font color="white">. </font></para>
+                 <para style="terp_default_8">[[ o.employee_id.name ]]</para>
                 </td>
              </tr>
             </blockTable>
@@ -660,14 +662,14 @@
              <tr>
                 <td>
                  <para style="terp_default_8">Diterima Oleh :</para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_8">(Purschasing Dept.)</para>
                 </td>
              </tr>
@@ -679,14 +681,14 @@
  			<tr>
                 <td>
                  <para style="terp_default_8">Diperiksa Oleh :</para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_8">(Chief/Ass Mgr/Mgr/GM)</para>
                 </td>
              </tr>
@@ -697,14 +699,14 @@
              <tr>
                 <td>
                  <para style="terp_default_8">Disetujui Oleh</para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
-                 <para style="terp_default_5"><font color="white"> </font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
+                 <para style="terp_default_5"><font color="white"> .</font></para>
                   <para style="terp_default_8">(Mgr / GM / Press.Dir)</para>
                 </td>
              </tr>

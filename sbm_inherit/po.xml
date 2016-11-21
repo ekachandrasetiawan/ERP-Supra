@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-			
-		<!-- Create Product -->
-		<!-- UNCOMMENT TO UPDATE -->
+
 		<!-- <record id="advance_payment" model="product.product">
             <field name="name">Advance Payment</field>
             <field name="categ_id">24</field>
@@ -15,7 +13,6 @@
             <field name="sale_ok" eval="False"/>
 	        <field name="purchase_ok" eval="False"/>
         </record> -->
-
 
 		<record id="purchase_order_form" model="ir.ui.view">
 			<field name="name">purchase.order.form</field>
