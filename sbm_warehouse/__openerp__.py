@@ -1,7 +1,7 @@
 {
     "name": "Supra Bakti Mandiri Warehouse",
     "version": "1.0",
-    "depends": ["base","stock","sbm_po_revise"],
+    "depends": ["base","stock","sbm_po_revise","sbm_inherit"],
     "author": "Suprabakti Mandiri",
     "category": "SBM Users",
     "description": """Modul ini digunakan untuk Mendefiniskan Kebutuhan Dept Warehouse""",
