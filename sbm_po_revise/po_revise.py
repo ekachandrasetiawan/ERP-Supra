@@ -45,18 +45,6 @@ class Purchase_Order(osv.osv):
 	}
 
 	def create(self, cr, uid, vals, context={}):
-		obj_po = self.pool.get('purchase.order')
-		if 'force_unique' not in context:
-			if vals['name']:
-				name = str(vals['name']).replace(" ","")[:6]
-				cek = obj_po.search(cr ,uid, [('name','ilike',name)])
-
-				for x in obj_po.browse(cr ,uid, cek):
-					if name == x.name[:6]:
-						raise osv.except_osv(
-								_('Information'),
-								_('Order Reference must be unique per Company!'))
-
 		order = super(Purchase_Order, self).create(cr, uid, vals, context=context)
 		return order
 
