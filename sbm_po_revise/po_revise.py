@@ -17,8 +17,17 @@ from email.mime.text import MIMEText
 
 class Purchase_Order_Line(osv.osv):
 	_inherit = 'purchase.order.line'
+
+	def _get_date_now(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			res[item.id] = time.strftime('%Y-%m-%d')
+
+		return res
+
 	_columns = {
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
+		'date_now': fields.function(_get_date_now,string="Date Now",type="date"),
 	}
 
 Purchase_Order_Line()
