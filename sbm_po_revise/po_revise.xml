@@ -194,7 +194,7 @@
        </field>
     </record>
 
-    <record id="deactive_po_line_cancel" model="ir.ui.view">
+    <!-- <record id="deactive_po_line_cancel" model="ir.ui.view">
        <field name="name">purchase.order.form</field>
        <field name="model">purchase.order</field>
        <field name="type">form</field>
@@ -207,7 +207,7 @@
             
 
        </field>
-    </record>
+    </record> -->
 
     <record id="purchase_order_form_view_report_po_revision" model="ir.ui.view">
         <field name="name">purchase.order.form</field>
