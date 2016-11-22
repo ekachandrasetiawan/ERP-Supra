@@ -2165,7 +2165,7 @@ class stock_partial_picking(osv.osv_memory):
 	
 	_inherit = "stock.partial.picking"
 
-	def _partial_move_for(self, cr, uid, move):
+	def _partial_move_for(self, cr, uid, move, context={}):
 		partial_move = {
 			'product_id' : move.product_id.id,
 			'product_name':move.name,
