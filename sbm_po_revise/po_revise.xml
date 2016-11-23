@@ -319,11 +319,11 @@
                     <field string="Multi Search" name="name" filter_domain="[('name','ilike', self)]"/>
                     <field string="Product" name="product_id" filter_domain="[('product_id','=',self)]"/>
                     
-                    <filter string="Uncomplate" name="uncomplate" domain="[('date_planned','=', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('received_items', '=', 2)]"/>
+                    <filter string="Uncomplate" name="uncomplate" domain="[('date_planned','>', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('received_items', '&lt;', product_qty)]"/>
 
-                    <filter string="Overdue" name="overdue" domain="[('date_planned','&lt;', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('state', '=', 'confirmed')]"/>
+                    <filter string="Overdue" name="overdue" domain="[('date_planned','&lt;', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('qty_status_overdue','&lt;', True)]"/>
 
-                    <filter string="Todo" name="todo" domain="[('date_planned','=', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('received_items', '=', 2)]"/>
+                    <filter string="Todo" name="todo" domain="['&amp;','|',('date_planned','=', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('received_items','=', 0),('received_items','>', 0)]"/>
 
                     <filter string="Draft" name="draft" icon="terp-check" domain="[('state','=','draft')]"/>
                     <filter string="Confirmed" name="confirmed" icon="terp-check" domain="[('state','=','confirmed')]"/>
