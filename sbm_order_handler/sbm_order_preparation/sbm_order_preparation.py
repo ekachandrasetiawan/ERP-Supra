@@ -265,7 +265,8 @@ class order_preparation(osv.osv):
 				obj_dn = self.pool.get('delivery.note').search(cr, uid ,[('prepare_id', '=', op.id)])
 				if obj_dn:
 					dn = self.pool.get('delivery.note').browse(cr, uid, obj_dn)[0]
-					if dn.state == 'draft' or dn.state == 'submited' or dn.state == 'approve':
+					# if dn.state == 'draft' or dn.state == 'submited' or dn.state == 'approve':
+					if dn.state in ['draft','submited']:
 						msg = 'Please to complete the process of Delivery Note with No' + dn.name
 						raise openerp.exceptions.Warning(msg)
 

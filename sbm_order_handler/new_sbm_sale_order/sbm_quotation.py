@@ -1037,6 +1037,7 @@ class sale_order_invoice(osv.osv):
 
 		for inv_line in account_invoice.invoice_line:
 			material_invoice =[]
+			desc = ""
 			for order_line in inv_line.sale_order_lines:
 				for material in order_line.material_lines:
 					if material.desc:
@@ -1109,4 +1110,4 @@ class detail_pb(osv.osv):
 	_columns={
 		
 		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=True),
-	}	
+	}
