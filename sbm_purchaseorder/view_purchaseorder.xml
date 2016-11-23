@@ -61,22 +61,6 @@
                     </xpath>
                </field>
           </record>            
-          <record id="replace_print_purchase_import" model="ir.ui.view">
-              <field name="name">purchase.order.form</field>
-               <field name="model">purchase.order</field>
-               <field name="type">form</field>
-               <field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
-               <field name="arch" type="xml">
-                  <xpath expr="//header" position="inside">
-                    <button name="%(ad_purchase_import.purchase_importj)d" type="action" states="draft,approved,done" string="Import J" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user"/>
-                  </xpath>
-
-                  <xpath expr="//header" position="inside">
-                    <button name="%(ad_purchase_import.purchase_imports)d" type="action" states="draft,approved,done" string="Import S" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user"/>
-                  </xpath>
-               </field>
-          </record>
-
 
           <record id="replace_button_invoice" model="ir.ui.view">
               <field name="name">purchase.order.form</field>
