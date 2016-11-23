@@ -229,11 +229,11 @@
         <field name="type">form</field>
         <field name="inherit_id" ref="purchase_partial_invoicing.purchase_order_invoice"/>
         <field name="arch" type="xml">
-            <xpath expr="//button[@string='Partial Invoice']" position="replace">
+            <xpath expr="//header" position="inside">
                 <button name="%(purchase_partial_invoicing.action_purchase_partial_invoice)d" string="Partial Invoice" type="action" states="approved" groups="base.group_user" icon="terp-dolar" class="oe_highlight"/>
             </xpath>
 
-             <xpath expr="//button[@string='Full Invoice']" position="replace">
+             <xpath expr="//header" position="inside">
                 <button name="action_invoice_create" string="Full Invoice" type="object" states="approved" groups="base.group_user" icon="terp-dolar" class="oe_highlight"/>
             </xpath>
         </field>
