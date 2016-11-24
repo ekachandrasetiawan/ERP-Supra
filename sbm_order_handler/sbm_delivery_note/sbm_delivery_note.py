@@ -454,8 +454,9 @@ class delivery_note(osv.osv):
 				avgList.append(avgM)
 
 			avg = (sum(avgList)/len(avgList))
-			if recount == False:
-				data['product_qty'] = fullorder*(avg/100.00)
+			#if recount == False:
+			data['product_qty'] = fullorder*(avg/100.00)
+			_logger.error((fullorder, "--------------------", avg))
 		return True
 
 	"""
