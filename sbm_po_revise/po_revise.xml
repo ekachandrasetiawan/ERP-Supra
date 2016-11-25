@@ -192,20 +192,6 @@
        </field>
     </record>
 
-    <!-- <record id="deactive_po_line_cancel" model="ir.ui.view">
-       <field name="name">purchase.order.form</field>
-       <field name="model">purchase.order</field>
-       <field name="type">form</field>
-       <field name="inherit_id" ref="sbm_inherit.purchase_order_form_with_cancel_button"/>
-       <field name="arch" type="xml">
-
-            <button name="action_cancel_item" position="replace">
-                
-            </button>
-            
-
-       </field>
-    </record> -->
 
     <record id="purchase_order_form_view_report_po_revision" model="ir.ui.view">
         <field name="name">purchase.order.form</field>
@@ -217,9 +203,6 @@
               <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Purchase Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
               <button name="print_po_out" type="object" states="draft,sent,confirmed,approved" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user"/>
             </button>
-
-            <!-- <xpath expr="//button[@string='Import J']" position="replace"/>
-            <xpath expr="//button[@string='Import S']" position="replace"/> -->
         </field>
     </record>
 
@@ -319,11 +302,11 @@
                     <field string="Multi Search" name="name" filter_domain="[('name','ilike', self)]"/>
                     <field string="Product" name="product_id" filter_domain="[('product_id','=',self)]"/>
                     
-                    <filter string="Uncomplate" name="uncomplate" domain="[('date_planned','>', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('received_items', '&lt;', product_qty)]"/>
+                    <filter string="Uncomplate" name="uncomplate" domain="[('qty_status_uncomplate', '=', True)]"/>
 
-                    <filter string="Overdue" name="overdue" domain="[('date_planned','&lt;', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('qty_status_overdue','&lt;', True)]"/>
+                    <filter string="Overdue" name="overdue" domain="[('qty_status_overdue','=', True)]"/>
 
-                    <filter string="Todo" name="todo" domain="['&amp;','|',('date_planned','=', ((context_today()+datetime.timedelta(days=0)).strftime('%%Y-%%m-%%d'))),('received_items','=', 0),('received_items','>', 0)]"/>
+                    <filter string="Todo" name="todo" domain="[('qty_status_todo','=', True)]"/>
 
                     <filter string="Draft" name="draft" icon="terp-check" domain="[('state','=','draft')]"/>
                     <filter string="Confirmed" name="confirmed" icon="terp-check" domain="[('state','=','confirmed')]"/>

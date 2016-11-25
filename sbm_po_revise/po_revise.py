@@ -26,25 +26,15 @@ class Purchase_Order_Line(osv.osv):
 
 		return res
 
-	def _func_qty_status(self, cr, uid, ids, field_name, arg, context):
-		"""compute the value of the function field"""
-		res = {}
-		for record in self.browse(cr, uid, ids, context=context):
-			if (record.received_items > record.product_qty) and record.date_planned < time.strftime('%Y-%m-%d'):
+	def _func_qty_status_uncomplate(self, cr, uid, ids, field_name, arg, context):
+		
+		return True
 
-				res[record.id] = record.received_items > record.product_qty
-		return res
-
-	def _func_search_qty_status(self, cr, uid, obj, name, criterion, context):
-		"""we only support a search on the form
-		('column_name', '=', boolean) or ('column_name', '!=', boolean)
-		"""
+	def _func_search_qty_status_uncomplate(self, cr, uid, obj, name, criterion, context):
 		match_ids = []
 		value = criterion
-
-
-		cr.execute("SELECT id FROM purchase_order_line \
-                    WHERE received_items < product_qty")
+		
+		cr.execute("select * from purchase_order_line where received_items < product_qty")
 
 		for row in cr.fetchall():
 			match_ids.append(row[0])
@@ -53,11 +43,52 @@ class Purchase_Order_Line(osv.osv):
 			return [('id', 'in', match_ids)]
 		else:
 			return [('id', '=', 0)]
-			
+
+
+	def _func_qty_status_overdue(self, cr, uid, ids, field_name, arg, context):
+		
+		return True
+
+	def _func_search_qty_status_overdue(self, cr, uid, obj, name, criterion, context):
+		match_ids = []
+		value = criterion
+		
+		cr.execute("select * from purchase_order_line where received_items < product_qty AND to_char(date_planned, 'YYYY-MM-DD')  < to_char( now(), 'YYYY-MM-DD' )")
+
+		for row in cr.fetchall():
+			match_ids.append(row[0])
+
+		if match_ids:
+			return [('id', 'in', match_ids)]
+		else:
+			return [('id', '=', 0)]
+
+
+	def _func_qty_status_todo(self, cr, uid, ids, field_name, arg, context):
+		
+		return True
+
+	def _func_search_qty_status_todo(self, cr, uid, obj, name, criterion, context):
+		match_ids = []
+		value = criterion
+		
+		cr.execute("select * from purchase_order_line where received_items < product_qty AND to_char(date_planned, 'YYYY-MM-DD')  = to_char( now(), 'YYYY-MM-DD' )")
+
+		for row in cr.fetchall():
+			match_ids.append(row[0])
+
+		if match_ids:
+			return [('id', 'in', match_ids)]
+		else:
+			return [('id', '=', 0)]
+
+
 	_columns = {
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
 		'date_now': fields.function(_get_date_now,string="Date Now",type="date"),
-		'qty_status_overdue':fields.function(_func_qty_status, fnct_search=_func_search_qty_status, string='Qty Status',type='boolean'),
+		'qty_status_uncomplate':fields.function(_func_qty_status_uncomplate, fnct_search=_func_search_qty_status_uncomplate, string='Qty Status Uncomplate',type='boolean'),
+		'qty_status_overdue':fields.function(_func_qty_status_overdue, fnct_search=_func_search_qty_status_overdue, string='Qty Status Overdue',type='boolean'),
+		'qty_status_todo':fields.function(_func_qty_status_todo, fnct_search=_func_search_qty_status_todo, string='Qty Status Todo',type='boolean'),
 	}
 
 Purchase_Order_Line()
