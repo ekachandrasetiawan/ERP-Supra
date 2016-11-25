@@ -1039,27 +1039,48 @@ class sale_order_invoice(osv.osv):
 			material_invoice =[]
 			desc = ""
 			for order_line in inv_line.sale_order_lines:
-				for material in order_line.material_lines:
-					if material.desc:
-						description = '\n'+material.desc
-					else:
-						description	=""
-					material_invoice.append(
-						"["+material.product_id.default_code+"]"
-						+material.product_id.name
-						+" (" +str(float(material.qty)) +""
-						+material.uom.name+")"
-						+description)
+				# if material more than 1
+				inv_line_desc = ""
+				if order_line.name:
+					inv_line_desc = order_line.name
 
-					desc = "["+material.product_id.default_code+"] "+material.product_id.name
-				if material_invoice:
-					material ='\nConsist Of\n'+"\n".join(material_invoice)
+				if len(order_line.material_lines)>1:
+					print "MORE THAN 1"
+					# append new line if not null
+					if inv_line_desc:
+						inv_line_desc += "\n"
+
+					inv_line_desc += "Consist of:"
+					for material in order_line.material_lines:
+						material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty)) +""+str(material.uom.name)+")"+str(material.desc)
+
+						inv_line_desc += "\n"+material_desc
 				else:
-					material =""
+					# if product and uom same
+					theMaterial = order_line.material_lines[0]
+					print "ONLNY 1"
+					if order_line.product_id.id==theMaterial.product_id.id and theMaterial.uom.id==order_line.product_uom.id:
+						print "only 1 condition 1"
+						# then only append material description
+						if theMaterial.desc:
+							inv_line_desc += theMaterial.desc
+					else:
+						print "ONLY 1 CONDITION 2",theMaterial.uom.id,'-',order_line.product_uom.id
+						if inv_line_desc:
+							inv_line_desc += "\n"
 
+						inv_line_desc += "Consist of:"
+						for material in order_line.material_lines:
+							material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty)) +""+str(material.uom.name)+")"+str(material.desc)
+							inv_line_desc += "\n"+material_desc
+
+				
+				# print desc,"=++++++++++++++++++++++++++++++++=",material
+				desc += inv_line_desc
+				print desc,"<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
 				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':desc })
 		
-				
+		# raise osv.except_osv("ERRRRRRRRRRRRRRRRR","ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
 		return idInvoice
 
 class WizardCreatePbSo(osv.osv_memory):
