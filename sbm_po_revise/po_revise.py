@@ -429,7 +429,7 @@ class Purchase_Order_Revision(osv.osv):
 	def check_group_purchase_chief(self, cr, uid, ids, context={}):
 		#  Check User Groups Purchase Chief
 		m  = self.pool.get('ir.model.data')
-		id_group = m.get_object(cr, uid, 'sbm_po_revise', 'group_purchase_chief').id
+		id_group = m.get_object(cr, uid, 'sbm_purchase', 'group_purchase_chief').id
 		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
 		a = False
 		for x in user_group.users:
