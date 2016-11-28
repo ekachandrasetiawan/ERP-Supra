@@ -298,17 +298,23 @@
         <field name="type">search</field>
         <field name="arch" type="xml">
             <search string="Purchase Order Line">
-                <group expand="!" string="Purchase Order Line">
+                <group expand="!" string="Filter By Type">
+
                     <field string="Multi Search" name="name" filter_domain="[('name','ilike', self)]"/>
                     <field string="Product" name="product_id" filter_domain="[('product_id','=',self)]"/>
+                    <filter string="Purchase Local" name="local" domain="[('order_id.jenis','!=', 'impj')]"/>
+                    <filter string="Purchase Import" name="import" domain="[('order_id.jenis','=', 'impj')]"/>
                     
+                </group>
+
+                <group expand="!" string="Filter By Process">
                     <filter string="Uncomplete" name="uncomplete" domain="[('qty_status_uncomplete', '=', True)]"/>
-
                     <filter string="Overdue" name="overdue" domain="[('qty_status_overdue','=', True)]"/>
-
                     <filter string="Todo" name="todo" domain="[('qty_status_todo','=', True)]"/>
+                </group>
 
-                    <filter string="Draft" name="draft" icon="terp-check" domain="[('state','=','draft')]"/>
+
+                <group expand="!" string="Filter By State">
                     <filter string="Confirmed" name="confirmed" icon="terp-check" domain="[('state','=','confirmed')]"/>
                     <filter string="Done" name="done" icon="terp-check" domain="[('state','=','done')]"/>
 
@@ -328,7 +334,7 @@
         <field name="res_model">purchase.order.line</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('product_id.type','!=', 'service')]</field>
+        <field name="domain">[('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft'])]</field>
         <field name="search_view_id" ref="order_receive_status_tree_search" />
     </record>
 
