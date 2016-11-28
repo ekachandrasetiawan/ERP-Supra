@@ -35,7 +35,6 @@ class account_config_settings(osv.osv_memory):
             domain="[('type', '=', 'other')]"),
     }
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):
-        print "+++++++++++++++++++++++++++++++++++++++++++++++++++=="
         res = super(account_config_settings, self).onchange_company_id(cr, uid, ids, company_id, context=context)
         if company_id:
             company = self.pool.get('res.company').browse(cr, uid, company_id, context=context)

@@ -26,11 +26,11 @@ class Purchase_Order_Line(osv.osv):
 
 		return res
 
-	def _func_qty_status_uncomplate(self, cr, uid, ids, field_name, arg, context):
+	def _func_qty_status_uncomplete(self, cr, uid, ids, field_name, arg, context):
 		
 		return True
 
-	def _func_search_qty_status_uncomplate(self, cr, uid, obj, name, criterion, context):
+	def _func_search_qty_status_uncomplete(self, cr, uid, obj, name, criterion, context):
 		match_ids = []
 		value = criterion
 		
@@ -86,7 +86,7 @@ class Purchase_Order_Line(osv.osv):
 	_columns = {
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
 		'date_now': fields.function(_get_date_now,string="Date Now",type="date"),
-		'qty_status_uncomplate':fields.function(_func_qty_status_uncomplate, fnct_search=_func_search_qty_status_uncomplate, string='Qty Status Uncomplate',type='boolean'),
+		'qty_status_uncomplete':fields.function(_func_qty_status_uncomplete, fnct_search=_func_search_qty_status_uncomplete, string='Qty Status Uncomplete',type='boolean'),
 		'qty_status_overdue':fields.function(_func_qty_status_overdue, fnct_search=_func_search_qty_status_overdue, string='Qty Status Overdue',type='boolean'),
 		'qty_status_todo':fields.function(_func_qty_status_todo, fnct_search=_func_search_qty_status_todo, string='Qty Status Todo',type='boolean'),
 	}

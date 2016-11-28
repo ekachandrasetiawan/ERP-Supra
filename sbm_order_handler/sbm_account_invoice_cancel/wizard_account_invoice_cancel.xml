@@ -16,7 +16,7 @@
 							</group>
 						</sheet>
 						<footer>
-							<button name='confirm_cancel' type='object' string='Confirm' />
+							<button name='confirm_cancel' type='object' string='Confirm' confirm="Are you sure to Cancel"/>
 						</footer>
 					</form>
 			</field>
