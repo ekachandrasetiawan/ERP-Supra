@@ -53,7 +53,7 @@
             <field name="arch" type="xml">
             	<form string="Regular Requisition New" version="7.0">
             	<header>
-            		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief"/>
+            		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief,purchase.group_purchase_user"/>
             		<button name="setdraft" states="confirm,confirm2" string="Set to Draft" type="object"  icon="gtk-jump-to"/>
             		<button name="confirm" states="confirm" string="Approve" type="object" icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager,purchase.group_purchase_user"/>
             		<button name="confirm2" states="confirm2" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"  icon="gtk-apply"/>

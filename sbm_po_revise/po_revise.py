@@ -1,4 +1,5 @@
 import time
+import datetime
 import netsvc
 import openerp.exceptions
 import smtplib
@@ -25,9 +26,69 @@ class Purchase_Order_Line(osv.osv):
 
 		return res
 
+	def _func_qty_status_uncomplate(self, cr, uid, ids, field_name, arg, context):
+		
+		return True
+
+	def _func_search_qty_status_uncomplate(self, cr, uid, obj, name, criterion, context):
+		match_ids = []
+		value = criterion
+		
+		cr.execute("select * from purchase_order_line where received_items < product_qty")
+
+		for row in cr.fetchall():
+			match_ids.append(row[0])
+
+		if match_ids:
+			return [('id', 'in', match_ids)]
+		else:
+			return [('id', '=', 0)]
+
+
+	def _func_qty_status_overdue(self, cr, uid, ids, field_name, arg, context):
+		
+		return True
+
+	def _func_search_qty_status_overdue(self, cr, uid, obj, name, criterion, context):
+		match_ids = []
+		value = criterion
+		
+		cr.execute("select * from purchase_order_line where received_items < product_qty AND to_char(date_planned, 'YYYY-MM-DD')  < to_char( now(), 'YYYY-MM-DD' )")
+
+		for row in cr.fetchall():
+			match_ids.append(row[0])
+
+		if match_ids:
+			return [('id', 'in', match_ids)]
+		else:
+			return [('id', '=', 0)]
+
+
+	def _func_qty_status_todo(self, cr, uid, ids, field_name, arg, context):
+		
+		return True
+
+	def _func_search_qty_status_todo(self, cr, uid, obj, name, criterion, context):
+		match_ids = []
+		value = criterion
+		
+		cr.execute("select * from purchase_order_line where received_items < product_qty AND to_char(date_planned, 'YYYY-MM-DD')  = to_char( now(), 'YYYY-MM-DD' )")
+
+		for row in cr.fetchall():
+			match_ids.append(row[0])
+
+		if match_ids:
+			return [('id', 'in', match_ids)]
+		else:
+			return [('id', '=', 0)]
+
+
 	_columns = {
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
 		'date_now': fields.function(_get_date_now,string="Date Now",type="date"),
+		'qty_status_uncomplate':fields.function(_func_qty_status_uncomplate, fnct_search=_func_search_qty_status_uncomplate, string='Qty Status Uncomplate',type='boolean'),
+		'qty_status_overdue':fields.function(_func_qty_status_overdue, fnct_search=_func_search_qty_status_overdue, string='Qty Status Overdue',type='boolean'),
+		'qty_status_todo':fields.function(_func_qty_status_todo, fnct_search=_func_search_qty_status_todo, string='Qty Status Todo',type='boolean'),
 	}
 
 Purchase_Order_Line()
@@ -62,12 +123,12 @@ class Purchase_Order(osv.osv):
 		<html>
 		  <head></head>
 		  <body>
-		    <p>
-			   	Hi %s! <br/>
+			<p>
+				Hi %s! <br/>
 				PO Revisi <b> %s </b> telah di konfirm. Silahkan follow up
-		    </p>
-		    <br>
-		    Best Regards,<br>
+			</p>
+			<br>
+			Best Regards,<br>
 			Administrator ERP
 		  </body>
 		</html>
@@ -288,14 +349,14 @@ class Purchase_Order_Revision(osv.osv):
 		<html>
 		  <head></head>
 		  <body>
-		    <p>
-		    	Hi %s!<br><br>
+			<p>
+				Hi %s!<br><br>
 				Permintaan Revisi <b>PO # %s </b> sudah di setujui.<br>
 				Silahkan membuat dokumen revisi pada sistem ERP.<br>
 				Klik link ini untuk membuka detail. <a href="%s">View Purchase Order Revision</a><br>
-		    </p>
-		    <br>
-		    Best Regards,<br>
+			</p>
+			<br>
+			Best Regards,<br>
 			Administrator ERP
 		  </body>
 		</html>
@@ -676,14 +737,14 @@ class WizardPOrevise(osv.osv_memory):
 			<html>
 			  <head></head>
 			  <body>
-			    <p>
-			    	Hi %s!<br/><br/>
+				<p>
+					Hi %s!<br/><br/>
 					%s mengajukan permohonan untuk merevisi dokumen Purchase Order <b># %s </b> <br><b>Dengan alasan :</b><br/>
 					 %s .<br/><br/>
 					Silahkan klik Link ini untuk melihat detail pada sistem ERP. <a href="%s">View Purchase Order Revision</a>
-			    </p>
-			    <br/>
-			    Best Regards,<br/>
+				</p>
+				<br/>
+				Best Regards,<br/>
 				Administrator ERP
 			  </body>
 			</html>
@@ -693,7 +754,7 @@ class WizardPOrevise(osv.osv_memory):
 			<html>
 			  <head></head>
 			  <body>
-			    <p>
+				<p>
 					Hi %s !<br/><br/>
 
 					%s mengajukan permohonan untuk merevisi dokumen Purchase Order <b># %s </b> <br><b>Dengan alasan :</b><br>
@@ -703,9 +764,9 @@ class WizardPOrevise(osv.osv_memory):
 					Dan, Atau<br/>
 					Mempunyai Bank Statement dengan nomor <b> %s </b><br/>
 					Silahkan klik tombol Approve untuk approval permintaan tersebut pada Link ini.<a href="%s">View Purchase Order Revision</a>
-			    </p>
-			    <br>
-			    Best Regards,<br/>
+				</p>
+				<br>
+				Best Regards,<br/>
 				Administrator ERP
 			  </body>
 			</html>

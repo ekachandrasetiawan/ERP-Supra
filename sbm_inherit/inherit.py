@@ -1,5 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from stock import stock
+from openerp import pooler
 import math
 import time
 import webbrowser
@@ -7,7 +9,11 @@ import netsvc
 import openerp.exceptions
 from osv import osv, fields
 from openerp.tools.translate import _
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 import openerp.addons.decimal_precision as dp
+
+
+from openerp import netsvc
 class stock_picking(osv.osv):
 	def open_full_record(self, cr, uid, ids, context=None):
 		data= self.browse(cr, uid, ids, context=context)
@@ -877,6 +883,7 @@ class SaleOrder(osv.osv):
 		# Care for deprecated _inv_get() hook - FIXME: to be removed after 6.1
 		invoice_vals.update(self._inv_get(cr, uid, order, context=context))
 		return invoice_vals
+
 
 	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
 		user = self.pool.get('res.users').browse(cr,uid,user_id,context)

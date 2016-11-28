@@ -275,7 +275,12 @@ class purchase_order_line_detail(osv.osv):
 				hasil += data.received_items-data.supplied_items
 			res[item.id] = hasil
 		return res
-		
+	
+	def _get_stock_move(self,cr,uid,ids,context={}):
+		res = {}
+		for line in self.pool.get('stock.move').browse(cr,uid,ids,context=context):
+			res[line.purchase_line_id.id]=True
+		return res.keys()
 
 	_inherit = 'purchase.order.line'
 	_columns = {
@@ -286,7 +291,11 @@ class purchase_order_line_detail(osv.osv):
 		'product_uom': fields.many2one('product.uom', 'Product Unit of Measure', required=True),
 		'variants':fields.many2one('product.variants','variants'),
 		'date_planned':fields.date('Scheduled Date', select=True),
-		'received_items': fields.function(_get_received,string="Received Items",type="float",store=False, readonly=False),
+		'received_items': fields.function(_get_received,string="Received Items",type="float",readonly=False,
+			store={
+				'purchase.order.line': (lambda self, cr, uid, ids, c={}: ids, ['product_id','product_qty','state','supplied_items','qty_available_to_pick'], 20),
+				'stock.move': (_get_stock_move, ['product_qty','state'], 20),
+			}),
 		'supplied_items': fields.function(_get_supplied_items,string="Supplied Items",type="float",store=False, readonly=False),
 		'qty_available_to_pick': fields.function(_get_qty_available_to_pick,string="Available To Pick",type="float",store=False, readonly=False),
 		}
