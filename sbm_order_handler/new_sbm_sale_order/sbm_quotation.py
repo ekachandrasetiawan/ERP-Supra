@@ -1077,7 +1077,7 @@ class sale_order_invoice(osv.osv):
 				
 				# print desc,"=++++++++++++++++++++++++++++++++=",material
 				desc += inv_line_desc
-				print desc,"<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
+				# print desc,"<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
 				write_invoice_line = self.pool.get('account.invoice.line').write(cr,uid,inv_line.id,{'name':desc })
 		
 		# raise osv.except_osv("ERRRRRRRRRRRRRRRRR","ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
