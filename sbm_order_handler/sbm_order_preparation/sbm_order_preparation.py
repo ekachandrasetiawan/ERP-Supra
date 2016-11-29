@@ -276,16 +276,61 @@ class order_preparation(osv.osv):
 		self._set_op_followers(cr, uid, res, context=None)
 		return res
 
+	def validate_order_qty(self, cr, uid, ids, context={}):
+		val = self.browse(cr, uid, ids)[0]
+
+		obj_op_line = self.pool.get('order.preparation.line')
+		obj_op = self.pool.get('order.preparation')
+		obj_dn_line_mat = self.pool.get('delivery.note.line.material')
+		obj_dn_line_mat_ret = self.pool.get('delivery.note.line.material.return')
+		obj_move = self.pool.get('stock.move')
+
+		for x in val.prepare_lines:
+			nilai= 0
+			op_line = [] #assign default to 0 result
+			if x.sale_line_material_id: #if not old order_preparation_data
+				op_line=obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,x.sale_line_material_id.id)])
+
+			for l in obj_op_line.browse(cr, uid, op_line):
+				op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
+
+				product_return = 0
+				search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
+				print "-----",l.id
+				if search_dn_lm:
+					search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , search_dn_lm)])
+					print 'AAAAAAAAAAAA ',search_cek_return
+					# Cek DN Line Material Return
+					for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
+						if rn.stock_move_id.state == 'done':
+							product_return += rn.stock_move_id.product_qty
+
+				if op.state <> 'cancel':
+					nilai += l.product_qty - product_return
+
+			if x.sale_line_material_id.id:
+
+				so_material_line=self.pool.get('sale.order.material.line').browse(cr, uid, [x.sale_line_material_id.id])[0]
+				mm = ' ' + so_material_line.product_id.default_code + ' '
+				msg = 'Product' + mm + 'Melebihi Order.!\n'
+
+				if nilai > so_material_line.qty and l.extra_material != True:
+					raise openerp.exceptions.Warning(msg)
+		return True
+
 	"""Action submit
 	"""
 	def preparation_submit(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
+
 
 		if val.picking_id.id:
 			if val.picking_id.state == 'cancel':
 				raise osv.except_osv(('Warning'), ('Delivery Order Status Cancel, Please Refresh Delivery Order '))
 
 		res = False
+		self.validate_order_qty(cr, uid, ids, context=context)
+		
 		validasi  = self.validasi(cr, uid, ids, context=None)
 		if validasi == True:
 
@@ -568,49 +613,10 @@ class order_preparation(osv.osv):
 
 
 	def preparation_confirm(self, cr, uid, ids, context=None):
-		val = self.browse(cr, uid, ids)[0]
-
-		obj_op_line = self.pool.get('order.preparation.line')
-		obj_op = self.pool.get('order.preparation')
-		obj_dn_line_mat = self.pool.get('delivery.note.line.material')
-		obj_dn_line_mat_ret = self.pool.get('delivery.note.line.material.return')
-		obj_move = self.pool.get('stock.move')
-
-		for x in val.prepare_lines:
-			nilai= 0
-			op_line = [] #assign default to 0 result
-			if x.sale_line_material_id: #if not old order_preparation_data
-				op_line=obj_op_line.search(cr,uid,[('sale_line_material_id', '=' ,x.sale_line_material_id.id)])
-
-			for l in obj_op_line.browse(cr, uid, op_line):
-				op=obj_op.browse(cr, uid, [l.preparation_id.id])[0]
-
-				product_return = 0
-				search_dn_lm=obj_dn_line_mat.search(cr, uid, [('op_line_id', 'in' , [l.id])])
-				print "-----",l.id
-				if search_dn_lm:
-					search_cek_return=obj_dn_line_mat_ret.search(cr, uid, [('delivery_note_line_material_id', 'in' , search_dn_lm)])
-					print 'AAAAAAAAAAAA ',search_cek_return
-					# Cek DN Line Material Return
-					for rn in obj_dn_line_mat_ret.browse(cr, uid, search_cek_return):
-						if rn.stock_move_id.state == 'done':
-							product_return += rn.stock_move_id.product_qty
-
-				if op.state <> 'cancel':
-					nilai += l.product_qty - product_return
-
-			if x.sale_line_material_id.id:
-
-				so_material_line=self.pool.get('sale.order.material.line').browse(cr, uid, [x.sale_line_material_id.id])[0]
-				mm = ' ' + so_material_line.product_id.default_code + ' '
-				msg = 'Product' + mm + 'Melebihi Order.!\n'
-
-				if nilai > so_material_line.qty and l.extra_material != True:
-					raise openerp.exceptions.Warning(msg)
-
+		
 		self._set_message_unread(cr, uid, ids, context=None)
+		self.validate_order_qty(cr, uid, ids, context=context)
 		validasi = self.validasi(cr, uid, ids, context=None)
-
 		if validasi == True:
 			self.write(cr, uid, ids, {'state': 'approve'})
 			
