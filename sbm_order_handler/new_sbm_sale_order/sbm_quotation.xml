@@ -549,12 +549,12 @@
 
 			<field name="arch" type="xml">
 				<header> 
-					<button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}" icon="STOCK_CONVERT" />
+					<button name="generate_material" type="object" string="Generate Material" attrs="{'invisible':[('state','in',['draft','cancel'])]}" icon="STOCK_CONVERT" confirm="Are you sure to Generate Material"/>
 
 					<button name="generate_wo" type="object" string="Generate work Order" attrs="{'invisible':[('state','in',['draft','cancel'])]}" confirm="Are you sure to Generate Work Order" icon="STOCK_CONVERT"/>
 
-					<button name="cek_so" type="object" string="Cek Sale order" icon="terp-check"/>
-					 <button name="print_so_web" type="object" string="Print Sales order" class="oe_highlight" icon="gtk-print"/>
+					<button name="cek_so" type="object" string="Cek Sale order" icon="terp-check" confirm="Are you sure to Check Sales Order"/>
+					<button name="print_so_web" type="object" string="Print Sales order" class="oe_highlight" icon="gtk-print"/>
 
 				</header>
 			  
@@ -726,9 +726,9 @@
 			<field name="arch" type="xml">
 				<form string="quotation" version="7.0">
 					<header>
-						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system,base.group_admin_support,sbm_order_handler.group_admin_ho" icon="terp-check"/>
+						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system,base.group_admin_support,sbm_order_handler.group_admin_ho" icon="terp-check" confirm="Are you sure to Confirm Document RFQ"/>
 					
-						<button name="cancel_quotation" type="object" string="Cancel" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system" icon="STOCK_CANCEL"/>
+						<button name="cancel_quotation" type="object" string="Cancel" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system" icon="STOCK_CANCEL" confirm="Are you sure to Cancel Document RFQ"/>
 
 						<field name="quotation_state" widget="statusbar" />
 					</header>

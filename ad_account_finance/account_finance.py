@@ -140,8 +140,6 @@ class account_invoice(osv.osv):
         return True
 
     def onchange_format_faktur(self, cr, uid, ids, no):
-        print no
-        print "Len ->",len(no)
         try:
             int(no)
             if len(no) == 16:
@@ -785,7 +783,6 @@ class account_voucher(osv.osv):
         ctx.update({'date': date})
         vals = self.recompute_voucher_lines(cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=ctx)
 
-        print '==================',vals
         vals2 = self.recompute_payment_rate(cr, uid, ids, vals, currency_id, date, ttype, journal_id, amount, context=context)
         for key in vals.keys():
             res[key].update(vals[key])
@@ -1021,7 +1018,6 @@ class account_voucher_line(osv.osv):
 
     def _compute_balance(self, cr, uid, ids, name, args, context=None):
 
-        print '==========EKA CHANDRA==========',
         currency_pool = self.pool.get('res.currency')
         rs_data = {}
         for line in self.browse(cr, uid, ids, context=context):

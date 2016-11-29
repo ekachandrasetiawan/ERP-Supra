@@ -23,6 +23,7 @@ class purchase_partial_invoice(osv.osv_memory):
     }
 
     def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
+        print '===============xxxxxxxxxxxxxxxx===============cccccccccccccccccc============='
         if context is None:
             context = {}
         purchase_obj = self.pool.get('purchase.order')

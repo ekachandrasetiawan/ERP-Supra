@@ -37,7 +37,7 @@
         <field name="inherit_id" ref="sbm_inherit.view_order_form" />
         <field name="arch" type="xml">
 			<button name="action_cancel" position="replace">
-    			<button name="action_cancel" states="manual,progress" string="Cancel Order" type="object" groups="sbm_inherit.group_sale_order_cancel" icon="STOCK_CANCEL"/>
+    			<button name="action_cancel" states="manual,progress" string="Cancel Order" type="object" groups="sbm_inherit.group_sale_order_cancel" icon="STOCK_CANCEL" confirm="Are you sure to Cancel Document Sales Order"/>
     		</button>
         </field>
     	</record>
@@ -49,7 +49,7 @@
         <field name="inherit_id" ref="ad_sales_project.view_sale_order_project" />
         <field name="arch" type="xml">
         	<xpath expr="//button[@name='action_button_confirm']" position="replace">
-				<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager,base.group_sale_salesman_all_leads,base.group_user" icon="STOCK_APPLY"/>
+				<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager,base.group_sale_salesman_all_leads,base.group_user" icon="STOCK_APPLY" confirm="Are you sure to Confirm Document RFQ"/>
 		    </xpath>
         </field>
     	</record>
@@ -62,7 +62,7 @@
         <field name="arch" type="xml">
         	<button name="print_quotation" position="replace"/>
         	<button name="cancel" position="replace">
-        		<button name="cancel" states="draft,sent" string="Cancel Quotation" groups="base.group_user" icon="STOCK_CANCEL"/>
+        		<button name="cancel" states="draft,sent" string="Cancel Quotation" groups="base.group_user" icon="STOCK_CANCEL" confirm="Are you sure to Cancel Document Sales Order"/>
         	</button>
             <xpath expr="//group[@name='sale_total']" position="after">
                 <group style="width: 65%%">
@@ -98,7 +98,7 @@
         <field name="inherit_id" ref="sbm_saleorder.saleorder_create_pb"/>
         <field name="arch" type="xml">
         	<button name="action_create_pb" position="replace">
-        		<button name="action_create_pb" states="progress,manual" string="Create PB" type="object" icon="STOCK_ADD"/>
+        		<button name="action_create_pb" states="progress,manual" string="Create PB" type="object" icon="STOCK_ADD" confirm="Are you sure to Create PB From Document Sales Order"/>
         	</button>
         </field>
     	</record>

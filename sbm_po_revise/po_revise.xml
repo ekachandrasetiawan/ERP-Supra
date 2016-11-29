@@ -14,7 +14,7 @@
                         <field name="reason"/>
                     </group>
                     <footer>
-                        <button name="request_po_revise" string="Submit" type="object" class="oe_highlight"/>
+                        <button name="request_po_revise" string="Submit" type="object" class="oe_highlight" confirm="Are You Sure to Submit Document ?"/>
                         or
                         <button string="Cancel" class="oe_link" special="cancel"/>
                     </footer>
@@ -298,17 +298,23 @@
         <field name="type">search</field>
         <field name="arch" type="xml">
             <search string="Purchase Order Line">
-                <group expand="!" string="Purchase Order Line">
+                <group expand="!" string="Filter By Type">
+
                     <field string="Multi Search" name="name" filter_domain="[('name','ilike', self)]"/>
                     <field string="Product" name="product_id" filter_domain="[('product_id','=',self)]"/>
+                    <filter string="Purchase Local" name="local" domain="[('order_id.jenis','!=', 'impj')]"/>
+                    <filter string="Purchase Import" name="import" domain="[('order_id.jenis','=', 'impj')]"/>
                     
-                    <filter string="Uncomplate" name="uncomplate" domain="[('qty_status_uncomplate', '=', True)]"/>
+                </group>
 
+                <group expand="!" string="Filter By Process">
+                    <filter string="Uncomplete" name="uncomplete" domain="[('qty_status_uncomplete', '=', True)]"/>
                     <filter string="Overdue" name="overdue" domain="[('qty_status_overdue','=', True)]"/>
-
                     <filter string="Todo" name="todo" domain="[('qty_status_todo','=', True)]"/>
+                </group>
 
-                    <filter string="Draft" name="draft" icon="terp-check" domain="[('state','=','draft')]"/>
+
+                <group expand="!" string="Filter By State">
                     <filter string="Confirmed" name="confirmed" icon="terp-check" domain="[('state','=','confirmed')]"/>
                     <filter string="Done" name="done" icon="terp-check" domain="[('state','=','done')]"/>
 
@@ -327,7 +333,8 @@
         <field name="name">Order Receive Status</field>
         <field name="res_model">purchase.order.line</field>
         <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>           
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft'])]</field>
         <field name="search_view_id" ref="order_receive_status_tree_search" />
     </record>
 
@@ -344,11 +351,11 @@
             <button name="invoice_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are You Sure to Submit Invoice ?"/>
         </button>
         <button string="Validate" position="replace">
-            <button name="invoice_open" states="submited,proforma2" string="Validate" class="oe_highlight" groups="account.group_account_invoice"/>
+            <button name="invoice_open" states="submited,proforma2" string="Validate" class="oe_highlight" groups="account.group_account_invoice" confirm="Are You Sure to Validate Invoice ?"/>
         </button>
         
         <xpath expr="//form/header/button[@name='action_cancel_draft']"  position="replace">
-            <button name="action_cancel_draft" states="cancel,proforma2,submited" string="Reset to Draft" type="object" groups="sbm_inherit.group_customer_invoice_administrator,sbm_inherit.group_customer_invoice_set_to_draft"/>
+            <button name="action_cancel_draft" states="cancel,proforma2,submited" string="Reset to Draft" type="object" groups="sbm_inherit.group_customer_invoice_administrator,sbm_inherit.group_customer_invoice_set_to_draft" confirm="Are You Sure to Set To Draft Invoice ?"/>
         </xpath>
        </field>
     </record>

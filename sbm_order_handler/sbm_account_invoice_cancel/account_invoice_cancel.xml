@@ -20,7 +20,7 @@
 			<field name='inherit_id' ref="account.invoice_form"/>
 			<field name='arch' type='xml'>
 				<xpath expr="//form/header/button[@name='invoice_cancel']" position="after">
-					<button name='%(action_account_invoice_cancel_form)d' type='action' string='Cancel Wizard' states='submited,draft,proforma,proforma2' />
+					<button name='%(action_account_invoice_cancel_form)d' type='action' string='Cancel Wizard' states='submited,draft,proforma,proforma2' confirm="Are you sure to Cancel"/>
 				</xpath>
 			</field>
 			
