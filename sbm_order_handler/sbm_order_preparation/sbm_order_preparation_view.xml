@@ -134,6 +134,10 @@
 							<field name="sale_line_material_id" domain="[('sale_order_line_id', '=', sale_line_id)]"/>
 					</xpath>
 
+					<field name="detail" position="before">
+						<field name="extra_material" />
+					</field>
+
 					<xpath expr="//field[@name='prepare_lines']" position="before">
 						<button name="reload_sale_order" type="object" string="Reload Product" attrs="{'invisible':[('state','!=','draft')]}"/>
 					</xpath>

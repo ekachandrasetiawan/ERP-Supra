@@ -605,7 +605,7 @@ class order_preparation(osv.osv):
 				mm = ' ' + so_material_line.product_id.default_code + ' '
 				msg = 'Product' + mm + 'Melebihi Order.!\n'
 
-				if nilai > so_material_line.qty:
+				if nilai > so_material_line.qty and l.extra_material != True:
 					raise openerp.exceptions.Warning(msg)
 
 		self._set_message_unread(cr, uid, ids, context=None)
@@ -743,6 +743,8 @@ class order_preparation_line(osv.osv):
 		'product_uom': fields.many2one('product.uom', 'UoM'),
 		'sale_line_id': fields.many2one('sale.order.line', "Sale Item", required=True),
 		'sale_line_material_id': fields.many2one('sale.order.material.line', 'Material Ref', required=True),
+
+		'extra_material':fields.boolean('Is Extra Material'),
 	}
 
 	def change_item(self, cr, uid, ids, item, context={}):
