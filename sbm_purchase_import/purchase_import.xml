@@ -168,8 +168,9 @@
             <field name="act_window_id" ref="purchase_order_import"/>
         </record>
 
-        <menuitem name="Purcahse Order Import" parent="purchase.menu_procurement_management" id="menu_purchase_order_import" action="purchase_order_import" sequence="5"/>
-
-        <delete model="ir.ui.menu" id="ad_purchase_import.menu_purchase_order_import"/>
+        <record model="ir.ui.menu" id="ad_purchase_import.menu_purchase_order_import">
+           <field name="action" ref="purchase_order_import"/>
+           <field name="sequence">5</field>
+        </record>
     </data>
 </openerp>
