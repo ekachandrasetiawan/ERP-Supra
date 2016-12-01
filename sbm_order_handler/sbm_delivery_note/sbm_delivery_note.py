@@ -184,9 +184,6 @@ class delivery_note(osv.osv):
 		'prepare_id':{}
 	}
 
-
-
-
 	def validasi_stock(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		loc = 12
@@ -1105,6 +1102,7 @@ class delivery_note_line_material_return(osv.osv):
 	_name = 'delivery.note.line.material.return'	
 	_columns = {
 		'id':fields.integer('ID'),
+		'return_no':fields.char('Return No'),
 		'delivery_note_id': fields.many2one('delivery.note','Delivery Note', ondelete='cascade',onupdate="cascade"),
 		'delivery_note_line_id': fields.many2one('delivery.note.line','Delivery Note Line',ondelete='cascade',onupdate="cascade"),
 		'delivery_note_line_material_id': fields.many2one('delivery.note.line.material','Delivery Note Line Material',ondelete='cascade',onupdate="cascade"),
@@ -1113,6 +1111,27 @@ class delivery_note_line_material_return(osv.osv):
 	}
 
 delivery_note_line_material_return()
+
+
+class stock_picking_in(osv.osv):
+	_inherit = 'stock.picking.in'
+	_table="stock_picking"
+
+	def print_return(self,cr,uid,ids,context=None):
+		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
+		urlTo = url+"delivery-note/printreturn&id="+str(ids[0])+"&uid="+str(uid)
+		return {
+			'type'	: 'ir.actions.client',
+			'target': 'new',
+			'tag'	: 'print.out.op',
+			'params': {
+				'redir'	: urlTo,
+				'uid':uid
+			},
+		}				
+	
+stock_picking_in()
+
 
 class stock_picking(osv.osv):
 	_name = 'stock.picking'
@@ -1403,6 +1422,10 @@ class stock_return_picking(osv.osv_memory):
 				'in': 'stock.picking.in',
 				'internal': 'stock.picking',
 		}
+
+		# Create return No
+		self.create_return_no(cr, uid, new_picking, context=None)
+
 		return {
 			'domain': "[('id', 'in', ["+str(new_picking)+"])]",
 			'name': _('Returned Picking'),
@@ -1412,5 +1435,12 @@ class stock_return_picking(osv.osv_memory):
 			'type':'ir.actions.act_window',
 			'context':context,
 		}
+
+	def create_return_no(self, cr, uid, ids, context=None):
+		return_no = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.return')
+
+		cr.execute("""update delivery_note_line_material_return set return_no=%s where stock_picking_id=%s""", (return_no, ids))
+
+		return True
 
 stock_return_picking()
