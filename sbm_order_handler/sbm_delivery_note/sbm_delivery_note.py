@@ -184,6 +184,9 @@ class delivery_note(osv.osv):
 		'prepare_id':{}
 	}
 
+
+
+
 	def validasi_stock(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		loc = 12
@@ -273,31 +276,34 @@ class delivery_note(osv.osv):
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 
-	def onchange_old_spk(self, cr, uid, ids, spk_id, context={}):
+	def onchange_old_spk(self, cr, uid, ids, spk_id, op_id=None, context={}):
 		# browse = self.pool.get('perintah.key')browse(cr, uid, ids, context=context)
+		if not op_id:
 
-		spk = self.pool.get('perintah.kerja').browse(cr, uid, spk_id, context=context)
-		line = []
-		res = {}				
-		for spk_item in spk.perintah_lines:
-			item = {
-				'product_id':spk_item.product_id.id,
-				'name': spk_item.name,
-				'product_qty':spk_item.product_qty,
-				'product_uom':spk_item.product_uom.id,
-			}
+			spk = self.pool.get('perintah.kerja').browse(cr, uid, spk_id, context=context)
+			line = []
+			res = {}				
+			for spk_item in spk.perintah_lines:
+				item = {
+					'product_id':spk_item.product_id.id,
+					'name': spk_item.name,
+					'product_qty':spk_item.product_qty,
+					'product_uom':spk_item.product_uom.id,
+				}
 
-			item['note_lines_material'] = [(0,0,{
-				'product_id':spk_item.product_id.id,
-				'name': spk_item.name,
-				'qty':spk_item.product_qty,
-				'product_uom':spk_item.product_uom.id,
-			})]
-			print item['note_lines_material'],'+++++++++++++++++++++++++++++++++++++++++++++++++++++++='
-			line.append(item)
+				item['note_lines_material'] = [(0,0,{
+					'product_id':spk_item.product_id.id,
+					'name': spk_item.name,
+					'qty':spk_item.product_qty,
+					'product_uom':spk_item.product_uom.id,
+				})]
+				print item['note_lines_material'],'+++++++++++++++++++++++++++++++++++++++++++++++++++++++='
+				line.append(item)
 
-		res['note_lines'] = line
-		return {'value':res}
+			res['note_lines'] = line
+			return {'value':res}
+		else:
+			return True
 
 	""""Event On Change Order Packaging"""
 	def prepare_change(self, cr, uid, ids, pre, validasi=False):
@@ -1102,7 +1108,6 @@ class delivery_note_line_material_return(osv.osv):
 	_name = 'delivery.note.line.material.return'	
 	_columns = {
 		'id':fields.integer('ID'),
-		'return_no':fields.char('Return No'),
 		'delivery_note_id': fields.many2one('delivery.note','Delivery Note', ondelete='cascade',onupdate="cascade"),
 		'delivery_note_line_id': fields.many2one('delivery.note.line','Delivery Note Line',ondelete='cascade',onupdate="cascade"),
 		'delivery_note_line_material_id': fields.many2one('delivery.note.line.material','Delivery Note Line Material',ondelete='cascade',onupdate="cascade"),
@@ -1111,27 +1116,6 @@ class delivery_note_line_material_return(osv.osv):
 	}
 
 delivery_note_line_material_return()
-
-
-class stock_picking_in(osv.osv):
-	_inherit = 'stock.picking.in'
-	_table="stock_picking"
-
-	def print_return(self,cr,uid,ids,context=None):
-		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
-		urlTo = url+"delivery-note/printreturn&id="+str(ids[0])+"&uid="+str(uid)
-		return {
-			'type'	: 'ir.actions.client',
-			'target': 'new',
-			'tag'	: 'print.out.op',
-			'params': {
-				'redir'	: urlTo,
-				'uid':uid
-			},
-		}				
-	
-stock_picking_in()
-
 
 class stock_picking(osv.osv):
 	_name = 'stock.picking'
@@ -1332,7 +1316,8 @@ class stock_return_picking(osv.osv_memory):
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 				if val.picking_id.id:
-					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',[mov_id])],context=context)
+					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','in',[mov_id])],context=context)
+					print dn_line_material_id,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<---------------",mov_id
 					dn_line_id = dn_line.search(cr,uid,[('note_lines_material','=',dn_line_material_id[0])],context=context)[0]
 					id_line_material = dn_line_material_id[0]
 
@@ -1422,10 +1407,6 @@ class stock_return_picking(osv.osv_memory):
 				'in': 'stock.picking.in',
 				'internal': 'stock.picking',
 		}
-
-		# Create return No
-		self.create_return_no(cr, uid, new_picking, context=None)
-
 		return {
 			'domain': "[('id', 'in', ["+str(new_picking)+"])]",
 			'name': _('Returned Picking'),
@@ -1435,12 +1416,5 @@ class stock_return_picking(osv.osv_memory):
 			'type':'ir.actions.act_window',
 			'context':context,
 		}
-
-	def create_return_no(self, cr, uid, ids, context=None):
-		return_no = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.return')
-
-		cr.execute("""update delivery_note_line_material_return set return_no=%s where stock_picking_id=%s""", (return_no, ids))
-
-		return True
 
 stock_return_picking()

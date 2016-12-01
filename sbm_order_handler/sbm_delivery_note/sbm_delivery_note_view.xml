@@ -141,7 +141,7 @@
 										</group>
 
 										<group>
-											<field name="work_order_id" on_change="onchange_old_spk(work_order_id)" />
+											<field name="work_order_id" on_change="onchange_old_spk(work_order_id, prepare_id)" />
 											<field name="work_order_in" />
 										</group>
 								 </page>
