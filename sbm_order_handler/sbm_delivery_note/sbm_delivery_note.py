@@ -297,7 +297,7 @@ class delivery_note(osv.osv):
 				'product_uom':spk_item.product_uom.id,
 			})]
 			print item['note_lines_material'],'+++++++++++++++++++++++++++++++++++++++++++++++++++++++='
-			line.append((0,0,item))
+			line.append(item)
 
 		res['note_lines'] = line
 		return {'value':res}
