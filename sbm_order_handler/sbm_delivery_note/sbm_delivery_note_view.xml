@@ -66,7 +66,7 @@
 							</button>
 
 							<button string="Return Products" position="replace">
-									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done" type="action" groups="stock.group_stock_user" confirm="Are you sure to Return Delivery Note"/>
+									<button name="%(stock.act_stock_return_picking)d" string="Return Products" states="done" type="action" groups="stock.group_stock_user" confirm="Are you sure to Return Delivery Note" icon="STOCK_REVERT_TO_SAVED"/>
 									<button name="print_dn_out_new" type="object" states="submited" string="Print Out DN" icon="gtk-dnd-multiple"/>
 									<button name="print_pack_list" type="object" states="submited" string="Print Pack List" icon="gtk-dnd-multiple"/>
 							</button>
@@ -147,6 +147,19 @@
 								 </page>
 							</xpath>
 							<xpath expr="//page[@string='Signature']" position="replace"></xpath>
+
+							<xpath expr="//page[@string='Proses Return Products']" position="replace">
+								<page string="Proses Return Products">
+									<field name="note_return_ids_proses">
+										<tree>
+											<field name="return_no"/>
+											<field name="name"/>
+											<field name="partner_id"/>
+											<field name="state"/>
+										</tree>
+									</field>
+								</page>
+							</xpath>
 					 </field>
 				 </record>
 
@@ -179,8 +192,7 @@
 				<field name="arch" type="xml">
 					<xpath expr="//header" position="inside">
                     	<button name="print_return" type="object" states="assigned,done" string="Print Return" icon="gtk-print"/>
-                  	</xpath>
-
+                  	</xpath>                  	
 				 </field>
 			</record>
 
@@ -202,7 +214,27 @@
 				<field name="padding">4</field>
 			</record>
 
+        <record id="return_view_stock_return_picking_form_cancel_notes" model="ir.ui.view">
+            <field name="name">stock.return.picking.memory.form</field>
+            <field name="model">stock.return.picking.memory</field>
+            <field name="inherit_id" ref="stock.stock_return_memory_tree_in"/>
+            <field name="arch" type="xml">
+                <field name="quantity" position="after">
+                	<field name="cancel_notes"/>
+                </field>
+            </field>
+        </record>
 
+		<record id="view_move_picking_tree_inherit" model="ir.ui.view">
+		 <field name="name">delivery.note.tree</field>
+		 <field name="model">stock.move</field>
+		 <field name="inherit_id" ref="stock.view_move_picking_tree"/>
+		 <field name="arch" type="xml">
+		 	<field name="state" position="before">
+		 		<field name="cancel_notes"/>
+		 	</field>
+		</field>
+		</record>
 
 	</data>
 </openerp>

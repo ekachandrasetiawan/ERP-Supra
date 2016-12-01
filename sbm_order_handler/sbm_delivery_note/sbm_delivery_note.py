@@ -1117,6 +1117,10 @@ class stock_picking_in(osv.osv):
 	_inherit = 'stock.picking.in'
 	_table="stock_picking"
 
+	_columns = {
+		'return_no':fields.char('Return No'),
+	}
+
 	def print_return(self,cr,uid,ids,context=None):
 		url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
 		urlTo = url+"delivery-note/printreturn&id="+str(ids[0])+"&uid="+str(uid)
@@ -1134,10 +1138,13 @@ stock_picking_in()
 
 
 class stock_picking(osv.osv):
+
 	_name = 'stock.picking'
 	_inherit = ["stock.picking","mail.thread"]
+
 	_columns = {
 		'is_postpone': fields.boolean('Is Postpone'),
+		'return_no':fields.char('Return No'),
 	}
 
 stock_picking()
@@ -1150,11 +1157,23 @@ class stock_move(osv.osv):
 	}
 
 
+stock_move()
+
+
+class stock_return_picking_memory(osv.osv_memory):
+	_name = "stock.return.picking.memory"
+	_inherit = "stock.return.picking.memory"
+	_columns = {
+		'cancel_notes': fields.text('Cancel Notes'),
+	}
+
+stock_return_picking_memory()
+
+
 class stock_return_picking(osv.osv_memory):
 	_inherit = 'stock.return.picking'
 	_name = 'stock.return.picking'
 	_description = 'Return Picking'
-
 
 	def default_get(self, cr, uid, fields, context=None):
 
@@ -1376,6 +1395,7 @@ class stock_return_picking(osv.osv_memory):
 											'state': 'draft',
 											'location_id': new_location, 
 											'location_dest_id': move.location_id.id,
+											'cancel_notes':data_get.cancel_notes,
 											'date': date_cur,
 				})
 				move_obj.write(cr, uid, [move.id], {'move_history_ids2':[(4,new_move)]}, context=context)
@@ -1398,7 +1418,6 @@ class stock_return_picking(osv.osv_memory):
 
 			if val.picking_id.id:
 				for note_line_return in dn_return_rel:
-					print '===============',note_line_return
 					dn_rm.create(cr,uid,note_line_return)
 					# a
 			else:	
@@ -1441,6 +1460,9 @@ class stock_return_picking(osv.osv_memory):
 
 		cr.execute("""update delivery_note_line_material_return set return_no=%s where stock_picking_id=%s""", (return_no, ids))
 
+		# Update Return No from Stock Picking 
+		self.pool.get('stock.picking').write(cr,uid,ids,{'return_no':return_no},context=None)
+		self.pool.get('stock.picking.in').write(cr,uid,ids,{'return_no':return_no},context=None)
 		return True
 
 stock_return_picking()
