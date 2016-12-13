@@ -634,14 +634,25 @@ class order_preparation(osv.osv):
 				if not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
 					notActiveProducts.append(product.default_code)	
 
+			# Validasi Jika Product Bacth tidak di input dan QTy tidak sama
+			if product.track_production == True or product.track_outgoing == True or product.track_incoming == True:
+				qty_note_line =  x.product_qty
+				if x.prodlot_id:
+					qty_bacth = 0
+					for line_batch in x.prodlot_id:
+						qty_bacth += line_batch.qty
+
+					if qty_bacth < qty_note_line:
+						raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product Bacth'))
+				else:
+					raise osv.except_osv(('Warning..!!'), ('Please Input Batch Product'))
+			
 			if product.not_stock == False:
 				mm = ' ' + product.default_code + ' '
 				stock = ' ' + str(product.qty_available) + ' '
 				msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
-				if x.product_qty > product.qty_available:
-					raise openerp.exceptions.Warning(msg)
-					return False
+				
 
 				# Validasi Stock
 				if product.track_outgoing:
@@ -654,19 +665,12 @@ class order_preparation(osv.osv):
 							msg = 'Stock Product' + mm + ' '+batch.name.name+' Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 							raise openerp.exceptions.Warning(msg)
 							return False
+				else:
+					if x.product_qty > product.qty_available:
+						raise openerp.exceptions.Warning(msg)
+						return False
 
-				# Validasi Jika Product Bacth tidak di input dan QTy tidak sama
-				if product.track_production == True or product.track_outgoing == True or product.track_incoming == True:
-					qty_note_line =  x.product_qty
-					if x.prodlot_id:
-						qty_bacth = 0
-						for line_batch in x.prodlot_id:
-							qty_bacth += line_batch.qty
-
-						if qty_bacth < qty_note_line:
-							raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product Bacth'))
-					else:
-						raise osv.except_osv(('Warning..!!'), ('Please Input Batch Product'))
+				
 
 		if len(notActiveProducts) > 0:
 			m_p_error = ""
@@ -763,6 +767,19 @@ class order_preparation_line(osv.osv):
 
 order_preparation_line()
 
+
+
+class order_preparation_batch(osv.osv):
+	_inherit = "order.preparation.batch"
+
+	def product_batch(self,cr,uid,ids,prodlot_id,qty,context=None):
+		hasil=self.pool.get('stock.production.lot').browse(cr,uid,[prodlot_id], context=context)[0]
+		# if qty > hasil.stock_available:
+		# 	raise openerp.exceptions.Warning('Stock Available Tidak Mencukupi')
+		# 	return {'value':{'qty':0}}
+
+		return {'value':{'desc':hasil.desc,'exp_date':hasil.exp_date,'stock_available':hasil.stock_available}}
+
 class WizardOrderPreparation(osv.osv_memory):
 
 	def default_get(self, cr, uid, fields, context=None):
@@ -826,3 +843,5 @@ class sale_order_material_line(osv.osv):
 	_rec_name = 'product_ref'
 	
 sale_order_material_line()	
+
+
