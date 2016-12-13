@@ -726,7 +726,7 @@
 			<field name="arch" type="xml">
 				<form string="quotation" version="7.0">
 					<header>
-						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system,base.group_admin_support,sbm_order_handler.group_admin_ho" icon="terp-check" confirm="Are you sure to Confirm Document RFQ"/>
+						<button name="confirm_quotation" type="object" string="Confirm" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional,base.group_admin_support" icon="terp-check" confirm="Are you sure to Confirm Document RFQ"/>
 					
 						<button name="cancel_quotation" type="object" string="Cancel" attrs="{'invisible':[('quotation_state','not in',['draft'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system" icon="STOCK_CANCEL" confirm="Are you sure to Cancel Document RFQ"/>
 

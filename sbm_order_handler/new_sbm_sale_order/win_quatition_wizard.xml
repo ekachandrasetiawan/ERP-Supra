@@ -36,7 +36,7 @@
 			<field name="inherit_id" ref="quotation_form_view"/>
 			<field name="arch" type="xml">
 				<header position="inside">
-                       <button name='%(wizard_win_quotation_form)d' type='action' string='Win' attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}" groups="base.group_admin_support,sbm_order_handler.group_admin_ho" icon="STOCK_YES" confirm="Are you sure to Prosess WIN Document RFQ"/>
+                       <button name='%(wizard_win_quotation_form)d' type='action' string='Win' attrs="{'invisible':[('quotation_state','not in',['confirmed'])]}" groups="base.group_sales_supra,base.group_sales_admin,base.group_system,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional,base.group_admin_support" icon="STOCK_YES" confirm="Are you sure to Prosess WIN Document RFQ"/>
 				</header>
 			</field>
 		</record>
