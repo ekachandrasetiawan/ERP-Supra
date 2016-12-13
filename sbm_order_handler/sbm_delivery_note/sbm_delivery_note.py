@@ -184,30 +184,37 @@ class delivery_note(osv.osv):
 		'prepare_id':{}
 	}
 
-
-
-
 	def validasi_stock(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		loc = 12
 		if not val.special:
 			if val.prepare_id.location_id.id:
 				loc = val.prepare_id.location_id.id
-
+			context['location'] = loc
+			context['location_id'] = loc
 			for line in val.note_lines:
 				for x in line.note_lines_material:
 					if not context:
 						context = {}
-					context['location'] = loc
+					
 
 					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 
-					if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
-						mm = ' ' + product.default_code + ' '
-						stock = ' ' + str(product.qty_available) + ' '
-						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
+					if x.prodlot_id:
+						prodlot = self.pool.get('stock.production.lot').browse(cr, uid, x.prodlot_id.id, context=context)
+						_logger.error((context, "--------------------", x.prodlot_id))
+						if x.qty > prodlot.stock_available:
+							mm = ' ' + prodlot.name + ' '
+							stock = ' ' + str(prodlot.stock_available) + ' '
+							msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
+							raise openerp.exceptions.Warning(msg)
+					else:
+						if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
+							mm = ' ' + product.default_code + ' '
+							stock = ' ' + str(product.qty_available) + ' '
+							msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
 
-						raise openerp.exceptions.Warning(msg)
+							raise openerp.exceptions.Warning(msg)
 
 		return True
 	
@@ -268,42 +275,39 @@ class delivery_note(osv.osv):
 				got_line = lines[2]
 			else:
 				got_line = lines
-
-			if got_line['product_qty'] == 0:
+			
+			if got_line and got_line['product_qty'] == 0:
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
 		print vals,"______________________________"
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 
-	def onchange_old_spk(self, cr, uid, ids, spk_id, op_id=None, context={}):
+	def onchange_old_spk(self, cr, uid, ids, spk_id, context={}):
 		# browse = self.pool.get('perintah.key')browse(cr, uid, ids, context=context)
-		if not op_id:
 
-			spk = self.pool.get('perintah.kerja').browse(cr, uid, spk_id, context=context)
-			line = []
-			res = {}				
-			for spk_item in spk.perintah_lines:
-				item = {
-					'product_id':spk_item.product_id.id,
-					'name': spk_item.name,
-					'product_qty':spk_item.product_qty,
-					'product_uom':spk_item.product_uom.id,
-				}
+		spk = self.pool.get('perintah.kerja').browse(cr, uid, spk_id, context=context)
+		line = []
+		res = {}				
+		for spk_item in spk.perintah_lines:
+			item = {
+				'product_id':spk_item.product_id.id,
+				'name': spk_item.name,
+				'product_qty':spk_item.product_qty,
+				'product_uom':spk_item.product_uom.id,
+			}
 
-				item['note_lines_material'] = [(0,0,{
-					'product_id':spk_item.product_id.id,
-					'name': spk_item.name,
-					'qty':spk_item.product_qty,
-					'product_uom':spk_item.product_uom.id,
-				})]
-				print item['note_lines_material'],'+++++++++++++++++++++++++++++++++++++++++++++++++++++++='
-				line.append(item)
+			item['note_lines_material'] = [(0,0,{
+				'product_id':spk_item.product_id.id,
+				'name': spk_item.name,
+				'qty':spk_item.product_qty,
+				'product_uom':spk_item.product_uom.id,
+			})]
+			print item['note_lines_material'],'+++++++++++++++++++++++++++++++++++++++++++++++++++++++='
+			line.append((0,0,item))
 
-			res['note_lines'] = line
-			return {'value':res}
-		else:
-			return True
+		res['note_lines'] = line
+		return {'value':res}
 
 	""""Event On Change Order Packaging"""
 	def prepare_change(self, cr, uid, ids, pre, validasi=False):
@@ -384,7 +388,7 @@ class delivery_note(osv.osv):
 									material_line.append((0,0,{
 										'product_id':dopline.product_id.id,
 										'prodlot_id':xbatch.name.id,
-										'desc':xbatch.desc,
+										'desc':dopline.name,
 										'qty':xbatch.qty,
 										'product_uom':dopline.product_uom.id,
 										'location_id':dline.picking_location.id,
@@ -1108,6 +1112,7 @@ class delivery_note_line_material_return(osv.osv):
 	_name = 'delivery.note.line.material.return'	
 	_columns = {
 		'id':fields.integer('ID'),
+		'return_no':fields.char('Return No'),
 		'delivery_note_id': fields.many2one('delivery.note','Delivery Note', ondelete='cascade',onupdate="cascade"),
 		'delivery_note_line_id': fields.many2one('delivery.note.line','Delivery Note Line',ondelete='cascade',onupdate="cascade"),
 		'delivery_note_line_material_id': fields.many2one('delivery.note.line.material','Delivery Note Line Material',ondelete='cascade',onupdate="cascade"),
@@ -1140,7 +1145,6 @@ class stock_picking_in(osv.osv):
 		}				
 	
 stock_picking_in()
-
 
 
 class stock_picking(osv.osv):
@@ -1357,8 +1361,7 @@ class stock_return_picking(osv.osv_memory):
 			if context.get('active_model') == 'delivery.note':
 				val = self.pool.get('delivery.note').browse(cr, uid, record_idx, context=context)
 				if val.picking_id.id:
-					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','in',[mov_id])],context=context)
-					print dn_line_material_id,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<---------------",mov_id
+					dn_line_material_id=dn_line_material.search(cr,uid,[('stock_move_id','=',[mov_id])],context=context)
 					dn_line_id = dn_line.search(cr,uid,[('note_lines_material','=',dn_line_material_id[0])],context=context)[0]
 					id_line_material = dn_line_material_id[0]
 
@@ -1448,6 +1451,10 @@ class stock_return_picking(osv.osv_memory):
 				'in': 'stock.picking.in',
 				'internal': 'stock.picking',
 		}
+
+		# Create return No
+		self.create_return_no(cr, uid, new_picking, context=None)
+
 		return {
 			'domain': "[('id', 'in', ["+str(new_picking)+"])]",
 			'name': _('Returned Picking'),
@@ -1458,7 +1465,6 @@ class stock_return_picking(osv.osv_memory):
 			'context':context,
 		}
 
-
 	def create_return_no(self, cr, uid, ids, context=None):
 		return_no = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note.return')
 
@@ -1468,4 +1474,5 @@ class stock_return_picking(osv.osv_memory):
 		self.pool.get('stock.picking').write(cr,uid,ids,{'return_no':return_no},context=None)
 		self.pool.get('stock.picking.in').write(cr,uid,ids,{'return_no':return_no},context=None)
 		return True
+
 stock_return_picking()
