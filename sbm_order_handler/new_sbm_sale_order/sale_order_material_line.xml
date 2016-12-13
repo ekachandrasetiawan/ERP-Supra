@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="sale_order_material_line_tree_view" model="ir.ui.view">
+			<field name="name">sale.order.material.line.tree</field>
+			<field name="model">sale.order.material.line</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Sale Order Material Line">
+					<field name="sale_order_id" string="Sale Order"/>
+					<field name="product_id"/>
+					<field name="qty"/>
+					<field name="on_process_qty" string="Process Qty"/>
+					<field name="shipped_qty" string="Shipped Qty"/>
+					<field name="uom"/>
+					<field name="picking_location" string="Location"/>
+					<field name="status" string="Status"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_sale_order_material_line">
+			<field name="name">Sale Order Material Line</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">sale.order.material.line</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref='sale_order_material_line_tree_view'/>
+		</record>
+
+
+		<menuitem parent="base.menu_sales" id="sale.menu_sale_order_material_line" action="action_sale_order_material_line" sequence="5" string="Sale Order Material Line"/>
+
+	</data>
+</openerp>
