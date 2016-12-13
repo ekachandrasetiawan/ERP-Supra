@@ -141,6 +141,37 @@
 					<xpath expr="//field[@name='prepare_lines']" position="before">
 						<button name="reload_sale_order" type="object" string="Reload Product" attrs="{'invisible':[('state','!=','draft')]}"/>
 					</xpath>
+
+					<xpath expr="//field[@name='prepare_lines']" position="replace">
+						<field colspan="4" name="prepare_lines" nolabel="1" widget="one2many_list">
+                                <form>
+                                    <field name="no"/>
+                                    <field name="product_id"/>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom"/>
+                                    <field name="name" colspan="4"/>
+                                    <field name="detail" colspan="4"/>
+                                    <field name="prodlot_id" colspan="4" nolabel="1" widget="one2many_list">
+                                        <tree string="Detail Batch" editable="buttom">
+                                            <field name="name" domain="[('product_id','=',parent.product_id)]" on_change="product_batch(name,qty)"/>
+                                            <field name="desc" on_change="product_batch(name,qty)"/>
+                                            <field name="exp_date" on_change="product_batch(name,qty)"/>
+                                            <field name="stock_available" on_change="product_batch(name,qty)"/>
+                                            <field name="qty"/>
+                                        </tree>        
+                                    </field>
+                                </form>
+                                <tree string="">
+                                    <field name="no"/>
+                                    <field colspan="4" name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom"/>
+                                    <field name="product_packaging"/>
+                                    <field name="prodlot_id"/>
+                                </tree>
+                            </field>
+					</xpath>
 			 </field>
 		</record>
 
