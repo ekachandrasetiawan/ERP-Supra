@@ -77,7 +77,9 @@ class Sale_order(osv.osv):
 
 		m  = self.pool.get('ir.model.data')
 		id_group = m.get_object(cr, uid, 'base', 'group_admin_support').id
-		user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+		id_group_regional = m.get_object(cr, uid, 'sbm_inherit', 'group_sales_admin_regional').id
+
+		user_group = self.pool.get('res.groups').browse(cr, uid, [id_group,id_group_regional])
 
 		id_group_ho = m.get_object(cr, uid, 'sbm_order_handler', 'group_admin_ho').id
 		user_group_ho = self.pool.get('res.groups').browse(cr, uid, id_group_ho)
