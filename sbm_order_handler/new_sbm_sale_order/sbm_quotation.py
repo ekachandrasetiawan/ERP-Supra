@@ -1054,7 +1054,11 @@ class sale_order_invoice(osv.osv):
 
 					inv_line_desc += "Consist of:"
 					for material in order_line.material_lines:
-						material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty)) +""+str(material.uom.name)+")"+str(material.desc)
+						try:
+
+							material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty)) +""+str(material.uom.name)+")"+str(material.desc)
+						except UnicodeError:
+							material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty))+str(material.desc)
 
 						inv_line_desc += "\n"+material_desc
 				else:
