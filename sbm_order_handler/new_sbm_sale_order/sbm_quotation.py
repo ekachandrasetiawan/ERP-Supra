@@ -598,7 +598,7 @@ class sale_order_material_line(osv.osv):
 		'uom':fields.many2one("product.uom",required=True,string="uom"),
 		'picking_location':fields.many2one('stock.location',required=True),
 		'is_loaded_from_change':fields.boolean('Load From Change ?'),
-		'sale_order_id': fields.related('sale_order_line_id','order_id', type='many2one', relation='sale.order'),
+		'sale_order_id': fields.related('sale_order_line_id','order_id', type='many2one', relation='sale.order', store=True),
 		'status': fields.related('sale_order_line_id','state', type='char', relation='sale.order'),
 	}
 
