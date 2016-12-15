@@ -95,5 +95,29 @@
            		</field>
            </field>
         </record>
+
+		<record id="seq_purchase_requisition_sales" model="ir.sequence.type">
+			<field name="name">Purchase Requisition Sales</field>
+			<field name="code">pembelian.barang.sales</field>
+		</record>
+
+		<record id="seq_purchase_requisition_sales_request" model="ir.sequence">
+			<field name="name">Purchase Requisition Sales</field>
+			<field name="code">pembelian.barang.sales</field>
+			<field name="prefix">/</field>
+			<field name="padding">4</field>
+		</record>
+
+		<record id="seq_purchase_requisition_internal" model="ir.sequence.type">
+			<field name="name">Purchase Requisition Internal</field>
+			<field name="code">pembelian.barang.internal</field>
+		</record>
+
+		<record id="seq_purchase_requisition_internal_request" model="ir.sequence">
+			<field name="name">Purchase Requisition Internal</field>
+			<field name="code">pembelian.barang.internal</field>
+			<field name="prefix">/</field>
+			<field name="padding">4</field>
+		</record>
 	</data>
 </openerp>

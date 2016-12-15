@@ -15,6 +15,18 @@ class purchase_requisition(osv.osv):
 		'proc_type':fields.selection([('sales','Sales Order/Project/Work Order'),('internal','Internal/Consumable')],'Proc Type',required=True),
 	}
 
+	def submit(self,cr,uid,ids,context={}):
+		val = self.browse(cr, uid, ids)[0]
+
+		context.update(action_state='submit')
+		
+		if val.proc_type == 'sales':
+			sequence = 'SBM/PB/S/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.sales')
+		else:
+			sequence = 'SBM/PB/I/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.internal')
+
+		return self.write(cr,uid,ids,{'state':'confirm','name':sequence},context=context)
+
 purchase_requisition()
 
 class create_pb_material_line(osv.osv_memory):
