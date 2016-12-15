@@ -6,11 +6,35 @@ from openerp import pooler
 from openerp.osv.orm import browse_record, browse_null
 from openerp.tools.translate import _
 
+
+class purchase_requisition(osv.osv):
+	_inherit = 'pembelian.barang'
+	_columns={
+		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=False),
+		'department_id':fields.many2one('hr.department','Department',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
+		'proc_type':fields.selection([('sales','Sales Order/Project/Work Order'),('internal','Internal/Consumable')],'Proc Type',required=True),
+	}
+
+	def submit(self,cr,uid,ids,context={}):
+		val = self.browse(cr, uid, ids)[0]
+
+		context.update(action_state='submit')
+		
+		if val.proc_type == 'sales':
+			sequence = 'SBM/PB/S/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.sales')
+		else:
+			sequence = 'SBM/PB/I/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.internal')
+
+		return self.write(cr,uid,ids,{'state':'confirm','name':sequence},context=context)
+
+purchase_requisition()
+
 class create_pb_material_line(osv.osv_memory):
 	_name = "create.pb.material.line"
 	_description = "Create PB Sale Order Material Line"
 	_columns = {
-		'name':fields.char(string='Name'),
+		'name':fields.char(string='Sale Order'),
+		'client_order_ref':fields.char(string='Customer Reference'),
 		'detail_ids':fields.one2many('create.pb.detail.material.line','detail_id', 'Detail ID'),
 	}
 
@@ -24,6 +48,7 @@ class create_pb_material_line(osv.osv_memory):
 		res = super(create_pb_material_line, self).default_get(cr, uid, fields, context=context)
 		
 		so_name = ''
+		po_no = ''
 		linesData = []
 		if active_ids:
 			if context.get('active_model','') == 'sale.order.material.line' and len(context['active_ids']) > 0:
@@ -36,10 +61,11 @@ class create_pb_material_line(osv.osv_memory):
 
 				for y in set(so_id):
 					line =self.pool.get('sale.order').browse(cr,uid,y)
-
 					so_name += str(line.name + ',')
+					po_no += str(line.client_order_ref + ',')
 
 			res.update(name=so_name[:-1])
+			res.update(client_order_ref=po_no[:-1])
 			res.update(detail_ids=linesData)
 
 		return res
@@ -76,13 +102,14 @@ class create_pb_material_line(osv.osv_memory):
 			duedate = time.strftime('%Y-%m-%d')
 		pb_id = pb_obj.create(cr, uid, {
 								'name': '/',
+								'spk_no':val.client_order_ref,
 								'tanggal':time.strftime('%Y-%m-%d'),
+								'proc_type':'sales',
 								'duedate':duedate,
 								'employee_id':employee.id,
 								'department_id':employee.department_id.id,
 								'ref_pb':val.name,
-								'source_location_request_id':12,
-								'destination_location_request_id':67
+								'source_location_request_id':12
 							})
 
 		for line in val.detail_ids:

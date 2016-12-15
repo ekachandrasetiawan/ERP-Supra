@@ -776,7 +776,7 @@
 												<field name="sequence" />
 												<field name="product_no_cus" />
 												<field name="product_id" on_change="onchange_product_quotation(product_id,product_uom_qty,product_uom)" domain="[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')]" />
-												<field name="name" />
+												<field name="name" readonly="1"/>
 												<!-- <field name="product_uom_qty" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom)" /> -->
 												  <label for="product_uom_qty"/>
 											<div>
