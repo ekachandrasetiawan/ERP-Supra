@@ -37,6 +37,17 @@ class purchase_requisition(osv.osv):
 
 purchase_requisition()
 
+class detail_pb(osv.osv):
+	_inherit = 'detail.pb'
+
+	def onchange_material_line(self, cr, uid, ids, line_id, context=None):
+		material_line =self.pool.get('sale.order.material.line').browse(cr,uid,line_id)
+
+		return {'value':{'sale_line_ids':material_line.sale_order_line_id.id}}
+
+detail_pb()
+
+
 class create_pb_material_line(osv.osv_memory):
 	_name = "create.pb.material.line"
 	_description = "Create PB Sale Order Material Line"
@@ -80,9 +91,10 @@ class create_pb_material_line(osv.osv_memory):
 
 	def _load_so_line(self, cr, uid, line):
 		so_item = {
-			'product_id'		: line.product_id.id,
-			'qty'				: line.qty,
-			'uom'				: line.uom.id,
+			'product_id'					: line.product_id.id,
+			'qty'							: line.qty,
+			'uom'							: line.uom.id,
+			'sale_order_material_line_id'	: line.id,
 		}
 
 		return so_item
@@ -127,7 +139,10 @@ class create_pb_material_line(osv.osv_memory):
 										 'jumlah_diminta':line.qty,
 										 'satuan':line.uom.id,
 										 'keterangan':line.notes,
-										 'detail_pb_id':pb_id
+										 'detail_pb_id':pb_id,
+										 'sale_line_ids':line.sale_order_material_line_id.sale_order_line_id.id,
+										 'sale_order_material_line_id':line.sale_order_material_line_id.id,
+										 'customer_id':line.sale_order_material_line_id.sale_order_id.partner_id.id,
 										 })
 
 		pool_data=self.pool.get("ir.model.data")
@@ -157,6 +172,47 @@ class create_pb_detail_material_line(osv.osv_memory):
 		'qty':fields.float(string='Qty', required=True),
 		'uom':fields.many2one('product.uom','UOM'),
 		'notes':fields.text(string='Notes', required=False),
+		'sale_order_material_line_id':fields.many2one('sale.order.material.line'),
 	}
 		
 create_pb_detail_material_line()
+
+
+class sale_order_material_line(osv.osv):
+	_inherit = 'sale.order.material.line'
+
+
+	def name_get(self, cr, uid, ids, context=None):
+		if not ids:
+			return []
+		reads = self.read(cr, uid, ids, ['product_id','sale_order_id'], context=context)
+		res = []
+		for record in reads:
+			name = '[' + record['sale_order_id'][1] + '] ' + record['product_id'][1]
+			res.append((record['id'],name ))
+		return res
+
+	def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
+		if not args:
+			args = []
+		if name:
+			ids = self.search(cr, user, [('product_id','=',name)]+ args, limit=limit, context=context)
+			if not ids:
+				ids = self.search(cr, user, [('product_id','=',name)]+ args, limit=limit, context=context)
+			if not ids:
+				ids = set()
+				ids.update(self.search(cr, user, args + [('product_id',operator,name)], limit=limit, context=context))
+				if not limit or len(ids) < limit:
+					ids.update(self.search(cr, user, args + [('sale_order_id',operator,name)], limit=(limit and (limit-len(ids)) or False) , context=context))
+				ids = list(ids)
+			if not ids:
+				ptrn = re.compile('(\[(.*?)\])')
+				res = ptrn.search(name)
+				if res:
+					ids = self.search(cr, user, [('product_id','=', res.group(2))] + args, limit=limit, context=context)
+		else:
+			ids = self.search(cr, user, args, limit=limit, context=context)
+		result = self.name_get(cr, user, ids, context=context)
+		return result
+		
+sale_order_material_line()
