@@ -26,11 +26,52 @@
 			<field name="res_model">sale.order.material.line</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
+			<field name="domain">[('product_id.type','!=','service')]</field> 
 			<field name="view_id" ref='sale_order_material_line_tree_view'/>
 		</record>
 
-
 		<menuitem parent="base.menu_sales" id="sale.menu_sale_order_material_line" action="action_sale_order_material_line" sequence="5" string="Sale Order Material Line"/>
+
+  		<record id="view_sale_order_material_line" model="ir.ui.view">
+            <field name="name">Sale Order Material Line</field>
+            <field name="model">create.pb.material.line</field>
+            <field name="arch" type="xml">
+               <form string="Create Purchase Requisition From Sale Order Material Line" version="7.0">
+               	 	<sheet>
+						<group col="4" colspan="4">
+		            	 	<field name="name" readonly="1"/>
+			            </group>
+		            	<notebook colspan="4">
+					    	<page string="Product Detail">
+			                    <field name="detail_ids" nolabel="1" colspan="4" string="Detail Product">
+			                    	<tree string="Product" editable="bottom">
+			                          	<field name="product_id" readonly="1"/>
+			                          	<field name="qty"/>
+			                          	<field name="uom" readonly="1"/>
+			                          	<field name="notes"/>
+			                        </tree>
+			                    </field>
+			                </page>
+			            </notebook>
+		            </sheet>
+                    <footer>
+                        <button name="create_pb" string="Create Purchase Requisition" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+		<act_window name="Create Purchase Requisition With Selected Product"
+            res_model="create.pb.material.line"
+            src_model="sale.order.material.line"
+            view_mode="form"
+            target="new"
+            multi="True"
+            key2="client_action_multi"
+            id="action_create_pb_sale_material_line"
+            groups="sbm_order_handler.group_admin_ho,base.group_admin_support"/>
 
 	</data>
 </openerp>
