@@ -11,6 +11,7 @@ class purchase_requisition(osv.osv):
 	_inherit = 'pembelian.barang'
 	_columns={
 		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=False),
+		'department_id':fields.many2one('hr.department','Department',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'proc_type':fields.selection([('sales','Sales Order/Project/Work Order'),('internal','Internal/Consumable')],'Proc Type',required=True),
 	}
 
