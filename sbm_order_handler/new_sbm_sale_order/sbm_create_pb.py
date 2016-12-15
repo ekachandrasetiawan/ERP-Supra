@@ -20,11 +20,19 @@ class purchase_requisition(osv.osv):
 
 		context.update(action_state='submit')
 		
-		if val.proc_type == 'sales':
-			sequence = 'SBM/PB/S/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.sales')
+		if val.name == '/':
+			if val.proc_type == 'sales':
+				sequence = 'SBM/PB/S/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.sales')
+			else:
+				sequence = 'SBM/PB/I/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.internal')
 		else:
-			sequence = 'SBM/PB/I/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.internal')
+			if val.proc_type == 'sales' and val.name[7] <> 'S':
+				sequence = 'SBM/PB/S/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.sales')
 
+			elif val.proc_type == 'internal' and val.name[7] <> 'I':
+				sequence = 'SBM/PB/I/' + time.strftime('%y') + self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang.internal')
+			else:
+				sequence = val.name
 		return self.write(cr,uid,ids,{'state':'confirm','name':sequence},context=context)
 
 purchase_requisition()
