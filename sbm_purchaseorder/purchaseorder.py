@@ -49,12 +49,16 @@ class Purchase_Order_Sbm(osv.osv):
 	}
 	
 	def create(self, cr, uid, vals, context=None):
-		
+				
 		if vals['jenis'] == 'loc-petty':
-			vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.petty')
+			name_seq = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.petty')
 		else:
-			vals['name']=int(time.time())
+			if vals['name'] <> '/':
+				name_seq = vals['name']
+			else:
+				name_seq=int(time.time())
 
+		vals['name'] = name_seq
 		return super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
 
 	def print_po_out(self,cr,uid,ids,context=None):
