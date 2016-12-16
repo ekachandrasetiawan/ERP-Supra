@@ -590,7 +590,19 @@ class sale_order_material_line(osv.osv):
 	_name = 'sale.order.material.line'
 	_description = 'Sale order material line'
 	_order = "no asc"
-	
+
+	def _count_procured_qty(self,cr,uid,ids,name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('detail.pb').search(cr,uid,[('sale_order_material_line_id', '=' ,item.id)])
+			hasil= 0
+			for data in self.pool.get('detail.pb').browse(cr,uid,move):
+				if data.state <> 'cancel':
+					hasil += data.jumlah_diminta
+
+			res[item.id] = hasil
+		return res
+
 	_columns = {
 		'no':fields.integer('No'),
 		'sale_order_line_id':fields.many2one('sale.order.line',string="Sale Order Line", onupdate="CASCADE", ondelete="CASCADE"),
@@ -601,6 +613,7 @@ class sale_order_material_line(osv.osv):
 		'picking_location':fields.many2one('stock.location',required=True),
 		'is_loaded_from_change':fields.boolean('Load From Change ?'),
 		'sale_order_id': fields.related('sale_order_line_id','order_id', type='many2one', relation='sale.order', store=True),
+		'procured_qty':fields.function(_count_procured_qty, string="Procured Qty", store=False),
 		'status': fields.related('sale_order_line_id','state', type='char', relation='sale.order'),
 	}
 
