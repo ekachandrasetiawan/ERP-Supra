@@ -850,6 +850,30 @@ class SBM_Work_Order(osv.osv):
 			},
 		}
 
+	def action_create_pb(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_order_handler', 'view_create_pb_work_order')
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'view_create_pb_work_order',
+			'res_model': 'create.pb.work.order',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
 SBM_Work_Order()
 
 
@@ -884,6 +908,18 @@ class SBM_Work_Order_Output(osv.osv):
 	}
 
 	_rec_name = 'item_id'
+
+
+	def name_get(self, cr, uid, ids, context=None):
+		if not ids:
+			return []
+		reads = self.read(cr, uid, ids, ['item_id'], context=context)
+		res = []
+		for record in reads:
+			name = record['item_id'][1]
+
+			res.append((record['id'],name ))
+		return res
 
 	def default_get(self, cr, uid, fields, context=None):
 		if context is None:
@@ -929,8 +965,22 @@ class SBM_Work_Order_Output_Raw_Material(osv.osv):
 		'uom_id':fields.many2one('product.uom', required=True, string='UOM'),
 		'customer_material':fields.boolean(string='Customer Materials'),
 		'adhoc_material_id':fields.many2one('sbm.adhoc.order.request.output.material', string='Adhoc Materials', required=False),
+		'regular_requisition_item_id':fields.many2one('detail.pb', string='Requisition Item'),
 	}
 
+	_rec_name = 'item_id'
+
+
+	def name_get(self, cr, uid, ids, context=None):
+		if not ids:
+			return []
+		reads = self.read(cr, uid, ids, ['item_id'], context=context)
+		res = []
+		for record in reads:
+			name = record['item_id'][1]
+
+			res.append((record['id'],name ))
+		return res
 
 	def change_item(self, cr, uid, ids, item, context={}):
 		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
@@ -949,6 +999,151 @@ class SBM_Work_Order_Line_Files(osv.osv):
 	}
 
 SBM_Work_Order_Line_Files()
+
+
+class create_pb_work_order(osv.osv_memory):
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: 
+			context = {}
+
+		active_ids = context['active_ids']
+		active_model = context.get('active_model')
+		wo_no =''
+		res = super(create_pb_work_order, self).default_get(cr, uid, fields, context=context)
+		for x in context['active_ids']:
+			data =self.pool.get('sbm.work.order').browse(cr,uid,x)
+
+			wo_no = data.request_no
+
+		linesData = []
+		if active_ids:
+			res.update(name=active_ids)
+			res.update(wo_no=wo_no)
+		return res
+
+
+	def request_purchase_requisition(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		pb_obj = self.pool.get('pembelian.barang')
+		pb_detail_obj = self.pool.get('detail.pb')
+		work_order_obj = self.pool.get('sbm.work.order')
+		wo_material = self.pool.get('sbm.work.order.output.raw.material')
+
+		work_order = work_order_obj.browse(cr, uid, val.name.id, context=None)
+
+		if context is None:
+			context = {}
+
+		empl=self.pool.get('hr.employee').search(cr,uid,[('user_id', '=' ,uid)])
+		employee=self.pool.get('hr.employee').browse(cr,uid,empl)[0]
+
+		if not employee.id:
+			raise osv.except_osv(('Information..!!'), ('User Tidak di Daftarkan di Employee ..'))
+
+		ref_pb = ''
+		if work_order.sale_order_id:
+			ref_pb += ' SO :' + work_order.sale_order_id.name
+
+		if work_order.request_no:
+			ref_pb += ' WO :' + work_order.request_no
+
+		pb_id = pb_obj.create(cr, uid, {
+								'name': '/',
+								'spk_no':work_order.wo_no,
+								'tanggal':time.strftime('%Y-%m-%d'),
+								'proc_type':'sales',
+								'duedate':work_order.due_date,
+								'employee_id':employee.id,
+								'department_id':employee.department_id.id,
+								'ref_pb':ref_pb,
+								'source_location_request_id':work_order.location_id.id
+							})
+
+		for line in val.detail_ids:
+			if line.work_order_output_raw_material_id:
+				pb_detail_obj.create(cr, uid, {
+											 'name':line.work_order_output_raw_material_id.item_id.id,
+											 'part_no':line.work_order_output_raw_material_id.item_id.default_code,
+											 'jumlah_diminta':line.qty,
+											 'satuan':line.work_order_output_raw_material_id.item_id.uom_id.id,
+											 'detail_pb_id':pb_id,
+											 'customer_id':work_order.customer_id.id,
+											 'wo_item_output_id':line.sbm_work_order_output_id.id,
+											 'wo_item_output_material_id':line.work_order_output_raw_material_id.id,
+											 })
+			elif line.product_id:
+				pb_detail_obj.create(cr, uid, {
+											 'name':line.product_id.id,
+											 'part_no':line.product_id.default_code,
+											 'jumlah_diminta':line.qty,
+											 'satuan':line.product_id.uom_id.id,
+											 'detail_pb_id':pb_id,
+											 'customer_id':work_order.customer_id.id,
+											 'wo_item_output_id':line.sbm_work_order_output_id.id,
+											 })
+
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_purchase', "view_pb_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'pembelian.barang.view.pb.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'pembelian.barang'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = pb_id
+		return action
+	
+	_name = "create.pb.work.order"
+	_description = "Create PB From Work Oder"
+	_columns = {
+		'name':fields.many2one('sbm.work.order',string='Request No'),
+		'wo_no':fields.char(string='Request No'),
+		'detail_ids':fields.one2many('create.pb.detail.work.order','detail_id', 'Detail ID'),
+	}
+
+	_rec_name = 'name';
+
+create_pb_work_order()
+
+
+class create_pb_detail_work_order(osv.osv_memory):
+	_name = "create.pb.detail.work.order"
+	_description = "Create PB Detail Work Oder"
+	_columns = {
+		'detail_id':fields.many2one('create.pb.work.order', required=False,readonly=True),
+		'from_output':fields.boolean('From Output'),
+		'sbm_work_order_output_id':fields.many2one('sbm.work.order.output','Work Order Output'),
+		'work_order_output_raw_material_id':fields.many2one('sbm.work.order.output.raw.material',string='Product Output',required=False),
+		'product_id':fields.many2one('product.product',string='Product', required=False),
+		'qty':fields.float(string='Qty', required=True),
+		'uom':fields.many2one('product.uom','UOM', readonly=True),
+	}
+
+	def onchange_work_order_output_id(self, cr, uid, ids, output_id, context=None):
+		if output_id:
+			cek=self.pool.get('sbm.work.order.output.raw.material').search(cr,uid,[('work_order_output_id', '=' ,output_id)])
+			hasil=self.pool.get('sbm.work.order.output.raw.material').browse(cr,uid,cek)
+			product =[x.id for x in hasil]
+			return {'domain': {'work_order_output_raw_material_id': [('id','in',tuple(product))]}}
+
+	def change_raw_material(self, cr, uid, ids, from_output, sbm_work_order_output_id, work_order_output_raw_material_id, context=None):
+		if from_output == True:
+			hasil = self.pool.get('sbm.work.order.output.raw.material').browse(cr,uid,work_order_output_raw_material_id)
+		return {'value':{'qty':hasil.qty,'uom':hasil.uom_id.id}}
+
+	def product_change(self, cr, uid, ids, product_id, context=None):
+		if product_id:
+			product = self.pool.get('product.product').browse(cr,uid,product_id)
+		return {'value':{'uom':product.uom_id.id}}
+
+create_pb_detail_work_order()
+
 
 
 class Sale_order(osv.osv):	
@@ -974,3 +1169,13 @@ class order_preparation(osv.osv):
 
 
 order_preparation()
+
+
+class detail_pb(osv.osv):
+	_inherit="detail.pb"
+	_columns={
+		'wo_item_output_id':fields.many2one('sbm.work.order.output', string="For Supply WO Output"),
+		'wo_item_output_material_id':fields.many2one('sbm.work.order.output.raw.material', string="For Supply WO Raw Material"),
+	}
+
+detail_pb()

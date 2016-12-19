@@ -18,33 +18,35 @@
 			</tree>
 		</field>
 	</record>
-    <record model="ir.ui.view" id="sbm_work_order_form">
+	<record model="ir.ui.view" id="sbm_work_order_form">
 	<field name="name">sbm.work.order.form</field>
 	<field name="model">sbm.work.order</field>
-    <field name="type">form</field>
-    <field name="arch" type="xml">
-    	<form string="WORK ORDER" version="7.0">
-	        <header>
-	        	<button name="work_order_confirm" states="draft" string="Confirm" type="object"  icon="gtk-apply" confirm="Are you sure to Confirm Work Order" groups="sbm_order_handler.group_admin_ho,base.group_admin_support"/>
+	<field name="type">form</field>
+	<field name="arch" type="xml">
+		<form string="WORK ORDER" version="7.0">
+			<header>
+				<button name="work_order_confirm" states="draft" string="Confirm" type="object"  icon="gtk-apply" confirm="Are you sure to Confirm Work Order" groups="sbm_order_handler.group_admin_ho,base.group_admin_support"/>
 
-	        	<button name="work_order_set_draft" states="confirmed,approved" string="Set To Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Work Order" groups="sbm_order_handler.group_admin_spv"/>
+				<button name="work_order_set_draft" states="confirmed,approved" string="Set To Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Work Order" groups="sbm_order_handler.group_admin_spv"/>
 
-	        	<button name="work_order_check" states="confirmed" string="Check WO" type="object"  icon="terp-check" confirm="Are you sure to Check Work Order" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv"/>
+				<button name="work_order_check" states="confirmed" string="Check WO" type="object"  icon="terp-check" confirm="Are you sure to Check Work Order" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv"/>
 
-	        	<button name="work_order_cancel" states="confirmed,approved,approved2,approved3" string="Cancel" type="object"  icon="STOCK_CANCEL" confirm="Are you sure to Cancel Work Order" groups="sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager"/>
+				<button name="work_order_cancel" states="confirmed,approved,approved2,approved3" string="Cancel" type="object"  icon="STOCK_CANCEL" confirm="Are you sure to Cancel Work Order" groups="sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager"/>
 
-	        	<button name="work_order_validate" states="approved" string="Validate WO" type="object"  icon="terp-check" confirm="Are you sure to Validate Work Order" groups="sbm_order_handler.group_admin_spv"/>
+				<button name="work_order_validate" states="approved" string="Validate WO" type="object"  icon="terp-check" confirm="Are you sure to Validate Work Order" groups="sbm_order_handler.group_admin_spv"/>
 
-	        	<button name="work_order_process" states="approved2" string="Process WO" type="object"  icon="STOCK_SAVE" confirm="Are you sure to Process Work Order" groups="sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop"/>
+				<button name="work_order_process" states="approved2" string="Process WO" type="object"  icon="STOCK_SAVE" confirm="Are you sure to Process Work Order" groups="sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop"/>
 
-	        	<button name="work_order_finish" states="approved3" string="Finish WO" type="object"  icon="STOCK_SAVE_AS" confirm="Are you sure to Finish Work Order" groups="sbm_order_handler.group_admin_workshop"/>
+				<button name="work_order_finish" states="approved3" string="Finish WO" type="object"  icon="STOCK_SAVE_AS" confirm="Are you sure to Finish Work Order" groups="sbm_order_handler.group_admin_workshop"/>
 
-	        	<button name="print_work_order" type="object" states="approved,approved2,approved3,done" string="Print Work Order" icon="gtk-dnd-multiple"/>
+				<button name="print_work_order" type="object" states="approved,approved2,approved3,done" string="Print Work Order" icon="gtk-dnd-multiple"/>
 
-	            <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,approved3,done"/>
-        	</header>
-        	<sheet>
-        		<div class="oe_title">
+				<button name="action_create_pb" states="approved3" string="Create Purchase Requisition" type="object" icon="STOCK_NEW"/>
+
+				<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,approved,approved2,approved3,done"/>
+			</header>
+			<sheet>
+				<div class="oe_title">
 					<h1>
 						<label string="WORK ORDER"/>
 						<separator string=""/>
@@ -58,42 +60,42 @@
 						</group>
 					</h3>
 				</div>
-        			<group col="4" colspan="4">
-        				<group colspan="2">
-        					<field name="source_type" attrs="{'required':True}"/>
-		            	 	<field name="sale_order_id" attrs="{'invisible':[('source_type', 'in', ['adhoc','internal_request'])], 'required':[('source_type', 'in', ['project','sale_order'])]}" on_change="sale_order_change(sale_order_id)"/>
-		            	 	<field name="adhoc_order_request_id" attrs="{'invisible':[('source_type', '!=', 'adhoc')], 'required':[('source_type', '=', 'adhoc')]}" on_change="adhoc_order_change(adhoc_order_request_id)"/>
-		            	 	<field name="customer_id" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
-		            	 	<field name="customer_site_id" domain="[('parent_id', '=', customer_id)]" attrs="{'invisible':[('work_location', '!=', 'customersite')], 'required':[('work_location', '=', 'customersite')]}" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
-		            	 	
-        				</group>
-        				<group colspan="2">
-		            		<field name="work_location" attrs="{'required':True}"/>
-		            		<field name="location_id" attrs="{'required':True}"/>
-		            	 	<field name="due_date"  attrs="{'required':True}"/>
-		            	 	<field name="order_date"/>
-	            		</group>
-	            	</group>
-	            <notebook colspan="4">
-	            	<page string="Product Outputs">
-	            		<field name="outputs" context="{'type':source_type}">
-	            			<tree>
-	            				<field name="item_id"/>
-	            				<field name="desc"/>
-	            				<field name="qty"/>
-	            				<field name="uom_id"/>
-	            			</tree>
-	            			<form string="Output Picking">
-	            				<field name="item_id" colspan="4" on_change="change_item(item_id)"/>
-	            				<field name="desc" colspan="4"/>
-	            				<field name="qty"/>
-	            				<field name="uom_id"/>
-	            				<field name="attachment_ids" colspan="4"  widget="many2many_binary" string="Attach a file"/>
-	            				<field name="wo_type" invisible="1"/>
-	            				<separator string="Detail Sales Order" colspan="4"/>
+					<group col="4" colspan="4">
+						<group colspan="2">
+							<field name="source_type" attrs="{'required':True}"/>
+							<field name="sale_order_id" attrs="{'invisible':[('source_type', 'in', ['adhoc','internal_request'])], 'required':[('source_type', 'in', ['project','sale_order'])]}" on_change="sale_order_change(sale_order_id)"/>
+							<field name="adhoc_order_request_id" attrs="{'invisible':[('source_type', '!=', 'adhoc')], 'required':[('source_type', '=', 'adhoc')]}" on_change="adhoc_order_change(adhoc_order_request_id)"/>
+							<field name="customer_id" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
+							<field name="customer_site_id" domain="[('parent_id', '=', customer_id)]" attrs="{'invisible':[('work_location', '!=', 'customersite')], 'required':[('work_location', '=', 'customersite')]}" context="{'search_default_customer':1, 'show_address': 1}" options="{&quot;always_reload&quot;: True}"/>
+							
+						</group>
+						<group colspan="2">
+							<field name="work_location" attrs="{'required':True}"/>
+							<field name="location_id" attrs="{'required':True}"/>
+							<field name="due_date"  attrs="{'required':True}"/>
+							<field name="order_date"/>
+						</group>
+					</group>
+				<notebook colspan="4">
+					<page string="Product Outputs">
+						<field name="outputs" context="{'type':source_type}">
+							<tree>
+								<field name="item_id"/>
+								<field name="desc"/>
+								<field name="qty"/>
+								<field name="uom_id"/>
+							</tree>
+							<form string="Output Picking">
+								<field name="item_id" colspan="4" on_change="change_item(item_id)"/>
+								<field name="desc" colspan="4"/>
+								<field name="qty"/>
+								<field name="uom_id"/>
+								<field name="attachment_ids" colspan="4"  widget="many2many_binary" string="Attach a file"/>
+								<field name="wo_type" invisible="1"/>
+								<separator string="Detail Sales Order" colspan="4"/>
 								<field name="sale_line_id" domain="[('order_id', '=', parent.sale_order_id)]" on_change="check_item_material(sale_line_id)" attrs="{'required':[('wo_type', '=', 'sale_order')]}"/>
 								<field name="sale_order_material_line" domain="[('sale_order_line_id', '=', sale_line_id)]" attrs="{'required':[('wo_type', '=', 'sale_order')]}"/>
-		            				<notebook colspan="4">
+									<notebook colspan="4">
 											<page string="Consumed Materials">
 												<field name="raw_materials" colspan="4" nolabel="1" widget="one2many_list">
 													<tree string="Material Lines" editable="buttom">
@@ -116,26 +118,26 @@
 												</field>
 											</page>
 									</notebook>
-	            			</form>
-	            		</field>
-	            	</page>
-	            	<page string="Others">
-	            		<group>
-	            			<field name="repeat_ref_id"/>
-	            			<field name="approver"/>
-	            			<field name="approver2"/>
-	            			<field name="approver3"/>
-	            		</group>
-	            	</page>
-	            </notebook>
-	            <field name="notes" placeholder="Notes" />
-        	</sheet>
-        	<div class="oe_chatter">
+							</form>
+						</field>
+					</page>
+					<page string="Others">
+						<group>
+							<field name="repeat_ref_id"/>
+							<field name="approver"/>
+							<field name="approver2"/>
+							<field name="approver3"/>
+						</group>
+					</page>
+				</notebook>
+				<field name="notes" placeholder="Notes" />
+			</sheet>
+			<div class="oe_chatter">
 				<field name="message_follower_ids" widget="mail_followers"/>
 				<field name="message_ids" widget="mail_thread"/>
 			</div>
-    	</form>
-    </field>
+		</form>
+	</field>
 	</record>
 	<record model="ir.actions.act_window" id="action_sbm_work_order">
 		<field name="name">SBM Work Order</field>
@@ -203,6 +205,50 @@
 	<menuitem id="sbm_work_order" name="Work Order" parent="base.menu_base_partner" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop,base.group_admin_support"/>
 
 	<menuitem name="SBM Work Order" parent="sbm_work_order" id="sbm_work_order_request" action="action_sbm_work_order" sequence="2" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_workshop,base.group_admin_support"/>
+
+	<!-- Wizard Create Purchase Requisition -->
+	<record id="view_create_pb_work_order" model="ir.ui.view">
+	<field name="name">Create Purchase Requisition</field>
+	<field name="model">create.pb.work.order</field>
+	<field name="arch" type="xml">
+	   <form string="Create Purchase Requisition Work Oder" version="7.0">
+			<sheet>
+				<group col="4" colspan="4">
+					<field name="wo_no" readonly="1"/>
+					<field name="name" invisible="1"/>
+				</group>
+				<notebook colspan="4">
+					<page string="Product Detail">
+						<field name="detail_ids" nolabel="1" colspan="4" string="Detail Product">
+							<tree string="Product" editable="bottom">
+								<field name="from_output"/>
+								<field name="sbm_work_order_output_id" domain="[('work_order_id','=',parent.name)]" on_change="onchange_work_order_output_id(sbm_work_order_output_id)"/>
+								<field name="work_order_output_raw_material_id" attrs="{'invisible':[('from_output', '=', False)]}" on_change="change_raw_material(from_output, sbm_work_order_output_id, work_order_output_raw_material_id)"/>
+								<field name="product_id" attrs="{'invisible':[('from_output', '=', True)]}" on_change="product_change(product_id)"/>
+								<field name="qty"/>
+								<field name="uom"/>
+							</tree>
+						</field>
+					</page>
+				</notebook>
+			</sheet>
+			<footer>
+				<button name="request_purchase_requisition" string="Create Purchase Requisition" type="object" class="oe_highlight" />
+				or
+				<button string="Cancel" class="oe_link" special="cancel" />
+			</footer>
+		</form>
+	</field>
+	</record>
+
+    <record id="wizard_purchase_requisition_action" model="ir.actions.act_window">
+        <field name="name">Action Create Purhcase Requisition From Work Oder</field>
+        <field name="res_model">create.pb.work.order</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_create_pb_work_order"/>
+    </record>
 
 </data>
 </openerp>
