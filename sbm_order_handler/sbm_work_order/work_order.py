@@ -1118,9 +1118,9 @@ class create_pb_detail_work_order(osv.osv_memory):
 	_columns = {
 		'detail_id':fields.many2one('create.pb.work.order', required=False,readonly=True),
 		'from_output':fields.boolean('From Output'),
-		'sbm_work_order_output_id':fields.many2one('sbm.work.order.output','Work Order Output'),
-		'work_order_output_raw_material_id':fields.many2one('sbm.work.order.output.raw.material',string='Product Output',required=False),
-		'product_id':fields.many2one('product.product',string='Product', required=False),
+		'sbm_work_order_output_id':fields.many2one('sbm.work.order.output','Item Output'),
+		'work_order_output_raw_material_id':fields.many2one('sbm.work.order.output.raw.material',string='Output Row Material',required=False),
+		'product_id':fields.many2one('product.product',string='Product'),
 		'qty':fields.float(string='Qty', required=True),
 		'uom':fields.many2one('product.uom','UOM', readonly=True),
 	}

@@ -222,9 +222,9 @@
 						<field name="detail_ids" nolabel="1" colspan="4" string="Detail Product">
 							<tree string="Product" editable="bottom">
 								<field name="from_output"/>
-								<field name="sbm_work_order_output_id" domain="[('work_order_id','=',parent.name)]" on_change="onchange_work_order_output_id(sbm_work_order_output_id)"/>
-								<field name="work_order_output_raw_material_id" attrs="{'invisible':[('from_output', '=', False)]}" on_change="change_raw_material(from_output, sbm_work_order_output_id, work_order_output_raw_material_id)"/>
-								<field name="product_id" attrs="{'invisible':[('from_output', '=', True)]}" on_change="product_change(product_id)"/>
+								<field name="sbm_work_order_output_id" domain="[('work_order_id','=',parent.name)]" on_change="onchange_work_order_output_id(sbm_work_order_output_id)" required="1"/>
+								<field name="work_order_output_raw_material_id" attrs="{'invisible':[('from_output', '=', False)], 'required':[('from_output', '=', True)]}" on_change="change_raw_material(from_output, sbm_work_order_output_id, work_order_output_raw_material_id)"/>
+								<field name="product_id" attrs="{'invisible':[('from_output', '=', True)], 'required':[('from_output', '=', False)]}"  on_change="product_change(product_id)"/>
 								<field name="qty"/>
 								<field name="uom"/>
 							</tree>
