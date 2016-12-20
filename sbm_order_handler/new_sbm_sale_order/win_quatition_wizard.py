@@ -37,9 +37,29 @@ class win_quatition_wizard(osv.osv_memory):
 			},context=context)
 		# print datas.cancel_reason
 		quotation_obj = self.pool.get("sale.order")
-		quotation_obj.action_button_confirm(cr, uid, [context['active_id']], context)
+		# quotation_obj.action_button_confirm(cr, uid, [context['active_id']], context)
+
+		so_name = self.pool.get('ir.sequence').get(cr, uid, 'sale.order')
+		self.pool.get('sale.order').write(cr, uid, context['active_id'], {'name':so_name}, context=context)
+		wf_service = netsvc.LocalService("workflow")
+		wf_service.trg_validate(uid, 'sale.order', context['active_id'], 'quotation_sent', cr)
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sale', "view_order_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'sale.view_order_form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = res_id
+		action['res_model'] = 'sale.order'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = context['active_id']
+		return action
 		
-		return res
+		# return res
 
 
 

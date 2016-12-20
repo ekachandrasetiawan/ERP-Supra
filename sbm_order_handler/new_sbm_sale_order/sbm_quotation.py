@@ -87,16 +87,17 @@ class Sale_order(osv.osv):
 		status = False
 		
 		if user_group:
-			for x in user_group.users:
-				if uid == x.id:
-					status = True
+			for group in user_group:
+				for x in group.users:
+					if uid == x.id:
+						status = True
 
 		if user_group_ho:
 			for y in user_group_ho.users:
 				if uid == y.id:
 					status = True
-		if val.quotation_state == 'confirmed' and status == False:
-			raise osv.except_osv(('Warning..!!'), ('User Not Access Edit Quotation'))
+		if val.quotation_state == 'confirmed' and status == False and 'force_write' not in context:
+			raise osv.except_osv(('Warning..!!'), ('Maaf tidak diijinkan untuk mengedit Penawaran'))
 
 		return super(Sale_order, self).write(cr, uid, ids, vals, context=context)
 
@@ -216,6 +217,7 @@ class Sale_order(osv.osv):
 		if(self._check_before_save(cr,uid,vals.get('order_line'))):
 			sequence_no_quotation = self.pool.get('ir.sequence').get(cr, uid, 'quotation.sequence.type')
 			vals['quotation_no'] = sequence_no_quotation
+			vals['name'] = sequence_no_quotation
 			res = super(Sale_order, self).create(cr, uid, vals, context=context)
 		else:
 			raise osv.except_osv(_('Warning'),_('Order Line dan Material Line tidak boleh kosong'))
