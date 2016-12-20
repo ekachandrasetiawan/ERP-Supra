@@ -18,9 +18,7 @@ class win_quatition_wizard(osv.osv_memory):
 		'delivery_date':fields.date(string="Delivery Date"),
 	}
 
-	def confirm(self,cr,uid,ids,context={}):
-		print context,'context----'
-		res = {}
+	def rfqToWin(self,cr,uid,ids,context={}):
 		# browse() untuk mining data dari database browse(cr,uid,ids,context) ids bisa list bisa integer
 		datas = self.browse(cr, uid, ids[0], context=context)
 		print ids,"======================================",datas.date_order
@@ -35,6 +33,36 @@ class win_quatition_wizard(osv.osv_memory):
 			'delivery_date':datas.delivery_date,
 			'quotation_state':'win'
 			},context=context)
+
+	def confirmToConfirmedSaleOrder(self, cr, uid, ids, context={}):
+		res = {}
+		self.rfqToWin(cr,uid,ids,context)
+		quotation_obj = self.pool.get("sale.order")
+		quotation_obj.action_button_confirm(cr, uid, [context['active_id']], context)
+
+		so_name = self.pool.get('ir.sequence').get(cr, uid, 'sale.order')
+		self.pool.get('sale.order').write(cr, uid, context['active_id'], {'name':so_name}, context=context)
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sale', "view_order_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'sale.view_order_form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = res_id
+		action['res_model'] = 'sale.order'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = context['active_id']
+		return action
+
+
+	def confirm(self,cr,uid,ids,context={}):
+		print context,'context----'
+		res = {}
+		self.rfqToWin(cr, uid, ids, context=context)
 		# print datas.cancel_reason
 		quotation_obj = self.pool.get("sale.order")
 		# quotation_obj.action_button_confirm(cr, uid, [context['active_id']], context)

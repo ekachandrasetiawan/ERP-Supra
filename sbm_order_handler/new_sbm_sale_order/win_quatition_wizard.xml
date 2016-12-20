@@ -16,7 +16,9 @@
 							</group>
 						</sheet>
 						<footer>
-							<button name='confirm' context="{'force_write':True}" type='object' string='Confirm' confirm="Are you sure to Confirm WIN Document RFQ" />
+							<button name='confirmToConfirmedSaleOrder' context="{'force_write':True}" type='object' string='Confirm' confirm="Are you sure to Confirm WIN Document RFQ" groups="sbm_order_handler.group_admin_ho,base.group_admin_support,sbm_inherit.group_sales_admin_regional" />
+
+							<button name='confirm' context="{'force_write':True}" type='object' string='Confirm' confirm="Are you sure to Confirm WIN Document RFQ" groups="base.group_sales_supra" />
 						</footer>
 					</form>
 			</field>
