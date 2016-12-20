@@ -3,33 +3,33 @@
 	<data>
 		
 		<record id="wizard_order_preparation_form" model="ir.ui.view">
-            <field name="name">Wizard Order Preparation</field>
-            <field name="model">wizard.order.preparation</field>
-            <field name="arch" type="xml">
-                <form string="Order Preparation" version="7.0">
-                    <group>
-                        <field name="op_id" readonly="True"/>
-                    </group>
-                    <group>
-                        <field name="notes"/>
-                    </group>
-                    <footer>
-                        <button name="request_op_validate" string="Validate" type="object" class="oe_highlight"/>
-                        or
-                        <button string="Cancel" class="oe_link" special="cancel"/>
-                    </footer>
-                </form>
-            </field>
-        </record>
+			<field name="name">Wizard Order Preparation</field>
+			<field name="model">wizard.order.preparation</field>
+			<field name="arch" type="xml">
+				<form string="Order Preparation" version="7.0">
+					<group>
+						<field name="op_id" readonly="True"/>
+					</group>
+					<group>
+						<field name="notes"/>
+					</group>
+					<footer>
+						<button name="request_op_validate" string="Validate" type="object" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
 
-        <record id="wizard_order_preparation_action" model="ir.actions.act_window">
-            <field name="name">Action Order Preparation</field>
-            <field name="res_model">wizard.order.preparation</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="wizard_order_preparation_form"/>
-        </record>
+		<record id="wizard_order_preparation_action" model="ir.actions.act_window">
+			<field name="name">Action Order Preparation</field>
+			<field name="res_model">wizard.order.preparation</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="wizard_order_preparation_form"/>
+		</record>
 
 
 		<record id="order_preparation_form" model="ir.ui.view">
@@ -128,6 +128,37 @@
 							<attribute name="required">True</attribute>
 					</xpath>
 
+					<xpath expr="//field[@name='prepare_lines']" position="replace">
+						<field colspan="4" name="prepare_lines" nolabel="1" widget="one2many_list">
+								<form>
+									<field name="no"/>
+									<field name="product_id"/>
+									<field name="product_qty"/>
+									<field name="product_uom"/>
+									<field name="name" colspan="4"/>
+									<field name="detail" colspan="4"/>
+									<field name="prodlot_id" colspan="4" nolabel="1" widget="one2many_list">
+										<tree string="Detail Batch" editable="buttom">
+											<field name="name" domain="[('product_id','=',parent.product_id)]" on_change="product_batch(name,qty)"/>
+											<field name="desc" on_change="product_batch(name,qty)"/>
+											<field name="exp_date" on_change="product_batch(name,qty)"/>
+											<field name="stock_available" on_change="product_batch(name,qty)"/>
+											<field name="qty"/>
+										</tree>        
+									</field>
+								</form>
+								<tree string="">
+									<field name="no"/>
+									<field colspan="4" name="name"/>
+									<field name="product_id"/>
+									<field name="product_qty"/>
+									<field name="product_uom"/>
+									<field name="product_packaging"/>
+									<field name="prodlot_id"/>
+								</tree>
+							</field>
+					</xpath>
+
 					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form" position="inside">
 							<separator string="Detail Sales Order" colspan="4"/>
 							<field name="sale_line_id" domain="[('order_id', '=', parent.sale_id)]" on_change="check_item_material(sale_line_id)"/>
@@ -142,36 +173,7 @@
 						<button name="reload_sale_order" type="object" string="Reload Product" attrs="{'invisible':[('state','!=','draft')]}"/>
 					</xpath>
 
-					<xpath expr="//field[@name='prepare_lines']" position="replace">
-						<field colspan="4" name="prepare_lines" nolabel="1" widget="one2many_list">
-                                <form>
-                                    <field name="no"/>
-                                    <field name="product_id"/>
-                                    <field name="product_qty"/>
-                                    <field name="product_uom"/>
-                                    <field name="name" colspan="4"/>
-                                    <field name="detail" colspan="4"/>
-                                    <field name="prodlot_id" colspan="4" nolabel="1" widget="one2many_list">
-                                        <tree string="Detail Batch" editable="buttom">
-                                            <field name="name" domain="[('product_id','=',parent.product_id)]" on_change="product_batch(name,qty)"/>
-                                            <field name="desc" on_change="product_batch(name,qty)"/>
-                                            <field name="exp_date" on_change="product_batch(name,qty)"/>
-                                            <field name="stock_available" on_change="product_batch(name,qty)"/>
-                                            <field name="qty"/>
-                                        </tree>        
-                                    </field>
-                                </form>
-                                <tree string="">
-                                    <field name="no"/>
-                                    <field colspan="4" name="name"/>
-                                    <field name="product_id"/>
-                                    <field name="product_qty"/>
-                                    <field name="product_uom"/>
-                                    <field name="product_packaging"/>
-                                    <field name="prodlot_id"/>
-                                </tree>
-                            </field>
-					</xpath>
+					
 			 </field>
 		</record>
 
