@@ -1032,6 +1032,8 @@ class create_pb_work_order(osv.osv_memory):
 
 		work_order = work_order_obj.browse(cr, uid, val.name.id, context=None)
 
+		objname, location_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'stock_location_stock')
+
 		if context is None:
 			context = {}
 
@@ -1057,7 +1059,7 @@ class create_pb_work_order(osv.osv_memory):
 								'employee_id':employee.id,
 								'department_id':employee.department_id.id,
 								'ref_pb':ref_pb,
-								'source_location_request_id':work_order.location_id.id
+								'source_location_request_id':location_id
 							})
 
 		for line in val.detail_ids:
@@ -1071,6 +1073,8 @@ class create_pb_work_order(osv.osv_memory):
 											 'customer_id':work_order.customer_id.id,
 											 'wo_item_output_id':line.sbm_work_order_output_id.id,
 											 'wo_item_output_material_id':line.work_order_output_raw_material_id.id,
+											 'sale_line_ids':line.sbm_work_order_output_id.sale_line_id.id,
+											 'sale_order_material_line_id':line.sbm_work_order_output_id.sale_order_material_line.id,
 											 })
 			elif line.product_id:
 				pb_detail_obj.create(cr, uid, {
@@ -1081,6 +1085,7 @@ class create_pb_work_order(osv.osv_memory):
 											 'detail_pb_id':pb_id,
 											 'customer_id':work_order.customer_id.id,
 											 'wo_item_output_id':line.sbm_work_order_output_id.id,
+											 'sale_line_ids':line.sbm_work_order_output_id.sale_line_id.id,
 											 })
 
 
@@ -1170,6 +1175,31 @@ class order_preparation(osv.osv):
 
 order_preparation()
 
+class purchase_requisition(osv.osv):
+	_inherit = "pembelian.barang"
+	_description = "Pembelian Barang"
+
+	def confirm2(self,cr,uid,ids,context={}):
+		val = self.browse(cr, uid, ids)[0]
+
+		obj_wo = self.pool.get('sbm.work.order')
+		obj_wo_output = self.pool.get('sbm.work.order.output')
+		obj_wo_output_material = self.pool.get('sbm.work.order.output.raw.material')
+
+		for x in val.detail_pb_ids:
+			if x.wo_item_output_material_id.id == False:
+				obj_wo_output_material.create(cr, uid, {
+						 'work_order_output_id':x.wo_item_output_id.id,
+						 'item_id':x.name.id,
+						 'desc':'[' + x.name.default_code + ']' + x.name.name,
+						 'qty':x.jumlah_diminta,
+						 'uom_id':x.satuan.id,
+						 'regular_requisition_item_id':x.id,
+						 })
+		res = super(purchase_requisition, self).confirm2(cr, uid, ids, context=context)
+		return res
+
+purchase_requisition()
 
 class detail_pb(osv.osv):
 	_inherit="detail.pb"
