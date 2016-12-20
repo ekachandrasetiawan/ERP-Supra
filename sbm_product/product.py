@@ -13,6 +13,76 @@ class product_product(osv.osv):
 		'product_by_location': fields.one2many('stock.product.by.location','product_id'),
 	}
 
+	def name_get(self, cr, user, ids, context=None):
+		if context is None:
+			context = {}
+		if isinstance(ids, (int, long)):
+			ids = [ids]
+		if not len(ids):
+			return []
+		def _name_get(d):
+			name = d.get('name','')
+			code = d.get('default_code',False)
+			partner_code = d.get('partner_code','')
+			if code:
+				name = '[%s] %s' % (code, name)
+			if d.get('variants'):
+				name = name + ' - %s' % (d['variants'],)
+			return (d['id'], name)
+
+		partner_id = context.get('partner_id', False)
+
+		result = []
+		for product in self.browse(cr, user, ids, context=context):
+			sellers = filter(lambda x: x.name.id == partner_id, product.seller_ids)
+			if sellers:
+				for s in sellers:
+					mydict = {
+							  'id': product.id,
+							  'name': s.product_name or product.name,
+							  'default_code': s.product_code or product.default_code,
+							  'partner_code': s.partner_code or product.partner_code,
+							  'variants': product.variants
+							  }
+					result.append(_name_get(mydict))
+			else:
+				mydict = {
+						  'id': product.id,
+						  'name': product.name,
+						  'default_code': product.default_code,
+						  'partner_code': product.partner_code,
+						  'variants': product.variants
+						  }
+				result.append(_name_get(mydict))
+		return result
+
+	def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
+		if not args:
+			args = []
+		if name:
+			ids = self.search(cr, user, [('default_code','=',name)]+ args, limit=limit, context=context)
+			if not ids:
+				ids = self.search(cr, user, [('ean13','=',name)]+ args, limit=limit, context=context)
+			if not ids:
+				ids = self.search(cr, user, [('partner_code',operator,name)]+ args, limit=limit, context=context)
+			if not ids:
+				ids = set()
+				ids.update(self.search(cr, user, args + [('default_code',operator,name)], limit=limit, context=context))
+				if not limit or len(ids) < limit:
+					ids.update(self.search(cr, user, args + [('name',operator,name)], limit=(limit and (limit-len(ids)) or False) , context=context))
+				if not limit or len(ids) < limit:
+					ids.update(self.search(cr, user, args + [('partner_code',operator,name)], limit=(limit and (limit-len(ids)) or False) , context=context))
+				ids = list(ids)
+			if not ids:
+				ptrn = re.compile('(\[(.*?)\])')
+				res = ptrn.search(name)
+				if res:
+					ids = self.search(cr, user, [('default_code','=', res.group(2))] + args, limit=limit, context=context)
+		else:
+			ids = self.search(cr, user, args, limit=limit, context=context)
+		result = self.name_get(cr, user, ids, context=context)
+		return result
+		
 	def disable_product(self,cr,uid,ids,context={}):
 		return self.write(cr,uid,ids,{'active':False},context=context)
 
