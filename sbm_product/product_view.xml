@@ -74,7 +74,6 @@
 			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
 		</record>
 
-
 		<record id="product_search_form_view_filter" model="ir.ui.view">
             <field name="name">product.product.select</field>
             <field name="model">product.product</field>
