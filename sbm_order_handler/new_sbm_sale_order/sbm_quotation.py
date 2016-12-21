@@ -1100,7 +1100,11 @@ class sale_order_invoice(osv.osv):
 
 							material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty)) +""+str(material.uom.name)+")"+str(material.desc)
 						except UnicodeError:
-							material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty))+str(material.desc)
+							_logger.error((type(material.desc),"------------------------------------------------------------------------"))
+							try:
+								material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty))+str(material.desc)
+							except UnicodeError:
+								material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty))
 
 						inv_line_desc += "\n"+material_desc
 				else:
@@ -1178,5 +1182,5 @@ class detail_pb(osv.osv):
 	_inherit="detail.pb"
 	_columns={
 		
-		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=True),
+		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=False),
 	}

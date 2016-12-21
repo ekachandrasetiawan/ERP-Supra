@@ -1193,7 +1193,7 @@ class purchase_requisition(osv.osv):
 		obj_wo_output_material = self.pool.get('sbm.work.order.output.raw.material')
 
 		for x in val.detail_pb_ids:
-			if x.wo_item_output_material_id.id == False:
+			if x.wo_item_output_material_id.id == False and False:
 				obj_wo_output_material.create(cr, uid, {
 						 'work_order_output_id':x.wo_item_output_id.id,
 						 'item_id':x.name.id,

@@ -184,7 +184,7 @@ class delivery_note(osv.osv):
 		'prepare_id':{}
 	}
 
-	def validasi_stock(self, cr, uid, ids, context=None):
+	def validasi_stock(self, cr, uid, ids, context={}):
 		val = self.browse(cr, uid, ids)[0]
 		loc = 12
 		if not val.special:
