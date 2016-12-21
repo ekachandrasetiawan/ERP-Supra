@@ -1064,6 +1064,9 @@ class create_pb_work_order(osv.osv_memory):
 
 		for line in val.detail_ids:
 			if line.work_order_output_raw_material_id:
+				if line.qty == 0:
+					raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product [' + line.work_order_output_raw_material_id.default_code + ']'))
+
 				pb_detail_obj.create(cr, uid, {
 											 'name':line.work_order_output_raw_material_id.item_id.id,
 											 'part_no':line.work_order_output_raw_material_id.item_id.default_code,
@@ -1077,6 +1080,9 @@ class create_pb_work_order(osv.osv_memory):
 											 'sale_order_material_line_id':line.sbm_work_order_output_id.sale_order_material_line.id,
 											 })
 			elif line.product_id:
+				if line.qty == 0:
+					raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product [' + line.product_id.default_code + ']'))
+
 				pb_detail_obj.create(cr, uid, {
 											 'name':line.product_id.id,
 											 'part_no':line.product_id.default_code,

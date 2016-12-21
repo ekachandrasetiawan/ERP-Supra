@@ -67,18 +67,29 @@
 		</record>
 
 		<record model="res.groups" id="base.group_sale_manager">
-			
 			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
 		</record>
 
 		<record model="res.groups" id="sbm_inherit.group_customer_invoice_admin_supervisor">
-			
 			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
 		</record>
 
-		
+		<record id="product_search_form_view_filter" model="ir.ui.view">
+            <field name="name">product.product.select</field>
+            <field name="model">product.product</field>
+            <field name="type">search</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+                <search string="Product">
+                    <group string="Filter">
+                    	<field name="name" position="replace">
+                    		<field name="name" string="Full Search Product" filter_domain="['|', ('name','ilike', self), '|', ('default_code', 'ilike', self),('partner_code', 'ilike', self)]"/>
+                    	</field>
+                    </group>
+					<newline/>
+				</search>
+            </field>
+        </record> 
 
-
-		
 	</data>
 </openerp>

@@ -23,11 +23,10 @@
                         <field name="partner_id" select="1" string="Customer"/>
                         <field name="state" select="1" string="State"/>
                     </group>
-
+                    
 					<newline/>
 				</search>
             </field>
         </record> 
-
     </data>
 </openerp>
