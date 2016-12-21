@@ -130,7 +130,7 @@
                             <field name="satuan" on_change="onchange_product_new(name, satuan)" string="UOM"/>
                             <field name="keterangan" colspan="4"/>
                             
-                            <field name="sale_order_material_line_id" colspan="2" string="Material Line" on_change="onchange_material_line(sale_order_material_line_id)" required="True"/>
+                            <field name="sale_order_material_line_id" colspan="2" string="Material Line" on_change="onchange_material_line(sale_order_material_line_id)"/>
                             <field name="sale_line_ids" colspan="2" string="Sales Line"/>
                             
                             <field name="qty_available"/>
