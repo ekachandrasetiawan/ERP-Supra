@@ -353,6 +353,27 @@
 	        <field name="groups" eval="[(4, ref('sbm_purchase.group_jobdesc_position_dept_chief'))]"/>
 	    </record>
 
+        <record model="ir.rule" id="ir_purchase_requisition_group_admin_support">
+	        <field name="name">Purchase Requisiton Group Admin Support</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="domain_force">['|', ('employee_id.user_id','=',user.id),('message_follower_ids','in',[user.partner_id.id])]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('base.group_admin_support'))]"/>
+	    </record>
+
+        <record model="ir.rule" id="ir_purchase_requisition_group_sales_admin_regional">
+	        <field name="name">Purchase Requisiton Group Admin Regional</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="domain_force">['|', ('employee_id.user_id','=',user.id),('message_follower_ids','in',[user.partner_id.id])]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('sbm_inherit.group_sales_admin_regional'))]"/>
+	    </record>
 
 	    <record model="ir.rule" id="ir_purchase_requisition_manager_rule">
 	        <field name="name">Purchase Requisiton Manager</field>
@@ -374,6 +395,17 @@
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
 	        <field name="groups" eval="[(4, ref('purchase.group_purchase_manager'))]"/>
+	    </record>
+
+	    <record model="ir.rule" id="ir_purchase_requisition_purchase_users_all_rule">
+	        <field name="name">All Purchase Requisition Purchase Users</field>
+	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
+	        <field name="domain_force">[(1,'=',1)]</field>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="True"/>
+	        <field name="perm_unlink" eval="True"/>
+	        <field name="perm_create" eval="True"/>
+	        <field name="groups" eval="[(4, ref('purchase.group_purchase_user'))]"/>
 	    </record>
 
 
