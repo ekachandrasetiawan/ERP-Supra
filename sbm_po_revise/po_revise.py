@@ -82,6 +82,26 @@ class Purchase_Order_Line(osv.osv):
 		else:
 			return [('id', '=', 0)]
 
+	def _func_following_po(self, cr, uid, ids, field_name, arg, context):
+		
+		return True
+
+	def _func_search_following_po(self, cr, uid, obj, name, criterion, context):
+		match_ids = []
+		value = criterion
+		users = self.pool.get('res.users').browse(cr, uid, uid, context=None)
+		#  Saerch Mail Followers
+		cr.execute("SELECT res_id FROM mail_followers WHERE res_model = 'purchase.order' AND partner_id = %s", [users.partner_id.id])
+		po_followers = map(lambda res_id: res_id[0], cr.fetchall())
+
+		for x in po_followers:
+			po_line = self.pool.get('purchase.order.line').search(cr, uid, [('order_id', '=', x)], context=None)
+			lines = self.pool.get('purchase.order.line').browse(cr, uid, po_line, context=None)
+			
+			for row in lines:
+				match_ids.append(row.id)
+		
+		return [('id', 'in', match_ids)]
 
 	_columns = {
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
@@ -89,6 +109,7 @@ class Purchase_Order_Line(osv.osv):
 		'qty_status_uncomplete':fields.function(_func_qty_status_uncomplete, fnct_search=_func_search_qty_status_uncomplete, string='Qty Status Uncomplete',type='boolean'),
 		'qty_status_overdue':fields.function(_func_qty_status_overdue, fnct_search=_func_search_qty_status_overdue, string='Qty Status Overdue',type='boolean'),
 		'qty_status_todo':fields.function(_func_qty_status_todo, fnct_search=_func_search_qty_status_todo, string='Qty Status Todo',type='boolean'),
+		'following_po':fields.function(_func_following_po, fnct_search=_func_search_following_po, string='Following PO',type='boolean'),
 	}
 
 Purchase_Order_Line()
