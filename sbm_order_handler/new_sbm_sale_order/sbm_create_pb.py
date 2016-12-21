@@ -185,11 +185,17 @@ class sale_order_material_line(osv.osv):
 	def name_get(self, cr, uid, ids, context=None):
 		if not ids:
 			return []
-		reads = self.read(cr, uid, ids, ['product_id','sale_order_id'], context=context)
+		reads = self.read(cr, uid, ids, ['sale_order_id','product_id'], context=context)
 		res = []
+
 		for record in reads:
-			name = '[' + record['sale_order_id'][1] + '] ' + record['product_id'][1]
-			res.append((record['id'],name ))
+			if record['sale_order_id']:
+				name = '[' + record['sale_order_id'][1] + '] ' + record['product_id'][1]
+				res.append((record['id'],name ))
+			else:
+				material_line = self.pool.get('sale.order.material.line').browse(cr, uid, record['id'], context=None)
+				name = '[' + str(material_line.sale_order_id.name) + '] '+record['product_id'][1]
+				res.append((record['id'],name ))
 		return res
 
 	def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):

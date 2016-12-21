@@ -605,6 +605,29 @@ class sale_order_material_line(osv.osv):
 			res[item.id] = hasil
 		return res
 
+	def _getSaleOrder(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		
+		for item in self.browse(cr,uid,ids,context=context):
+			sale_order = self.pool.get('sale.order').browse(cr, uid, item.id, context=None)
+			for x in sale_order.order_line:
+				for y in x.material_lines:
+					if y.sale_order_id == False:
+						res_id = y.id
+					else:
+						res_id = y.id
+
+					res[res_id] = item.id
+		return res
+		
+
+
+	def _get_cek_so_state(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			result[line.id] = True
+		return result.keys()
+
 	_columns = {
 		'no':fields.integer('No'),
 		'sale_order_line_id':fields.many2one('sale.order.line',string="Sale Order Line", onupdate="CASCADE", ondelete="CASCADE"),
@@ -614,7 +637,11 @@ class sale_order_material_line(osv.osv):
 		'uom':fields.many2one("product.uom",required=True,string="uom"),
 		'picking_location':fields.many2one('stock.location',required=True),
 		'is_loaded_from_change':fields.boolean('Load From Change ?'),
-		'sale_order_id': fields.related('sale_order_line_id','order_id', type='many2one', relation='sale.order', store=True),
+		'sale_order_id': fields.function(_getSaleOrder, method=True, string="Request No",type="many2one", relation='sale.order',
+			store={
+				'sale.order.material.line': (lambda self, cr, uid, ids, c={}: ids, ['sale_order_id','sale_order_line_id'], 20),
+				'sale.order': (_get_cek_so_state, ['state','quotation_state'], 20),
+			}),
 		'procured_qty':fields.function(_count_procured_qty, string="Procured Qty", store=False),
 		'status': fields.related('sale_order_line_id','state', type='char', relation='sale.order'),
 	}
