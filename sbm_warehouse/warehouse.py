@@ -31,7 +31,7 @@ class stock_picking(osv.osv):
 
 		count = len(partial_datas) - 1
 
-		data_table = '<table border="1"><tr><th>No</th><th>Product</th><th>Qty</th><th>UOM</th></tr>'
+		data_table = '<table border="1"><tr><th>No</th><th>Product</th><th>Qty Receive</th> <th>Qty Purchase</th><th>UOM</th></tr>'
 		no = 1
 		count_line = 0
 		count_partial_data = 0
@@ -47,7 +47,7 @@ class stock_picking(osv.osv):
 					product = self.pool.get('product.product').browse(cr,uid,partial_data.get('product_id'),context=None)
 					uom = self.pool.get('product.uom').browse(cr,uid,partial_data.get('product_uom'),context=None)
 
-					data_table += '<tr><th>'+ str(no) +'</th><th>' + '['+ product.default_code +']' + product.name +'</th><th>'+ str(product_qty) +'</th><th>'+ uom.name +'</th></tr>'
+					data_table += '<tr><th>'+ str(no) +'</th><th>' + '['+ product.default_code +']' + product.name +'</th><th>'+ str(product_qty) +'</th><th>'+ str(move.purchase_line_id.product_qty) +'</th><th>'+ uom.name +'</th></tr>'
 					count_line += 1
 					no += 1
 
@@ -71,7 +71,7 @@ class stock_picking(osv.osv):
 			  <body>
 				<p>
 					Dear %s!<br/><br/>
-					%s Telah Receive Product di Purchase Oder No <b> %s </b> Dengan Cara %s <br/>
+					%s Telah Receive Product di Purchase Oder No <b> %s </b> Dengan Cara <font color="red"> <b> %s </b> </font> <br/>
 					<br/>
 					<b>Detail :</b><br/>
 					%s
