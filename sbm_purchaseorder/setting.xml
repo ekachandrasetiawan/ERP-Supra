@@ -345,7 +345,7 @@
         <record model="ir.rule" id="ir_purchase_requisition_chief_rule">
 	        <field name="name">Purchase Requisiton Chief</field>
 	        <field name="model_id" ref="sbm_purchase.model_pembelian_barang"/>
-	        <field name="domain_force">[('employee_id.user_id','=',user.id)]</field>
+	        <field name="domain_force">['|', ('employee_id.user_id','=',user.id),('message_follower_ids','in',[user.partner_id.id])]</field>
 	        <field name="perm_read" eval="True"/>
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
