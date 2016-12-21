@@ -147,13 +147,14 @@ class stock_move(osv.osv):
 		if todo:
 			self.action_confirm(cr, uid, todo, context=context)
 			todo = []
-		date_done = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+		date_done = time.strftime('%Y-%m-%d %H:%M:%S')
 
 		for move in self.browse(cr, uid, ids, context=context):
 			if move.state in ['done','cancel']:
 				continue
 			move_ids.append(move.id)
-			date_done = move.picking_id.date_done
+			if move.picking_id.date_done:
+				date_done = move.picking_id.date_done
 
 			if move.picking_id:
 				picking_ids.append(move.picking_id.id)
