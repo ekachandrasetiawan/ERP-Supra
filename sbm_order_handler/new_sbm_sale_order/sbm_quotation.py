@@ -1181,6 +1181,5 @@ class WizardCreatePbLineSo(osv.osv_memory):
 class detail_pb(osv.osv):
 	_inherit="detail.pb"
 	_columns={
-		
 		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=False),
 	}

@@ -13,6 +13,7 @@ class purchase_requisition(osv.osv):
 		'destination_location_request_id': fields.many2one('stock.location', "Destination Location", required=False),
 		'department_id':fields.many2one('hr.department','Department',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'proc_type':fields.selection([('sales','Sales Order/Project/Work Order'),('internal','Internal/Consumable')],'Proc Type',required=True),
+		'source_model':fields.selection([('sales','Sales Order'),('work_order','Work Order')],'Source Model',required=False,states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 	}
 
 	def submit(self,cr,uid,ids,context={}):

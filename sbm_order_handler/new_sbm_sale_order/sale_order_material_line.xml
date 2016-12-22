@@ -100,12 +100,12 @@
 					<field name="department_id" required="True"/>
 				</field>
 				<field name="name" position="replace">
-					<field name="name" colspan="2"/>
+					<field name="name" colspan="4"/>
 				</field>
 				<field name="name" position="after">
 					<field name="proc_type" colspan="2"/>
+					<field name="source_model" colspan="2"/>
 				</field>
-				
 
 				<field name="detail_pb_ids" position="replace">
 					<field name="detail_pb_ids" nolabel="1" colspan="4">
