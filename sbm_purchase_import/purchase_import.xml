@@ -135,6 +135,25 @@
                                 </group>
                             </group>
                         </page>
+                         <page string='Other Info' >
+                            <separator string="Your ref"/>
+                            <field name="yourref" colspan="4" nolabel="1"/>
+                            <separator string="Note"/>
+                            <field name="note" colspan="4" nolabel="1"/>
+                            <separator string="Delivery"/>
+                            <field name="delivery" colspan="4" nolabel="1"/>
+                            <separator string="Other"/>
+                            <field name="other" colspan="4" nolabel="1"/>
+                        </page>
+                         <page string='Setting' >
+                            <separator string="Total Price"/>
+                            <field name="total_price" colspan="4" nolabel="1"/>
+                            <separator string="Shipment To"/>
+                            <field name="shipment_to" colspan="4" nolabel="1"/>
+
+                            <separator string="After Shipment"/>
+                            <field name="after_shipment" colspan="4" nolabel="1"/>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
