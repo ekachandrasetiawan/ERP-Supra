@@ -424,7 +424,9 @@ class hr_attendance_machine(osv.osv):
 			searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.'+str(work_addr))], context=context)
 			if searchConfSite:
 				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
-				urlTo = str(browseConf.value)+"attendance/first-and-last-scan&site="+str(work_addr)
+				url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
+
+				urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
 		
 		return {
 			'type'	: 'ir.actions.client',
@@ -454,10 +456,13 @@ class hr_attendance_machine(osv.osv):
 
 		if work_addr:
 
+
 			searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.'+str(work_addr))], context=context)
 			if searchConfSite:
 				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
-				urlTo = str(browseConf.value)+"attendance/first-and-last-scan-site&site="+str(work_addr)
+				
+				url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
+				urlTo = url+"attendance/first-and-last-scan-site&site="+str(work_addr)
 		
 		return {
 			'type'	: 'ir.actions.client',
