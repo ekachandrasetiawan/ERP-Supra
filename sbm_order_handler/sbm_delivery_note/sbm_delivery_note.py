@@ -190,19 +190,18 @@ class delivery_note(osv.osv):
 		if not val.special:
 			if val.prepare_id.location_id.id:
 				loc = val.prepare_id.location_id.id
-			context['location'] = loc
-			context['location_id'] = loc
+
 			for line in val.note_lines:
 				for x in line.note_lines_material:
 					if not context:
 						context = {}
-					
-
+						
+					context['location'] = loc
+					context['location_id'] = loc
 					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 
 					if x.prodlot_id:
 						prodlot = self.pool.get('stock.production.lot').browse(cr, uid, x.prodlot_id.id, context=context)
-						_logger.error((context, "--------------------", x.prodlot_id))
 						if x.qty > prodlot.stock_available:
 							mm = ' ' + prodlot.name + ' '
 							stock = ' ' + str(prodlot.stock_available) + ' '

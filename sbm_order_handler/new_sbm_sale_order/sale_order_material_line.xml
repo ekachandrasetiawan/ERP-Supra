@@ -108,7 +108,7 @@
 				</field>
 
 				<field name="detail_pb_ids" position="replace">
-					<field name="detail_pb_ids" nolabel="1" colspan="4">
+					<field name="detail_pb_ids" nolabel="1" colspan="4" context="{'default_source_model' : source_model}">
                         <tree string="Product Detail" editable="none">
                           	<field name="name" on_change="setvariants(name)"/>
                           	<field name="variants"/>
@@ -130,7 +130,7 @@
                             <field name="satuan" on_change="onchange_product_new(name, satuan)" string="UOM"/>
                             <field name="keterangan" colspan="4"/>
                             
-                            <field name="sale_order_material_line_id" colspan="2" string="Material Line" on_change="onchange_material_line(sale_order_material_line_id)"/>
+                            <field name="sale_order_material_line_id" colspan="2" string="Material Line" on_change="onchange_material_line(sale_order_material_line_id)" attrs="{'required':[('source_model', '=', 'sales')]}"/>
                             <field name="sale_line_ids" colspan="2" string="Sales Line"/>
                             
                             <field name="qty_available"/>
@@ -138,7 +138,7 @@
                             <field name="processed_items"/>
 							<field name="delivery_items"/>
                             <field name="state"/>
-                            
+                            <field name="source_model" invisible="1"/>
                         </form>
                     </field>
 				</field>
