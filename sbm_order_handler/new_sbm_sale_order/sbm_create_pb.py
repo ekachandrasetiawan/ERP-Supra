@@ -41,6 +41,10 @@ purchase_requisition()
 class detail_pb(osv.osv):
 	_inherit = 'detail.pb'
 
+	_columns={
+		'source_model':fields.selection([('sales','Sales Order'),('work_order','Work Order')],'Source Model'),
+	}
+
 	def onchange_material_line(self, cr, uid, ids, line_id, context=None):
 		material_line =self.pool.get('sale.order.material.line').browse(cr,uid,line_id)
 
