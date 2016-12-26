@@ -59,7 +59,7 @@ class stock_picking(osv.osv):
 
 		ip_address = '192.168.9.26:10001'
 		db = 'LIVE_2014'
-		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order&menu_id=330&action=394'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.purchase_id.id)+'&view_type=form&model=purchase.order&menu_id=330&action=394'
 
 		p  = self.pool.get('ir.model.data')
 		warehouse_user = p.get_object(cr, uid, 'stock', 'group_stock_user').id
