@@ -662,10 +662,12 @@ class sale_order_material_line(osv.osv):
 		res={}
 		if product_id:
 			product= self.pool.get('product.product').browse(cr,uid,product_id,{})
-			res["value"]={
-			"uom":product.uom_id.id
-			}
 
+			if product.bom_ids:
+				return {'warning': {"title": _("Perhatian"), "message": _("Product Set Harus Dijabarkan")}, 'value': {'product_id': False}}
+
+			product= self.pool.get('product.product').browse(cr,uid,product_id,{})
+			res["value"]={"uom":product.uom_id.id}
 		return res
 
 	def onchange_product_uom(self,cr,uid,ids,product_id,uom,context={}):
@@ -1181,6 +1183,5 @@ class WizardCreatePbLineSo(osv.osv_memory):
 class detail_pb(osv.osv):
 	_inherit="detail.pb"
 	_columns={
-		
 		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=False),
 	}

@@ -106,7 +106,7 @@
          </record>
 
 
-            <!-- Start Membuat Seq No -->
+        <!-- Start Membuat Seq No -->
         <record id="seq_pop_new" model="ir.sequence.type">
           <field name="name">Purchase Order Petty</field>
           <field name="code">purchase.order.petty</field>
@@ -118,6 +118,28 @@
           <field name="padding">5</field>
         </record>
 
+
+        <record model="ir.actions.act_window" id="action_procurement_regular_requisition">
+          <field name="name">Purchase Requisition</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="res_model">pembelian.barang</field>
+          <field name="view_type">form</field>
+          <field name="view_mode">tree,form</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_product_list_regular_requisition">
+        <field name="name">Product List Regular Requisition</field>
+        <field name="res_model">detail.pb</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        </record>
+
+
+        <menuitem name="Procurement" id="sales_report_procurement" parent="base.menu_base_partner" groups="base.group_admin_support,sbm_inherit.group_sales_admin_regional" sequence="2"/>
+
+        <menuitem name="Regular Requisition" id="procurement_regular_requisition" parent="sales_report_procurement" groups="base.group_admin_support,sbm_inherit.group_sales_admin_regional" action="action_procurement_regular_requisition"/>
+
+        <menuitem name="Product List Regular Requisition" id="procurement_product_list_regular_requisition" parent="sales_report_procurement" groups="base.group_admin_support,sbm_inherit.group_sales_admin_regional" action="action_product_list_regular_requisition"/>
 
      </data>
 </openerp>
