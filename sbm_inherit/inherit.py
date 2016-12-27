@@ -2057,6 +2057,7 @@ class InternalMove(osv.osv):
 	_columns={
 		'name':fields.char('I.M No.'),
 		'internal_move_request_id':fields.many2one('internal.move.request',string='Request No',required=True,domain=[('state','in',['confirmed','onprocess'])]),
+		'return_ref_id':fields.many2one('internal.move', string="Return Ref"),
 		'due_date_transfer':fields.date('Transfer Due Date'),
 		'due_date_preparation':fields.date('Preparation Due Date'),
 		'date_prepared':fields.date('Prepared Date'),
@@ -2125,6 +2126,28 @@ class InternalMove(osv.osv):
 			},
 		}
 
+	def action_create_return(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_inherit', 'wizard_create_return_internal_move')
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_create_return_internal_move',
+			'res_model': 'create.return.internal.move',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
 class InternalMoveLine(osv.osv):
 	_description = "Internal Move Line"
 	def create(self,cr,uid,vals,context={}):
@@ -2170,6 +2193,7 @@ class InternalMoveLine(osv.osv):
 		'desc':fields.text('Description'),
 		'internal_move_id':fields.many2one('internal.move',string='Internal Move No',required=True,ondelete="CASCADE",onupdate="CASCADE"),
 		'internal_move_request_line_id':fields.many2one('internal.move.request.line',string="IM Req Line"),
+		'return_line_ref_id':fields.many2one('internal.move.line',string="Return Line Ref"),
 		'product_id':fields.many2one('product.product',string="Product",required=True),
 		'uom_id':fields.many2one('product.uom',string="UOM",required=True),
 		'qty':fields.float('Qty',required=True),
@@ -2708,3 +2732,148 @@ class account_bank_statement(osv.osv):
 		return res
 
 account_bank_statement()
+
+
+
+class create_return_internal_move(osv.osv_memory):
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: 
+			context = {}
+
+		active_ids = context['active_ids']
+		active_model = context.get('active_model')
+
+		res = super(create_return_internal_move, self).default_get(cr, uid, fields, context=context)
+		
+		linesData = []
+		if active_ids:
+			move_data =self.pool.get('internal.move').browse(cr,uid,active_ids)[0]
+			if context.get('active_model','') == 'internal.move':
+				for x in move_data.lines:
+					data =self.pool.get('internal.move.line').browse(cr,uid,x.id)
+					linesData += [self._load_so_line(cr, uid, data)]
+
+			res.update(name=move_data.name)
+			res.update(internal_move_id=move_data.id)
+
+			# Dikarnakan Proses Return Maka Source & Destination di sesuaikan
+			res.update(source=move_data.destination.id)
+			res.update(destination=move_data.source.id)
+
+			res.update(lines=linesData)
+
+		return res
+
+	def _load_so_line(self, cr, uid, line):
+		move_line_item = {
+			'product_id'			: line.product_id.id,
+			'desc'					: line.desc,
+			'qty'					: line.qty,
+			'uom_id'				: line.uom_id.id,
+			'source'				: line.source.id,
+			'destination'			: line.destination.id,
+			'internal_move_line_id'	: line.id,
+		}
+
+		return move_line_item
+
+
+	def request_create_return_internal_move(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids)[0]
+
+		obj_im = self.pool.get("internal.move")
+		obj_im_line = self.pool.get("internal.move.line")
+	
+		lines = []
+
+		for line in val.lines:
+			data = obj_im_line.browse(cr, uid, line.internal_move_line_id.id)
+			material_line = []
+			for x in data.detail_ids:
+				material_line.append((0,0,{
+						'no':x.no,
+						'name':x.name,
+						'desc':x.desc,
+						'internal_move_line_id':line.id,
+						'product_id':x.product_id.id,
+						'uom_id':x.uom_id.id,
+						'qty':line.qty,
+						'stock_move_id':x.stock_move_id.id,
+						'stock_prod_lot_id':x.stock_prod_lot_id.id,
+						'type':x.type,
+					}))
+
+			lines.append((0,0,{
+					'internal_move_request_line_id':data.internal_move_request_line_id.id,
+					'return_line_ref_id':data.id,
+					'name':data.name,
+					'no':data.no,
+					'desc':data.desc,
+					'product_id':data.product_id.id,
+					'uom_id':data.uom_id.id,
+					'qty':line.qty,
+					'source':val.source.id,
+					'destination':val.destination.id,
+					'detail_ids':material_line,
+				}))
+
+		
+		im_id = obj_im.create(cr, uid, {
+										'name':'',
+										'internal_move_request_id':val.internal_move_id.internal_move_request_id.id,
+										'return_ref_id':val.internal_move_id.id,
+										'source':val.source.id,
+										'destination':val.destination.id,
+										'manual_pb_no':val.internal_move_id.manual_pb_no,
+										'ref_no':val.internal_move_id.ref_no,
+										'lines':lines,
+										'state':'draft'
+									   })
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_inherit', "internal_move_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'internal.move.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'internal.move'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = im_id
+		return action
+
+	_name = "create.return.internal.move"
+	_description = "Create Return Internal Move"
+	_columns = {
+		'name':fields.char(string='I.M No.'),
+		'internal_move_id':fields.many2one('internal.move',required=True,string="Internal Move ID"),
+		'source':fields.many2one('stock.location',required=True,string="Source Location"),
+		'destination':fields.many2one('stock.location',required=True,string="Destination Location"),
+		'lines':fields.one2many('create.return.internal.move.line','lines_id',string="Lines"),
+	}
+
+create_return_internal_move()
+
+
+class create_return_internal_move_line(osv.osv_memory):
+	_name="create.return.internal.move.line"
+	_description="Create Return Internal Move Line"
+	_columns={
+		'lines_id':fields.many2one('create.return.internal.move',string="Wizard",required=True,ondelete='CASCADE',onupdate='CASCADE'),
+		'name':fields.char('Name'),
+		'product_id':fields.many2one('product.product',string="Product",required=True),
+		'desc':fields.text('Description'),
+		'qty':fields.float('Qty',required=True),
+		'uom_id':fields.many2one('product.uom',string="UOM",required=True),
+		'source':fields.many2one('stock.location',required=False,string="Source Location"),
+		'destination':fields.many2one('stock.location',required=False,string="Destination Location"),
+		'internal_move_line_id':fields.many2one('internal.move.line',string="Internal Move Line"),
+	}
+
+	_rec_name = 'lines_id'
+
+create_return_internal_move_line()

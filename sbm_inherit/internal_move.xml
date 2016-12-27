@@ -325,12 +325,14 @@
 
 						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
 
+						<button name="action_create_return" states="transfered,done" string="Return Internal Move" type="object" icon="STOCK_REVERT_TO_SAVED" confirm="Are you sure to Create Return Internal Move"/>
 
 					</header>
 					<sheet>
 						<group>
 							<field name="name" readonly="True" />
 							<field name="internal_move_request_id" on_change="load_request(internal_move_request_id)" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="return_ref_id" attrs="{'invisible':[('return_ref_id', '=', False)]}"/>
 							<field name="due_date_preparation" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="due_date_transfer" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="date_prepared" readonly="True" />
@@ -490,6 +492,38 @@
 		<menuitem name="Internal Move Request" parent="sbm_inherit.mr_menu_ws" id="internal_move_req_ws_menu" action="action_internal_move_request" />
 		<menuitem name="Internal Move" parent="sbm_inherit.mr_menu_ws" id="internal_move_ws_menu" action="action_internal_move_confirmed" />
 
+
+
+		<record id="wizard_create_return_internal_move" model="ir.ui.view">
+		<field name="name">Create Return Internal Move</field>
+		<field name="model">create.return.internal.move</field>
+		<field name="arch" type="xml">
+			<form string="Create Return Internal Move" version="7.0">
+				<group>
+					<field name="name" readonly="True" />
+					<field name="internal_move_id" readonly="True" />
+					<field name="source" readonly="True" />
+					<field name="destination" readonly="True" />
+				</group>
+				<field name="lines">
+					<tree editable="bottom" string="Internal Move Lines">
+						<field name="product_id" readonly="True"/>
+						<field name="desc" readonly="True"/>
+						<field name="qty"/>
+						<field name="uom_id" readonly="True" />
+						<field name="source" readonly="True" />
+						<field name="destination" readonly="True" />
+						<field name="internal_move_line_id" readonly="True" />
+					</tree>
+				</field>
+				<footer>
+                    <button name="request_create_return_internal_move" string="Create Return Internal Move" type="object" class="oe_highlight"/>
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+			</form>
+		</field>
+	</record>
 
 
 	</data>
