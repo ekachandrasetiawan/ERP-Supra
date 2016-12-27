@@ -325,7 +325,7 @@
 
 						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
 
-						<button name="action_create_return" states="transfered,done" string="Return Internal Move" type="object" icon="STOCK_REVERT_TO_SAVED" confirm="Are you sure to Create Return Internal Move"/>
+						<button name="action_create_return" states="done" string="Return Internal Move" type="object" icon="STOCK_REVERT_TO_SAVED" confirm="Are you sure to Create Return Internal Move"/>
 
 					</header>
 					<sheet>
