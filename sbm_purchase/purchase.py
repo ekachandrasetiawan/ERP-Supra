@@ -550,7 +550,7 @@ class Set_PO(osv.osv):
 		else:
 			jenis = 'loc-petty'
 			seq =int(time.time())
-			
+		
 		sid = obj_purchase.create(cr, uid, {
 										'name':seq,
 										'date_order': time.strftime("%Y-%m-%d"),
@@ -568,7 +568,6 @@ class Set_PO(osv.osv):
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.name.supplier_taxes_id))
 			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
-			print "Callling PO Line Create----------------------"
 			obj_purchase_line.create(cr, uid, {
 										 'no':noline,
 										 'date_planned': time.strftime("%Y-%m-%d"),
@@ -587,7 +586,6 @@ class Set_PO(osv.osv):
 										 'taxes_id': [(6,0,taxes_ids)],
 										 })
 			noline=noline+1
-			print '===================TEST NO====================',noline
 
 		# purchase ==> Nama Module nya purchase_order_form ==> Nama Id Form nya
 		pool_data=self.pool.get("ir.model.data")
