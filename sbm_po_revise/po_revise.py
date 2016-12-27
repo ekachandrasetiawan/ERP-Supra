@@ -171,23 +171,46 @@ class Purchase_Order(osv.osv):
 		res = super(Purchase_Order, self).action_invoice_create(cr, uid, ids, context=None)
 		return res
 
+	def seq_purchase_order_no(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+		seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
+
+		po_no = seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
+
+		if val.jenis == 'impj':
+			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
+		elif val.jenis == 'imps':
+			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
+		else:
+			no = po_no
+
+		return no
+
 	def wkf_confirm_order(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		obj_po = self.pool.get('purchase.order')
-		x_name = val.name
+
+		#Call Seq No
+		if len(val.name) == 10 and val.jenis == 'loc':
+			seq_no  = self.seq_purchase_order_no(cr, uid, ids, context=None)
+			self.write(cr, uid, ids, {'name': seq_no})
+			
+
+		# name = x_name.replace(" ","")[:6]
+		# cek = obj_po.search(cr ,uid, [('name','ilike',name)])
+
+		# for x in obj_po.browse(cr ,uid, cek):
+		# 	for i in ids:
+		# 		if i <> x.id:
+		# 			if name == x.name[:6]:
+		# 				if not val.po_revision_id:
+		# 					raise osv.except_osv(
+		# 							_('Information'),
+		# 							_('Order Reference must be unique per Company!'))
 		
-		name = x_name.replace(" ","")[:6]
-		cek = obj_po.search(cr ,uid, [('name','ilike',name)])
-
-		for x in obj_po.browse(cr ,uid, cek):
-			for i in ids:
-				if i <> x.id:
-					if name == x.name[:6]:
-						if not val.po_revision_id:
-							raise osv.except_osv(
-									_('Information'),
-									_('Order Reference must be unique per Company!'))
-
+		
 		res = super(Purchase_Order, self).wkf_confirm_order(cr, uid, ids, context=None)
 		return True
 
