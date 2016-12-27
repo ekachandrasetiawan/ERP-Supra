@@ -9,6 +9,8 @@ from osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
+import re
+
 class win_quatition_wizard(osv.osv_memory):
 	_name ='wizard.win.quotation'
 	_columns ={
@@ -38,10 +40,13 @@ class win_quatition_wizard(osv.osv_memory):
 		res = {}
 		self.rfqToWin(cr,uid,ids,context)
 		quotation_obj = self.pool.get("sale.order")
+		data = quotation_obj.browse(cr,uid, context['active_id'], context=context)
+
 		quotation_obj.action_button_confirm(cr, uid, [context['active_id']], context)
 
-		so_name = self.pool.get('ir.sequence').get(cr, uid, 'sale.order')
-		self.pool.get('sale.order').write(cr, uid, context['active_id'], {'name':so_name}, context=context)
+		if not re.match(r'SO\/',data.name,re.M|re.I):
+			so_name = self.pool.get('ir.sequence').get(cr, uid, 'sale.order')
+			self.pool.get('sale.order').write(cr, uid, context['active_id'], {'name':so_name}, context=context)
 
 		pool_data=self.pool.get("ir.model.data")
 		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sale', "view_order_form")     
