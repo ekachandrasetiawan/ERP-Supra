@@ -2752,7 +2752,21 @@ class create_return_internal_move(osv.osv_memory):
 			if context.get('active_model','') == 'internal.move':
 				for x in move_data.lines:
 					data =self.pool.get('internal.move.line').browse(cr,uid,x.id)
-					linesData += [self._load_so_line(cr, uid, data)]
+
+					p = self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,data.id)])
+
+					if p:
+						qty_available = data.qty
+						
+						move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
+
+						for x in move_line:
+							qty_available = qty_available - x.qty
+
+						if qty_available <> 0:
+							linesData += [self._load_so_line(cr, uid, data)]
+					else:
+						linesData += [self._load_so_line(cr, uid, data)]
 
 			res.update(name=move_data.name)
 			res.update(internal_move_id=move_data.id)
@@ -2766,25 +2780,51 @@ class create_return_internal_move(osv.osv_memory):
 		return res
 
 	def _load_so_line(self, cr, uid, line):
-		move_line_item = {
-			'product_id'			: line.product_id.id,
-			'desc'					: line.desc,
-			'qty'					: line.qty,
-			'uom_id'				: line.uom_id.id,
-			'source'				: line.source.id,
-			'destination'			: line.destination.id,
-			'internal_move_line_id'	: line.id,
-		}
+		move_line_item = {}
+		qty_available = line.qty
+
+		p=self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,line.id)])
+		if p:
+			move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
+			for x in move_line:
+				qty_available = qty_available - x.qty
+
+		if qty_available <> 0:
+			move_line_item = {
+				'product_id'			: line.product_id.id,
+				'desc'					: line.desc,
+				'qty'					: qty_available,
+				'uom_id'				: line.uom_id.id,
+				'source'				: line.source.id,
+				'destination'			: line.destination.id,
+				'internal_move_line_id'	: line.id,
+			}
 
 		return move_line_item
 
+	def validasi_product_return(self, cr, uid, data, qty, context=None):
+		# nilai = 0
+		# p=self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,data.id)])
+		# if p:	
+		# 	move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
+		# 	for x in move_line:
+		# 		nilai += x.qty
+		# else:
+		# 	move_line=self.pool.get('internal.move.line').browse(cr,uid,data.id)
+
+		# 	if qty > move_line.qty:
+		# 		raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty Pengiriman")	
+
+		# if qty > nilai:
+		# 	raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty")
+
+		return True
 
 	def request_create_return_internal_move(self,cr,uid,ids,context=None):
 		val = self.browse(cr, uid, ids)[0]
 
 		obj_im = self.pool.get("internal.move")
 		obj_im_line = self.pool.get("internal.move.line")
-	
 		lines = []
 
 		for line in val.lines:
@@ -2804,19 +2844,22 @@ class create_return_internal_move(osv.osv_memory):
 						'type':x.type,
 					}))
 
-			lines.append((0,0,{
-					'internal_move_request_line_id':data.internal_move_request_line_id.id,
-					'return_line_ref_id':data.id,
-					'name':data.name,
-					'no':data.no,
-					'desc':data.desc,
-					'product_id':data.product_id.id,
-					'uom_id':data.uom_id.id,
-					'qty':line.qty,
-					'source':val.source.id,
-					'destination':val.destination.id,
-					'detail_ids':material_line,
-				}))
+			validasi = self.validasi_product_return(cr, uid, data, line.qty, context=None)
+
+			if validasi == True:
+				lines.append((0,0,{
+						'internal_move_request_line_id':data.internal_move_request_line_id.id,
+						'return_line_ref_id':data.id,
+						'name':data.name,
+						'no':data.no,
+						'desc':data.desc,
+						'product_id':data.product_id.id,
+						'uom_id':data.uom_id.id,
+						'qty':line.qty,
+						'source':val.source.id,
+						'destination':val.destination.id,
+						'detail_ids':material_line,
+					}))
 
 		
 		im_id = obj_im.create(cr, uid, {
