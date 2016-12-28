@@ -177,7 +177,7 @@ class Purchase_Order(osv.osv):
 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 		seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
 
-		po_no = seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
+		po_no = time.strftime('%y')+seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
 
 		if val.jenis == 'impj':
 			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
