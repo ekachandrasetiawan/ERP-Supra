@@ -169,6 +169,7 @@
             <field name="res_model">purchase.order</field>
             <field name="type">ir.actions.act_window</field>
             <field name="context">{'default_jenis': 'impj', 'default_type_permintaan': '1'}</field>
+            <field name="domain">[('jenis','in',['impj','imps'])]</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             
