@@ -287,6 +287,7 @@
                 <field name="product_qty"/>
                 <field name="product_uom"/>
                 <field name="received_items"/>
+                <field name="invoiced_items"/>
                 <field name="state"/>
             </tree>
         </field>
@@ -312,6 +313,7 @@
                 <group expand="!" string="Filter By Type">
 
                     <field string="Multi Search" name="name" filter_domain="[('name','ilike', self)]"/>
+                    <field string="PO No" name="order_id" filter_domain="[('order_id','=',self)]"/>
                     <field string="Product" name="product_id" filter_domain="[('product_id','=',self)]"/>
                     <filter string="Purchase Local" name="local" domain="[('order_id.jenis','!=', 'impj')]"/>
                     <filter string="Purchase Import" name="import" domain="[('order_id.jenis','=', 'impj')]"/>
@@ -349,6 +351,7 @@
         <field name="view_mode">tree,form</field>
         <field name="domain">[('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft'])]</field>
         <field name="search_view_id" ref="order_receive_status_tree_search" />
+        <field name="context">{"search_default_uncomplete":1}</field>
     </record>
 
     <record id="action_order_receive_status" model="ir.actions.act_window">
@@ -359,6 +362,7 @@
         <field name="view_mode">tree,form</field>
         <field name="domain">[('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft'])]</field>
         <field name="search_view_id" ref="order_receive_status_tree_search" />
+        <field name="context">{"search_default_uncomplete":1}</field>
     </record>
 
     <record id="action_order_receive_status_tree5_view1" model="ir.actions.act_window.view">

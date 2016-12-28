@@ -107,19 +107,27 @@ class Purchase_Order_Line(osv.osv):
 	def _get_invoiced_items(self,cr,uid,ids,field_name,args,context={}):		
 		res = {}
 		for item in self.browse(cr,uid,ids,context=context):
-			move=self.pool.get('stock.move').search(cr,uid,[('purchase_line_id', '=' ,item.id), ('state', '=', 'done')])
+			move=self.pool.get('stock.move').search(cr,uid,[('purchase_line_id', '=' ,item.id)])
+
 			hasil= 0
 			for data in  self.pool.get('stock.move').browse(cr,uid,move):
-				hasil += data.product_qty
+				if data.picking_id.invoice_id.id:
+					if data.picking_id.invoice_id.state <> 'cancel':
+						for x in data.picking_id.invoice_id.invoice_line:
+							if data.product_id.id == x.product_id.id and data.name == x.name:
+								hasil += x.quantity
+
 			res[item.id] = hasil
 		return res
 
+	def _get_stock_move(self,cr,uid,ids,context={}):
+		res = {}
+		for line in self.pool.get('stock.move').browse(cr,uid,ids,context=context):
+			res[line.purchase_line_id.id]=True
+		return res.keys()
+
 	_columns = {
-		'invoiced_items': fields.function(_get_invoiced_items,string="Invoice Item",type="float",readonly=False,
-			store={
-				'purchase.order.line': (lambda self, cr, uid, ids, c={}: ids, ['product_id','product_qty','state','supplied_items','qty_available_to_pick'], 20),
-				'stock.move': (_get_stock_move, ['product_qty','state'], 20),
-			}),
+		'invoiced_items': fields.function(_get_invoiced_items,string="Invoice Item",type="float",readonly=False, store=False),
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
 		'date_now': fields.function(_get_date_now,string="Date Now",type="date"),
 		'qty_status_uncomplete':fields.function(_func_qty_status_uncomplete, fnct_search=_func_search_qty_status_uncomplete, string='Qty Status Uncomplete',type='boolean'),
