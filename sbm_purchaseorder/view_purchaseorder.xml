@@ -59,6 +59,10 @@
                               </group>
                          </page>
                     </xpath>
+
+                    <xpath expr="//field[@name='order_line']" position="attributes">
+                        <attribute name="context">{'default_date_planned' : date_order}</attribute>
+                    </xpath>
                </field>
           </record>            
 
