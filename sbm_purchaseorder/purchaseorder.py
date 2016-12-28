@@ -220,6 +220,66 @@ class Purchase_Order_Sbm(osv.osv):
 			'datas': datas,
 		}
 
+
+	def copy_pure_purchase_order(self,cr,uid,ids,fiscal_position_id=False,context=None):
+		val = self.browse(cr,uid,ids,context)[0]
+		po_obj = self.pool.get('purchase.order')
+		account_fiscal_position = self.pool.get('account.fiscal.position')
+		account_tax = self.pool.get('account.tax')
+		lines = []
+		for line in val.order_line:
+			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.product_id.supplier_taxes_id))
+			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
+			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+			
+			if line.product_id.active == True:
+				lines.append((0,0,{
+						'no'			:line.no,
+						'product_id'	:line.product_id.id,
+						'variants'		:line.variants.id,
+						'name'			:line.name,
+						'part_number'	:line.part_number,
+						'date_planned'	:line.date_planned,
+						'product_qty'	:line.product_qty,
+						'product_uom'	:line.product_uom.id,
+						'price_unit'	:line.price_unit,
+						'note_line'		:'-',
+						'taxes_id'		:[(6,0,taxes_ids)],
+					}))
+			else:
+				raise osv.except_osv(_('Error'),_('Product '+line.product_id.default_code+ " is not active in system.\r\nPlease activate it first."))
+
+		po_id = po_obj.create(cr, uid, {
+				'name':int(time.time()),
+				'date_order': time.strftime("%Y-%m-%d"),
+				'duedate':time.strftime("%Y-%m-%d"),
+				'partner_id': val.partner_id.id,
+				'jenis': val.jenis,
+				'pricelist_id': val.pricelist_id.id,
+				'location_id': val.location_id.id,
+				'origin':val.origin,
+				'type_permintaan':val.type_permintaan,
+				'term_of_payment':val.term_of_payment,
+				'order_line':lines
+			})
+
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'purchase', "purchase_order_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'purchase.order.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'purchase.order'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = po_id
+
+		return action
+
 Purchase_Order_Sbm()
 
 
