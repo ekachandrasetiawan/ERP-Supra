@@ -111,7 +111,7 @@ class Purchase_Order_Line(osv.osv):
 
 			hasil= 0
 			for data in  self.pool.get('stock.move').browse(cr,uid,move):
-				if data.picking_id.invoice_id.id:
+				if data.picking_id.invoice_id:
 					if data.picking_id.invoice_id.state <> 'cancel':
 						for x in data.picking_id.invoice_id.invoice_line:
 							if data.product_id.id == x.product_id.id and data.name == x.name:
