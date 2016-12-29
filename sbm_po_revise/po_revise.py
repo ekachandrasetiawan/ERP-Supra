@@ -104,30 +104,43 @@ class Purchase_Order_Line(osv.osv):
 		return [('id', 'in', match_ids)]
 
 	
-	def _get_invoiced_items(self,cr,uid,ids,field_name,args,context={}):		
+	def _get_invoiced_items(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
+		
 		for item in self.browse(cr,uid,ids,context=context):
-			move=self.pool.get('stock.move').search(cr,uid,[('purchase_line_id', '=' ,item.id)])
-
-			hasil= 0
-			for data in  self.pool.get('stock.move').browse(cr,uid,move):
-				if data.picking_id.invoice_id:
-					if data.picking_id.invoice_id.state <> 'cancel':
-						for x in data.picking_id.invoice_id.invoice_line:
-							if data.product_id.id == x.product_id.id and data.name == x.name:
-								hasil += x.quantity
-
-			res[item.id] = hasil
+			cr.execute("SELECT invoice_id FROM purchase_order_line_invoice_rel WHERE order_line_id = %s", [item.id])
+			invoice_line = map(lambda x: x[0], cr.fetchall())
+			if invoice_line:
+				hasil = 0
+				for x in invoice_line:
+					inv = self.pool.get('account.invoice.line').browse(cr, uid, x)
+					hasil += inv.quantity
+				res[item.id] = hasil
+			else:
+				res[item.id] = 0
 		return res
 
-	def _get_stock_move(self,cr,uid,ids,context={}):
+	def _get_invoiced_nominal(self,cr,uid,ids,field_name,args,context={}):		
 		res = {}
-		for line in self.pool.get('stock.move').browse(cr,uid,ids,context=context):
-			res[line.purchase_line_id.id]=True
-		return res.keys()
+		
+		for item in self.browse(cr,uid,ids,context=context):
+			cr.execute("SELECT invoice_id FROM purchase_order_line_invoice_rel WHERE order_line_id = %s", [item.id])
+			invoice_line = map(lambda x: x[0], cr.fetchall())
+			if invoice_line:
+				hasil = 0
+				for x in invoice_line:
+					inv = self.pool.get('account.invoice.line').browse(cr, uid, x)
+
+					hasil += inv.price_subtotal
+
+				res[item.id] = hasil
+			else:
+				res[item.id] = 0
+		return res
 
 	_columns = {
-		'invoiced_items': fields.function(_get_invoiced_items,string="Invoice Item",type="float",readonly=False, store=False),
+		'invoiced_nominal': fields.function(_get_invoiced_nominal,string="Invoiced Nominal",type="float", store=False),
+		'invoiced_items': fields.function(_get_invoiced_items,string="Invoiced Items",type="float", store=False),
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
 		'date_now': fields.function(_get_date_now,string="Date Now",type="date"),
 		'qty_status_uncomplete':fields.function(_func_qty_status_uncomplete, fnct_search=_func_search_qty_status_uncomplete, string='Qty Status Uncomplete',type='boolean'),
