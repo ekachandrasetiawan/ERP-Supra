@@ -288,6 +288,7 @@
                 <field name="product_uom"/>
                 <field name="received_items"/>
                 <field name="invoiced_items"/>
+                <field name="invoiced_nominal"/>
                 <field name="state"/>
             </tree>
         </field>
