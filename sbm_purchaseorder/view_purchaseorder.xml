@@ -9,7 +9,8 @@
                <field name="inherit_id" ref="purchase.purchase_order_form"/>
                <field name="arch" type="xml">
                     <button name="print_quotation" position="replace">
-                         <button class="oe_highlight" name="%(printpo)d" states="approved,draft" string="Print Purchase Order" type="action"/>
+                        <button class="oe_highlight" name="%(printpo)d" states="approved,draft" string="Print Purchase Order" type="action"/>
+                        <button confirm="Are You Sure to Copy This Document Into a New Document?" name="copy_pure_purchase_order" string="Copy Purchase Order" type="object" icon="STOCK_COPY" states="approved,done"/>
                     </button>                       
                     <field name="name" position="replace">
                          <field name="name"/>
@@ -58,6 +59,10 @@
                                    <field name='print_line'/>
                               </group>
                          </page>
+                    </xpath>
+
+                    <xpath expr="//field[@name='order_line']" position="attributes">
+                        <attribute name="context">{'default_date_planned' : date_order}</attribute>
                     </xpath>
                </field>
           </record>            

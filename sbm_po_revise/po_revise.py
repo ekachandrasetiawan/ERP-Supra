@@ -103,7 +103,31 @@ class Purchase_Order_Line(osv.osv):
 		
 		return [('id', 'in', match_ids)]
 
+	
+	def _get_invoiced_items(self,cr,uid,ids,field_name,args,context={}):		
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			move=self.pool.get('stock.move').search(cr,uid,[('purchase_line_id', '=' ,item.id)])
+
+			hasil= 0
+			for data in  self.pool.get('stock.move').browse(cr,uid,move):
+				if data.picking_id.invoice_id.id:
+					if data.picking_id.invoice_id.state <> 'cancel':
+						for x in data.picking_id.invoice_id.invoice_line:
+							if data.product_id.id == x.product_id.id and data.name == x.name:
+								hasil += x.quantity
+
+			res[item.id] = hasil
+		return res
+
+	def _get_stock_move(self,cr,uid,ids,context={}):
+		res = {}
+		for line in self.pool.get('stock.move').browse(cr,uid,ids,context=context):
+			res[line.purchase_line_id.id]=True
+		return res.keys()
+
 	_columns = {
+		'invoiced_items': fields.function(_get_invoiced_items,string="Invoice Item",type="float",readonly=False, store=False),
 		'po_line_rev': fields.many2one('purchase.order.line', 'PO Line Revise'),
 		'date_now': fields.function(_get_date_now,string="Date Now",type="date"),
 		'qty_status_uncomplete':fields.function(_func_qty_status_uncomplete, fnct_search=_func_search_qty_status_uncomplete, string='Qty Status Uncomplete',type='boolean'),
@@ -177,7 +201,7 @@ class Purchase_Order(osv.osv):
 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 		seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
 
-		po_no = seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
+		po_no = time.strftime('%y')+seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
 
 		if val.jenis == 'impj':
 			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
@@ -269,16 +293,17 @@ class Purchase_Order(osv.osv):
 					partial_data = {}
 					for line in x.move_lines:
 						po_line = obj_po_line.search(cr, uid, [('po_line_rev', '=', line.purchase_line_id.id)])
-						po_line_id=obj_po_line.browse(cr, uid, po_line)[0]
+						if po_line:
+							po_line_id=obj_po_line.browse(cr, uid, po_line)[0]
 
-						mv = stock_move.search(cr, uid, [('purchase_line_id', '=', po_line_id.id)])
-						move_id = stock_move.browse(cr, uid, mv)[0]
+							mv = stock_move.search(cr, uid, [('purchase_line_id', '=', po_line_id.id)])
+							move_id = stock_move.browse(cr, uid, mv)[0]
 
-						partial_data['move%s' % (move_id.id)] = {
-									'product_id': line.product_id.id,
-									'product_qty': line.product_qty,
-									'product_uom': line.product_uom.id,
-									'prodlot_id': line.prodlot_id.id}
+							partial_data['move%s' % (move_id.id)] = {
+										'product_id': line.product_id.id,
+										'product_qty': line.product_qty,
+										'product_uom': line.product_uom.id,
+										'prodlot_id': line.prodlot_id.id}
 
 					picking_do = obj_picking.do_partial(cr,uid,[n_picking.id],partial_data,context={})
 					id_done = picking_do.items()
