@@ -242,7 +242,7 @@ class Purchase_Order_Sbm(osv.osv):
 						'date_planned'	:line.date_planned,
 						'product_qty'	:line.product_qty,
 						'product_uom'	:line.product_uom.id,
-						'price_unit'	:line.price_unit,
+						'price_unit'	:0,
 						'note_line'		:'-',
 						'taxes_id'		:[(6,0,taxes_ids)],
 					}))

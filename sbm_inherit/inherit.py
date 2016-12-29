@@ -2803,20 +2803,23 @@ class create_return_internal_move(osv.osv_memory):
 		return move_line_item
 
 	def validasi_product_return(self, cr, uid, data, qty, context=None):
-		# nilai = 0
-		# p=self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,data.id)])
-		# if p:	
-		# 	move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
-		# 	for x in move_line:
-		# 		nilai += x.qty
-		# else:
-		# 	move_line=self.pool.get('internal.move.line').browse(cr,uid,data.id)
+		nilai = 0
+		p=self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,data.id)])
 
-		# 	if qty > move_line.qty:
-		# 		raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty Pengiriman")	
+		if p:	
+			move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
+			for x in move_line:
+				nilai += x.qty
 
-		# if qty > nilai:
-		# 	raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty")
+			if qty > nilai:
+				raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty")
+		else:
+			move_line=self.pool.get('internal.move.line').browse(cr,uid,data.id)
+
+			if qty > move_line.qty:
+				raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty Pengiriman")	
+
+		
 
 		return True
 

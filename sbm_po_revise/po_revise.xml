@@ -277,7 +277,10 @@
         <field name="type">tree</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree string="Order Receive Status" colors="red:(date_planned &lt; date_now) and product_qty > received_items);blue:(date_planned &gt; date_now) and product_qty > received_items);green:date_planned == date_now">
+            <tree string="Order Receive Status" colors="red:(date_planned &lt; date_now) and product_qty > received_items);
+                blue:(date_planned &gt; date_now) and product_qty > received_items);
+                green:(date_planned == date_now) and received_items &lt; product_qty); 
+                black:(state == 'done');black:(product_qty == received_items)">
                 <field name="order_id"/>
                 <field name="product_id"/>
                 <field name="name"/>
@@ -288,6 +291,7 @@
                 <field name="product_uom"/>
                 <field name="received_items"/>
                 <field name="invoiced_items"/>
+                <field name="invoiced_nominal"/>
                 <field name="state"/>
             </tree>
         </field>
