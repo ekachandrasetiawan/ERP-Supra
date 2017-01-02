@@ -24,5 +24,10 @@
 			<field name="category_id" ref="base.module_category_purchase_management"/>
 			<field name="name">Group Finance Staff</field>
 		</record>
+
+		<record model="res.groups" id="group_purchase_item_controlle">
+			<field name="category_id" ref="base.module_category_purchase_management"/>
+			<field name="name">Purchase Item Controller</field>
+		</record>
     </data>
 </openerp>

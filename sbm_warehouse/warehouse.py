@@ -119,7 +119,18 @@ class stock_picking(osv.osv):
 						partner_name = s.partner_id.name
 
 						self.send_email(cr, uid, ids, subject, partner_id, po_id, partner_name, partial_datas, context=None)
-		
+			
+			# group Item Contrroller
+			m  = self.pool.get('ir.model.data')
+			id_group = m.get_object(cr, uid, 'sbm_purchase', 'group_purchase_item_controlle').id
+			user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+			for x in user_group.users:
+				if x.email:
+					partner_id = x.partner_id.id
+					partner_name = x.partner_id.name
+					self.send_email(cr, uid, ids, subject, partner_id, po_id, partner_name, partial_datas, context=None)
+					
 		res = super(stock_picking,self).do_partial(cr,uid,ids,partial_datas,context)
 		return res
 
