@@ -80,7 +80,7 @@
                         <group>
                             <field name="partner_ref"/>
                             <field name="origin"/>
-                            <field name="term_of_payment"/>
+                            <field name="term_of_payment" required="True"/>
                         </group>
                     </group>
                     <notebook>

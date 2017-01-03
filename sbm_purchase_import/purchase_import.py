@@ -6,6 +6,9 @@ from osv import osv, fields
 
 class purchase_order(osv.osv):
 	_inherit = "purchase.order"
+	_columns = {
+		'term_of_payment':fields.char('Term Of Payment', required=False)
+	}
 
 purchase_order()
 

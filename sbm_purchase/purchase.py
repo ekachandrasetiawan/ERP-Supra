@@ -519,7 +519,7 @@ class Set_PO(osv.osv):
 	_columns ={
 		'name':fields.many2one('res.partner','Supplier',required=True, domain=[('supplier','=',True),('is_company', '=', True)]),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True, domain=[('type','=','purchase')]),
-		'order_type':fields.selection([('1','Normal Order'),('2','Petty Order')],'Order Type',required=True),
+		'order_type':fields.selection([('1','Normal Order'), ('2','Import J'), ('3','Import S'), ('3','Petty Order')],'Order Type',required=True),
 		'permintaan': fields.many2many('detail.pb', 'pre_item_rel', 'item_id', 'permintaan_id', 'Detail Permintaan',domain=[('state','=','onproses'),('qty_available','>',0)]),
 	}
 	
@@ -543,13 +543,17 @@ class Set_PO(osv.osv):
 		for x in set(pb):
 			detailpb += x[:5] + ', '
 
-		
-		if val.order_type == 1 :
+		seq =int(time.time())
+		if val.order_type == '1':
 			jenis = 'loc'
-			seq =int(time.time())
+		elif val.order_type == '2':
+			jenis = 'impj'
+		elif val.order_type == '3':
+			jenis = 'imps'
 		else:
 			jenis = 'loc-petty'
-			seq =int(time.time())
+
+		payment_term = val.name.term_payment
 		
 		sid = obj_purchase.create(cr, uid, {
 										'name':seq,
@@ -561,7 +565,7 @@ class Set_PO(osv.osv):
 										'location_id': 12,
 										'origin':detailpb,
 										'type_permintaan':'1',
-										'term_of_payment':val.name.term_payment
+										'term_of_payment':payment_term
 									   })
 		noline=1
 		for line in val.permintaan:
@@ -589,7 +593,10 @@ class Set_PO(osv.osv):
 
 		# purchase ==> Nama Module nya purchase_order_form ==> Nama Id Form nya
 		pool_data=self.pool.get("ir.model.data")
-		action_model,action_id = pool_data.get_object_reference(cr, uid, 'purchase', "purchase_order_form")     
+		if jenis in ['impj','imps']:
+			action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_purchase_import', "view_purchase_order_import_form")
+		else:
+			action_model,action_id = pool_data.get_object_reference(cr, uid, 'purchase', "purchase_order_form")
 		action_pool = self.pool.get(action_model)
 		res_id = action_model and action_id or False
 		action = action_pool.read(cr, uid, action_id, context=context)

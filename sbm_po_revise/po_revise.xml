@@ -232,6 +232,7 @@
         <field name="arch" type="xml">
             <field name="term_of_payment" position="attributes">
                 <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+                <attribute name="required">True</attribute>
             </field>
         </field>
     </record>
@@ -364,7 +365,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">['&','&',('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft']),('order_id.state','in',['approved','except_picking','except_invoice','done'])]</field>
+        <field name="domain">['&amp;','&amp;',('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft']),('order_id.state','in',['approved','except_picking','except_invoice','done'])]</field>
         <field name="search_view_id" ref="order_receive_status_tree_search" />
         <field name="context">{"search_default_uncomplete":1}</field>
     </record>
