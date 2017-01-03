@@ -86,7 +86,7 @@
 		   	    <xpath expr="//button[@string='Import Sale Order Line']" position="replace"/>
 
 		   	    <xpath expr="//button[@name='action_cancel_item']" position="replace">
-		   	    	<button name="action_cancel_item" states="draft,confirm,confirm2" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="STOCK_CANCEL"/>
+		   	    	<button name="action_cancel_item" states="draft" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="STOCK_CANCEL"/>
 		   	    </xpath>
 
 		   	    <xpath expr="//button[@string='Print Purchase Requisition']" position="replace">

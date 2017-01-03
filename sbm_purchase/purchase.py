@@ -40,7 +40,8 @@ class Pembelian_Barang(osv.osv):
 				res[data.id] = "purchase"
 			elif action_state == "draft":
 				res[data.id] = "draft"
-
+			elif action_state == "cancel":
+				res[data.id] = "cancel"
 		return res
 
 
@@ -118,6 +119,35 @@ class Pembelian_Barang(osv.osv):
 
 	_order = 'id DESC'
 
+
+	def send_email_validate(self, cr, uid, ids, context={}):
+		val = self.browse(cr, uid, ids)[0]
+
+		body = """\
+		<html>
+		  <head></head>
+		  <body>
+			<p>
+				Dear %s!<br><br>
+				Purchase Requisition Nomor <b># %s </b> Telah mendapat Approval oleh Purchaser 
+				dan PO akan segera di release. <br/>
+				Sistem ERP akan memberi notifikasi selanjutnya pada saat PO terkait pb tersebut di release.<br>
+			</p>
+			<br>
+			Best Regards,<br>
+			Administrator ERP
+		  </body>
+		</html>
+		""" % (val.employee_id.name, val.name)
+
+		email_to = val.employee_id.user_id.email
+		if email_to:
+			subject = 'Purchase Requisition Reject No #' + val.name
+			partner_id = val.employee_id.user_id.partner_id.id
+			
+			send_email = self.send_email(cr, uid, ids, val.id, subject, email_to, partner_id, body, context={})
+
+		return True
 
 
 	def action_cancel_item(self,cr,uid,ids,context=None):
@@ -206,6 +236,9 @@ class Pembelian_Barang(osv.osv):
 #			raise osv.except_osv(('Perhatian..!!'), ('Harus Atasannya langsung ..'))
 		context.update(action_state='confirm2')
 		cr.execute('Update detail_pb Set state=%s Where detail_pb_id=%s', ('onproses',ids[0]))
+
+		# Send Email 
+		self.send_email_validate(cr, uid, ids, context=context)
 		return self.write(cr,uid,ids,{'state':'purchase'},context=context)
 
 	def purchase(self,cr,uid,ids,context={}):
@@ -226,22 +259,73 @@ class Pembelian_Barang(osv.osv):
 			'datas': datas,
 			}
 
+	def send_email(self, cr, uid, ids, pb_id, subject, email_to, partner_id, body, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		mail_mail = self.pool.get('mail.mail')
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
+
+		username = obj_usr.browse(cr, uid, uid)
+
+		mail_id = mail_mail.create(cr, uid, {
+			'model': 'pembelian.barang',
+			'res_id': pb_id,
+			'subject': subject,
+			'body_html': body,
+			'auto_delete': True,
+			}, context=context)
+
+		mail_mail.send(cr, uid, [mail_id], recipient_ids=[partner_id], context=context)
+
+		return True
+
 Pembelian_Barang()
 
 
 class ClassName(osv.osv):
-	
 	def action_cancel_item(self,cr,uid,ids,context=None):
+		cr.execute("SELECT create_uid FROM pembelian_barang WHERE id = %s", ids)
+		id_user_create = map(lambda id: id[0], cr.fetchall())
+
+		for x in id_user_create:
+			if x != uid:
+				user_name = self.pool.get('res.users').browse(cr, uid, x)
+				raise osv.except_osv(('Warning..!!'), ('Cancellation can only Perform Document author' + ' "' + user_name.name + '"'))
+
 		if context is None:
 			context = {}
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_purchase', 'wizard_pr_cancel_form')
 
-		# print "<<<<<<<<<<<<<<<<<<<<",view_id
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'status':'cancel',
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_pr_cancel_form',
+			'res_model': 'wizard.pr.cancel.item',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
+
+	def action_reject_pb(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_purchase', 'wizard_pr_cancel_form')
 
 		context.update({
 			'active_model': self._name,
 			'active_ids': ids,
+			'status':'reject',
 			'active_id': len(ids) and ids[0] or False
 		})
 		return {
@@ -265,34 +349,72 @@ class WizardPRCancelItem(osv.osv_memory):
 	def default_get(self, cr, uid, fields, context=None):
 		if context is None: context = {}
 		pb_ids = context.get('active_ids', [])
-		# print '====================',pb_ids
 		active_model = context.get('active_model')
 		res = super(WizardPRCancelItem, self).default_get(cr, uid, fields, context=context)
 		if not pb_ids or len(pb_ids) != 1:
-			# Partial Picking Processing may only be done for one picking at a time
 			return res
 		pb_id, = pb_ids
 		if pb_id:
 			res.update(pb_id=pb_id)
 			pb = self.pool.get('pembelian.barang').browse(cr, uid, pb_id, context=context)
-			# linesData = []
-			# linesData += [self._load_po_line(cr, uid, l) for l in po.order_line if l.state not in ('done','cancel')]
-			# res.update(lines=linesData)
-		print res,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		return res
 
+	def template_email_reject(self, cr, uid, ids, user, pb_no, alasan, context={}):
+		res = """\
+		<html>
+		  <head></head>
+		  <body>
+			<p>
+				Dear %s!<br><br>
+				Purchase Requisition Nomor <b># %s </b> Telah di Reject.<br>
+				<b>Dengan Alasan :</b> %s 
+			</p>
+			<br>
+			Best Regards,<br>
+			Administrator ERP
+		  </body>
+		</html>
+		""" % (user, pb_no, alasan)
+		return res
 
 	def request_cancel(self,cr,uid,ids,context=None):
-		print "CALLING request_cancel_item method"
 		data = self.browse(cr,uid,ids,context)[0]
+		obj_pb = self.pool.get('pembelian.barang')
+		if context is None: 
+			context = {}
 
-		lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
-		dp = self.pool.get('detail.pb').browse(cr, uid, lines)
-		for x in dp:
-			self.pool.get('detail.pb').write(cr,uid,x.id,{'state':'cancel'})
+		context.update(action_state='cancel')
+
+		if context.get('status',False) == 'reject':
+
+			email_to = data.pb_id.employee_id.user_id.email
+			if email_to:
+				subject = 'Purchase Requisition Reject No #' + data.pb_id.name
+				partner_id = data.pb_id.employee_id.user_id.partner_id.id
+
+				template_email = self.template_email_reject(cr, uid, ids, data.pb_id.employee_id.name, data.pb_id.name, data.cancel_reason, context={})
+				send_email = obj_pb.send_email(cr, uid, ids, data.pb_id.id, subject, email_to, partner_id, template_email, context={})
+
+			if send_email == True:
+				lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
+				dp = self.pool.get('detail.pb').browse(cr, uid, lines)
+				for x in dp:
+					cr.execute('Update detail_pb SET state=%s Where detail_pb_id=%s', ('cancel',data.pb_id.id))
+
+				# Create By Log
+				msg = _(template_email)
+				obj_pb.message_post(cr, uid, [data.pb_id.id], body=msg, context=context)
+
+				res = obj_pb.write(cr,uid,data.pb_id.id,{'state':'cancel'},context=context)
+		else:
+			lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
+			dp = self.pool.get('detail.pb').browse(cr, uid, lines)
+			for x in dp:
+				cr.execute('Update detail_pb SET state=%s Where detail_pb_id=%s', ('cancel',data.pb_id.id))
 			
-		return self.pool.get('pembelian.barang').write(cr,uid,data.pb_id.id,{'cancel_reason':data.cancel_reason,'state':'cancel'})
+			res = obj_pb.write(cr,uid,data.pb_id.id,{'cancel_reason':data.cancel_reason,'state':'cancel'},context=context)
 
+		return res 
 
 	_name="wizard.pr.cancel.item"
 	_description="Wizard Cancel Item On PR"
@@ -401,6 +523,11 @@ class Detail_PB(osv.osv):
 				res[data.id] = "onproses"
 		return res
 
+	def _get_cek_state_pb(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('detail.pb').browse(cr, uid, ids, context=context):
+			result[line.detail_pb_id.id] = True
+		return result.keys()
 
 	def _get_cek_state_detail_pb(self, cr, uid, ids, context=None):
 		result = {}
@@ -443,7 +570,8 @@ class Detail_PB(osv.osv):
 		'processed_items': fields.function(_get_processed_items,string="Processed Items",type="float",store=False),
 		'state':fields.function(_getParentState,method=True,string="State",type="selection",selection=STATES,
 			store={
-				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
+				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id','state'], 20),
+				'pembelian.barang': (_get_cek_state_pb, ['state'], 20),
 				'order.requisition.delivery.line': (_get_cek_state_detail_pb, ['state'], 20),
 				'purchase.order.line': (_get_cek_state_po_line, ['state'], 20),
 			}),
