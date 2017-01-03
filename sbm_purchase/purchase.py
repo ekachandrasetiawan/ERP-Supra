@@ -435,7 +435,7 @@ class Detail_PB(osv.osv):
 				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
 				'purchase.order.line': (_get_cek_po_line, ['state'], 20),
 			}),
-		'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",
+		'delivery_items': fields.function(_get_delivery_items,string="Supplied Items",type="float",
 			store={
 				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
 				'order.requisition.delivery.line':(_get_cek_delivery_item,['state'],20),
