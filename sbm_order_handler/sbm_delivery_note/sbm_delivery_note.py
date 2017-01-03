@@ -424,6 +424,11 @@ class delivery_note(osv.osv):
 			res['partner_id'] = data.sale_id.partner_id.id
 			res['partner_shipping_id'] = data.sale_id.partner_shipping_id.id
 			res['attn'] = data.sale_id.attention.id
+			warehouse_notes = data.warehouse_notes
+			warehouse_notes = warehouse_notes.replace('-','')
+
+			if data.warehouse_notes:
+				res['terms'] = warehouse_notes
 
 		return  {'value': res}
 
