@@ -199,21 +199,21 @@ class delivery_note(osv.osv):
 					context['location'] = loc
 					context['location_id'] = loc
 					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
+					if product.not_stock == False:
+						if x.prodlot_id:
+							prodlot = self.pool.get('stock.production.lot').browse(cr, uid, x.prodlot_id.id, context=context)
+							if x.qty > prodlot.stock_available:
+								mm = ' ' + prodlot.name + ' '
+								stock = ' ' + str(prodlot.stock_available) + ' '
+								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
+								raise openerp.exceptions.Warning(msg)
+						else:
+							if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
+								mm = ' ' + product.default_code + ' '
+								stock = ' ' + str(product.qty_available) + ' '
+								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
 
-					if x.prodlot_id:
-						prodlot = self.pool.get('stock.production.lot').browse(cr, uid, x.prodlot_id.id, context=context)
-						if x.qty > prodlot.stock_available:
-							mm = ' ' + prodlot.name + ' '
-							stock = ' ' + str(prodlot.stock_available) + ' '
-							msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
-							raise openerp.exceptions.Warning(msg)
-					else:
-						if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
-							mm = ' ' + product.default_code + ' '
-							stock = ' ' + str(product.qty_available) + ' '
-							msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
-
-							raise openerp.exceptions.Warning(msg)
+								raise openerp.exceptions.Warning(msg)
 
 		return True
 	
