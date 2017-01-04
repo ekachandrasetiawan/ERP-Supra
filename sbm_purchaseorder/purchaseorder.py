@@ -78,6 +78,10 @@ class Purchase_Order_Sbm(osv.osv):
 
 
 	def wkf_approve_order(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		obj_pb = self.pool.get('pembelian.barang')
+		obj_detail_pb = self.pool.get('detail.pb')
+
 		for po in self.browse(cr, uid, ids, context=context):
 			if po.jenis == 'impj':
 				no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
@@ -89,30 +93,31 @@ class Purchase_Order_Sbm(osv.osv):
 			print no;
 
 			if po.type_permintaan == '1':
-
-				# cek = self.pool.get('detail.order.line').search(cr,uid,[('order_line_id', '=' ,ids)])
-				# order_line =self.pool.get('detail.order.line').browse(cr,uid,cek)
-				# for x in order_line:
-				# 	detail_pb_cek=self.pool.get('detail.pb').search(cr,uid,[('id', '=' ,x.detail_pb_id)])
-				# 	valdetailpb = self.pool.get('detail.pb').browse(cr,uid, detail_pb_cek[0])
-				# 	self.pool.get('detail.pb').write(cr, uid, [x.detail_pb_id], {'qty_available': valdetailpb.jumlah_diminta-x.qty})
-				# 	if valdetailpb.jumlah_diminta-x.qty == 0:
-				# 		self.pool.get('detail.pb').write(cr, uid, [x.detail_pb_id], {'state':'proses'})
-				#print '--------------------------------',ids
-				# obj_purchase_line = self.pool.get('purchase.order.line').browse(cr,uid,[('order_id', '=' ,)])
 				cek = self.pool.get('purchase.order.line').search(cr,uid,[('order_id', '=' ,ids)])
-
 				obj_purchase_line = self.pool.get('purchase.order.line').browse(cr,uid, cek)
 				
+				result = []
 				for z in obj_purchase_line:
+					row = []
 					if z.line_pb_general_id:
+						pb_id = z.line_pb_general_id.detail_pb_id.id
+
 						detail_pb_cek=self.pool.get('detail.pb').search(cr,uid,[('id', '=' ,z.line_pb_general_id.id)])
-						
 						valdetailpb = self.pool.get('detail.pb').browse(cr,uid,detail_pb_cek[0])
+
+						# Append Data PB ID dan Detail PB ID
+						row.append(valdetailpb.id)
+						row.append(valdetailpb.detail_pb_id.id)
+
 						#  Cek Qty Available Detail PB, Jika hasil nya 0 maka update state Detail PB
-						print '=====================',valdetailpb.qty_available
 						if valdetailpb.qty_available == 0.0:
 							self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'state':'proses'})
+
+					result.append(row)
+
+				# Prosess Send Email
+				self.proses_send_email(cr, uid, ids, result, context=None)
+
 			elif po.type_permintaan == '2':
 				# loop each order line
 				for line in po.order_line:
@@ -123,7 +128,6 @@ class Purchase_Order_Sbm(osv.osv):
 				for line in po.order_line:
 					if line.line_pb_subcont_id:
 						self.pool.get('purchase.requisition.subcont.line').write(cr,uid,[line.line_pb_subcont_id.id],{'state_line':'po'})
-
 		return super(Purchase_Order_Sbm,self).wkf_approve_order(cr,uid,ids,context=context)
 	
 	def _create_pickings(self, cr, uid, order, order_lines, picking_id=False, context=None):
@@ -280,18 +284,150 @@ class Purchase_Order_Sbm(osv.osv):
 
 		return action
 
+
+	def proses_send_email(self, cr, uid, ids, result, context=None):
+		# Pengelompokan PB Line ID sesuai Dengan PB ID nya
+		order=[]
+		dic=dict()
+		for value,key in result:
+		  try:
+			dic[key].append(value)
+		  except KeyError:
+			order.append(key)
+			dic[key]=[value]
+		newlist=map(dic.get, order)
+
+		# Pengelompokan PB Line ID dengan Employee ID
+		data = []
+		for nilai in newlist:
+			column = []
+			for x in nilai:
+				row = []
+				pb_line = self.pool.get('detail.pb').browse(cr, uid, x, context=None)
+				row.append(pb_line.id)
+				row.append(pb_line.detail_pb_id.employee_id.id)
+				column.append(row)
+
+			data.append(column)
+
+		dt_line = []
+		for data_array in data:
+			for x in data_array:
+				dt_line.append(x)
+
+		order_1=[]
+		dic_1=dict()
+		for value,key in dt_line:
+		  try:
+			dic_1[key].append(value)
+		  except KeyError:
+			order_1.append(key)
+			dic_1[key]=[value]
+		newlist_1=map(dic_1.get, order_1)
+
+		for lines in newlist_1:
+			employee_id = False
+			email_to = False
+			partner_id = False
+			for x in lines:
+				pb_line_id = self.pool.get('detail.pb').browse(cr, uid, x, context=None)
+
+				employee_id = pb_line_id.detail_pb_id.employee_id.id
+				employee_name = pb_line_id.detail_pb_id.employee_id.name
+				email_to = pb_line_id.detail_pb_id.employee_id.user_id.email
+				partner_id = pb_line_id.detail_pb_id.employee_id.user_id.partner_id.id
+
+			self.data_email(cr, uid, ids, lines, employee_id, employee_name, email_to, partner_id, context=None)
+
+		return True
+
+
+	def data_email(self, cr, uid, ids, lines, employee_id, employee_name, email_to, partner_id, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		obj_pb = self.pool.get('pembelian.barang')
+
+		body = self.template_email(cr, uid, ids, lines, employee_name, context=None)
+		subject = 'Telah di release PO #' + val.name
+
+		send_email = self.send_email(cr, uid, ids, val.id, subject, email_to, partner_id, body, context={})
+		return True
+
+	def template_email(self, cr, uid, ids, lines, employee_name, context=None):
+		val = self.browse(cr, uid, ids)[0]
+
+		ip_address = '192.168.9.26:10001'
+		db = 'LIVE_2014'
+		url = 'http://'+ip_address+'/?db='+db+'#id=' +str(val.id)+'&view_type=form&model=purchase.order&menu_id=330&action=394'
+
+		data_table = '<table border="1"><tr><th>Purchase Requisition No</th><th>Product</th><th>Qty (PO)</th></tr>'
+		for x in lines:
+			qty = 0
+			uom = False
+			for c in val.order_line:
+				if c.line_pb_general_id.id == x:
+					qty = c.product_qty
+					uom = c.product_uom.name
+
+			pb_line = self.pool.get('detail.pb').browse(cr, uid, x, context=None)
+			data_table += '<tr><td>'+ str(pb_line.detail_pb_id.name) +'</td><td>' + '['+ pb_line.name.default_code +']' + pb_line.name.name +'</td><td>'+ str(qty) + ' ' + str(uom) + '</td></tr>'
+		
+		data_table += '</table>'
+
+		body = """\
+			<html>
+			  <head></head>
+			  <body>
+				<p>
+					Dear %s!<br/><br/>
+					Telah di release PO # %s untuk memenuhi permintaan
+					<br/>
+					<b>Detail Barang :</b><br/>
+					%s
+					<br/>
+					Silahkan klik Link ini untuk melihat Purchase Oder. <a href="%s">View Purchase Order</a>
+				</p>
+				<br/>
+				Best Regards,<br/>
+				Administrator ERP
+			  </body>
+			</html>
+			""" % (employee_name, val.name, data_table, url)
+
+		return body
+
+
+	def send_email(self, cr, uid, ids, po_id, subject, email_to, partner_id, body, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		mail_mail = self.pool.get('mail.mail')
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
+
+		username = obj_usr.browse(cr, uid, uid)
+
+		mail_id = mail_mail.create(cr, uid, {
+			'model': 'purchase.order',
+			'res_id': po_id,
+			'subject': subject,
+			'body_html': body,
+			'auto_delete': True,
+			}, context=context)
+
+		mail_mail.send(cr, uid, [mail_id], recipient_ids=[partner_id], context=context)
+
+		return True
+
 Purchase_Order_Sbm()
 
 
 class purchase_order_patty(osv.osv):
-    _name = "purchase.order.petty"
-    _inherit = "purchase.order"
-    _table = "purchase_order"
-    _description = "Purchase Order Petty"
+	_name = "purchase.order.petty"
+	_inherit = "purchase.order"
+	_table = "purchase_order"
+	_description = "Purchase Order Petty"
 
-    _columns = {
-    		'jenis':fields.selection([('loc','Local Regular'),('loc-petty','Local Regular Petty'),('impj','Import J'),('imps','Import S')],'Jenis'),
-    }
+	_columns = {
+			'jenis':fields.selection([('loc','Local Regular'),('loc-petty','Local Regular Petty'),('impj','Import J'),('imps','Import S')],'Jenis'),
+	}
 
 
 purchase_order_patty()
