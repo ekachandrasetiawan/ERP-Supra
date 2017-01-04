@@ -43,6 +43,7 @@ class detail_pb(osv.osv):
 
 	_columns={
 		'source_model':fields.selection([('sales','Sales Order'),('work_order','Work Order')],'Source Model'),
+		'po_line_ids': fields.one2many('purchase.order.line', 'line_pb_general_id', 'PO Line IDS'),
 	}
 
 	def onchange_material_line(self, cr, uid, ids, line_id, context=None):
