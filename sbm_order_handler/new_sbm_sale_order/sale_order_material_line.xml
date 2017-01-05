@@ -86,11 +86,27 @@
 		   	    <xpath expr="//button[@string='Import Sale Order Line']" position="replace"/>
 
 		   	    <xpath expr="//button[@name='action_cancel_item']" position="replace">
-		   	    	<button name="action_cancel_item" states="draft" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="STOCK_CANCEL"/>
+		   	    	<button name="action_cancel_item" states="draft" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional" icon="STOCK_CANCEL"/>
 		   	    </xpath>
 
 		   	    <xpath expr="//button[@string='Print Purchase Requisition']" position="replace">
-		   	    	<button name="%(sbm_purchase.reportpb)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition" type="action" icon="gtk-print"/>
+		   	    	<button name="%(sbm_purchase.reportpb)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition" type="action" icon="gtk-print" groups="sbm_purchase.group_jobdesc_position_dept_chief,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@name='submit']" position="replace">
+		   	    	<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief,purchase.group_purchase_user,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@name='confirm']" position="replace">
+		   	    	<button name="confirm" states="confirm" string="Approve" type="object" icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_ho"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@name='confirm2']" position="replace">
+		   	    	<button name="confirm2" states="confirm2" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_spv"  icon="gtk-apply"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@name='setdraft']" position="replace">
+		   	    	<button name="setdraft" states="confirm,confirm2" string="Set to Draft" type="object"  icon="gtk-jump-to" groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_ho"/>
 		   	    </xpath>
 
 				<field name="destination_location_request_id" position="replace">
