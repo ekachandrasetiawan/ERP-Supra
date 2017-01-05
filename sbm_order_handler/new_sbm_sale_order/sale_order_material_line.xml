@@ -101,7 +101,7 @@
 		   	    	<button name="confirm" states="confirm" string="Approve" type="object" icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_ho"/>
 		   	    </xpath>
 
-		   	    <xpath expr="//button[@name='confirm']" position="replace">
+		   	    <xpath expr="//button[@name='confirm2']" position="replace">
 		   	    	<button name="confirm2" states="confirm2" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_spv"  icon="gtk-apply"/>
 		   	    </xpath>
 
