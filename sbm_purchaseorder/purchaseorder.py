@@ -116,7 +116,8 @@ class Purchase_Order_Sbm(osv.osv):
 					result.append(row)
 
 				# Prosess Send Email
-				self.proses_send_email(cr, uid, ids, result, context=None)
+				if row:
+					self.proses_send_email(cr, uid, ids, result, context=None)
 
 			elif po.type_permintaan == '2':
 				# loop each order line
