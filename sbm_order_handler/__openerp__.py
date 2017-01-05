@@ -42,6 +42,7 @@
 		'new_sbm_sale_order/print_name_button.xml',
 		'new_sbm_sale_order/wizardcreatepb.xml',
 		'new_sbm_sale_order/sale_order_material_line.xml',
+		'new_sbm_sale_order/setting.xml',
 		'sbm_order_preparation/setting.xml',
 		'sbm_order_preparation/sbm_order_preparation_view.xml',
 		'sbm_order_preparation/search.xml',
