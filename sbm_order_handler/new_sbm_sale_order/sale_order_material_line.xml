@@ -141,7 +141,7 @@
                         </tree>
                         <form string="Product Detail Purchase Requisition">
                     		<field name="name" on_change="setvariants(name)" colspan="4"/>
-                    		<field name="desc"/>
+                    		<field name="desc" colspan="4"/>
                         	<field name="variants"/>
                             <field name="part_no"/>
                             <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
