@@ -11,7 +11,24 @@ class ReportPB(report_sxw.rml_parse):
 			'sum' : sum,
 			'get_lines':self.get_lines,
 			'proyek':self.proyek,
+			'signature':self.signature
 			})
+
+	def signature(self,obj):
+		res={}
+
+		if obj.proc_type == 'internal':
+			res['signature1'] = obj.employee_id.name
+			res['signature2'] = 'Chief/Ass Mgr/Mgr/GM'
+			res['signature3'] = 'Purchasing Dept'
+			res['signature4'] = 'Mgr/GM/Press.Dir'
+		else:
+			res['signature1'] = 'Admin/Staff/SPV/Chief'
+			res['signature2'] = 'Asst.Mgr/Mgr/GM Dept/Divisi/Site'
+			res['signature3'] = 'Staff/Spv/Asst. Mgr Purchasing'
+			res['signature4'] = 'Mgr Purchasing'
+
+		return res
 
 	def proyek(self,obj):
 		res = ''

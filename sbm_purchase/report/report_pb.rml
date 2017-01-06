@@ -7,9 +7,9 @@
       <pageGraphics>
         <setFont name="Helvetica" size="10"/>
         <drawString x="19.0cm" y="1cm">Hal <pageNumber/></drawString>
-        <image x="1.0cm" y="26.4cm" height="60.0" >[[ company.logo or removeParentNode('image') ]]</image>
+        <image x="1.5cm" y="26.4cm" height="60.0" >[[ company.logo or removeParentNode('image') ]]</image>
         <setFont name="Arial" size="16"/>
-        <drawString x="8.0cm" y="27.6cm">PEMBELIAN BARANG</drawString>
+        <drawString x="8.8cm" y="27.6cm">PEMBELIAN BARANG</drawString>
         <setFont name="Helvetica" size="7"/>
       </pageGraphics>
     </header>
@@ -121,7 +121,7 @@
     <paraStyle name="terp_tblheader_General" fontSize="9.0" leading="10" alignment="LEFT" spaceBefore="6.0" spaceAfter="6.0"/>
     <paraStyle name="terp_default_8" fontSize="9.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_8_top" fontSize="9.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="terp_default_8_center" fontSize="9.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="terp_default_8_center" fontSize="8.0" leading="10" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_default_8_center_bold" fontSize="9.0" leading="10" fontName="Arial" alignment="CENTER" spaceBefore="0.0" spaceAfter="0.0"/>
     <paraStyle name="terp_tblheader_General_Centre" fontSize="9.0" leading="10" alignment="CENTER" spaceBefore="6.0" spaceAfter="6.0"/>
     <paraStyle name="terp_tblheader_General_Right" fontSize="9.0" leading="10" alignment="RIGHT" spaceBefore="6.0" spaceAfter="6.0"/>
@@ -271,7 +271,7 @@
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white">. </font></para>
-                 <para style="terp_default_8_center">(Admin/Staff/SPV/Chief)</para>
+                 <para style="terp_default_8_center">( [[ signature(o)['signature1'] ]] )</para>
                 </td>
              </tr>
             </blockTable>
@@ -286,7 +286,7 @@
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white"> .</font></para>
-                 <para style="terp_default_8_center">(Asst.Mgr/Mgr/GM Dept/Divisi/Site)</para>
+                 <para style="terp_default_8_center">( [[ signature(o)['signature2'] ]] )</para>
                 </td>
              </tr>
             </blockTable>
@@ -302,7 +302,7 @@
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white"> .</font></para>
-                 <para style="terp_default_8_center">(Staff/Spv/Asst. Mgr Purchasing)</para>
+                 <para style="terp_default_8_center">( [[ signature(o)['signature3'] ]] )</para>
                 </td>
              </tr>
             </blockTable>
@@ -317,7 +317,7 @@
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white"> .</font></para>
                  <para style="terp_default_5"><font color="white"> .</font></para>
-                  <para style="terp_default_8_center">(Mgr Purchasing)</para>
+                 <para style="terp_default_8_center">( [[ signature(o)['signature4'] ]] )</para>
                 </td>
              </tr>
             </blockTable>
