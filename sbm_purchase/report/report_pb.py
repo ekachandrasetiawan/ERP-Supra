@@ -10,7 +10,24 @@ class ReportPB(report_sxw.rml_parse):
 			'time': time,
 			'sum' : sum,
 			'get_lines':self.get_lines,
+			'proyek':self.proyek,
 			})
+
+	def proyek(self,obj):
+		res = ''
+		partner_id = False
+		detail_pb_ids= obj.detail_pb_ids
+		for x in detail_pb_ids:
+			if x.sale_line_ids:
+
+				if partner_id != x.sale_line_ids.order_id.partner_id.id:
+					res += x.sale_line_ids.order_id.partner_id.name+','
+				partner_id = x.sale_line_ids.order_id.partner_id.id
+
+		res = res[:-1]
+
+		return res
+
 	def get_lines(self,obj):
 		detail_pb_ids= obj.detail_pb_ids
 		res=[]
@@ -38,7 +55,7 @@ class ReportPB(report_sxw.rml_parse):
 				name += "\r\n\r\n"+x.keterangan
 				keterangan = ""
 
-			arrLine.update({'no':i,'name':name,'satuan':x.satuan,'part_no':part_no,'jumlah_diminta':x.jumlah_diminta,'stok':x.stok,'keterangan':keterangan,'so_name':so_name})
+			arrLine.update({'no':i,'name':name,'desc':x.desc,'satuan':x.satuan,'part_no':part_no,'jumlah_diminta':x.jumlah_diminta,'stok':x.stok,'keterangan':keterangan,'so_name':so_name})
 			res.append(arrLine)
 			arrLine={}
 			i+=1

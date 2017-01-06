@@ -115,17 +115,17 @@ class WizardCreatePB(osv.osv_memory):
 										'tanggal':time.strftime("%Y-%m-%d"),
 										'ref_pb':sale.client_order_ref,
 										'duedate':duedate,
-										'notes':sale.note,
+										'notes':val.note,
 										'state':'draft'
 									   })
 		for line in val.lines:
 			detail_pb.create(cr, uid, {
 										 'name':line.product_id.id,
+										 'desc':line.description,
 										 'detail_pb_id':sid,
 										 'part_number':line.product_id.default_code,
 										 'jumlah_diminta':line.qty,
 										 'satuan':line.uom.id,
-										 'keterangan':line.description,
 										 'sale_line_ids':line.so_line_id.id,
 										 'sale_order_material_line_id':line.id,
 										 })

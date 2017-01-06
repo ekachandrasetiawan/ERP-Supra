@@ -127,6 +127,7 @@
 					<field name="detail_pb_ids" nolabel="1" colspan="4" context="{'default_source_model' : source_model}">
                         <tree string="Product Detail" editable="none">
                           	<field name="name" on_change="setvariants(name)"/>
+                          	<field name="desc"/>
                           	<field name="variants"/>
                             <field name="part_no"/>
                             <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
@@ -140,6 +141,7 @@
                         </tree>
                         <form string="Product Detail Purchase Requisition">
                     		<field name="name" on_change="setvariants(name)" colspan="4"/>
+                    		<field name="desc"/>
                         	<field name="variants"/>
                             <field name="part_no"/>
                             <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>

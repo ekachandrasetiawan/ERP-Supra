@@ -545,6 +545,7 @@ class Detail_PB(osv.osv):
 	_name = 'detail.pb'
 	_columns = {
 		'name':fields.many2one('product.product','Product',track_visibility='onchange'),
+		'desc':fields.text('Desc'),
 		'variants':fields.many2one('product.variants','variants',track_visibility='onchange'),
 		'part_no':fields.char('Part No',track_visibility='onchange'),
 		'jumlah_diminta':fields.float('Qty',track_visibility='onchange'),
