@@ -34,7 +34,7 @@ class ReportPB(report_sxw.rml_parse):
 
 
 			keterangan =  x.keterangan
-			if len(x.keterangan)>64:
+			if x.keterangan and len(x.keterangan)>64:
 				name += "\r\n\r\n"+x.keterangan
 				keterangan = ""
 
