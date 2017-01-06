@@ -8,7 +8,7 @@
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
 				<tree string="Sale Order Material Line" colors="gray:qty==procured_qty;">
-					<field name="sale_order_id" string="Sale Order"/>
+					<field name="sale_id"/>
 					<field name="product_id"/>
 					<field name="qty"/>
 					<field name="on_process_qty" string="Process Qty"/>

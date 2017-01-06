@@ -116,7 +116,7 @@
                     <group expand="!" string="Filter By">
 						<filter icon="terp-dolar_ok!" string="Posted" domain="[('status','not in',['draft','cancel'])]" help="Posted" name="filter_posted"/>
 				    	<filter icon="terp-dolar_ok!" string="Non Posted" domain="[('status','in',['draft','cancel'])]" help="Non Posted" name="filter_nonposted"/>
-					  	<field name="sale_order_id" filter_domain="[('sale_order_id','ilike',self)]" string="No So"/>
+					  	<field name="sale_id" filter_domain="[('sale_id','ilike',self)]" string="No Sale Order"/>
 		     	    	<field name="product_id" filter_domain="[('product_id','ilike',self)]"/>
 				   		<field name="status" filter_domain="[('status','ilike',self)]" string="Status"/>
                     </group>
