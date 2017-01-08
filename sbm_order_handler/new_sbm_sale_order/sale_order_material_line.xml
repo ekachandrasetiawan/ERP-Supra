@@ -8,7 +8,7 @@
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
 				<tree string="Sale Order Material Line" colors="gray:qty==procured_qty;">
-					<field name="sale_order_id" string="Sale Order"/>
+					<field name="sale_id"/>
 					<field name="product_id"/>
 					<field name="qty"/>
 					<field name="on_process_qty" string="Process Qty"/>
@@ -127,6 +127,7 @@
 					<field name="detail_pb_ids" nolabel="1" colspan="4" context="{'default_source_model' : source_model}">
                         <tree string="Product Detail" editable="none">
                           	<field name="name" on_change="setvariants(name)"/>
+                          	<field name="desc"/>
                           	<field name="variants"/>
                             <field name="part_no"/>
                             <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
@@ -140,6 +141,7 @@
                         </tree>
                         <form string="Product Detail Purchase Requisition">
                     		<field name="name" on_change="setvariants(name)" colspan="4"/>
+                    		<field name="desc" colspan="4"/>
                         	<field name="variants"/>
                             <field name="part_no"/>
                             <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>

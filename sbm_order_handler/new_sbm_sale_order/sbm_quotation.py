@@ -642,6 +642,7 @@ class sale_order_material_line(osv.osv):
 				'sale.order.material.line': (lambda self, cr, uid, ids, c={}: ids, ['sale_order_id','sale_order_line_id'], 20),
 				'sale.order': (_get_cek_so_state, ['state','quotation_state'], 20),
 			}),
+		'sale_id': fields.related('sale_order_line_id','order_id', type='many2one', relation='sale.order', string='Sale Order'),
 		'procured_qty':fields.function(_count_procured_qty, string="Procured Qty", store=False),
 		'status': fields.related('sale_order_line_id','state', type='char', relation='sale.order'),
 	}
