@@ -6,7 +6,7 @@
 			<field name="inherit_id" ref="sbm_saleorder.wizard_create_pb_form" />
 			<field name="arch" type="xml">
 				<field name='so_line_id' position="replace">
-					<field name="so_material_line_id" invisible="1" />
+					<field name="so_material_line_id" invisible="0" />
 				</field>
 				
 

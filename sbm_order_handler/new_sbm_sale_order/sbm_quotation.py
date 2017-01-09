@@ -1165,14 +1165,71 @@ class WizardCreatePbSo(osv.osv_memory):
 
 	def _load_so_line(self, cr, uid,line):
 		res = {
-		'so_line_id': line.sale_order_line_id.id,
-		'so_material_line_id': line.id,
-		'product_id'		: line.product_id.id,
-		'description'		: line.desc,
-		'uom'				: line.uom.id,
-		'qty'				: line.qty,
+		'so_line_id'			: line.sale_order_line_id.id,
+		'so_material_line_id'	: line.id,
+		'product_id'			: line.product_id.id,
+		'description'			: line.desc,
+		'uom'					: line.uom.id,
+		'qty'					: line.qty,
 		}
 		return res	
+
+	def request_create_pb(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids)[0]
+		sale_order = self.pool.get("sale.order")
+		pembelian_barang = self.pool.get('pembelian.barang')
+		detail_pb = self.pool.get('detail.pb')
+		
+		sale=val.so_id
+		
+		if sale.due_date:
+			duedate=sale.due_date
+		else:
+			duedate=time.strftime("%Y-%m-%d")
+
+		empl=self.pool.get('hr.employee').search(cr,uid,[('user_id', '=' ,uid)])
+		employee=self.pool.get('hr.employee').browse(cr,uid,empl)[0]
+
+		sid = pembelian_barang.create(cr, uid, {
+										'name':'/',
+										'proc_type':'sales',
+										'source_model':'sales',
+										'employee_id':employee.id,
+										'department_id':employee.department_id.id,
+										'spk_no':sale.client_order_ref,
+										'tanggal':time.strftime("%Y-%m-%d"),
+										'ref_pb':sale.client_order_ref,
+										'duedate':duedate,
+										'notes':val.note,
+										'state':'draft'
+									   })
+		for line in val.lines:
+			detail_pb.create(cr, uid, {
+										 'name':line.product_id.id,
+										 'desc':line.description,
+										 'detail_pb_id':sid,
+										 'part_number':line.product_id.default_code,
+										 'jumlah_diminta':line.qty,
+										 'satuan':line.uom.id,
+										 'sale_line_ids':line.so_line_id.id,
+										 'sale_order_material_line_id':line.so_material_line_id.id,
+										 })
+
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_purchase', "view_pb_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'pembelian.barang.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'pembelian.barang'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = sid
+		return action
 
 class WizardCreatePbLineSo(osv.osv_memory):
 	_inherit="wizard.create.pb.line"
