@@ -189,6 +189,7 @@ class sale_order_material_line(osv.osv):
 
 
 	def name_get(self, cr, uid, ids, context=None):
+		print '=================xxxxxxxx==========',ids
 		if not ids:
 			return []
 		reads = self.read(cr, uid, ids, ['sale_order_id','product_id'], context=context)
