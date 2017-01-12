@@ -920,7 +920,7 @@ account_invoice_tax()
 
 class sale_order(osv.osv):
 	_inherit = 'sale.order'
-	ef manual_invoice(self, cr, uid, ids, context=None):
+	def manual_invoice(self, cr, uid, ids, context=None):
 		""" create invoices for the given sales orders (ids), and open the form
 			view of one of the newly created invoices
 		"""
