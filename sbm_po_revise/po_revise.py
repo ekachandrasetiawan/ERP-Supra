@@ -223,6 +223,8 @@ class Purchase_Order(osv.osv):
 		else:
 			no = po_no
 
+		print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA++++++++++++++++++++++++++"
+
 		return no
 
 	def wkf_confirm_order(self, cr, uid, ids, context=None):
@@ -416,7 +418,7 @@ class Purchase_Order_Revision(osv.osv):
 		msg.attach(part2)
 		# Login Email
 		username = 'jay@beltcare.com' 
-		password = 'wskg3815'
+		password = '---------'
 
 		# Kirim Email
 		server = smtplib.SMTP('smtp.beltcare.com:587')
