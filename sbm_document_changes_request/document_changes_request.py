@@ -7,6 +7,7 @@ from osv import osv, fields
 class document_changes_request(osv.osv):
 
 	_name = 'document.changes.request'
+
 	_columns = {
 		'name': fields.char('Name'),
 		'request_id': fields.many2one('res.users', "Request Name",required=True),
@@ -18,8 +19,9 @@ class document_changes_request(osv.osv):
 		'it_notes' : fields.text('IT Notes',required=False),
 		'state' : fields.selection([('draft', 'Draft'), ('submitted', 'Submitted'), ('approved', 'Approved'), ('canceled', 'Canceled'), ('rejected', 'Rejected'), ('done', 'Done')], 'State', select=True),
 	}
-	
 
+	_inherit = ['mail.thread']
+	
 	def action_submit(self, cr, uid, ids, context=None):
 
 		return self.write(cr,uid,ids,{'state':'submitted'},context=context)
@@ -58,7 +60,7 @@ class document_changes_request(osv.osv):
 
 	def reqId(self, cr, uid, ids, request_id):
 		if uid != request_id:
-			return {'warning': {"title": _("Perhatian"), "message": _("User Harus yang login")}, 'value': {'request_id': uid, 'fault_category': 'user'}}
+			return {'warning': {"title": _("Perhatian"), "message": _("Berubah")}, 'value': {'request_id': request_id}}
 		return True	
 
 document_changes_request()
