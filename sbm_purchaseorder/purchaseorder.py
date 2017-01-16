@@ -49,7 +49,9 @@ class Purchase_Order_Sbm(osv.osv):
 	}
 	
 	def create(self, cr, uid, vals, context=None):
-		vals['name'] = int(time.time())
+		if vals['name'] == '/':
+			vals['name'] = int(time.time())
+			
 		return super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
 
 	def print_po_out(self,cr,uid,ids,context=None):
