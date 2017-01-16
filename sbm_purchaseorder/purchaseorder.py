@@ -49,7 +49,9 @@ class Purchase_Order_Sbm(osv.osv):
 	}
 	
 	def create(self, cr, uid, vals, context=None):
-		vals['name'] = int(time.time())
+		if vals['name'] == '/':
+			vals['name'] = int(time.time())
+			
 		return super(Purchase_Order_Sbm, self).create(cr, uid, vals, context=context)
 
 	def print_po_out(self,cr,uid,ids,context=None):
@@ -83,15 +85,6 @@ class Purchase_Order_Sbm(osv.osv):
 		obj_detail_pb = self.pool.get('detail.pb')
 
 		for po in self.browse(cr, uid, ids, context=context):
-			if po.jenis == 'impj':
-				no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
-			elif po.jenis == 'imps':
-				no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
-			else:
-				no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
-
-			print no;
-
 			if po.type_permintaan == '1':
 				cek = self.pool.get('purchase.order.line').search(cr,uid,[('order_id', '=' ,ids)])
 				obj_purchase_line = self.pool.get('purchase.order.line').browse(cr,uid, cek)
