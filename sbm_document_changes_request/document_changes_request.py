@@ -42,13 +42,43 @@ class document_changes_request(osv.osv):
 
 		return self.write(cr,uid,ids,{'state':'draft'},context=context)
 
+	def action_open_document(self, cr, uid, ids, context=None):
+
+		if context is None:
+			context = {}
+		
+		document_object = self.browse(cr,uid,ids)
+		
+		model_document = document_object[0].document_model.model
+	
+		get_document_views_id = self.pool.get('ir.ui.view').search(cr,uid,[('model', '=' , model_document), ('type', '=' , 'form'), ('inherit_id', '=' , None)])
+
+		res = {
+			'name': _(document_object[0].document_model.name),
+			'view_type': 'form',
+			'view_mode': 'form',
+			'view_id': [get_document_views_id[0]],
+			'res_model': model_document,
+			'type': 'ir.actions.act_window',
+			'nodestroy': True,
+			'target': 'current',
+			'context': context,
+			'res_id': document_object[0].fk_model or False,
+		}
+
+		return res
+
+	def reqId(self, cr, uid, ids, request_id):
+		if uid != request_id:
+			return {'warning': {"title": _("Perhatian"), "message": _("Berubah")}, 'value': {'request_id': request_id}}
+		return True	
+
 	def _request_get(self, cr, uid, context=None):
 		obj_user = self.pool.get('res.users')
 
 		cek = obj_user.search(cr,uid,[('id', '=' ,uid)])
 
 		if cek:
-			# hasil=obj_user.browse(cr,uid,cek)[0]
 			return uid
 		else:
 			return False	
@@ -57,10 +87,5 @@ class document_changes_request(osv.osv):
 		'state': 'draft',
 		'request_id': _request_get,
 	}
-
-	def reqId(self, cr, uid, ids, request_id):
-		if uid != request_id:
-			return {'warning': {"title": _("Perhatian"), "message": _("Berubah")}, 'value': {'request_id': request_id}}
-		return True	
 
 document_changes_request()
