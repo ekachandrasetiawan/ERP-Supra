@@ -838,11 +838,9 @@ class WizardPOrevise(osv.osv_memory):
 			  <body>
 				<p>
 					Hi %s !<br/><br/>
-
 					%s mengajukan permohonan untuk merevisi dokumen Purchase Order <b># %s </b> <br><b>Dengan alasan :</b><br>
 					%s <br/><br/>
 					PO tersebut sudah mempunyai Invoice dengan nomor kwitansi <b># %s </b> <br>
-
 					Dan, Atau<br/>
 					Mempunyai Bank Statement dengan nomor <b> %s </b><br/>
 					Silahkan klik tombol Approve untuk approval permintaan tersebut pada Link ini.<a href="%s">View Purchase Order Revision</a>
