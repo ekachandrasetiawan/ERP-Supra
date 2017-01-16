@@ -21,27 +21,33 @@
             <field name="arch" type="xml">
             	<form string="Document Changes Request" version="7.0">
             		<header>
-                        <button name="action_submit" states="draft" string="Submit" type="object" icon="gtk-apply"/>
-                        <button name="action_approve" states="submitted" string="Approve" type="object" icon="gtk-apply"/>
-                        <button name="action_reject" states="submitted" string="Reject" type="object" icon="STOCK_CLOSE"/>
-                        <button name="action_validate" states="approved" string="Validate" type="object" icon="gtk-apply"/>
-                        <button name="action_open_state" states="approved" string="Set to Draft" type="object" icon="gtk-jump-to"/>
+                        <button name="action_submit" states="draft" string="Submit" type="object" icon="gtk-apply" groups="base.group_user"/>
+                        <button name="action_approve" states="submitted" string="Approve" type="object" icon="gtk-apply" groups="base.group_no_one,sbm_purchase.group_jobdesc_position_dept_chief"/>
+                        <button name="action_reject" states="submitted" string="Reject" type="object" icon="STOCK_CLOSE" groups="sbm_purchase.group_jobdesc_position_dept_chief"/>
+                        <button name="action_validate" states="approved" string="Validate" type="object" icon="gtk-apply" groups="base.group_no_one"/>
+                        <button name="action_open_state" states="approved" string="Set to Draft" type="object" icon="gtk-jump-to" groups="base.group_no_one"/>
+                        <button name="action_open_document" states="approved" string="Open Document" type="object" icon="STOCK_FILE"/>
 
                          <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,done"/>
             		</header>
             		<sheet>
             			<separator string="Document Changes Request"/>
             			<group col="4" colspan="4">
-            				<field name="name"/>
-            				<field name="request_id" on_change="reqId(request_id)"/>
+            				<field name="name" attrs="{'readonly':[('state','not in',['draft'])]}"/>
+            				<field name="request_id" on_change="reqId(request_id)" attrs="{'readonly':[('state','not in',['draft'])]}"/>
             				<field name="document_model"/>
-            				<field name="fk_model"/>
-            				<field name="document_name"/>
-            				<field name="fault_category"/>
-                            <field name="reasons"/>
-                            <field name="it_notes"/>
+            				<field name="fk_model" attrs="{'readonly':[('state','not in',['draft'])]}"/>
+            				<field name="document_name" attrs="{'readonly':[('state','not in',['draft'])]}"/>
+            				<field name="fault_category" attrs="{'readonly':[('state','not in',['draft'])]}"/>
+                            <field name="reasons" attrs="{'readonly':[('state','not in',['draft'])]}"/>
+                            <field name="it_notes" attrs="{'readonly':[('state','not in',['draft','approved'])]}" groups="base.group_no_one"/>
             			</group>
             		</sheet>
+
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>  
             	</form>
             </field>
         </record>

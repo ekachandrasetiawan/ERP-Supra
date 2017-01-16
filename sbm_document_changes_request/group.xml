@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    	<record id="ir_model_data_res_groups_it" model="ir.model.data">
+            <field name="module">base</field>
+            <field name="name">group_it</field>
+            <field name="model">res.groups</field>
+            <field name="res_id">56</field>
+        </record>
+
+    </data>
+</openerp>
