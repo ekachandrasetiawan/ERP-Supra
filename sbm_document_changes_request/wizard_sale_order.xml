@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<record id="open_state_wizard" model='ir.ui.view'>
+			<field name='name'>lost.quotation.wizard</field>
+			<field name='model'>wizard.sale.order</field>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+					<form string='Open State' version='7.0'>
+						<sheet>
+							<group>
+								<field name='so_id' readonly="1"/>
+							</group>			          
+							<notebook colspan="4">
+							<page string="Order Lines">
+							    <field name="wizard_so_line_ids" colspan="4">
+							        <tree string="Order Lines" editable="buttom">
+							        	<field name="sequence" readonly="1"/>
+							          	<field name="so_line_id" readonly="1"/>
+							          	<field name="to_open"/>
+							        </tree>
+							    </field>
+							</page>
+							</notebook>						
+						</sheet>
+						<footer>
+							<button name='action_open_state' type='object' string='Submit' confirm="Are you sure to Open State Document Sale Order" />
+						</footer>
+					</form>
+			</field>
+		</record>
+
+		<record model='ir.actions.act_window' id="wizard_open_state_form">
+			<field name="name">wizard.open.state.form</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">wizard.sale.order</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="open_state_wizard"/>
+			<field name="target">new</field>
+		</record>
+		
+		<record id="button_open_state" model='ir.ui.view'>
+			<field name="name">Open State</field>
+			<field name="model">sale.order</field>
+			<field name='type'>form</field>
+			<field name="inherit_id" ref='sale.view_order_form'/>
+			<field name="arch" type='xml'>
+				<header position="inside">
+					<button name='%(wizard_open_state_form)d' type="action" string="Open State" states="manual" icon="STOCK_UNDO"/>
+				</header>
+			</field>
+		</record>
+
+    </data>
+</openerp>

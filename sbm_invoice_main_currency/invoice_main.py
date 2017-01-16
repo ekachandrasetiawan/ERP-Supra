@@ -932,14 +932,9 @@ class sale_order(osv.osv):
 		for id in ids:
 			wf_service.trg_validate(uid, 'sale.order', id, 'manual_invoice', cr)
 		inv_ids1 = set(inv.id for sale in self.browse(cr, uid, ids, context) for inv in sale.invoice_ids)
-		
-		
 		# determine newly created invoices
 		new_inv_ids = list(inv_ids1 - inv_ids0)
 
-		if not new_inv_ids:
-			new_inv_ids = [self.action_invoice_create(cr, uid, ids, context)]
-			
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
 		res_id = res and res[1] or False,
 

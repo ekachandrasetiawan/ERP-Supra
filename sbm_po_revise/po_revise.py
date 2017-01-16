@@ -212,15 +212,14 @@ class Purchase_Order(osv.osv):
 		val = self.browse(cr, uid, ids, context={})[0]
 
 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-		seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
-
-		po_no = time.strftime('%y')+seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
-
+		
 		if val.jenis == 'impj':
 			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
 		elif val.jenis == 'imps':
 			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
 		else:
+			seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
+			po_no = time.strftime('%y')+seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
 			no = po_no
 
 		return no
@@ -416,7 +415,7 @@ class Purchase_Order_Revision(osv.osv):
 		msg.attach(part2)
 		# Login Email
 		username = 'jay@beltcare.com' 
-		password = 'wskg3815'
+		password = '---------'
 
 		# Kirim Email
 		server = smtplib.SMTP('smtp.beltcare.com:587')
