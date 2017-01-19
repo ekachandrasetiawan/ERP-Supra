@@ -218,7 +218,7 @@ class Purchase_Order(osv.osv):
 		elif val.jenis == 'imps':
 			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
 		else:
-			seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
+			seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.sequence')
 			po_no = time.strftime('%y')+seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
 			no = po_no
 
@@ -418,11 +418,11 @@ class Purchase_Order_Revision(osv.osv):
 		password = '---------'
 
 		# Kirim Email
-		server = smtplib.SMTP('smtp.beltcare.com:587')
-		server.starttls()
-		server.login(username,password)
-		server.sendmail(me, you,msg.as_string())
-		server.quit()
+		# server = smtplib.SMTP('smtp.beltcare.com:587')
+		# server.starttls()
+		# server.login(username,password)
+		# server.sendmail(me, you,msg.as_string())
+		# server.quit()
 		return True
 
 	def template_email_approve(self, cr, uid, ids, user, no_po, url, context={}):
