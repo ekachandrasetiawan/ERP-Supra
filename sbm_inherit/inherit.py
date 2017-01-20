@@ -263,9 +263,9 @@ class PurchaseOrderFullInvoice(osv.osv):
 			'account_analytic_id': order_line.account_analytic_id.id or False,
 			# 'amount_discount':order_line.discount_nominal
 		}
-	def _prepare_inv_line_for_discount(self, cr, uid, account_id,discountNominal, invoiceLineTaxId, context=None):
-		
+	def _prepare_inv_line_for_discount(self, cr, uid, account_id,discountNominal, invoiceLineTaxId, product_discount, context=None):			
 		return {
+			'product_id': product_discount,
 			'name': "Discount",
 			'account_id': account_id,
 			'price_unit': discountNominal or 0.0,
@@ -275,12 +275,22 @@ class PurchaseOrderFullInvoice(osv.osv):
 	def _makeInvoiceLine(self,cr,uid,taxesId,acc_discount_id,discountNominal,context=None):
 		if context is None:
 			context = {}
+
+		product_discount = False
+		obj_product = self.pool.get('product.product').search(cr, uid, [('default_code', '=', 'DISCPEMBELIAN')])
+		if obj_product:
+			product = self.pool.get('product.product').browse(cr, uid, obj_product)[0]
+			product_discount = product.id
+		else:
+			raise osv.except_osv(_('Information!'),
+				_('Please Create Master Product dengan Part Number DISCPEMBELIAN'))
+
 		journal_obj = self.pool.get('account.journal')
 		inv_obj = self.pool.get('account.invoice')
 		inv_line_obj = self.pool.get('account.invoice.line')
 
 		invoiceLineTaxId = taxesId
-		inv_line_discount_data = self._prepare_inv_line_for_discount(cr, uid, acc_discount_id, discountNominal, invoiceLineTaxId, context=context)
+		inv_line_discount_data = self._prepare_inv_line_for_discount(cr, uid, acc_discount_id, discountNominal, invoiceLineTaxId, product_discount, context=context)
 		
 		return inv_line_obj.create(cr, uid, inv_line_discount_data, context=context)
 		

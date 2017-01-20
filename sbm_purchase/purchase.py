@@ -3,6 +3,8 @@ from datetime import date, timedelta, datetime
 import netsvc
 from tools.translate import _
 from osv import osv, fields
+from email.message import Message
+from email.header import Header
 
 class Pembelian_Barang(osv.osv):
 	
@@ -263,8 +265,7 @@ class Pembelian_Barang(osv.osv):
 		val = self.browse(cr, uid, ids)[0]
 		mail_mail = self.pool.get('mail.mail')
 		obj_usr = self.pool.get('res.users')
-		obj_partner = self.pool.get('res.partner')
-
+		obj_partner = self.pool.get('res.partner')	
 		username = obj_usr.browse(cr, uid, uid)
 
 		mail_id = mail_mail.create(cr, uid, {

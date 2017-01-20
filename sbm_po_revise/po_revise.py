@@ -212,18 +212,15 @@ class Purchase_Order(osv.osv):
 		val = self.browse(cr, uid, ids, context={})[0]
 
 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-		seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order')
-
-		po_no = time.strftime('%y')+seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
-
+		
 		if val.jenis == 'impj':
 			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.importj')
 		elif val.jenis == 'imps':
 			no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.imports')
 		else:
+			seq_no = self.pool.get('ir.sequence').get(cr, uid, 'purchase.order.sequence')
+			po_no = time.strftime('%y')+seq_no+'/PO/SBM/'+rom[int(time.strftime('%m'))]+'/'+time.strftime('%y')
 			no = po_no
-
-		print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA++++++++++++++++++++++++++"
 
 		return no
 
@@ -421,11 +418,11 @@ class Purchase_Order_Revision(osv.osv):
 		password = '---------'
 
 		# Kirim Email
-		server = smtplib.SMTP('smtp.beltcare.com:587')
-		server.starttls()
-		server.login(username,password)
-		server.sendmail(me, you,msg.as_string())
-		server.quit()
+		# server = smtplib.SMTP('smtp.beltcare.com:587')
+		# server.starttls()
+		# server.login(username,password)
+		# server.sendmail(me, you,msg.as_string())
+		# server.quit()
 		return True
 
 	def template_email_approve(self, cr, uid, ids, user, no_po, url, context={}):
@@ -840,11 +837,9 @@ class WizardPOrevise(osv.osv_memory):
 			  <body>
 				<p>
 					Hi %s !<br/><br/>
-
 					%s mengajukan permohonan untuk merevisi dokumen Purchase Order <b># %s </b> <br><b>Dengan alasan :</b><br>
 					%s <br/><br/>
 					PO tersebut sudah mempunyai Invoice dengan nomor kwitansi <b># %s </b> <br>
-
 					Dan, Atau<br/>
 					Mempunyai Bank Statement dengan nomor <b> %s </b><br/>
 					Silahkan klik tombol Approve untuk approval permintaan tersebut pada Link ini.<a href="%s">View Purchase Order Revision</a>

@@ -383,6 +383,19 @@
         <field name="act_window_id" ref="action_order_receive_status"/>
     </record>
 
+
+    <record id="seq_type_purchase_order" model="ir.sequence.type">
+        <field name="name">Sequence Purchase Order Fix Bug</field>
+        <field name="code">purchase.order.sequence</field>
+    </record>
+
+    <record id="seq_purchase_order_fix_bug" model="ir.sequence">
+        <field name="name">Sequence Purchase Order Fix Bug</field>
+        <field name="code">purchase.order.sequence</field>
+        <field name="padding">5</field>
+    </record>
+
+
     <menuitem name="Order Receive Status" parent="purchase.menu_procurement_management" id="order_receive_status_id" action="action_order_receive_status"/>
 
     <record id="inherit_view_invoice_form" model="ir.ui.view">
