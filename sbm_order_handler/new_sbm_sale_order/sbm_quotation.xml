@@ -775,13 +775,13 @@
 											<group>
 												<field name="sequence" />
 												<field name="product_no_cus" />
-												<field name="product_id" on_change="onchange_product_quotation(product_id,product_uom_qty,product_uom)" domain="[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')]" />
+												<field name="product_id" options="{&quot;always_reload&quot;: True, 'no_open': True,'no_create': 1, 'no_create_edit': 1}" on_change="onchange_product_quotation(product_id,product_uom_qty,product_uom)" domain="[('sale_ok','=','True'),('categ_id.name','!=','LOCAL')]" />
 												<field name="name" readonly="1" />
 												<!-- <field name="product_uom_qty" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom)" /> -->
 												  <label for="product_uom_qty"/>
 											<div>
 												<field context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'shop':parent.shop_id, 'uom':product_uom}" name="product_uom_qty" class="oe_inline" on_change="onchange_product_quotation_qty(product_id,product_uom_qty,product_uom,price_unit,discount,tax_id,material_lines)" />
-												<field name="product_uom" groups="product.group_uom" on_change="onchange_product_uom(product_id,product_uom)" class="oe_inline oe_no_button"/>
+												<field name="product_uom" options="{&quot;always_reload&quot;: True, 'no_open': True,'no_create': 1, 'no_create_edit': 1}" groups="product.group_uom" on_change="onchange_product_uom(product_id,product_uom)" class="oe_inline oe_no_button"/>
 											</div>
 												<!-- <field name="product_uom" invisible="1"/> -->
 											</group>
@@ -806,11 +806,11 @@
 												<field name="material_lines">
 													<tree editable="buttom">
 														<field name="no"/>
-														<field name="product_id" string="Material Item" on_change="onchange_product_material(product_id)"/>
+														<field name="product_id" options="{&quot;always_reload&quot;: True, 'no_open': True,'no_create': 1, 'no_create_edit': 1}" string="Material Item" on_change="onchange_product_material(product_id)"/>
 														<field name="desc" string="Description" />
 														<field name="qty" />
-														<field name="uom" string="Unit" on_change="onchange_product_uom(product_id,uom)" />
-														<field name="picking_location" string="Picking Location"/>
+														<field name="uom" options="{&quot;always_reload&quot;: True, 'no_open': True,'no_create': 1, 'no_create_edit': 1}" string="Unit" on_change="onchange_product_uom(product_id,uom)" />
+														<field name="picking_location" options="{&quot;always_reload&quot;: True, 'no_open': True,'no_create': 1, 'no_create_edit': 1}" string="Picking Location"/>
 														<field name="is_loaded_from_change" invisible="1" />
 													</tree>
 												</field>
