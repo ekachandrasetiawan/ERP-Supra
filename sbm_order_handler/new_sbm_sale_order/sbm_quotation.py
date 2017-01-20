@@ -922,10 +922,9 @@ class sale_order_line(osv.osv):
 				res['value']['name']=product.description_sale
 			else:
 				res['value']['name']=False
-			if product.supplier_taxes_id:
+			if product.taxes_id:
 				tax =[]
-				for i in product.supplier_taxes_id:
-					print i.id
+				for i in product.taxes_id:
 					tax.append(i.id)
 				res['value']['tax_id']=tax
 			else:
