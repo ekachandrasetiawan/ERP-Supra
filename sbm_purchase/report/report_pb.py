@@ -67,6 +67,7 @@ class ReportPB(report_sxw.rml_parse):
 				pn = x.name.default_code
 
 				if x.name.default_code and len(x.name.default_code) > 10:
+					
 					part_no = "\r\n\r\n"+x.name.default_code
 
 
