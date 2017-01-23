@@ -2136,6 +2136,31 @@ class InternalMove(osv.osv):
 			},
 		}
 
+	def action_cancel(self,cr,uid,ids,context=None):
+		stock_picking_object = self.pool.get('stock.picking')
+		stock_move_object = self.pool.get('stock.move')
+		val = self.browse(cr, uid, ids, context={})[0]
+ 		
+ 		get_stock_move_id = self.pool.get('stock.move').search(cr,uid,[('picking_id', '=' , val.picking_id.id)])
+
+ 		# Update state cancel pada stock move
+ 		for i in get_stock_move_id:
+ 			stock_move_object.write(cr,uid,i,{'state':'cancel'})
+		
+		# Update state cancel pada stock picking
+		stock_picking_object.write(cr,uid,val.picking_id.id,{'state':'cancel'})
+		
+		# Update state cancel pada internal move
+		self.write(cr,uid,ids,{'state':'cancel'},context=context)
+
+		return True
+
+	def action_cancelToDraft(self,cr,uid,ids,context=None):
+		# Update state draft pada internal move
+		self.write(cr,uid,ids,{'state':'draft', 'picking_id':None},context=context)
+
+		return True		
+
 	def action_create_return(self,cr,uid,ids,context=None):
 		if context is None:
 			context = {}
