@@ -308,6 +308,8 @@
 						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,checked,ready,transfered,done" />
 						<button name="confirmInternalMove" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_set,sbm_inherit.group_im_confirmer" />
 
+						<button name="action_reload_line" type="object" string="Reload" icon="STOCK_REFRESH" states="draft" groups="base.group_no_one" />
+
 						<button name="checkedInternalMove" type="object" string="Checked" icon="gtk-apply" states="confirmed" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
 						<button name="setAsDraftInternalMove" type="object" string="Set to Draft" icon="gtk-apply" states="confirmed,ready,checked" confirm="Are You Sure to set This Document to Draft ? If this confirmed then the confirmed process will be closed and stock will be refunded!" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
@@ -325,9 +327,9 @@
 
 						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
 
-						<button name="action_cancel" type="object" string="Cancel" states="transfered" groups="base.group_no_one" />
+						<button name="action_cancel" type="object" string="Cancel" states="transfered" icon="STOCK_CANCEL" groups="base.group_no_one" />
 
-						<button name="action_cancelToDraft" type="object" string="Set to Draft" icon="gtk-apply" states="cancel" groups="base.group_no_one" />
+						<button name="action_cancel_to_draft" type="object" string="Set to Draft" icon="gtk-apply" states="cancel" groups="base.group_no_one" />
 
 						<button name="action_create_return" states="done" string="Return Internal Move" type="object" icon="STOCK_REVERT_TO_SAVED" confirm="Are you sure to Create Return Internal Move"/>
 

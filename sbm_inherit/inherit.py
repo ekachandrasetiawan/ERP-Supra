@@ -2136,7 +2136,7 @@ class InternalMove(osv.osv):
 			},
 		}
 
-	def action_cancel(self,cr,uid,ids,context=None):
+	def action_cancel(self,cr,uid,ids,context={}):
 		stock_picking_object = self.pool.get('stock.picking')
 		stock_move_object = self.pool.get('stock.move')
 		val = self.browse(cr, uid, ids, context={})[0]
@@ -2155,11 +2155,89 @@ class InternalMove(osv.osv):
 
 		return True
 
-	def action_cancelToDraft(self,cr,uid,ids,context=None):
+	def action_cancel_to_draft(self,cr,uid,ids,context=None):
 		# Update state draft pada internal move
 		self.write(cr,uid,ids,{'state':'draft', 'picking_id':None},context=context)
 
-		return True		
+		return True
+
+	def action_reload_line(self,cr,uid,ids,context={}):
+
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		data = val.internal_move_request_id
+		
+		context['location'] = val.source.id
+		context['location_id'] = val.source.id
+
+		context['destination'] = val.destination.id
+		context['destination_id'] = val.destination.id
+
+		will_load = self._loadLines(cr,uid,data,context=context) #ini yang belum di load dari mr
+
+		# ambil lines current
+		current_lines = val.lines
+
+		# harus di dapat internal_move_request_line_id yang akan di append ke internal_move_line
+		mr_lines = data.lines
+
+		for mr_line in mr_lines:
+			# loop each mr_lines
+			qty = mr_line.qty - mr_line.processed_item_qty
+			
+			in_current_lines = self.pool.get('internal.move.line').search(cr, uid, [('internal_move_request_line_id','=',mr_line.id), ('internal_move_id','=',val.id)])
+
+			if in_current_lines:
+				# jika found di current_lines
+				current_processed = 0.0
+				for found_line in self.pool.get('internal.move.line').browse(cr, uid, in_current_lines, context=context):
+					current_processed += found_line.qty
+
+				qty = qty+current_processed
+
+			if qty>0:
+				if len(will_load)==0:
+					will_load.append((0,0,{
+						'no':mr_line.no,
+						'product_id':mr_line.product_id.id,
+						'desc':mr_line.desc,
+						'uom_id':mr_line.uom_id.id,
+						'qty':qty,
+						'qty_available':mr_line.product_id.qty_available,
+						'internal_move_request_line_id':mr_line.id,
+						'detail_ids':self._loadLineDetail(cr,uid,mr_line),
+						'state':'draft',
+						'source':context['location'],
+						'destination':context['destination']
+					}));
+				else :
+					found_in_load  = False
+					for w_load in will_load :
+						c_wload = len(w_load)
+						if mr_line.id == w_load[(c_wload-1)]['internal_move_request_line_id']:
+							w_load[(c_wload-1)]['qty'] = qty;
+							found_in_load = True
+					if not found_in_load:
+						will_load.append((0,0,{
+							'no':mr_line.no,
+							'product_id':mr_line.product_id.id,
+							'desc':mr_line.desc,
+							'uom_id':mr_line.uom_id.id,
+							'qty':qty,
+							'qty_available':mr_line.product_id.qty_available,
+							'internal_move_request_line_id':mr_line.id,
+							'detail_ids':self._loadLineDetail(cr,uid,mr_line),
+							'state':'draft',
+							'source':context['location'],
+							'destination':context['destination']
+						}));
+						
+		lines_ids = self.pool.get('internal.move.line').search(cr, uid, [('internal_move_id','=',val.id)], context=context)
+		self.pool.get('internal.move.line').unlink(cr, uid, lines_ids, context=context)
+
+		self.pool.get('internal.move').write(cr,uid,ids,{'lines':will_load},context=context)
+
+		return True			
 
 	def action_create_return(self,cr,uid,ids,context=None):
 		if context is None:
