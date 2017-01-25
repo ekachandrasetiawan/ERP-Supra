@@ -570,7 +570,7 @@ class order_preparation(osv.osv):
 							else:
 								set_qty = (y.qty + y.returned_qty) - (y.on_process_qty + y.shipped_qty)
 
-							if set_qty > 0:
+							if set_qty > 0 and x.state not in ['cancel','draft']:
 								line.append({
 									'no': seq_no,
 									'product_id' : y.product_id.id,
