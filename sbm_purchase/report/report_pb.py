@@ -70,6 +70,10 @@ class ReportPB(report_sxw.rml_parse):
 					
 					part_no = "\r\n\r\n"+x.name.default_code
 
+				if len(x.part_no) > 10:
+
+					part_no = "\r\n\r\n"+x.part_no
+
 
 			keterangan =  x.keterangan
 			if x.keterangan and len(x.keterangan)>64:
