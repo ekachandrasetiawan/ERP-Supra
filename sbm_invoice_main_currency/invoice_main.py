@@ -993,10 +993,16 @@ class sale_order_line(osv.osv):
 				raise osv.except_osv(_('Error!'),
 							_('There is no Fiscal Position defined or Income category account defined for default properties of Product categories.'))
 
-			lineDesc = line.name or ""
+			if line.name:
+				lineDesc = line.name
+			else:
+				lineDesc = ""
 
 			for mat in line.material_lines:
-				lineDesc += mat.desc or ""+'\n'
+				if mat.desc:
+					lineDesc += mat.desc+'\n'
+				else:
+					lineDesc += '\n'
 
 			res = {
 				'name': lineDesc,

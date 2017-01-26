@@ -2647,10 +2647,10 @@ class sale_advance_payment_inv(osv.osv_memory):
 				_('Invoice Complate'))
 		elif dp_percentage == 0 and amount_total >= so.amount_total:
 			raise osv.except_osv(_('Informasi'),
-				_('Invoice Complate'))
+				_('Invoice Complete'))
 		elif amount_total >= so.amount_total:
 			raise osv.except_osv(_('Informasi'),
-				_('Invoice Complate'))
+				_('Invoice Complete'))
 		elif dp_percentage + wizard.amount > 100:
 			raise osv.except_osv(_('Warning'),
 				_('invoice can not be in the process, the percentage is too large'))
@@ -2658,6 +2658,9 @@ class sale_advance_payment_inv(osv.osv_memory):
 			print '==========ok===='
 
 		res = super(sale_advance_payment_inv,self).create_invoices(cr,uid,ids,context=context)
+		print res,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+		raise osv.except_osv(_('Informasi'),
+				_('Invoice Complete'))
 		return res
 
 	def _check_is_invoice_by_delivery_note_exist(self,cr,uid,ids,sale_obj):
