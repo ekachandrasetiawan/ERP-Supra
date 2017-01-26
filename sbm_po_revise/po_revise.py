@@ -159,6 +159,12 @@ class Purchase_Order(osv.osv):
 	# 		order = context['default_order']
 	# 	return super(Purchase_Order, self).search(cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count)
 
+	STATES_RECEIVING = [
+		('wait', 'Waiting'),
+		('partial', 'Partial Received'),
+		('full', 'Full Received'),
+		('none','Not Applicable')
+	]
 
 	_inherit = 'purchase.order'
 
@@ -187,14 +193,48 @@ class Purchase_Order(osv.osv):
 
 		return res
 
+	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for data in self.browse(cr,uid,ids,context):
+			full = False
+			partial = False
+
+			res[data.id] = "wait"
+
+			for x in data.order_line:
+				if x.received_items == x.product_qty:
+					full = True
+				elif x.received_items < x.product_qty:
+					partial = True
+
+			if full == True and partial == False:
+				res[data.id] = "full"
+			elif full == False and partial == True:
+				res[data.id] = "partial"
+			elif full == True and partial == True:
+				res[data.id] = "partial"
+			elif full == False and partial == False:
+				res[data.id] = "wait"
+
+		return res
+
+	def _get_cek_receiving_status(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
+			result[line.order_id.id] = True
+		return result.keys()
+
 	_columns = {
 		'rev_counter':fields.integer('Rev Counter'),
 		'revise_histories': fields.one2many('purchase.order.revision', 'po_source', 'Purchase Order Revision'),
 		'po_revision_id': fields.many2one('purchase.order.revision', 'Purchase Order Revision'),
 		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,store=False),
+		'receiving_status':fields.function(_getParentState,method=True,string="Receiving Status",type="selection",selection=STATES_RECEIVING,
+			store=False),
 	}
 
 	_defaults ={
+		'invoice_method':'manual',
 		'rev_counter':0,
 	}
 
