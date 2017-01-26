@@ -169,6 +169,7 @@ class Purchase_Order(osv.osv):
 	}
 
 	_defaults ={
+		'invoice_method':'manual',
 		'rev_counter':0,
 	}
 
