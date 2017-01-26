@@ -168,6 +168,31 @@ class Purchase_Order(osv.osv):
 
 	_inherit = 'purchase.order'
 
+	INVOICE_STATE = [
+		('wait', 'Waiting'),
+		('partial', 'Partial Invoiced'),
+		('full', 'Full Invoiced')
+	]
+
+	# FOR INVOICE STATE FIELD
+	def _get_invoiced_status(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+
+		for data in self.browse(cr,uid,ids,context=context):
+			total_invoice = 0.0
+
+			res[data.id] = 'wait'
+
+			for line in data.order_line:
+				total_invoice+=line.invoiced_nominal
+
+			if total_invoice >= data.amount_total :
+				res[data.id]  = 'full'
+			elif total_invoice < data.amount_total and total_invoice > 0.0:
+				res[data.id] = 'partial'
+
+		return res
+
 	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for data in self.browse(cr,uid,ids,context):
@@ -203,6 +228,7 @@ class Purchase_Order(osv.osv):
 		'rev_counter':fields.integer('Rev Counter'),
 		'revise_histories': fields.one2many('purchase.order.revision', 'po_source', 'Purchase Order Revision'),
 		'po_revision_id': fields.many2one('purchase.order.revision', 'Purchase Order Revision'),
+		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,store=False),
 		'receiving_status':fields.function(_getParentState,method=True,string="Receiving Status",type="selection",selection=STATES_RECEIVING,
 			store=False),
 	}
