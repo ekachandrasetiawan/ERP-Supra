@@ -111,8 +111,7 @@ class Purchase_Order_Sbm(osv.osv):
 						#  Cek Qty Available Detail PB, Jika hasil nya 0 maka update state Detail PB
 						if valdetailpb.qty_available == 0.0:
 							self.pool.get('detail.pb').write(cr, uid, [z.line_pb_general_id.id], {'state':'proses'})
-
-					result.append(row)
+						result.append(row)
 
 				# Prosess Send Email
 				if row:
