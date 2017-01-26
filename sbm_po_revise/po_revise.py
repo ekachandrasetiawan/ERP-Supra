@@ -173,14 +173,33 @@ class Purchase_Order(osv.osv):
 		for data in self.browse(cr,uid,ids,context):
 			full = False
 			partial = False
+			service = False
 
 			res[data.id] = "wait"
 
+			count = len(data.order_line)
 			for x in data.order_line:
 				if x.received_items == x.product_qty:
 					full = True
 				elif x.received_items < x.product_qty:
 					partial = True
+
+
+				if count > 1:
+					i = 1
+					for i in range(count):
+						if x.product_id.type == 'service':
+							if i == 1 and x.product_id.type == 'service' and service == False:
+								service = True
+							elif i > 1 and x.product_id.type == 'service' and service == True:
+								service = False
+						i +=1
+				else:
+					if x.product_id.type == 'service':
+						service = True
+					else:
+						service = False
+
 
 			if full == True and partial == False:
 				res[data.id] = "full"
@@ -190,6 +209,9 @@ class Purchase_Order(osv.osv):
 				res[data.id] = "partial"
 			elif full == False and partial == False:
 				res[data.id] = "wait"
+
+			if service == True:
+				res[data.id] = "none"
 
 		return res
 
