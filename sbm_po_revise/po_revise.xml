@@ -237,6 +237,22 @@
         </field>
     </record>
 
+
+  <record id="view_po_receiving_status" model="ir.ui.view">
+       <field name="name">purchase.order.tree</field>
+       <field name="model">purchase.order</field>
+       <field name="type">form</field>
+       <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+       <field name="arch" type="xml">
+            <field name="state" position="after">
+                 <field name="receiving_status" />
+            </field>
+            <field name="state" position="replace">
+                <field name="state" invisible="1"/>
+            </field>
+       </field>
+  </record>
+
     <record id="add_readonly_purchase_purchase_form_view" model="ir.ui.view">
         <field name="name">add.readonly.purchase.purchase.form.view</field>
         <field name="model">purchase.order</field>
@@ -295,6 +311,18 @@
                 <field name="invoiced_nominal"/>
                 <field name="state"/>
             </tree>
+        </field>
+    </record>
+
+    <record id="view_po_revise_invoice_status_tree" model="ir.ui.view">
+        <field name="name">purchase.order.tree</field>
+        <field name="model">purchase.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref='sbm_purchase_import.view_purchase_order_import_tree'/>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                 <field name="invoice_status" />
+            </field>
         </field>
     </record>
 
