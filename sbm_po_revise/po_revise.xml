@@ -298,6 +298,18 @@
         </field>
     </record>
 
+    <record id="view_po_revise_invoice_status_tree" model="ir.ui.view">
+        <field name="name">purchase.order.tree</field>
+        <field name="model">purchase.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref='sbm_purchase_import.view_purchase_order_import_tree'/>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                 <field name="invoice_status" />
+            </field>
+        </field>
+    </record>
+
     <record id="order_receive_status_form" model="ir.ui.view">
         <field name="name">purchase.order.line.form</field>
         <field name="model">purchase.order.line</field>
