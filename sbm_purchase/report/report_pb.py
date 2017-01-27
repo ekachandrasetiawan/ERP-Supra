@@ -80,7 +80,7 @@ class ReportPB(report_sxw.rml_parse):
 				name += "\r\n\r\n"+x.keterangan
 				keterangan = ""
 
-			arrLine.update({'no':i,'name':name,'desc':x.desc,'satuan':x.satuan,'part_no':part_no,'jumlah_diminta':x.jumlah_diminta,'stok':x.stok,'keterangan':keterangan,'so_name':so_name})
+			arrLine.update({'no':x.no,'name':name,'desc':x.desc,'satuan':x.satuan,'part_no':part_no,'jumlah_diminta':x.jumlah_diminta,'stok':x.stok,'keterangan':keterangan,'so_name':so_name})
 			res.append(arrLine)
 			arrLine={}
 			i+=1
