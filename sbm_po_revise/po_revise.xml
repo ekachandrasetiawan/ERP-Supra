@@ -242,7 +242,7 @@
        <field name="name">purchase.order.tree</field>
        <field name="model">purchase.order</field>
        <field name="type">form</field>
-       <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+       <field name="inherit_id" ref="sbm_purchase_import.view_purchase_order_import_tree"/>
        <field name="arch" type="xml">
             <field name="state" position="after">
                  <field name="receiving_status" />
@@ -420,7 +420,7 @@
     <record id="seq_purchase_order_fix_bug" model="ir.sequence">
         <field name="name">Sequence Purchase Order Fix Bug</field>
         <field name="code">purchase.order.sequence</field>
-        <field name="padding">5</field>
+        <field name="padding">4</field>
     </record>
 
 
