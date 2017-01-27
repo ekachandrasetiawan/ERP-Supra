@@ -239,7 +239,7 @@
         <para style="terp_default_8_top">[[ lines['name'] ]]</para>
         <para style="terp_default_8_top">[[ lines['desc'] ]]</para>
       </td>
-      <td><para style="terp_default_8_top">[[ lines['part_no'] ]]</para></td>
+      <td><para style="terp_default_8_top"><xpre style="terp_default_8_top">[[ lines['part_no'] ]]</xpre></para></td>
       <td><para style="terp_default_Right_8">[[ lines['jumlah_diminta'] ]] [[ lines['satuan'].name ]]</para></td>
       <td><para style="terp_default_Right_8">[[ lines['stok'] ]]</para></td>
       <td><para style="terp_default_Right_8">[[ lines['keterangan'] ]] [[ lines['so_name'] ]]</para></td>

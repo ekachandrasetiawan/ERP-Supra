@@ -64,16 +64,10 @@ class ReportPB(report_sxw.rml_parse):
 
 			part_no = x.part_no
 			if x.detail_pb_id.proc_type=='sales':
-				pn = x.name.default_code
+				part_no = x.name.default_code
 
 				if x.name.default_code and len(x.name.default_code) > 10:
-					
 					part_no = "\r\n\r\n"+x.name.default_code
-
-				if len(x.part_no) > 10:
-
-					part_no = "\r\n\r\n"+x.part_no
-
 
 			keterangan =  x.keterangan
 			if x.keterangan and len(x.keterangan)>64:
