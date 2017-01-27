@@ -6,7 +6,7 @@
 	"category": "Purchase Order",
 	"description": """Modul ini digunakan untuk Menghandel Purchase order Revisi atau Pengganti""",
 	"init_xml": [],
-	'update_xml': ["po_revise.xml"],
+	'update_xml': ["po_revise.xml","search.xml"],
 	'demo_xml': [],
 	'installable': True,
 	'active': False,

@@ -193,6 +193,14 @@ class Purchase_Order(osv.osv):
 
 		return res
 
+
+	def _get_cek_invoicing_status(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
+			result[line.order_id.id] = True
+		return result.keys()
+
+
 	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for data in self.browse(cr,uid,ids,context):
@@ -246,13 +254,21 @@ class Purchase_Order(osv.osv):
 			result[line.order_id.id] = True
 		return result.keys()
 
+
 	_columns = {
 		'rev_counter':fields.integer('Rev Counter'),
 		'revise_histories': fields.one2many('purchase.order.revision', 'po_source', 'Purchase Order Revision'),
 		'po_revision_id': fields.many2one('purchase.order.revision', 'Purchase Order Revision'),
-		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,store=False),
+		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,
+			store={
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
+				'purchase.order.line': (_get_cek_invoicing_status, ['invoiced_nominal'], 20),
+			}),
 		'receiving_status':fields.function(_getParentState,method=True,string="Receiving Status",type="selection",selection=STATES_RECEIVING,
-			store=False),
+			store={
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
+				'purchase.order.line': (_get_cek_receiving_status, ['received_items'], 20),
+			}),
 	}
 
 	_defaults ={

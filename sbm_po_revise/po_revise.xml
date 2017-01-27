@@ -1,449 +1,448 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
+	<data>
 
-        <record id="wizard_po_revise_form" model="ir.ui.view">
-            <field name="name">Wizard Purhcase Order revise</field>
-            <field name="model">wizard.po.revise</field>
-            <field name="arch" type="xml">
-                <form string="Purchase Order revise" version="7.0">
-                    <group>
-                        <field name="po_source" readonly="True"/>
-                    </group>
-                    <group>
-                        <field name="reason"/>
-                    </group>
-                    <footer>
-                        <button name="request_po_revise" string="Submit" type="object" class="oe_highlight" confirm="Are You Sure to Submit Document ?"/>
-                        or
-                        <button string="Cancel" class="oe_link" special="cancel"/>
-                    </footer>
-                </form>
-            </field>
-        </record>
+		<record id="wizard_po_revise_form" model="ir.ui.view">
+			<field name="name">Wizard Purhcase Order revise</field>
+			<field name="model">wizard.po.revise</field>
+			<field name="arch" type="xml">
+				<form string="Purchase Order revise" version="7.0">
+					<group>
+						<field name="po_source" readonly="True"/>
+					</group>
+					<group>
+						<field name="reason"/>
+					</group>
+					<footer>
+						<button name="request_po_revise" string="Submit" type="object" class="oe_highlight" confirm="Are You Sure to Submit Document ?"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
 
-        <record id="wizard_po_revise_action" model="ir.actions.act_window">
-            <field name="name">Action Purcahse Order revise</field>
-            <field name="res_model">wizard.po.revise</field>
-            <field name="type">ir.actions.act_window</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="wizard_po_revise_form"/>
-        </record>
+		<record id="wizard_po_revise_action" model="ir.actions.act_window">
+			<field name="name">Action Purcahse Order revise</field>
+			<field name="res_model">wizard.po.revise</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="wizard_po_revise_form"/>
+		</record>
 
 
-        <!--  Purchase Order Revise -->
+		<!--  Purchase Order Revise -->
 
- 		<record id="view_po_revise_tree" model="ir.ui.view">
-            <field name="name">purchase.order.revision.tree</field>
-            <field name="model">purchase.order.revision</field>
-            <field name="type">tree</field>
-            <field name="priority">2</field>
-            <field name="arch" type="xml">
-                <tree string="Purchase Order Revision">
+		<record id="view_po_revise_tree" model="ir.ui.view">
+			<field name="name">purchase.order.revision.tree</field>
+			<field name="model">purchase.order.revision</field>
+			<field name="type">tree</field>
+			<field name="priority">2</field>
+			<field name="arch" type="xml">
+				<tree string="Purchase Order Revision">
 
-                	<field name="po_source"/>
-                	<field name="rev_counter"/>
-                    <field name="is_invoiced"/>
-	                <field name="state"/>
-                </tree>
-            </field>
-        </record>
+					<field name="po_source"/>
+					<field name="rev_counter"/>
+					<field name="is_invoiced"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
 		
 		<record id="view_po_revise_form" model="ir.ui.view">
-            <field name="name">purchase.order.revision.form</field>
-            <field name="model">purchase.order.revision</field>
-            <field name="type">form</field>
-            <field name="priority">2</field>
-            <field name="arch" type="xml">
-            <form string="Purchase Order Revise" version="7.0">
-                <header>
-                    <button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order" groups="purchase.group_purchase_user"/>
+			<field name="name">purchase.order.revision.form</field>
+			<field name="model">purchase.order.revision</field>
+			<field name="type">form</field>
+			<field name="priority">2</field>
+			<field name="arch" type="xml">
+			<form string="Purchase Order Revise" version="7.0">
+				<header>
+					<button name="create_po" type="object" states="to_revise" string="Create New Purchase Order" icon="STOCK_ADD" confirm="Are you sure To Create Purchase Order" groups="purchase.group_purchase_user"/>
 
-                    <button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager,purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" confirm="Are you sure to Confirm Purchase Order Revision"/>
+					<button name="po_revise_approve" states="confirm" string="Approve" type="object"  icon="gtk-apply" groups="account.group_account_manager,purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" confirm="Are you sure to Confirm Purchase Order Revision"/>
 
-                    <button name="po_revise_cancel" states="confirm" string="Cancel" type="object"  icon="STOCK_CANCEL" groups="account.group_account_manager" confirm="Are you sure to Cancel Purchase Order Revision"/>
+					<button name="po_revise_cancel" states="confirm" string="Cancel" type="object"  icon="STOCK_CANCEL" groups="account.group_account_manager" confirm="Are you sure to Cancel Purchase Order Revision"/>
 
-                    <field name="state" widget="statusbar" statusbar_visible="confirm,approved,to_revise,done"/>
+					<field name="state" widget="statusbar" statusbar_visible="confirm,approved,to_revise,done"/>
 
-                </header>
-                <sheet>
-                    <div class="oe_title">
-                        <h1>
-                            <label string="Purchase Order Revise"/>
-                            <separator string=""/>
-                            <field name="po_source" class="oe_inline" colspan="4"/>
-                        </h1>
-                    </div>
-                    <group col="4" colspan="4">
-                        <field name="rev_counter"/>
-                        <field name="new_po"/>
-                        <field name="is_invoiced"/>
-                    </group>
+				</header>
+				<sheet>
+					<div class="oe_title">
+						<h1>
+							<label string="Purchase Order Revise"/>
+							<separator string=""/>
+							<field name="po_source" class="oe_inline" colspan="4"/>
+						</h1>
+					</div>
+					<group col="4" colspan="4">
+						<field name="rev_counter"/>
+						<field name="new_po"/>
+						<field name="is_invoiced"/>
+					</group>
 
-                    <div class="oe_clear"/>
-                    <field name="reason" class="oe_inline" placeholder="Notes..."/>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="message_ids" widget="mail_thread"/>
-                </div>
-            </form>
-    </field>
-        </record>
+					<div class="oe_clear"/>
+					<field name="reason" class="oe_inline" placeholder="Notes..."/>
+				</sheet>
+				<div class="oe_chatter">
+					<field name="message_follower_ids" widget="mail_followers"/>
+					<field name="message_ids" widget="mail_thread"/>
+				</div>
+			</form>
+	</field>
+		</record>
 
-    <record id="view_po_revision_search" model="ir.ui.view">
-        <field name="name">purchase.order.revision.search</field>
-        <field name="model">purchase.order.revision</field>
-        <field name="type">search</field>
-        <field name="arch" type="xml">
-            <search string="Purchase Order Revision">
-                <group expand="!" string="Purchase Order Revision">
-                    <filter string="Confirm" name="confirm" icon="terp-check" domain="[('state','=','confirm')]"/>
-                </group>
-                <group expand="1" string="Group By...">
-                    <filter icon="terp-personal" name="group_po" string="PO No." domain="[]" context="{'group_by':'po_source'}"/>
-                </group>
+	<record id="view_po_revision_search" model="ir.ui.view">
+		<field name="name">purchase.order.revision.search</field>
+		<field name="model">purchase.order.revision</field>
+		<field name="type">search</field>
+		<field name="arch" type="xml">
+			<search string="Purchase Order Revision">
+				<group expand="!" string="Purchase Order Revision">
+					<filter string="Confirm" name="confirm" icon="terp-check" domain="[('state','=','confirm')]"/>
+				</group>
+				<group expand="1" string="Group By...">
+					<filter icon="terp-personal" name="group_po" string="PO No." domain="[]" context="{'group_by':'po_source'}"/>
+				</group>
 
-                <field name="po_source" select="1" string="Purchase Order No"/>
-                <field name="new_po" select="1" string="Purchase Order New No"/>
-                <field name="state" select="1" string="State"/>
-                <newline/>
-            </search>
-        </field>
-    </record>
-
-
-    <record model="ir.actions.act_window" id="action_purchase_order_to_revise">
-        <field name="name">Purchase Order Revision</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">purchase.order.revision</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="view_po_revision_search" />
-        <field name="context">{'search_default_confirm':1}</field>
-    </record>
-
-    <record model="ir.actions.act_window" id="action_po_line_waiting_approval">
-        <field name="name">Purchase Order Revision</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">purchase.order.revision</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="view_po_revision_search" />
-        <field name="tree_view_id" ref="view_po_revise_tree" />
-        <field name="context">{'search_default_confirm':1}</field>
-    </record>
-
-    <menuitem name="Purchase Order To Revise" parent="purchase.menu_procurement_management" id="purchase_order_to_revise" action="action_purchase_order_to_revise" groups="account.group_account_manager"/>
-
-    <record model="ir.actions.act_window" id="action_purchase_order_waiting_approval_po_local">
-        <field name="name">Waiting Purchase Order Local</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">purchase.order</field>
-        <field name="domain">[('state','=','confirmed'),('jenis','=','loc')]</field>
-        <field name="context">{}</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
-    <menuitem name="Waiting Approval PO Local" parent="purchase.menu_procurement_management" id="purchase_order_waiting_approval_po_local" action="action_purchase_order_waiting_approval_po_local" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
-
-    <record id="replace_sbm_purchaseorder_view_po_form_set" model="ir.ui.view">
-       <field name="name">purchase.order.form</field>
-       <field name="model">purchase.order</field>
-       <field name="type">form</field>
-       <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
-       <field name="arch" type="xml">
-            <xpath expr="//button[@string='Print Purchase Order']" position="replace"/>
-
-       </field>
-    </record>
-
-    <record id="replace_purchase_view_po_form_set" model="ir.ui.view">
-       <field name="name">purchase.order.form</field>
-       <field name="model">purchase.order</field>
-       <field name="type">form</field>
-       <field name="inherit_id" ref="purchase.purchase_order_form"/>
-       <field name="arch" type="xml">
-            <xpath expr="//button[@name='action_cancel']" position="after">
-                    <button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
-                </xpath>
-            <button name="purchase_approve" position="replace">
-                <button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" icon="STOCK_APPLY" class="oe_highlight"/>
-            </button>
-            <button name="action_cancel_draft" position="replace">
-                <button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" icon="STOCK_JUMP_TO"/>
-            </button>
-            <button name="purchase_cancel" position="replace">
-                <button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
-            </button>
-            <button name="purchase_confirm" position="replace">
-                <button name="purchase_confirm" states="draft" string="Confirm Order" icon="STOCK_APPLY" class="oe_highlight"/>
-            </button>
-            <button name="action_cancel" position="replace">
-                <button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
-            </button>
-            <button name="view_picking" position="replace">
-                <button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" icon="STOCK_OPEN"/>
-            </button>
-            
-            <xpath expr="//button[@string='Resend Purchase Order']" position="replace"></xpath>
-       </field>
-    </record>
+				<field name="po_source" select="1" string="Purchase Order No"/>
+				<field name="new_po" select="1" string="Purchase Order New No"/>
+				<field name="state" select="1" string="State"/>
+				<newline/>
+			</search>
+		</field>
+	</record>
 
 
-    <record id="purchase_order_form_view_report_po_revision" model="ir.ui.view">
-        <field name="name">purchase.order.form</field>
-        <field name="model">purchase.order</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
-        <field name="arch" type="xml">
-            <button name="print_po_import_out" position="replace">
-              <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Purchase Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
-              <button name="print_po_out" type="object" states="draft,sent,confirmed,approved" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user"/>
-            </button>
-        </field>
-    </record>
+	<record model="ir.actions.act_window" id="action_purchase_order_to_revise">
+		<field name="name">Purchase Order Revision</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">purchase.order.revision</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="search_view_id" ref="view_po_revision_search" />
+		<field name="context">{'search_default_confirm':1}</field>
+	</record>
 
-    <record id="purchase_order_invoice_po_revision" model="ir.ui.view">
-        <field name="name">purchase.order.invoice.po.revision</field>
-        <field name="model">purchase.order</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="purchase_partial_invoicing.purchase_order_invoice"/>
-        <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button name="%(purchase_partial_invoicing.action_purchase_partial_invoice)d" string="Partial Invoice" type="action" states="approved" groups="base.group_user" icon="terp-dolar" class="oe_highlight"/>
-            </xpath>
+	<record model="ir.actions.act_window" id="action_po_line_waiting_approval">
+		<field name="name">Purchase Order Revision</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">purchase.order.revision</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="search_view_id" ref="view_po_revision_search" />
+		<field name="tree_view_id" ref="view_po_revise_tree" />
+		<field name="context">{'search_default_confirm':1}</field>
+	</record>
 
-             <xpath expr="//header" position="inside">
-                <button name="action_invoice_create" string="Full Invoice" type="object" states="approved" groups="base.group_user" icon="terp-dolar" class="oe_highlight"/>
-            </xpath>
-        </field>
-    </record>
+	<menuitem name="Purchase Order To Revise" parent="purchase.menu_procurement_management" id="purchase_order_to_revise" action="action_purchase_order_to_revise" groups="account.group_account_manager"/>
+
+	<record model="ir.actions.act_window" id="action_purchase_order_waiting_approval_po_local">
+		<field name="name">Waiting Purchase Order Local</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">purchase.order</field>
+		<field name="domain">[('state','=','confirmed'),('jenis','=','loc')]</field>
+		<field name="context">{}</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+
+	<menuitem name="Waiting Approval PO Local" parent="purchase.menu_procurement_management" id="purchase_order_waiting_approval_po_local" action="action_purchase_order_waiting_approval_po_local" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
+
+	<record id="replace_sbm_purchaseorder_view_po_form_set" model="ir.ui.view">
+	   <field name="name">purchase.order.form</field>
+	   <field name="model">purchase.order</field>
+	   <field name="type">form</field>
+	   <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
+	   <field name="arch" type="xml">
+			<xpath expr="//button[@string='Print Purchase Order']" position="replace"/>
+
+	   </field>
+	</record>
+
+	<record id="replace_purchase_view_po_form_set" model="ir.ui.view">
+	   <field name="name">purchase.order.form</field>
+	   <field name="model">purchase.order</field>
+	   <field name="type">form</field>
+	   <field name="inherit_id" ref="purchase.purchase_order_form"/>
+	   <field name="arch" type="xml">
+			<xpath expr="//button[@name='action_cancel']" position="after">
+					<button name="action_po_to_revise" states="approved" string="Ask For Revision" type="object" icon="STOCK_NEW"/>
+				</xpath>
+			<button name="purchase_approve" position="replace">
+				<button name="purchase_approve" states="confirmed" string="Approve Order" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" icon="STOCK_APPLY" class="oe_highlight"/>
+			</button>
+			<button name="action_cancel_draft" position="replace">
+				<button name="action_cancel_draft" states="cancel,sent,confirmed" string="Set to Draft" type="object" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief" icon="STOCK_JUMP_TO"/>
+			</button>
+			<button name="purchase_cancel" position="replace">
+				<button name="purchase_cancel" states="draft,confirmed,sent" string="Cancel Order" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
+			</button>
+			<button name="purchase_confirm" position="replace">
+				<button name="purchase_confirm" states="draft" string="Confirm Order" icon="STOCK_APPLY" class="oe_highlight"/>
+			</button>
+			<button name="action_cancel" position="replace">
+				<button name="action_cancel" states="approved,except_picking,except_invoice" string="Cancel Order" type="object" icon="STOCK_CANCEL" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief"/>
+			</button>
+			<button name="view_picking" position="replace">
+				<button name="view_picking" string="Receive Products" type="object" attrs="{'invisible': ['|', ('shipped','=',True), ('state','!=', 'approved')]}" icon="STOCK_OPEN"/>
+			</button>
+			
+			<xpath expr="//button[@string='Resend Purchase Order']" position="replace"></xpath>
+	   </field>
+	</record>
+
+	<record id="purchase_order_form_view_report_po_revision" model="ir.ui.view">
+		<field name="name">purchase.order.form</field>
+		<field name="model">purchase.order</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref="ad_purchase_import.purchase_order_form_view_report"/>
+		<field name="arch" type="xml">
+			<button name="print_po_import_out" position="replace">
+			  <button name="print_po_import_out" type="object" states="draft,sent,confirmed" string="Print Purchase Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user" attrs="{'invisible':[('jenis', 'in', ['loc','loc-petty'])]}"/>
+			  <button name="print_po_out" type="object" states="draft,sent,confirmed,approved" string="Print Purchase Local" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user"/>
+			</button>
+		</field>
+	</record>
+
+	<record id="purchase_order_invoice_po_revision" model="ir.ui.view">
+		<field name="name">purchase.order.invoice.po.revision</field>
+		<field name="model">purchase.order</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref="purchase_partial_invoicing.purchase_order_invoice"/>
+		<field name="arch" type="xml">
+			<xpath expr="//header" position="inside">
+				<button name="%(purchase_partial_invoicing.action_purchase_partial_invoice)d" string="Partial Invoice" type="action" states="approved" groups="base.group_user" icon="terp-dolar" class="oe_highlight"/>
+			</xpath>
+
+			 <xpath expr="//header" position="inside">
+				<button name="action_invoice_create" string="Full Invoice" type="object" states="approved" groups="base.group_user" icon="terp-dolar" class="oe_highlight"/>
+			</xpath>
+		</field>
+	</record>
 
 
-    <!-- ADD READONLY -->
-    <record id="add_readonly_rent_view" model="ir.ui.view">
-        <field name="name">add.readonly.rent.view</field>
-        <field name="model">purchase.order</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="sbm_purchase_rent.termpaymentpo_inherit_view"/>
-        <field name="arch" type="xml">
-            <field name="term_of_payment" position="attributes">
-                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
-                <attribute name="required">True</attribute>
-            </field>
-        </field>
-    </record>
+	<!-- ADD READONLY -->
+	<record id="add_readonly_rent_view" model="ir.ui.view">
+		<field name="name">add.readonly.rent.view</field>
+		<field name="model">purchase.order</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref="sbm_purchase_rent.termpaymentpo_inherit_view"/>
+		<field name="arch" type="xml">
+			<field name="term_of_payment" position="attributes">
+				<attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+				<attribute name="required">True</attribute>
+			</field>
+		</field>
+	</record>
 
 
   <record id="view_po_receiving_status" model="ir.ui.view">
-       <field name="name">purchase.order.tree</field>
-       <field name="model">purchase.order</field>
-       <field name="type">form</field>
-       <field name="inherit_id" ref="sbm_purchase_import.view_purchase_order_import_tree"/>
-       <field name="arch" type="xml">
-            <field name="state" position="after">
-                 <field name="receiving_status" />
-            </field>
-            <field name="state" position="replace">
-                <field name="state" invisible="1"/>
-            </field>
-       </field>
+	   <field name="name">purchase.order.tree</field>
+	   <field name="model">purchase.order</field>
+	   <field name="type">form</field>
+	   <field name="inherit_id" ref="sbm_purchase_import.view_purchase_order_import_tree"/>
+	   <field name="arch" type="xml">
+			<field name="state" position="after">
+				 <field name="receiving_status" />
+			</field>
+			<field name="state" position="replace">
+				<field name="state" invisible="1"/>
+			</field>
+	   </field>
   </record>
 
-    <record id="add_readonly_purchase_purchase_form_view" model="ir.ui.view">
-        <field name="name">add.readonly.purchase.purchase.form.view</field>
-        <field name="model">purchase.order</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="purchase.purchase_order_form"/>
-        <field name="arch" type="xml">
-            <field name="origin" position="attributes">
-                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
-            </field>
-             <field name="order_line" position="attributes">
-                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
-            </field>
-        </field>
-    </record>
+	<record id="add_readonly_purchase_purchase_form_view" model="ir.ui.view">
+		<field name="name">add.readonly.purchase.purchase.form.view</field>
+		<field name="model">purchase.order</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref="purchase.purchase_order_form"/>
+		<field name="arch" type="xml">
+			<field name="origin" position="attributes">
+				<attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+			</field>
+			 <field name="order_line" position="attributes">
+				<attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+			</field>
+		</field>
+	</record>
 
-    <record id="add_readonly_view_po_form_set" model="ir.ui.view">
-        <field name="name">add.readonly.view.po.form.set</field>
-        <field name="model">purchase.order</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
-        <field name="arch" type="xml">
-            <field name="attention" position="attributes">
-                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
-            </field>
-            <field name="duedate" position="attributes">
-                <attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
-            </field>
-             <field name="name" position="attributes">
-                <attribute name="attrs">{'readonly':True}</attribute>
-            </field>
-        </field>
-    </record>
+	<record id="add_readonly_view_po_form_set" model="ir.ui.view">
+		<field name="name">add.readonly.view.po.form.set</field>
+		<field name="model">purchase.order</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
+		<field name="arch" type="xml">
+			<field name="attention" position="attributes">
+				<attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+			</field>
+			<field name="duedate" position="attributes">
+				<attribute name="attrs">{'readonly':[('state','!=','draft')]}</attribute>
+			</field>
+			 <field name="name" position="attributes">
+				<attribute name="attrs">{'readonly':True}</attribute>
+			</field>
+		</field>
+	</record>
 
-    <!-- END READONLY -->
+	<!-- END READONLY -->
 
-    <record id="order_receive_status_tree" model="ir.ui.view">
-        <field name="name">purchase.order.line.tree</field>
-        <field name="model">purchase.order.line</field>
-        <field name="type">tree</field>
-        <field name="priority">2</field>
-        <field name="arch" type="xml">
-            <tree string="Order Receive Status" colors="red:(date_planned &lt; date_now) and product_qty > received_items);
-                blue:(date_planned &gt; date_now) and product_qty > received_items);
-                green:(date_planned == date_now) and received_items &lt; product_qty); 
-                black:(state == 'done');black:(product_qty == received_items)">
-                <field name="order_id"/>
-                <field name="product_id"/>
-                <field name="name"/>
-                <field name="part_number"/>
-                <field name="date_planned"/>
-                <field name="date_now" invisible="1"/>
-                <field name="product_qty"/>
-                <field name="product_uom"/>
-                <field name="received_items"/>
-                <field name="invoiced_items"/>
-                <field name="invoiced_nominal"/>
-                <field name="state"/>
-            </tree>
-        </field>
-    </record>
+	<record id="order_receive_status_tree" model="ir.ui.view">
+		<field name="name">purchase.order.line.tree</field>
+		<field name="model">purchase.order.line</field>
+		<field name="type">tree</field>
+		<field name="priority">2</field>
+		<field name="arch" type="xml">
+			<tree string="Order Receive Status" colors="red:(date_planned &lt; date_now) and product_qty > received_items);
+				blue:(date_planned &gt; date_now) and product_qty > received_items);
+				green:(date_planned == date_now) and received_items &lt; product_qty); 
+				black:(state == 'done');black:(product_qty == received_items)">
+				<field name="order_id"/>
+				<field name="product_id"/>
+				<field name="name"/>
+				<field name="part_number"/>
+				<field name="date_planned"/>
+				<field name="date_now" invisible="1"/>
+				<field name="product_qty"/>
+				<field name="product_uom"/>
+				<field name="received_items"/>
+				<field name="invoiced_items"/>
+				<field name="invoiced_nominal"/>
+				<field name="state"/>
+			</tree>
+		</field>
+	</record>
 
-    <record id="view_po_revise_invoice_status_tree" model="ir.ui.view">
-        <field name="name">purchase.order.tree</field>
-        <field name="model">purchase.order</field>
-        <field name="type">form</field>
-        <field name="inherit_id" ref='sbm_purchase_import.view_purchase_order_import_tree'/>
-        <field name="arch" type="xml">
-            <field name="state" position="after">
-                 <field name="invoice_status" />
-            </field>
-        </field>
-    </record>
+	<record id="view_po_revise_invoice_status_tree" model="ir.ui.view">
+		<field name="name">purchase.order.tree</field>
+		<field name="model">purchase.order</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref='sbm_purchase_import.view_purchase_order_import_tree'/>
+		<field name="arch" type="xml">
+			<field name="state" position="after">
+				 <field name="invoice_status" />
+			</field>
+		</field>
+	</record>
 
-    <record id="order_receive_status_form" model="ir.ui.view">
-        <field name="name">purchase.order.line.form</field>
-        <field name="model">purchase.order.line</field>
-        <field name="inherit_id" ref="purchase.purchase_order_line_form"/>
-        <field name="arch" type="xml">
-            <field name="product_id" position="before">
-                <field name="order_id" class="oe_inline"/>
-            </field>
-        </field>
-    </record>
+	<record id="order_receive_status_form" model="ir.ui.view">
+		<field name="name">purchase.order.line.form</field>
+		<field name="model">purchase.order.line</field>
+		<field name="inherit_id" ref="purchase.purchase_order_line_form"/>
+		<field name="arch" type="xml">
+			<field name="product_id" position="before">
+				<field name="order_id" class="oe_inline"/>
+			</field>
+		</field>
+	</record>
 
-    <record id="order_receive_status_tree_search" model="ir.ui.view">
-        <field name="name">purchase.order.line.search</field>
-        <field name="model">purchase.order.line</field>
-        <field name="type">search</field>
-        <field name="arch" type="xml">
-            <search string="Purchase Order Line">
-                <group expand="!" string="Filter By Type">
+	<record id="order_receive_status_tree_search" model="ir.ui.view">
+		<field name="name">purchase.order.line.search</field>
+		<field name="model">purchase.order.line</field>
+		<field name="type">search</field>
+		<field name="arch" type="xml">
+			<search string="Purchase Order Line">
+				<group expand="!" string="Filter By Type">
 
-                    <field string="Multi Search" name="name" filter_domain="[('name','ilike', self)]"/>
-                    <field string="PO No" name="order_id" filter_domain="[('order_id','=',self)]"/>
-                    <field string="Product" name="product_id" filter_domain="[('product_id','=',self)]"/>
-                    <filter string="Purchase Local" name="local" domain="[('order_id.jenis','!=', 'impj')]"/>
-                    <filter string="Purchase Import" name="import" domain="[('order_id.jenis','=', 'impj')]"/>
-                    
-                </group>
+					<field string="Multi Search" name="name" filter_domain="[('name','ilike', self)]"/>
+					<field string="PO No" name="order_id" filter_domain="[('order_id','=',self)]"/>
+					<field string="Product" name="product_id" filter_domain="[('product_id','=',self)]"/>
+					<filter string="Purchase Local" name="local" domain="[('order_id.jenis','!=', 'impj')]"/>
+					<filter string="Purchase Import" name="import" domain="[('order_id.jenis','=', 'impj')]"/>
+					
+				</group>
 
-                <group expand="!" string="Filter By Process">
-                    <filter string="Uncomplete" name="uncomplete" domain="[('qty_status_uncomplete', '=', True)]"/>
-                    <filter string="Overdue" name="overdue" domain="[('qty_status_overdue','=', True)]"/>
-                    <filter string="Todo" name="todo" domain="[('qty_status_todo','=', True)]"/>
-                </group>
+				<group expand="!" string="Filter By Process">
+					<filter string="Uncomplete" name="uncomplete" domain="[('qty_status_uncomplete', '=', True)]"/>
+					<filter string="Overdue" name="overdue" domain="[('qty_status_overdue','=', True)]"/>
+					<filter string="Todo" name="todo" domain="[('qty_status_todo','=', True)]"/>
+				</group>
 
-                <group expand="!" string="Filter By State">
-                    <filter string="Confirmed" name="confirmed" icon="terp-check" domain="[('state','=','confirmed')]"/>
-                    <filter string="Done" name="done" icon="terp-check" domain="[('state','=','done')]"/>
-                </group>
+				<group expand="!" string="Filter By State">
+					<filter string="Confirmed" name="confirmed" icon="terp-check" domain="[('state','=','confirmed')]"/>
+					<filter string="Done" name="done" icon="terp-check" domain="[('state','=','done')]"/>
+				</group>
 
-                <group expand="!" string="Filter Others">
-                    <filter string="Filter by Following PO" name="following_po" domain="[('following_po','=', True)]"/>
-                </group>
+				<group expand="!" string="Filter Others">
+					<filter string="Filter by Following PO" name="following_po" domain="[('following_po','=', True)]"/>
+				</group>
 
-                <group string="Group By">
-                    <filter icon="terp-stock_effects-object-colorize" name="state" string="State" domain="[]" context="{'group_by':'state'}"/>
-                </group>
+				<group string="Group By">
+					<filter icon="terp-stock_effects-object-colorize" name="state" string="State" domain="[]" context="{'group_by':'state'}"/>
+				</group>
 
-                <newline/>
-            </search>
-        </field>
-    </record>
+				<newline/>
+			</search>
+		</field>
+	</record>
 
-    <record model="ir.actions.act_window" id="action_order_receive_status">
-        <field name="name">Order Receive Status</field>
-        <field name="res_model">purchase.order.line</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <field name="domain">[('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft'])]</field>
-        <field name="search_view_id" ref="order_receive_status_tree_search" />
-        <field name="context">{"search_default_uncomplete":1}</field>
-    </record>
+	<record model="ir.actions.act_window" id="action_order_receive_status">
+		<field name="name">Order Receive Status</field>
+		<field name="res_model">purchase.order.line</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="domain">[('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft'])]</field>
+		<field name="search_view_id" ref="order_receive_status_tree_search" />
+		<field name="context">{"search_default_uncomplete":1}</field>
+	</record>
 
-    <record id="action_order_receive_status" model="ir.actions.act_window">
-        <field name="name">Order Receive Status</field>
-        <field name="res_model">purchase.order.line</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <field name="domain">['&amp;','&amp;',('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft']),('order_id.state','in',['approved','except_picking','except_invoice','done'])]</field>
-        <field name="search_view_id" ref="order_receive_status_tree_search" />
-        <field name="context">{"search_default_uncomplete":1}</field>
-    </record>
+	<record id="action_order_receive_status" model="ir.actions.act_window">
+		<field name="name">Order Receive Status</field>
+		<field name="res_model">purchase.order.line</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+		<field name="domain">['&amp;','&amp;',('product_id.type','!=', 'service'),('state', '!=', ['cancel','draft']),('order_id.state','in',['approved','except_picking','except_invoice','done'])]</field>
+		<field name="search_view_id" ref="order_receive_status_tree_search" />
+		<field name="context">{"search_default_uncomplete":1}</field>
+	</record>
 
-    <record id="action_order_receive_status_tree5_view1" model="ir.actions.act_window.view">
-        <field eval="1" name="sequence"/>
-        <field name="view_mode">tree</field>
-        <field name="view_id" ref="order_receive_status_tree"/>
-        <field name="act_window_id" ref="action_order_receive_status"/>
-    </record>
-    <record id="action_order_receive_status_tree5_view2" model="ir.actions.act_window.view">
-        <field eval="2" name="sequence"/>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="order_receive_status_form"/>
-        <field name="act_window_id" ref="action_order_receive_status"/>
-    </record>
-
-
-    <record id="seq_type_purchase_order" model="ir.sequence.type">
-        <field name="name">Sequence Purchase Order Fix Bug</field>
-        <field name="code">purchase.order.sequence</field>
-    </record>
-
-    <record id="seq_purchase_order_fix_bug" model="ir.sequence">
-        <field name="name">Sequence Purchase Order Fix Bug</field>
-        <field name="code">purchase.order.sequence</field>
-        <field name="padding">4</field>
-    </record>
+	<record id="action_order_receive_status_tree5_view1" model="ir.actions.act_window.view">
+		<field eval="1" name="sequence"/>
+		<field name="view_mode">tree</field>
+		<field name="view_id" ref="order_receive_status_tree"/>
+		<field name="act_window_id" ref="action_order_receive_status"/>
+	</record>
+	<record id="action_order_receive_status_tree5_view2" model="ir.actions.act_window.view">
+		<field eval="2" name="sequence"/>
+		<field name="view_mode">form</field>
+		<field name="view_id" ref="order_receive_status_form"/>
+		<field name="act_window_id" ref="action_order_receive_status"/>
+	</record>
 
 
-    <menuitem name="Order Receive Status" parent="purchase.menu_procurement_management" id="order_receive_status_id" action="action_order_receive_status"/>
+	<record id="seq_type_purchase_order" model="ir.sequence.type">
+		<field name="name">Sequence Purchase Order Fix Bug</field>
+		<field name="code">purchase.order.sequence</field>
+	</record>
 
-    <record id="inherit_view_invoice_form" model="ir.ui.view">
-       <field name="name">account.invoice.form</field>
-       <field name="model">account.invoice</field>
-       <field name="type">form</field>
-       <field name="inherit_id" ref="account.invoice_supplier_form"/>
-       <field name="arch" type="xml">
-        <button string="Validate" position="after">
-            <button name="invoice_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are You Sure to Submit Invoice ?"/>
-        </button>
-        <button string="Validate" position="replace">
-            <button name="invoice_open" states="submited,proforma2" string="Validate" class="oe_highlight" groups="account.group_account_invoice" confirm="Are You Sure to Validate Invoice ?"/>
-        </button>
-        
-        <xpath expr="//form/header/button[@name='action_cancel_draft']"  position="replace">
-            <button name="action_cancel_draft" states="cancel,proforma2,submited" string="Reset to Draft" type="object" groups="sbm_inherit.group_customer_invoice_administrator,sbm_inherit.group_customer_invoice_set_to_draft" confirm="Are You Sure to Set To Draft Invoice ?"/>
-        </xpath>
-       </field>
-    </record>
+	<record id="seq_purchase_order_fix_bug" model="ir.sequence">
+		<field name="name">Sequence Purchase Order Fix Bug</field>
+		<field name="code">purchase.order.sequence</field>
+		<field name="padding">4</field>
+	</record>
 
-    </data>
+
+	<menuitem name="Order Receive Status" parent="purchase.menu_procurement_management" id="order_receive_status_id" action="action_order_receive_status"/>
+
+	<record id="inherit_view_invoice_form" model="ir.ui.view">
+	   <field name="name">account.invoice.form</field>
+	   <field name="model">account.invoice</field>
+	   <field name="type">form</field>
+	   <field name="inherit_id" ref="account.invoice_supplier_form"/>
+	   <field name="arch" type="xml">
+		<button string="Validate" position="after">
+			<button name="invoice_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are You Sure to Submit Invoice ?"/>
+		</button>
+		<button string="Validate" position="replace">
+			<button name="invoice_open" states="submited,proforma2" string="Validate" class="oe_highlight" groups="account.group_account_invoice" confirm="Are You Sure to Validate Invoice ?"/>
+		</button>
+		
+		<xpath expr="//form/header/button[@name='action_cancel_draft']"  position="replace">
+			<button name="action_cancel_draft" states="cancel,proforma2,submited" string="Reset to Draft" type="object" groups="sbm_inherit.group_customer_invoice_administrator,sbm_inherit.group_customer_invoice_set_to_draft" confirm="Are You Sure to Set To Draft Invoice ?"/>
+		</xpath>
+	   </field>
+	</record>
+
+	</data>
 </openerp>
