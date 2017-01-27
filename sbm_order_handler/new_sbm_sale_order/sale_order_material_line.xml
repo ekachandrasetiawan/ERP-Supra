@@ -126,6 +126,7 @@
 				<field name="detail_pb_ids" position="replace">
 					<field name="detail_pb_ids" nolabel="1" colspan="4" context="{'default_source_model' : source_model}">
                         <tree string="Product Detail" editable="none">
+                        	<field name="no"/>
                           	<field name="name" on_change="setvariants(name)"/>
                           	<field name="desc"/>
                           	<field name="variants"/>
@@ -140,6 +141,7 @@
                             <field name="state"/>
                         </tree>
                         <form string="Product Detail Purchase Requisition">
+                        	<field name="no" colspan="4"/>
                     		<field name="name" on_change="setvariants(name)" colspan="4"/>
                     		<field name="desc" colspan="4"/>
                         	<field name="variants"/>

@@ -63,7 +63,6 @@ class Pembelian_Barang(osv.osv):
 
 	_name = 'pembelian.barang'
 	_columns = {
-		'no': fields.integer('No'),
 		'name':fields.char('No.PB',required=True, readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
 		'spk_no':fields.char('SPK No / PO No',readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]},track_visibility='onchange'),
 		'tanggal':fields.date('Date', required=True,readonly=True, states={'draft':[('readonly',False)],'edit':[('readonly',False)]}),
@@ -120,7 +119,7 @@ class Pembelian_Barang(osv.osv):
 		'source_location_request_id': 12,
 	}
 
-	_order = 'no ASC, id DESC'
+	_order = 'id DESC'
 
 
 	def send_email_validate(self, cr, uid, ids, context={}):

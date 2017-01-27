@@ -35,7 +35,6 @@
             <field name="priority">2</field>
             <field name="arch" type="xml">
                 <tree string="Regular Requisition">
-                	<field name="no"/>
                 	<field name="name"/>
                 	<field name="ref_pb"/>
 	                <field name="tanggal"/>
@@ -86,7 +85,6 @@
 			                <field name="ref_pb"/>
 			                <field name="source_location_request_id"/>
 		   					<field name="destination_location_request_id"/>
-		   					<field name="no"/>
 			            </group>
 			             <notebook colspan="4">
 					    	<page string="Product Detail">
