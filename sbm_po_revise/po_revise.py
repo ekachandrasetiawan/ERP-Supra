@@ -490,27 +490,33 @@ class Purchase_Order_Revision(osv.osv):
 
 	_rec_name = 'po_source'
 
-	def send_email(self, cr, uid, ids, Subject, email_to, url, html, context={}):
-		me="jay@beltcare.com"
-		you= email_to
-		msg = MIMEMultipart('alternative')
-		msg['Subject'] = Subject
-		msg['From'] = 'noreply@beltcare.com'
-		msg['To'] = you
+	def send_email(self, cr, uid, ids, Subject, email_to, url, html, po_revise=False, context={}):
+		mail_mail = self.pool.get('mail.mail')
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
 
-		part2 = MIMEText(html, 'html')
+		cek_partner = obj_partner.search(cr,uid,[('email', '=' ,email_to)])
+		partner = obj_partner.browse(cr,uid,cek_partner)[0]
 
-		msg.attach(part2)
-		# Login Email
-		username = 'jay@beltcare.com' 
-		password = '---------'
 
-		# Kirim Email
-		# server = smtplib.SMTP('smtp.beltcare.com:587')
-		# server.starttls()
-		# server.login(username,password)
-		# server.sendmail(me, you,msg.as_string())
-		# server.quit()
+		if po_revise == True:
+			model = 'purchase.order.revision'
+			for x in ids:
+				res_id = x
+		else:
+			model = 'purchase.order'
+			res_id = ids
+
+		mail_id = mail_mail.create(cr, uid, {
+			'model': model,
+			'res_id': res_id,
+			'subject': Subject,
+			'body_html': html,
+			'auto_delete': True,
+			}, context=context)
+
+		mail_mail.send(cr, uid, [mail_id], recipient_ids=[partner.id], context=context)
+
 		return True
 
 	def template_email_approve(self, cr, uid, ids, user, no_po, url, context={}):
@@ -708,8 +714,9 @@ class Purchase_Order_Revision(osv.osv):
 				for s in usr.user_ids:
 					if s.email:
 						email_to = s.email
+						po_revise = True
 						template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})
-						self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+						self.send_email(cr, uid, ids, subject, email_to, url, template_email, po_revise, context={})
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
