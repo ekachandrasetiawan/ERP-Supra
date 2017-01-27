@@ -2658,9 +2658,6 @@ class sale_advance_payment_inv(osv.osv_memory):
 			print '==========ok===='
 
 		res = super(sale_advance_payment_inv,self).create_invoices(cr,uid,ids,context=context)
-		print res,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-		raise osv.except_osv(_('Informasi'),
-				_('Invoice Complete'))
 		return res
 
 	def _check_is_invoice_by_delivery_note_exist(self,cr,uid,ids,sale_obj):
