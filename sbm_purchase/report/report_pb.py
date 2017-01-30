@@ -6,6 +6,7 @@ import pooler
 class ReportPB(report_sxw.rml_parse):
 	def __init__(self, cr, uid, name, context):
 		super(ReportPB, self).__init__(cr, uid, name, context=context)
+
 		self.localcontext.update({
 			'time': time,
 			'sum' : sum,
@@ -50,7 +51,7 @@ class ReportPB(report_sxw.rml_parse):
 		res=[]
 		arrLine={}
 		i=1
-		# customer= ''
+
 		for x in detail_pb_ids:
 
 			if x.variants.id==False:
@@ -63,18 +64,23 @@ class ReportPB(report_sxw.rml_parse):
 				so_name = x.sale_line_ids.order_id.name
 
 			part_no = x.part_no
+			if not part_no:
+				part_no = ""
 			if x.detail_pb_id.proc_type=='sales':
 				part_no = x.name.default_code
 
 				if x.name.default_code and len(x.name.default_code) > 10:
 					part_no = "\r\n\r\n"+x.name.default_code
 
+				if len(part_no) > 10:
+					part_no = "\r\n\r\n"+x.part_no
+
 			keterangan =  x.keterangan
 			if x.keterangan and len(x.keterangan)>64:
 				name += "\r\n\r\n"+x.keterangan
 				keterangan = ""
 
-			arrLine.update({'no':i,'name':name,'desc':x.desc,'satuan':x.satuan,'part_no':part_no,'jumlah_diminta':x.jumlah_diminta,'stok':x.stok,'keterangan':keterangan,'so_name':so_name})
+			arrLine.update({'no':x.no,'name':name,'desc':x.desc,'satuan':x.satuan,'part_no':part_no,'jumlah_diminta':x.jumlah_diminta,'stok':x.stok,'keterangan':keterangan,'so_name':so_name})
 			res.append(arrLine)
 			arrLine={}
 			i+=1
