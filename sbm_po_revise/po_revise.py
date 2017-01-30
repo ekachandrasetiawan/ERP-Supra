@@ -120,9 +120,10 @@ class Purchase_Order_Line(osv.osv):
 				res[item.id] = 0
 		return res
 
-	def _get_invoiced_nominal(self,cr,uid,ids,field_name,args,context={}):		
+	def _get_invoiced_nominal(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
-		
+		obj_po = self.pool.get('purchase.order')
+
 		for item in self.browse(cr,uid,ids,context=context):
 			cr.execute("SELECT invoice_id FROM purchase_order_line_invoice_rel WHERE order_line_id = %s", [item.id])
 			invoice_line = map(lambda x: x[0], cr.fetchall())
@@ -136,6 +137,10 @@ class Purchase_Order_Line(osv.osv):
 				res[item.id] = hasil
 			else:
 				res[item.id] = 0
+
+		invoice_status = 'invoice_status'
+		# obj_po._get_invoiced_status(cr,uid,ids,invoice_status,args,context={})
+
 		return res
 
 	_columns = {
@@ -176,6 +181,7 @@ class Purchase_Order(osv.osv):
 
 	# FOR INVOICE STATE FIELD
 	def _get_invoiced_status(self,cr,uid,ids,field_name,args,context={}):
+		print '=====&&&&&&&&&&&&&&&==============XXXXXXXXXXXXXX========='
 		res = {}
 
 		for data in self.browse(cr,uid,ids,context=context):
@@ -186,9 +192,9 @@ class Purchase_Order(osv.osv):
 			for line in data.order_line:
 				total_invoice+=line.invoiced_nominal
 
-			if total_invoice >= data.amount_total :
+			if total_invoice >= data.amount_untaxed:
 				res[data.id]  = 'full'
-			elif total_invoice < data.amount_total and total_invoice > 0.0:
+			elif total_invoice < data.amount_untaxed and total_invoice > 0.0:
 				res[data.id] = 'partial'
 
 		return res
@@ -198,6 +204,13 @@ class Purchase_Order(osv.osv):
 		result = {}
 		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
 			result[line.order_id.id] = True
+		return result.keys()
+
+
+	def _get_cek_stock_picking(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('stock.picking').browse(cr, uid, ids, context=context):
+			result[line.purchase_id.id] = True
 		return result.keys()
 
 
@@ -215,8 +228,10 @@ class Purchase_Order(osv.osv):
 				if x.received_items == x.product_qty:
 					full = True
 				elif x.received_items < x.product_qty:
-					partial = True
-
+					if x.received_items == 0:
+						partial = False
+					else:
+						partial = True
 
 				if count > 1:
 					i = 1
@@ -232,7 +247,6 @@ class Purchase_Order(osv.osv):
 						service = True
 					else:
 						service = False
-
 
 			if full == True and partial == False:
 				res[data.id] = "full"
@@ -254,20 +268,34 @@ class Purchase_Order(osv.osv):
 			result[line.order_id.id] = True
 		return result.keys()
 
+	def _get_date_now_purchase_order(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			res[item.id] = time.strftime('%Y-%m-%d')
+
+		return res
+
+	def _get_cek_account_invoice(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('account.invoice').browse(cr, uid, ids, context=context):
+			result[line.purchase_id.id] = True
+		return result.keys()
 
 	_columns = {
 		'rev_counter':fields.integer('Rev Counter'),
 		'revise_histories': fields.one2many('purchase.order.revision', 'po_source', 'Purchase Order Revision'),
 		'po_revision_id': fields.many2one('purchase.order.revision', 'Purchase Order Revision'),
+		'date_now': fields.function(_get_date_now_purchase_order,string="Date Now",type="date"),
 		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,
 			store={
-				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
-				'purchase.order.line': (_get_cek_invoicing_status, ['invoiced_nominal'], 20),
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state','order_line'], 20),
+				'purchase.order.line': (_get_cek_invoicing_status, ['invoiced_nominal','received_items','invoiced','state'], 20),
 			}),
 		'receiving_status':fields.function(_getParentState,method=True,string="Receiving Status",type="selection",selection=STATES_RECEIVING,
 			store={
-				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
-				'purchase.order.line': (_get_cek_receiving_status, ['received_items'], 20),
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state','order_line'], 20),
+				'purchase.order.line': (_get_cek_receiving_status, ['received_items','invoiced_nominal','invoiced','state'], 20),
+				'stock.picking': (_get_cek_stock_picking, ['state','cust_doc_ref','lbm_no','move_line'], 20),
 			}),
 	}
 
