@@ -193,6 +193,14 @@ class Purchase_Order(osv.osv):
 
 		return res
 
+
+	def _get_cek_invoicing_status(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
+			result[line.order_id.id] = True
+		return result.keys()
+
+
 	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
 		for data in self.browse(cr,uid,ids,context):
@@ -246,13 +254,21 @@ class Purchase_Order(osv.osv):
 			result[line.order_id.id] = True
 		return result.keys()
 
+
 	_columns = {
 		'rev_counter':fields.integer('Rev Counter'),
 		'revise_histories': fields.one2many('purchase.order.revision', 'po_source', 'Purchase Order Revision'),
 		'po_revision_id': fields.many2one('purchase.order.revision', 'Purchase Order Revision'),
-		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,store=False),
+		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,
+			store={
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
+				'purchase.order.line': (_get_cek_invoicing_status, ['invoiced_nominal'], 20),
+			}),
 		'receiving_status':fields.function(_getParentState,method=True,string="Receiving Status",type="selection",selection=STATES_RECEIVING,
-			store=False),
+			store={
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state'], 20),
+				'purchase.order.line': (_get_cek_receiving_status, ['received_items'], 20),
+			}),
 	}
 
 	_defaults ={
@@ -490,27 +506,33 @@ class Purchase_Order_Revision(osv.osv):
 
 	_rec_name = 'po_source'
 
-	def send_email(self, cr, uid, ids, Subject, email_to, url, html, context={}):
-		me="jay@beltcare.com"
-		you= email_to
-		msg = MIMEMultipart('alternative')
-		msg['Subject'] = Subject
-		msg['From'] = 'noreply@beltcare.com'
-		msg['To'] = you
+	def send_email(self, cr, uid, ids, Subject, email_to, url, html, po_revise=False, context={}):
+		mail_mail = self.pool.get('mail.mail')
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
 
-		part2 = MIMEText(html, 'html')
+		cek_partner = obj_partner.search(cr,uid,[('email', '=' ,email_to)])
+		partner = obj_partner.browse(cr,uid,cek_partner)[0]
 
-		msg.attach(part2)
-		# Login Email
-		username = 'jay@beltcare.com' 
-		password = '---------'
 
-		# Kirim Email
-		# server = smtplib.SMTP('smtp.beltcare.com:587')
-		# server.starttls()
-		# server.login(username,password)
-		# server.sendmail(me, you,msg.as_string())
-		# server.quit()
+		if po_revise == True:
+			model = 'purchase.order.revision'
+			for x in ids:
+				res_id = x
+		else:
+			model = 'purchase.order'
+			res_id = ids
+
+		mail_id = mail_mail.create(cr, uid, {
+			'model': model,
+			'res_id': res_id,
+			'subject': Subject,
+			'body_html': html,
+			'auto_delete': True,
+			}, context=context)
+
+		mail_mail.send(cr, uid, [mail_id], recipient_ids=[partner.id], context=context)
+
 		return True
 
 	def template_email_approve(self, cr, uid, ids, user, no_po, url, context={}):
@@ -708,8 +730,9 @@ class Purchase_Order_Revision(osv.osv):
 				for s in usr.user_ids:
 					if s.email:
 						email_to = s.email
+						po_revise = True
 						template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})
-						self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+						self.send_email(cr, uid, ids, subject, email_to, url, template_email, po_revise, context={})
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
