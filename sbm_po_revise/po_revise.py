@@ -120,9 +120,10 @@ class Purchase_Order_Line(osv.osv):
 				res[item.id] = 0
 		return res
 
-	def _get_invoiced_nominal(self,cr,uid,ids,field_name,args,context={}):		
+	def _get_invoiced_nominal(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
-		
+		obj_po = self.pool.get('purchase.order')
+
 		for item in self.browse(cr,uid,ids,context=context):
 			cr.execute("SELECT invoice_id FROM purchase_order_line_invoice_rel WHERE order_line_id = %s", [item.id])
 			invoice_line = map(lambda x: x[0], cr.fetchall())
@@ -136,6 +137,10 @@ class Purchase_Order_Line(osv.osv):
 				res[item.id] = hasil
 			else:
 				res[item.id] = 0
+
+		invoice_status = 'invoice_status'
+		# obj_po._get_invoiced_status(cr,uid,ids,invoice_status,args,context={})
+
 		return res
 
 	_columns = {
@@ -176,6 +181,7 @@ class Purchase_Order(osv.osv):
 
 	# FOR INVOICE STATE FIELD
 	def _get_invoiced_status(self,cr,uid,ids,field_name,args,context={}):
+		print '=====&&&&&&&&&&&&&&&==============XXXXXXXXXXXXXX========='
 		res = {}
 
 		for data in self.browse(cr,uid,ids,context=context):
@@ -186,12 +192,27 @@ class Purchase_Order(osv.osv):
 			for line in data.order_line:
 				total_invoice+=line.invoiced_nominal
 
-			if total_invoice >= data.amount_total :
+			if total_invoice >= data.amount_untaxed:
 				res[data.id]  = 'full'
-			elif total_invoice < data.amount_total and total_invoice > 0.0:
+			elif total_invoice < data.amount_untaxed and total_invoice > 0.0:
 				res[data.id] = 'partial'
 
 		return res
+
+
+	def _get_cek_invoicing_status(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('purchase.order.line').browse(cr, uid, ids, context=context):
+			result[line.order_id.id] = True
+		return result.keys()
+
+
+	def _get_cek_stock_picking(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('stock.picking').browse(cr, uid, ids, context=context):
+			result[line.purchase_id.id] = True
+		return result.keys()
+
 
 	def _getParentState(self,cr,uid,ids,field_name,args,context={}):
 		res = {}
@@ -207,8 +228,10 @@ class Purchase_Order(osv.osv):
 				if x.received_items == x.product_qty:
 					full = True
 				elif x.received_items < x.product_qty:
-					partial = True
-
+					if x.received_items == 0:
+						partial = False
+					else:
+						partial = True
 
 				if count > 1:
 					i = 1
@@ -224,7 +247,6 @@ class Purchase_Order(osv.osv):
 						service = True
 					else:
 						service = False
-
 
 			if full == True and partial == False:
 				res[data.id] = "full"
@@ -246,13 +268,35 @@ class Purchase_Order(osv.osv):
 			result[line.order_id.id] = True
 		return result.keys()
 
+	def _get_date_now_purchase_order(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			res[item.id] = time.strftime('%Y-%m-%d')
+
+		return res
+
+	def _get_cek_account_invoice(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('account.invoice').browse(cr, uid, ids, context=context):
+			result[line.purchase_id.id] = True
+		return result.keys()
+
 	_columns = {
 		'rev_counter':fields.integer('Rev Counter'),
 		'revise_histories': fields.one2many('purchase.order.revision', 'po_source', 'Purchase Order Revision'),
 		'po_revision_id': fields.many2one('purchase.order.revision', 'Purchase Order Revision'),
-		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,store=False),
+		'date_now': fields.function(_get_date_now_purchase_order,string="Date Now",type="date"),
+		'invoice_status':fields.function(_get_invoiced_status,method=True,string="Invoice State",type="selection",selection=INVOICE_STATE,
+			store={
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state','order_line'], 20),
+				'purchase.order.line': (_get_cek_invoicing_status, ['invoiced_nominal','received_items','invoiced','state'], 20),
+			}),
 		'receiving_status':fields.function(_getParentState,method=True,string="Receiving Status",type="selection",selection=STATES_RECEIVING,
-			store=False),
+			store={
+				'purchase.order': (lambda self, cr, uid, ids, c={}: ids, ['state','order_line'], 20),
+				'purchase.order.line': (_get_cek_receiving_status, ['received_items','invoiced_nominal','invoiced','state'], 20),
+				'stock.picking': (_get_cek_stock_picking, ['state','cust_doc_ref','lbm_no','move_line'], 20),
+			}),
 	}
 
 	_defaults ={
@@ -490,27 +534,33 @@ class Purchase_Order_Revision(osv.osv):
 
 	_rec_name = 'po_source'
 
-	def send_email(self, cr, uid, ids, Subject, email_to, url, html, context={}):
-		me="jay@beltcare.com"
-		you= email_to
-		msg = MIMEMultipart('alternative')
-		msg['Subject'] = Subject
-		msg['From'] = 'noreply@beltcare.com'
-		msg['To'] = you
+	def send_email(self, cr, uid, ids, Subject, email_to, url, html, po_revise=False, context={}):
+		mail_mail = self.pool.get('mail.mail')
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')
 
-		part2 = MIMEText(html, 'html')
+		cek_partner = obj_partner.search(cr,uid,[('email', '=' ,email_to)])
+		partner = obj_partner.browse(cr,uid,cek_partner)[0]
 
-		msg.attach(part2)
-		# Login Email
-		username = 'jay@beltcare.com' 
-		password = '---------'
 
-		# Kirim Email
-		# server = smtplib.SMTP('smtp.beltcare.com:587')
-		# server.starttls()
-		# server.login(username,password)
-		# server.sendmail(me, you,msg.as_string())
-		# server.quit()
+		if po_revise == True:
+			model = 'purchase.order.revision'
+			for x in ids:
+				res_id = x
+		else:
+			model = 'purchase.order'
+			res_id = ids
+
+		mail_id = mail_mail.create(cr, uid, {
+			'model': model,
+			'res_id': res_id,
+			'subject': Subject,
+			'body_html': html,
+			'auto_delete': True,
+			}, context=context)
+
+		mail_mail.send(cr, uid, [mail_id], recipient_ids=[partner.id], context=context)
+
 		return True
 
 	def template_email_approve(self, cr, uid, ids, user, no_po, url, context={}):
@@ -708,8 +758,9 @@ class Purchase_Order_Revision(osv.osv):
 				for s in usr.user_ids:
 					if s.email:
 						email_to = s.email
+						po_revise = True
 						template_email = self.template_email_approve(cr, uid, ids, usr.name, po_name, url, context={})
-						self.send_email(cr, uid, ids, subject, email_to, url, template_email, context={})
+						self.send_email(cr, uid, ids, subject, email_to, url, template_email, po_revise, context={})
 		return True
 			
 	def po_revise_setconfirmed(self, cr, uid, ids, context=None):
