@@ -20,7 +20,8 @@
         # "rules.xml",
         # "actions.xml",
         "views.xml",
-        'importlog.xml'
+        'importlog.xml',
+        'setting.xml'
         # "menus.xml",
     ],
     'demo_xml': [],
