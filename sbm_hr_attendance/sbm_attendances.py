@@ -497,6 +497,13 @@ class import_attendance_log(osv.osv):
 		'state':fields.selection([('draft','Draft'),('done','Done'),('cancel','Cancel')],string="State"),
 	}
 
+	def _default_machine(self, cr, uid, context={}):
+		res = False
+		machine = self.pool.get('hr.attendance.machine.admin').search(cr,uid,[('user_id', '=' ,uid)])
+		mac = self.pool.get('hr.attendance.machine.admin').browse(cr, uid, machine)[0]
+
+		return mac.machine_id.id
+
 	def _default_name(self, cr, uid, context={}):
 		res_user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
 		initial = False
@@ -511,6 +518,7 @@ class import_attendance_log(osv.osv):
 	_defaults = {
 		'name':_default_name,
 		'state':'draft',
+		'machine_id':_default_machine
 	}
 
 

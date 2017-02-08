@@ -813,7 +813,49 @@ class WizardOrderPreparation(osv.osv_memory):
 		'notes':fields.text('Notes',required=True, help="Warehouse Notes"),
 	}
 
+	def _getNotes(self,cr,uid,ids,context=None):
+		body = """\
+			<html>
+			<head></head>
+			<body>
+				<table border="0">
+					<tr>
+						<td width="100"></td>
+						<td width="200">MEASUREMENT</td>
+						<td width="100">WEIGHT</td>
+					</tr>
+					<tr>
+						<td width="100">BOX # 1</td>
+						<td width="200"></td>
+						<td width="100"></td>
+					</tr>
+					<tr>
+						<td width="100">BOX # 2</td>
+						<td width="200"></td>
+						<td width="100"></td>
+					</tr>
+					<tr>
+						<td width="100">BOX # 3</td>
+						<td width="200"></td>
+						<td width="100"></td>
+					</tr>
+					<tr>
+						<td width="100">BOX # 4</td>
+						<td width="200"></td>
+						<td width="100"></td>
+					</tr>
+				</table>
+			</body>
+			</html>
+		"""
+		return body
+
 	_rec_name="op_id"
+
+	_defaults={
+		'notes':_getNotes,
+	}
+
 
 WizardOrderPreparation()
 

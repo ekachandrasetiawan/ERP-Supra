@@ -11,7 +11,7 @@
 						<field name="op_id" readonly="True"/>
 					</group>
 					<group>
-						<field name="notes"/>
+						<field name="notes" widget="html"/>
 					</group>
 					<footer>
 						<button name="request_op_validate" string="Validate" type="object" class="oe_highlight"/>
@@ -102,7 +102,7 @@
 					<xpath expr="//page[@string='Notes']" position="after">
 						<page string="Warehouse Notes">
 							<group>
-								<field name="warehouse_notes"/>
+								<field name="warehouse_notes" widget="html"/>
 							</group>
 						</page>
 					</xpath>
