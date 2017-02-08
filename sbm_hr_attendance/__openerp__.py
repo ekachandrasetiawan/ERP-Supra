@@ -20,7 +20,9 @@
         # "rules.xml",
         # "actions.xml",
         "views.xml",
-        'importlog.xml'
+        'importlog.xml',
+        'sbm_res_partner_view.xml',
+        'sbm_hr_employee_view.xml'
         # "menus.xml",
     ],
     'demo_xml': [],

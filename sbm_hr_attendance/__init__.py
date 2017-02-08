@@ -1,1 +1,2 @@
 import sbm_attendances
+import sbm_res_partner
