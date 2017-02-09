@@ -132,7 +132,7 @@
 						<field colspan="4" name="prepare_lines" nolabel="1" widget="one2many_list">
 								<form>
 									<field name="no"/>
-									<field name="product_id"/>
+									<field name="product_id" on_change="change_item(product_id)"/>
 									<field name="product_qty"/>
 									<field name="product_uom"/>
 									<field name="name" colspan="4"/>
