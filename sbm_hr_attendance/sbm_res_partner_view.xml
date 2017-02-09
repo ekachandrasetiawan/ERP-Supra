@@ -8,9 +8,13 @@
             <field name='type'>form</field>
             <field name="inherit_id" ref='base.view_partner_form'/>
             <field name="arch" type='xml'>
-                <field name="email" position="after">
-                    <field name="is_site"/>
-                </field>
+                <page string="History" position="after" version="7.0">
+                    <page string="Company Settings">
+                        <group>
+                            <field name="is_site"/>                            
+                        </group>                        
+                    </page>
+                </page>
             </field>
         </record>
 
