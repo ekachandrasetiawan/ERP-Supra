@@ -21,6 +21,7 @@
         # "actions.xml",
         "views.xml",
         'importlog.xml',
+        'setting.xml'
         'sbm_res_partner_view.xml',
         'sbm_hr_employee_view.xml'
         # "menus.xml",

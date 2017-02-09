@@ -212,19 +212,18 @@ class acount_invoice(osv.osv):
 		tax_year = tax_year or '00'
 		tax_no_2 = tax_no_2 or '00000000'
 		# filteryear = False
-		print need_date
-		print tax_transaction_type,"<<<<<<<<<<<<<<<<<<<<type"
-		print tax_replacement_str,"replace"
-		print tax_no_1,"no1"
-		print tax_year,"year"
-		print tax_no_2,"no2"
+		# print tax_transaction_type,"<<<<<<<<<<<<<<<<<<<<type"
+		# print tax_replacement_str,"replace"
+		# print tax_no_1,"no1"
+		# print tax_year,"year"
+		# print tax_no_2,"no2"
 		if tax_transaction_type == False:
 			raise osv.except_osv(_('Warning'),_('Tax Transaction Type Tidak Boleh Kosong'))
 
 
 		if date_invoice:
 			month_tax = str(date_invoice[5:-3])
-			print month_tax
+			# print month_tax
 			tax_year_res = tax_year[-2:]
 			if month_tax =='01':
 				month_tax='I'
@@ -309,11 +308,11 @@ class acount_invoice(osv.osv):
 				
 				# 'tax_year':""
 				# }
-				print "AAAAAAAAAAAAAAAAA"
+				# print "AAAAAAAAAAAAAAAAA"
 				# raise osv.except_osv(_('Warning'),_('Select Invoice Date'))
 				res['warning'] ={
 					'title':'WARNING',
-					'message':'PLEASE SELECT INVOICE DATE BEFORE DOING THIS !!!'
+					'message':'PLEASE SELECT INVOICE DATE BEFORE DOING THIS!!!'
 				}
 		print res
 		
