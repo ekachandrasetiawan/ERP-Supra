@@ -172,7 +172,8 @@ class account_invoice(osv.osv):
 					'ppn_amount_tax_main':val.ppn_amount_tax_main,
 					'amount_total_main':val.amount_total_main,
 					'total_discount_main':val.total_discount_main,
-					'invoice_line':line
+					'invoice_line':line,
+					'payment_for': val.payment_for
 					})
 		return invoice_id
 
