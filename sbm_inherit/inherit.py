@@ -2140,12 +2140,12 @@ class InternalMove(osv.osv):
 		stock_picking_object = self.pool.get('stock.picking')
 		stock_move_object = self.pool.get('stock.move')
 		val = self.browse(cr, uid, ids, context={})[0]
- 		
- 		get_stock_move_id = self.pool.get('stock.move').search(cr,uid,[('picking_id', '=' , val.picking_id.id)])
+		
+		get_stock_move_id = self.pool.get('stock.move').search(cr,uid,[('picking_id', '=' , val.picking_id.id)])
 
- 		# Update state cancel pada stock move
- 		for i in get_stock_move_id:
- 			stock_move_object.write(cr,uid,i,{'state':'cancel'})
+		# Update state cancel pada stock move
+		for i in get_stock_move_id:
+			stock_move_object.write(cr,uid,i,{'state':'cancel'})
 		
 		# Update state cancel pada stock picking
 		stock_picking_object.write(cr,uid,val.picking_id.id,{'state':'cancel'})
@@ -2610,7 +2610,6 @@ class sale_advance_payment_inv(osv.osv_memory):
 	_inherit = "sale.advance.payment.inv"
 	_description = "Sales Advance Payment Invoice"
 
-
 	def create_invoices(self, cr, uid, ids, context=None):
 		sale_obj = self.pool.get('sale.order')
 		invoice_obj = self.pool.get('account.invoice')
@@ -2665,6 +2664,8 @@ class sale_advance_payment_inv(osv.osv_memory):
 		return True
 
 	def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
+
+		print '==========&&&&&&&&&&&&&&&&&&&&&&&&&&=============='
 		if context is None:
 			context = {}
 		sale_obj = self.pool.get('sale.order')

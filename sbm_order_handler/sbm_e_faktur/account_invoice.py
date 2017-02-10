@@ -202,6 +202,7 @@ class acount_invoice(osv.osv):
 
 	def onchange_tax_no(self,cr,uid,ids,date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,need_date=True):
 		
+		# print '============need_date=======',need_date
 		res={}
 		if is_tax_replacement:
 			tax_replacement_str ="1"
@@ -308,7 +309,7 @@ class acount_invoice(osv.osv):
 				
 				# 'tax_year':""
 				# }
-				# print "AAAAAAAAAAAAAAAAA"
+				print "AAAAAAAAAAAAAAAAA"
 				# raise osv.except_osv(_('Warning'),_('Select Invoice Date'))
 				res['warning'] ={
 					'title':'WARNING',
