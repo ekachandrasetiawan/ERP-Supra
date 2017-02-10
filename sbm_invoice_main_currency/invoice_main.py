@@ -937,8 +937,8 @@ class sale_order(osv.osv):
 		# determine newly created invoices
 		new_inv_ids = list(inv_ids1 - inv_ids0)
 
-		# if not new_inv_ids:
-		# 	new_inv_ids = [self.action_invoice_create(cr, uid, ids, context)]
+		if not new_inv_ids:
+			new_inv_ids = [self.action_invoice_create(cr, uid, ids, context)]
 			
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
 		res_id = res and res[1] or False,
