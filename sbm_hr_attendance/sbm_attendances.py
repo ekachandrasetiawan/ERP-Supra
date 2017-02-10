@@ -411,22 +411,26 @@ class hr_attendance_machine(osv.osv):
 		res = False
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"attendance/first-and-last-scan"
+		url = str(browseConf.value)
 		# user_ids = self.pool.get('res.users').search(cr,uid,uid,context=context)
 		userBrowse = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_users', 'group_using_public_ip_address')
+		groupBrowse = self.pool.get('res.groups').browse(cr,uid,view_id,context=context)
 
 		employee = userBrowse.employee_ids[0]
-
 		work_addr = employee.address_id.id
 
-		if work_addr:
-
-			searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.'+str(work_addr))], context=context)
-			if searchConfSite:
+		for usergroup in groupBrowse.users :
+			if usergroup.id == uid:
+				searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
 				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
-				url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
+				url = str(browseConf.value)
 
-				urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
+		if work_addr:
+			urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
+		else :
+			urlTo = url+"attendance/first-and-last-scan"
 		
 		return {
 			'type'	: 'ir.actions.client',
