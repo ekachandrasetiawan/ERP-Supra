@@ -243,10 +243,12 @@
 	   <field name="type">form</field>
 	   <field name="inherit_id" ref="sbm_purchase_import.view_purchase_order_import_tree"/>
 	   <field name="arch" type="xml">
+			<field name="origin" position="before">
+				 <field name="duedate"/>
+			</field>			
 			<field name="state" position="after">
 				 <field name="receiving_status" />
-				 <field name="duedate" invisible="0"/>
-				 <field name="date_now" invisible="0"/>
+				 <field name="date_now" invisible="1"/>
 			</field>
 			<field name="state" position="replace">
 				<field name="state" invisible="1"/>
