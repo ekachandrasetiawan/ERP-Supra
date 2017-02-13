@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data>
+	<data>
 		<record model="res.groups" id="group_site_admin">
 			<field name="name">Site Admin</field>
 		</record>
 
 		<record model="ir.rule" id="ir_employee_site_admin">
-	        <field name="name">Employee Site Admin</field>
-	        <field name="model_id" ref="hr.model_hr_employee"/>
-	        <field name="domain_force">[('address_id','in', [e.address_id.id for e in user.employee_ids])]</field>
-	        <field name="perm_read" eval="True"/>
-	        <field name="perm_write" eval="True"/>
-	        <field name="perm_unlink" eval="True"/>
-	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_hr_attendance.group_site_admin'))]"/>
-	    </record>
+			<field name="name">Employee Site Admin</field>
+			<field name="model_id" ref="hr.model_hr_employee"/>
+			<field name="domain_force">['|',('create_uid','=',user.id),('address_id','in', [e.address_id.id for e in user.employee_ids])]</field>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="True"/>
+			<field name="perm_unlink" eval="True"/>
+			<field name="perm_create" eval="True"/>
+			<field name="groups" eval="[(4, ref('sbm_hr_attendance.group_site_admin'))]"/>
+		</record>
 
 		<record model="ir.rule" id="ir_hr_attendance_log_site_admin">
-	        <field name="name">HR Attendance Log Site Admin</field>
-	        <field name="model_id" ref="sbm_hr_attendance.model_hr_attendance_log"/>
-	        <field name="domain_force">[('employee_id.address_id','in', [e.address_id.id for e in user.employee_ids])]</field>
-	        <field name="perm_read" eval="True"/>
-	        <field name="perm_write" eval="True"/>
-	        <field name="perm_unlink" eval="True"/>
-	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_hr_attendance.group_site_admin'))]"/>
-	    </record>
+			<field name="name">HR Attendance Log Site Admin</field>
+			<field name="model_id" ref="sbm_hr_attendance.model_hr_attendance_log"/>
+			<field name="domain_force">['|',('create_uid','=',user.id),('employee_id.address_id','in', [e.address_id.id for e in user.employee_ids])]</field>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="True"/>
+			<field name="perm_unlink" eval="True"/>
+			<field name="perm_create" eval="True"/>
+			<field name="groups" eval="[(4, ref('sbm_hr_attendance.group_site_admin'))]"/>
+		</record>
 
-    </data>
+	</data>
 </openerp>

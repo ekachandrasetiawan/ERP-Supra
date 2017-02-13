@@ -3,6 +3,7 @@
     "version": "1.0",
     "depends": [
         "hr",
+        "sbm_hr_mutasi"
     ],
     "author": "IT Dev Team @ Suprabakti Mandiri",
     "category": "Human Resource",
