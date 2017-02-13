@@ -257,7 +257,7 @@
 			<xpath expr="//tree[@string='Purchase Order']" position="attributes">
                 <attribute name="colors">
                  	red:receiving_status == 'wait' and (duedate &lt; date_now);
-                 	#a70523:invoice_status == 'wait' and (duedate &lt; date_now);
+                 	#1aa605:invoice_status == 'wait' and (duedate &lt; date_now);
                  	#a6a9ad:receiving_status == 'full' and invoice_status == 'full';
                  	#1271f2:receiving_status == 'full' and invoice_status == 'wait';
                  	#0b4eaa:receiving_status == 'full' and invoice_status == 'partial';
