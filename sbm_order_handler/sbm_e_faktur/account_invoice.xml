@@ -18,9 +18,13 @@
 
 				<field name='journal_id' position='after'>
 					<field name='tax_transaction_type' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,False)"/>
+					
 					<field name='is_tax_replacement' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'is_tax_replacement')" />
+
 					<field name='tax_no_1' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'tax_no_1')"/>
+
 					<field name='tax_year' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,tax_year)"/>
+
 					<field name='tax_no_2' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,tax_no_2)"/>
 				</field>
 

@@ -1077,6 +1077,7 @@ class sale_order_invoice(osv.osv):
 	_inherit =['sale.order','mail.thread']
 
 	def action_invoice_create(self, cr, uid, ids, grouped=False, states=None, date_invoice = False, context=None):
+		print '======$$$$$$$$$$$$$$$$$+=================='
 		res1={}
 		idInvoice = super(sale_order_invoice,self).action_invoice_create(cr,uid,ids,grouped,states,date_invoice,context=context)
 		account_invoice= self.pool.get('account.invoice').browse(cr,uid,idInvoice)

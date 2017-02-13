@@ -43,6 +43,7 @@ class sale_order(osv.osv):
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
 		res_id = res and res[1] or False,
 
+
 		return {
 			'name': _('Customer Invoices'),
 			'view_type': 'form',
