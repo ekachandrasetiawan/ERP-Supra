@@ -428,8 +428,10 @@ class hr_attendance_machine(osv.osv):
 				url = str(browseConf.value)
 
 		if work_addr:
+			print 'aaaaaaaaaaaaaa'
 			urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
 		else :
+			print 'bbbbbbbbbbbbbbbbbbbbbbb'
 			urlTo = url+"attendance/first-and-last-scan"
 		
 		return {
@@ -447,26 +449,30 @@ class hr_attendance_machine(osv.osv):
 		res = False
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"attendance/first-and-last-scan-site"
+		url = str(browseConf.value)
 		# user_ids = self.pool.get('res.users').search(cr,uid,uid,context=context)
 		userBrowse = self.pool.get('res.users').browse(cr,uid,uid,context=context)
 
 		if not userBrowse.employee_ids:
 			raise Warning(_('Please contact Your System Administrator to tell this error messege!\n\nUser not related to any employee!'))
 			
-		employee = userBrowse.employee_ids[0]
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_users', 'group_using_public_ip_address')
+		groupBrowse = self.pool.get('res.groups').browse(cr,uid,view_id,context=context)
 
+		employee = userBrowse.employee_ids[0]
 		work_addr = employee.address_id.id
 
-		if work_addr:
-
-
-			searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.'+str(work_addr))], context=context)
-			if searchConfSite:
+		for usergroup in groupBrowse.users :
+			if usergroup.id == uid:
+				searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
 				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
-				
-				url = self.pool.get('res.users').get_print_url(cr, uid, ids, context=None)
-				urlTo = url+"attendance/first-and-last-scan-site&site="+str(work_addr)
+				url = str(browseConf.value)
+
+		if work_addr:
+			urlTo = url+"attendance/first-and-last-scan-site&site="+str(work_addr)
+		else :
+			urlTo = url+"attendance/first-and-last-scan-site"
+
 		
 		return {
 			'type'	: 'ir.actions.client',
