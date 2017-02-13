@@ -814,11 +814,7 @@ class WizardOrderPreparation(osv.osv_memory):
 	}
 
 	def _getNotes(self,cr,uid,ids,context=None):
-		body = """\
-			<html>
-			<head></head>
-			<body>
-				<table border="0">
+		body = """<table border="0">
 					<tr>
 						<td width="100"></td>
 						<td width="200">MEASUREMENT</td>
@@ -844,10 +840,7 @@ class WizardOrderPreparation(osv.osv_memory):
 						<td width="200"></td>
 						<td width="100"></td>
 					</tr>
-				</table>
-			</body>
-			</html>
-		"""
+				</table>"""
 		return body
 
 	_rec_name="op_id"
