@@ -427,11 +427,9 @@ class hr_attendance_machine(osv.osv):
 				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
 				url = str(browseConf.value)
 
-		if work_addr:
-			print 'aaaaaaaaaaaaaa'
+		if work_addr:			
 			urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
-		else :
-			print 'bbbbbbbbbbbbbbbbbbbbbbb'
+		else :			
 			urlTo = url+"attendance/first-and-last-scan"
 		
 		return {
