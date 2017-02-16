@@ -181,7 +181,6 @@ class Purchase_Order(osv.osv):
 
 	# FOR INVOICE STATE FIELD
 	def _get_invoiced_status(self,cr,uid,ids,field_name,args,context={}):
-		print '=====&&&&&&&&&&&&&&&==============XXXXXXXXXXXXXX========='
 		res = {}
 
 		for data in self.browse(cr,uid,ids,context=context):
@@ -550,6 +549,11 @@ class Purchase_Order_Revision(osv.osv):
 		else:
 			model = 'purchase.order'
 			res_id = ids
+		
+
+		if type(res_id) == type([]):
+			for val in res_id:
+				res_id = val
 
 		mail_id = mail_mail.create(cr, uid, {
 			'model': model,
