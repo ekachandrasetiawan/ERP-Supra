@@ -126,20 +126,20 @@ class delivery_note(osv.osv):
 		res = {}
 		self._getRequestDocNo(cr, uid, ids, field_name,args,context={})
 		for item in self.browse(cr,uid,ids,context=context):
-			if val.state == 'draft':
-				if val.name:
-					RequestNo = val.name
+			if item.state == 'draft':
+				if item.name:
+					RequestNo = item.name
 				else:
 					RequestNo = '/'
 			else:
-				if val.seq_no:
-					RequestNo = val.seq_no+val.request_doc_no
+				if item.seq_no:
+					RequestNo = item.seq_no+item.request_doc_no
 				else:
 					# jika dn lama jika name sudah ada maka pasti name = nomor DN
-					if val.name != '/' and val.name.strip() != '':
-						RequestNo = val.name
+					if item.name != '/' and item.name.strip() != '':
+						RequestNo = item.name
 						# set up seq_no = name[:6]
-						self.write(cr, uid, ids, {'seq_no':val.name[:6]})
+						self.write(cr, uid, ids, {'seq_no':item.name[:6]})
 					else:
 						raise osv.except_osv(_('Error'), _("Failed to update name code on Delivery Note,, Please Contat System Administrator!"))
 			res[item.id] = RequestNo
@@ -405,6 +405,7 @@ class delivery_note(osv.osv):
 									'location_id':dline.picking_location.id,
 									'op_line_id':dopline.id
 									}))
+
 
 				line.append((0,0,{
 					'no': y.sequence,
@@ -1030,7 +1031,7 @@ class delivery_note_line(osv.osv):
 
 	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
 
-		return False
+		return 0
 
 	_inherit = "delivery.note.line"
 	_columns = {
