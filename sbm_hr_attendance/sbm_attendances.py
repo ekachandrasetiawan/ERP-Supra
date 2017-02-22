@@ -12,6 +12,10 @@ from openerp.tools.translate import _
 from osv import osv, fields
 from xml.etree import ElementTree as ET
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class hr_attendance_type(osv.osv):
 	_name = 'hr.attendance.type'
@@ -418,29 +422,35 @@ class hr_attendance_machine(osv.osv):
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_users', 'group_using_public_ip_address')
 		groupBrowse = self.pool.get('res.groups').browse(cr,uid,view_id,context=context)
 
-		employee = userBrowse.employee_ids[0]
-		work_addr = employee.address_id.id
+		# _logger.error((">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",userBrowse.employee_ids))
+		employee = False
+		for emp in userBrowse.employee_ids:
+			employee = userBrowse.employee_ids[0]
+		if employee:
+			work_addr = employee.address_id.id
 
-		for usergroup in groupBrowse.users :
-			if usergroup.id == uid:
-				searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
-				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
-				url = str(browseConf.value)
+			for usergroup in groupBrowse.users :
+				if usergroup.id == uid:
+					searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
+					browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
+					url = str(browseConf.value)
 
-		if work_addr:			
-			urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
-		else :			
-			urlTo = url+"attendance/first-and-last-scan"
-		
-		return {
-			'type'	: 'ir.actions.client',
-			'target': 'new',
-			'tag'	: 'print.out',
-			'params': {
-				# 'id'	: ids[0],
-				'redir'	: urlTo
-			},
-		}
+			if work_addr:			
+				urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
+			else :			
+				urlTo = url+"attendance/first-and-last-scan"
+			
+			return {
+				'type'	: 'ir.actions.client',
+				'target': 'new',
+				'tag'	: 'print.out',
+				'params': {
+					# 'id'	: ids[0],
+					'redir'	: urlTo
+				},
+			}
+		else:
+			raise osv.except_osv(_('Employee Null!'),_('You must be an Employee to access the page!'))
 		return res
 
 	def openprint_min_max_site(self,cr,uid,ids,context={}):
