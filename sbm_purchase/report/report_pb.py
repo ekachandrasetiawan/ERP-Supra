@@ -87,3 +87,4 @@ class ReportPB(report_sxw.rml_parse):
 		return res
 
 report_sxw.report_sxw('report.print.pb', 'pembelian.barang', 'addons/sbm_purchase/report/report_pb.rml', parser = ReportPB, header = False)
+report_sxw.report_sxw('report.print.pb.A5', 'pembelian.barang', 'addons/sbm_purchase/report/report_pbA5.rml', parser = ReportPB, header = False)

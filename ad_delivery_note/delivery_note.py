@@ -1455,7 +1455,7 @@ class delivery_note_line(osv.osv):
 				refunded_total += refund.product_qty
 
 			if item.product_qty == refunded_total:
-				self.write(cr,uid,[item.id],{'state':'donerefund'})
+				self.write(cr,uid,[item.id],{'state':'refunded'})
 			res[item.id] = refunded_total
 		return res
 

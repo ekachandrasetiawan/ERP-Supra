@@ -261,6 +261,21 @@ class Pembelian_Barang(osv.osv):
 			'datas': datas,
 			}
 
+
+	def reportpbA5(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		datas = {'ids': context.get('active_ids', [])}
+		datas['model'] = 'pembelian.barang'
+		datas['form'] = self.read(cr, uid, ids)[0]
+		
+		return {
+			'type': 'ir.actions.report.xml',
+			'report_name': 'print.pb.A5',
+			'report_type': 'webkit',
+			'datas': datas,
+			}
+
 	def send_email(self, cr, uid, ids, pb_id, subject, email_to, partner_id, body, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		mail_mail = self.pool.get('mail.mail')

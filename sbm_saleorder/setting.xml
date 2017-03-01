@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+    	<!-- Access Account Invoice -->
+    	<record model="ir.model.access" id="ir_access_account_invoice_admin_support">
+	        <field name="name">Access Account Invoice Admin Support</field>
+	        <field name="model_id" ref="account.model_account_invoice"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('base.group_admin_support'))]"/>
+	    </record>
+	
+	    <record model="ir.model.access" id="ir_access_account_invoice_group_sales_admin">
+	        <field name="name">Access Account Invoice Sales Admin</field>
+	        <field name="model_id" ref="account.model_account_invoice"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('base.group_sales_admin'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_account_invoice_group_sales_admin_regional">
+	        <field name="name">Access Account Invoice Admin Regional</field>
+	        <field name="model_id" ref="account.model_account_invoice"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('sbm_inherit.group_sales_admin_regional'))]"/>
+	    </record>
+
+
+
+    	<!-- Access Account Move -->
+    	<record model="ir.model.access" id="ir_access_account_move_admin_support">
+	        <field name="name">Access Account Move Admin Support</field>
+	        <field name="model_id" ref="account.model_account_move"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('base.group_admin_support'))]"/>
+	    </record>
+	
+	    <record model="ir.model.access" id="ir_access_account_move_group_sales_admin">
+	        <field name="name">Access Account Move Sales Admin</field>
+	        <field name="model_id" ref="account.model_account_move"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('base.group_sales_admin'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_account_move_group_sales_admin_regional">
+	        <field name="name">Access Account Move Admin Regional</field>
+	        <field name="model_id" ref="account.model_account_move"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('sbm_inherit.group_sales_admin_regional'))]"/>
+	    </record>
+
+
+    	<!-- Access Account Move  Reconcile-->
+    	<record model="ir.model.access" id="ir_access_account_move_reconcile_admin_support">
+	        <field name="name">Access Account Move Reconcile Admin Support</field>
+	        <field name="model_id" ref="account.model_account_move_reconcile"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('base.group_admin_support'))]"/>
+	    </record>
+	
+	    <record model="ir.model.access" id="ir_access_account_move_reconcile_group_sales_admin">
+	        <field name="name">Access Account Move Reconcile Sales Admin</field>
+	        <field name="model_id" ref="account.model_account_move_reconcile"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('base.group_sales_admin'))]"/>
+	    </record>
+
+	    <record model="ir.model.access" id="ir_access_account_move_reconcile_group_sales_admin_regional">
+	        <field name="name">Access Account Move Reconcile Admin Regional</field>
+	        <field name="model_id" ref="account.model_account_move_reconcile"/>
+	        <field name="perm_read" eval="True"/>
+	        <field name="perm_write" eval="False"/>
+	        <field name="perm_unlink" eval="False"/>
+	        <field name="perm_create" eval="False"/>
+	        <field name="groups" eval="[(4, ref('sbm_inherit.group_sales_admin_regional'))]"/>
+	    </record>
+
+    </data>
+</openerp>
