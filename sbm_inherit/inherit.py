@@ -1576,6 +1576,23 @@ class InternalMoveRequest(osv.osv):
 		'lines':fields.one2many('internal.move.request.line','internal_move_request_id',string="Items Request"),
 	}
 
+	def SetDraft(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		internal_move = self.pool.get('internal.move')
+
+		cek = internal_move.search(cr,uid,[('internal_move_request_id', '=' ,ids)])
+
+		if cek:
+			data = internal_move.browse(cr, uid, cek, context=None)
+			for x in data:
+				if x.state == 'cancel' or x.state == 'draft':
+					return self.write(cr,uid,ids,{'state':'draft'})
+				else:
+					raise osv.except_osv(('Information !!!'), ('Please Cancel or Set to Draft Internal Move '+ x.name ))
+		else:
+			return self.write(cr,uid,ids,{'state':'draft'})
+
+		return True
 
 	def _getUID(self,cr,uid,ids,context=None):
 		return uid

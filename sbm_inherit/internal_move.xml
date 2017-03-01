@@ -174,6 +174,7 @@
 					<header>
 						<field name="state" widget="statusbar" />
 						<button name="confirmRequest" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Confirm Request ?" />
+						<button name="SetDraft" type="object" string="Set To Draft" icon="gtk-jump-to" states="confirmed,onprocess,done" confirm="Are You Sure To Set to Draft" />
 					</header>
 					<sheet>
 						<group col="4" colspan="4">
