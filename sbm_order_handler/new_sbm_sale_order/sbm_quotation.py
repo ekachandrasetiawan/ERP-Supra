@@ -1099,6 +1099,10 @@ class sale_order_invoice(osv.osv):
 
 					inv_line_desc += "Consist of:"
 					for material in order_line.material_lines:
+
+						if material.desc == False:
+							material.desc = ""
+
 						try:
 
 							material_desc = "["+str(material.product_id.default_code)+"]"+str(material.product_id.name)+" (" +str(float(material.qty)) +""+str(material.uom.name)+")"+str(material.desc)
