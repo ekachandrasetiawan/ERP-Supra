@@ -195,10 +195,18 @@ class delivery_note(osv.osv):
 				for x in line.note_lines_material:
 					if not context:
 						context = {}
-						
+					
 					context['location'] = loc
 					context['location_id'] = loc
 					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
+
+					dn_line = self.pool.get('delivery.note.line.material').search(cr, uid, [('product_id', '=', x.product_id.id)])
+					data_line = self.pool.get('delivery.note.line.material').browse(cr, uid, dn_line)
+
+					count_qty = 0
+					for l in data_line:
+						count_qty += l.qty
+
 					if product.not_stock == False:
 						if x.prodlot_id:
 							prodlot = self.pool.get('stock.production.lot').browse(cr, uid, x.prodlot_id.id, context=context)
@@ -207,8 +215,16 @@ class delivery_note(osv.osv):
 								stock = ' ' + str(prodlot.stock_available) + ' '
 								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
 								raise openerp.exceptions.Warning(msg)
+
+							if count_qty > product.qty_available:
+								mm = ' ' + product.default_code + ' '
+								stock = ' ' + str(product.qty_available) + ' '
+								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
+
+								raise openerp.exceptions.Warning(msg)
 						else:
-							if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
+							# if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
+							if count_qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
 								mm = ' ' + product.default_code + ' '
 								stock = ' ' + str(product.qty_available) + ' '
 								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
