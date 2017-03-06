@@ -191,6 +191,8 @@ class delivery_note(osv.osv):
 			if val.prepare_id.location_id.id:
 				loc = val.prepare_id.location_id.id
 
+			note_line_ids = self.pool.get('delivery.note.line').search(cr, uid, [('note_id','=',ids)])
+			
 			for line in val.note_lines:
 				for x in line.note_lines_material:
 					if not context:
@@ -200,7 +202,7 @@ class delivery_note(osv.osv):
 					context['location_id'] = loc
 					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 
-					dn_line = self.pool.get('delivery.note.line.material').search(cr, uid, [('product_id', '=', x.product_id.id)])
+					dn_line = self.pool.get('delivery.note.line.material').search(cr, uid, [('product_id', '=', x.product_id.id), ('note_line_id','in',note_line_ids)])
 					data_line = self.pool.get('delivery.note.line.material').browse(cr, uid, dn_line)
 
 					count_qty = 0
