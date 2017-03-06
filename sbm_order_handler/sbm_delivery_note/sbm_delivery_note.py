@@ -1044,8 +1044,7 @@ class delivery_note_line(osv.osv):
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
-		
-		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
+		'state':fields.related('note_id', 'state', type='char',relation='delivery.note', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 		'sale_line_id': fields.many2one('sale.order.line',required=True, string="Sale Line"),
 	}
@@ -1097,7 +1096,8 @@ class delivery_note_line_material(osv.osv):
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
 		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
-		'state': fields.related('note_line_id','state', type='selection', relation='delivery.note.line', string='State'),
+		'state': fields.related('note_line_id','state', type='char', relation='delivery.note.line', string='State'),
+		'note_id': fields.related('note_line_id','note_id', type='many2one', relation='delivery.note', string="Doc NO"),
 	}
 
 	_rec_name = 'product_id';
