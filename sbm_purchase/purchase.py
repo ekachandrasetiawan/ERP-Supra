@@ -713,16 +713,23 @@ class Set_PO(osv.osv):
 										'term_of_payment':payment_term
 									   })
 		noline=1
-		for line in val.permintaan:
+		pb_line_id = []
+		for x in val.permintaan:
+			pb_line_id += [int(x.id)]
+
+		# for line in val.permintaan:
+		for l in sorted(pb_line_id):
+			line = self.pool.get('detail.pb').browse(cr, uid, l, context=None)
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.name.supplier_taxes_id))
 			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+
 			obj_purchase_line.create(cr, uid, {
 										 'no':noline,
 										 'date_planned': time.strftime("%Y-%m-%d"),
 										 'order_id': sid,
 										 #'pb_id': products[line]['name'],
-										 # 'pb_id': line.detail_pb_id.id,
+										 #'pb_id': line.detail_pb_id.id,
 										 'product_id': line.name.id,
 										 'variants':line.variants.id,
 										 'name':line.name.name,
@@ -735,7 +742,7 @@ class Set_PO(osv.osv):
 										 'taxes_id': [(6,0,taxes_ids)],
 										 })
 			noline=noline+1
-
+			
 		# purchase ==> Nama Module nya purchase_order_form ==> Nama Id Form nya
 		pool_data=self.pool.get("ir.model.data")
 		if jenis in ['impj','imps']:
