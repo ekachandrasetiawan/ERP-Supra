@@ -411,7 +411,7 @@ class WizardPRCancelItem(osv.osv_memory):
 				template_email = self.template_email_reject(cr, uid, ids, data.pb_id.employee_id.name, data.pb_id.name, data.cancel_reason, context={})
 				send_email = obj_pb.send_email(cr, uid, ids, data.pb_id.id, subject, email_to, partner_id, template_email, context={})
 
-			if send_email == True:
+			if email_to and send_email == True:
 				lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
 				dp = self.pool.get('detail.pb').browse(cr, uid, lines)
 				for x in dp:

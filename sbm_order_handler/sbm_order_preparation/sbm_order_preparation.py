@@ -654,7 +654,7 @@ class order_preparation(osv.osv):
 
 					# Validasi Stock Product Count
 
-					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('product_id', '=', x.product_id.id)])
+					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('product_id', '=', x.product_id.id), ('preparation_id','=',ids)])
 					data_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
 
 					count_qty_line = 0
@@ -664,11 +664,11 @@ class order_preparation(osv.osv):
 					if count_qty_line > product.qty_available:
 						mm = ' ' + product.default_code + ' '
 						stock = ' ' + str(product.qty_available) + ' '
-						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock + '. Permintaan = '+ count_qty_line+' available = '+ product.qty_available
 						raise openerp.exceptions.Warning(msg)
 						return False
 				else:
-					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('product_id', '=', x.product_id.id)])
+					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('product_id', '=', x.product_id.id), ('preparation_id','=',ids)])
 					data_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
 
 					count_qty_line = 0
@@ -678,7 +678,8 @@ class order_preparation(osv.osv):
 					if count_qty_line > product.qty_available:
 						mm = ' ' + product.default_code + ' '
 						stock = ' ' + str(product.qty_available) + ' '
-						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+						# msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock + '. Permintaan = '+ str(count_qty_line)+' available = '+ str(product.qty_available)
 						raise openerp.exceptions.Warning(msg)
 						return False
 

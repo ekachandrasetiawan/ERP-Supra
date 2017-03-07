@@ -191,6 +191,8 @@ class delivery_note(osv.osv):
 			if val.prepare_id.location_id.id:
 				loc = val.prepare_id.location_id.id
 
+			note_line_ids = self.pool.get('delivery.note.line').search(cr, uid, [('note_id','=',ids)])
+			
 			for line in val.note_lines:
 				for x in line.note_lines_material:
 					if not context:
@@ -200,7 +202,7 @@ class delivery_note(osv.osv):
 					context['location_id'] = loc
 					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
 
-					dn_line = self.pool.get('delivery.note.line.material').search(cr, uid, [('product_id', '=', x.product_id.id)])
+					dn_line = self.pool.get('delivery.note.line.material').search(cr, uid, [('product_id', '=', x.product_id.id), ('note_line_id','in',note_line_ids)])
 					data_line = self.pool.get('delivery.note.line.material').browse(cr, uid, dn_line)
 
 					count_qty = 0
@@ -1060,8 +1062,7 @@ class delivery_note_line(osv.osv):
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
-		
-		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
+		'state':fields.related('note_id', 'state', type='char',relation='delivery.note', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 		'sale_line_id': fields.many2one('sale.order.line',required=True, string="Sale Line"),
 	}
@@ -1113,7 +1114,8 @@ class delivery_note_line_material(osv.osv):
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
 		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
-		'state': fields.related('note_line_id','state', type='selection', relation='delivery.note.line', string='State'),
+		'state': fields.related('note_line_id','state', type='char', relation='delivery.note.line', string='State'),
+		'note_id': fields.related('note_line_id','note_id', type='many2one', relation='delivery.note', string="Doc NO"),
 	}
 
 	_rec_name = 'product_id';
