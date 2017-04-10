@@ -1633,7 +1633,7 @@ class InternalMoveRequestLine(osv.osv):
 	def _getProcessedItem(self,cr,uid,ids,field_name,args,context={}):
 		res={}
 
-		query = "SELECT SUM(a.qty) AS total FROM internal_move_line AS a JOIN internal_move as b ON a.internal_move_id = b.id WHERE a.internal_move_request_line_id = %s AND b.state not in ('cancel')"
+		query = "SELECT SUM(a.qty) AS total FROM internal_move_line AS a JOIN internal_move as b ON a.internal_move_id = b.id WHERE a.internal_move_request_line_id = %s AND b.state not in ('cancel','draft')"
 		for tid in ids:
 			cr.execute(query,[tid])
 			theRes = cr.fetchone()
@@ -1723,8 +1723,6 @@ class InternalMove(osv.osv):
 		return res
 	# to load internal move line detail automatic by detecting product is has set phantom bom
 	def _loadLineDetail(self,cr,uid,line):
-
-		
 		mrp = self.checkSet(cr,uid,line.product_id)
 		res = []
 		if mrp:
@@ -2208,8 +2206,9 @@ class InternalMove(osv.osv):
 				# jika found di current_lines
 				current_processed = 0.0
 				for found_line in self.pool.get('internal.move.line').browse(cr, uid, in_current_lines, context=context):
-					current_processed += found_line.qty
-
+					if val.state in ["confirmed", "checked","ready","transfered","done"]:
+						current_processed += found_line.qty
+						
 				qty = qty+current_processed
 
 			if qty>0:
