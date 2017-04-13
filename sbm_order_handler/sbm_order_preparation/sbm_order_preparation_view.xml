@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		
+		<record id="wizard_order_preparation_form" model="ir.ui.view">
+			<field name="name">Wizard Order Preparation</field>
+			<field name="model">wizard.order.preparation</field>
+			<field name="arch" type="xml">
+				<form string="Order Preparation" version="7.0">
+					<group>
+						<field name="op_id" readonly="True"/>
+					</group>
+					<group>
+						<field name="notes" widget="html"/>
+					</group>
+					<footer>
+						<button name="request_op_validate" string="Validate" type="object" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+
+		<record id="wizard_order_preparation_action" model="ir.actions.act_window">
+			<field name="name">Action Order Preparation</field>
+			<field name="res_model">wizard.order.preparation</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="wizard_order_preparation_form"/>
+		</record>
+
+
+		<record id="order_preparation_form" model="ir.ui.view">
+			 <field name="name">order.preparation.form</field>
+			 <field name="model">order.preparation</field>
+			 <field name="type">form</field>
+			 <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_form"/>
+			 <field name="arch" type="xml">
+					<button name="preparation_confirm" position="replace">
+						<button name="preparation_confirm" type="object" states="submited" string="Approve" icon="gtk-apply" confirm="Are you sure to Confirm Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
+
+						<button name="preparation_submit" type="object" states="draft" string="Submit" icon="gtk-apply" confirm="Are you sure to Submit Order Preparation ?" groups="sbm_order_handler.group_admin_ho" />
+					</button>
+					<field name="state" position="replace">
+						<field name="state" widget="statusbar" statusbar_visible="draft,submited,approve,done"/>
+					</field>
+
+					<button name="print_op_out" position="replace">
+						<button name="print_op_out" type="object" states="submited,approve,done" string="Print" icon="gtk-print"/>
+					</button>
+
+					<button name="preparation_cancel" position="replace">
+						<button name="preparation_cancel" type="object" states="draft" string="Cancel" icon="terp-stock_effects-object-colorize" confirm="Are you sure to ancel Order Preparation ?" groups="sbm_order_handler.group_admin_ho"/>
+					</button>
+					
+					<button name="preparation_draft" position="replace">
+						<button name="preparation_draft" type="object" states="submited" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="sbm_order_handler.group_admin_warehouse" confirm="Are you sure to Back To Draft Order Preparation ?"/>
+
+						<button name="preparation_draft" type="object" states="approve" string="Set to Draft" icon="terp-stock_effects-object-colorize" groups="stock.group_stock_user" confirm="Are you sure to Back To Draft Order Preparation ?"/>
+
+						<button name="set_delivery_notes" type="object" states="done" string="Set Delivery Notes" icon="gtk-dnd" groups="sbm_order_handler.group_admin_ho" confirm="Create DN Document?"  />
+
+					</button>
+
+					<button name="preparation_done" position="replace">
+						<button name="action_wizard_order_preparation" states="approve" string="Validate" type="object" icon="gtk-apply" confirm="Are you sure to validate Order Preparation" groups="sbm_order_handler.group_admin_warehouse"/>
+					</button>
+
+					<field name="picking_id" position="replace" />
+
+					<field name="poc" position="after">
+						<field name="location_id" on_change="sale_change(sale_id,location_id)" required="True"/>
+					</field>
+					
+					<field name="duedate" position="replace"/>
+
+					<field name="partner_shipping_id" position="after">
+						<field name="duedate"/>
+						<field name="is_postpone"/>
+					</field>
+					<field name="partner_shipping_id" position="replace">
+						<field name="partner_shipping_id" required="True"/>
+					</field>
+					<field name="sale_id" position="replace">
+						<field name="sale_id" on_change="sale_change(sale_id, location_id)" required="True"/> 
+						<field name="sbm_wo_id" on_change="sbm_wo_change(sbm_wo_id)"/> 
+					</field>
+
+					<field name="partner_id" position="replace">
+						<field name="partner_id" on_change="sale_change(sale_id, location_id)" required="True"/> 
+					</field>
+					<xpath expr="//page[@string='Notes']" position="after">
+							<page string="Others">
+								<group>
+									<field name="picking_id" on_change="picking_change(picking_id)"/>
+								</group>
+						 </page>
+					</xpath>
+
+					<xpath expr="//page[@string='Notes']" position="after">
+						<page string="Warehouse Notes">
+							<group>
+								<field name="warehouse_notes" widget="html"/>
+							</group>
+						</page>
+					</xpath>
+
+					<field name="product_id" position="replace">
+						<field name="product_id" on_change="change_item(product_id)"/>
+					</field>
+
+					<field name="product_uom" position="replace">
+						<field name="product_uom" on_change="change_item(product_id)"/>
+					</field>
+
+
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_id']" position="attributes">
+							<attribute name="required">True</attribute>
+					</xpath>
+
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_uom']" position="attributes">
+							<attribute name="required">True</attribute>
+					</xpath>
+
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form/field[@name='product_qty']" position="attributes">
+							<attribute name="required">True</attribute>
+					</xpath>
+
+					<xpath expr="//field[@name='prepare_lines']" position="replace">
+						<field colspan="4" name="prepare_lines" nolabel="1" widget="one2many_list">
+								<form>
+									<field name="no"/>
+									<field name="product_id" on_change="change_item(product_id)"/>
+									<field name="product_qty"/>
+									<field name="product_uom"/>
+									<field name="name" colspan="4"/>
+									<field name="detail" colspan="4"/>
+									<field name="prodlot_id" colspan="4" nolabel="1" widget="one2many_list">
+										<tree string="Detail Batch" editable="buttom">
+											<field name="name" domain="[('product_id','=',parent.product_id)]" on_change="product_batch(name,qty)"/>
+											<field name="desc" on_change="product_batch(name,qty)"/>
+											<field name="exp_date" on_change="product_batch(name,qty)"/>
+											<field name="stock_available" on_change="product_batch(name,qty)"/>
+											<field name="qty"/>
+										</tree>        
+									</field>
+								</form>
+								<tree string="">
+									<field name="no"/>
+									<field colspan="4" name="name"/>
+									<field name="product_id"/>
+									<field name="product_qty"/>
+									<field name="product_uom"/>
+									<field name="product_packaging"/>
+									<field name="prodlot_id"/>
+								</tree>
+							</field>
+					</xpath>
+
+					<xpath expr="//page[@string='Order Lines']/field[@name='prepare_lines']/form" position="inside">
+							<separator string="Detail Sales Order" colspan="4"/>
+							<field name="sale_line_id" domain="[('order_id', '=', parent.sale_id)]" on_change="check_item_material(sale_line_id)"/>
+							<field name="sale_line_material_id" domain="[('sale_order_line_id', '=', sale_line_id)]"/>
+					</xpath>
+
+					<field name="detail" position="before">
+						<field name="extra_material" />
+					</field>
+
+					<xpath expr="//field[@name='prepare_lines']" position="before">
+						<button name="reload_sale_order" type="object" string="Reload Product" attrs="{'invisible':[('state','!=','draft')]}"/>
+					</xpath>
+
+					
+			 </field>
+		</record>
+
+		<record id="op_pack_submited" model="mail.message.subtype">
+			<field name="name">Order Preparation Request Submited</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.preparation</field>
+		</record>
+		<record id="op_pack_approved" model="mail.message.subtype">
+			<field name="name">Order Preparation Request Approved</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.preparation</field>
+		</record>
+		<record id="op_pack_done" model="mail.message.subtype">
+			<field name="name">Order Preparation Request Done</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.preparation</field>
+		</record>
+		<record id="op_pack_draft" model="mail.message.subtype">
+			<field name="name">Order Preparation Request Set to Draft</field>
+			<field name="default" eval="False"/>
+			<field name="res_model">order.preparation</field>
+		</record>
+
+
+		<menuitem name="Order Preparation" parent="base.menu_sales" id="sale_order_preparation" action="ad_order_preparation.action_order_preparation_form" groups="sbm_order_handler.group_admin_warehouse,sbm_order_handler.group_admin_ho"/>
+
+		<record id="view_order_preparation_tree_new" model="ir.ui.view">
+				 <field name="name">order.preparation.tree</field>
+				 <field name="model">order.preparation</field>
+				 <field name="type">tree</field>
+				 <field name="priority">1</field>
+				 <field name="inherit_id" ref="ad_order_preparation.view_order_preparation_tree"/>
+				 <field name="arch" type="xml">
+							<xpath expr="//tree[@string='Order Preparation']" position="attributes">
+									 <attribute name="fonts">bold:message_unread==True;</attribute>
+									 <attribute name="colors">grey:state=='cancel';blue:state in ('draft','approve');green:state in ('done')</attribute>
+							</xpath>
+
+							<field name="name" position="before">
+									<field name="message_unread" invisible="1"/>
+							</field>
+				 </field>
+		</record>
+
+	</data>
+</openerp>

@@ -929,11 +929,11 @@ class sale_order(osv.osv):
 
 		# create invoices through the sales orders' workflow
 		inv_ids0 = set(inv.id for sale in self.browse(cr, uid, ids, context) for inv in sale.invoice_ids)
+
 		for id in ids:
 			wf_service.trg_validate(uid, 'sale.order', id, 'manual_invoice', cr)
+
 		inv_ids1 = set(inv.id for sale in self.browse(cr, uid, ids, context) for inv in sale.invoice_ids)
-		
-		
 		# determine newly created invoices
 		new_inv_ids = list(inv_ids1 - inv_ids0)
 
@@ -959,7 +959,7 @@ class sale_order(osv.osv):
 class sale_order_line(osv.osv):
 	_inherit = 'sale.order.line'
 	def _prepare_order_line_invoice_line(self, cr, uid, line, account_id=False, context=None):
-		
+		# raise osv.except_osv(_("error"),_('HAHAHAHAAAA'))
 		"""Prepare the dict of values to create the new invoice line for a
 		   sales order line. This method may be overridden to implement custom
 		   invoice generation (making sure to call super() to establish
@@ -997,8 +997,20 @@ class sale_order_line(osv.osv):
 			if not account_id:
 				raise osv.except_osv(_('Error!'),
 							_('There is no Fiscal Position defined or Income category account defined for default properties of Product categories.'))
+
+			if line.name:
+				lineDesc = line.name
+			else:
+				lineDesc = ""
+
+			for mat in line.material_lines:
+				if mat.desc:
+					lineDesc += mat.desc+'\n'
+				else:
+					lineDesc += '\n'
+
 			res = {
-				'name': line.name,
+				'name': lineDesc,
 				'sequence': line.sequence,
 				'origin': line.order_id.name,
 				'account_id': account_id,
@@ -1011,6 +1023,7 @@ class sale_order_line(osv.osv):
 				'invoice_line_tax_id': [(6, 0, [x.id for x in line.tax_id])],
 				'account_analytic_id': line.order_id.project_id and line.order_id.project_id.id or False,
 			}
+			print "RESSSSSSSSSSSSSSSSs--------------->>>>>>",res
 			
 
 		return res

@@ -174,6 +174,7 @@
 					<header>
 						<field name="state" widget="statusbar" />
 						<button name="confirmRequest" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Confirm Request ?" />
+						<button name="SetDraft" type="object" string="Set To Draft" icon="gtk-jump-to" states="confirmed,onprocess,done" confirm="Are You Sure To Set to Draft" />
 					</header>
 					<sheet>
 						<group col="4" colspan="4">
@@ -231,7 +232,7 @@
 							<field name="no" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="product_id" on_change="on_change_product(product_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
 							<field name="qty" attrs="{'readonly':[('state','!=','draft')]}"/>
-							<field name="uom_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+							<field name="uom_id" readonly="1"/>
 							<field name="desc" attrs="{'readonly':[('state','!=','draft')]}" />
 
 							
@@ -288,6 +289,7 @@
 			<field name="arch" type="xml">
 				<tree string="Internal Move">
 					<field name="name" />
+					<field name="internal_move_request_id" />
 					<field name="source" />
 					<field name="destination" />
 					<field name="due_date_preparation" />
@@ -307,6 +309,8 @@
 						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,checked,ready,transfered,done" />
 						<button name="confirmInternalMove" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_set,sbm_inherit.group_im_confirmer" />
 
+						<button name="action_reload_line" type="object" string="Reload" icon="STOCK_REFRESH" states="draft" groups="base.group_no_one" />
+
 						<button name="checkedInternalMove" type="object" string="Checked" icon="gtk-apply" states="confirmed" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
 						<button name="setAsDraftInternalMove" type="object" string="Set to Draft" icon="gtk-apply" states="confirmed,ready,checked" confirm="Are You Sure to set This Document to Draft ? If this confirmed then the confirmed process will be closed and stock will be refunded!" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
@@ -315,30 +319,39 @@
 
 						<button name="transferMove" type="object" string="Transfer Move" icon="gtk-apply" states="ready" confirm="Sure ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
+
+						<button name="receiveMove" type="object" string="Receive" icon="gtk-apply" states="transfered" confirm="Receive ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation" icon="gtk-print" states="confirmed,checked,ready"  groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_inherit.group_im_set"/>
 
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation WS" icon="gtk-print" states="checked,ready,transfered,done"  groups="sbm_inherit.group_im_ws_checker"/>
 
 						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
 
+						<button name="action_cancel" type="object" string="Cancel" states="transfered" icon="STOCK_CANCEL" groups="base.group_no_one" />
+
+						<button name="action_cancel_to_draft" type="object" string="Set to Draft" icon="gtk-apply" states="cancel" groups="base.group_no_one" />
+
+						<button name="action_create_return" states="done" string="Return Internal Move" type="object" icon="STOCK_REVERT_TO_SAVED" confirm="Are you sure to Create Return Internal Move"/>
 
 					</header>
 					<sheet>
 						<group>
 							<field name="name" readonly="True" />
 							<field name="internal_move_request_id" on_change="load_request(internal_move_request_id)" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="return_ref_id" attrs="{'invisible':[('return_ref_id', '=', False)]}"/>
 							<field name="due_date_preparation" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="due_date_transfer" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="date_prepared" readonly="True" />
 							<field name="date_transfered" readonly="True" />
 							<field name="date_received" readonly="True" />
-							<field name="source" attrs="{'readonly':[('state','!=','draft')]}" />
+							<field name="source" on_change="load_request(internal_move_request_id, source)" attrs="{'readonly':[('state','!=','draft')]}" />
 							<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
 
-							<field name="manual_pb_no" required="True" />
-							<field name="ref_no" />
+							<field name="manual_pb_no" required="True" attrs="{'readonly':[('state','!=','draft')]}"/>
+							<field name="ref_no" attrs="{'readonly':[('state','!=','draft')]}" />
 
-							<field name="picking_id" />
+							<field name="picking_id" attrs="{'readonly':[('state','!=','draft')]}" />
 
 							<field name="lines" widget="one2many_list" attrs="{'delete':[('state','=','draft')]}">
 								<tree string="Items">
@@ -400,13 +413,15 @@
 
 						<field name="uom_id" attrs="{'readonly':[('state','!=','draft')]}"/>
 						<field name="stock_move_id" readonly="1"/>
+						<field name="source" on_change="on_change_source_line(source, detail_ids)" attrs="{'readonly':[('state','!=','draft')]}" />
+						<field name="destination" attrs="{'readonly':[('state','!=','draft')]}" />
 						<field name="detail_ids">
 							<tree editable="bottom">
 								<!-- <field name="name" readonly="1" /> -->
 								<field name="no" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}"/>
 								<field name="type" on_change="on_change_type(type,parent.product_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
 								<field name="product_id" on_change="on_change_product(product_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
-								<field name="stock_prod_lot_id" attrs="{'required':[('type','=','batch')],'readonly':[('state','!=','draft')]}" on_change="on_change_batch(stock_prod_lot_id)" domain="[('product_id','=',product_id)]" />
+								<field name="stock_prod_lot_id" attrs="{'required':[('type','=','batch')],'readonly':[('state','!=','draft')]}" on_change="on_change_batch(stock_prod_lot_id, parent.source)" domain="[('product_id','=',product_id)]" />
 								<field name="desc" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}"/>
 								<field name="qty_available"/>
 								<field name="qty" on_change="validateQty(qty,qty_available,product_id,stock_prod_lot_id)" attrs="{'readonly':[('state','!=','draft')]}" />
@@ -416,6 +431,7 @@
 								<field name="stock_move_id" readonly="True" />
 								<field name="stock_state" />
 								<field name="state" readonly="True" />
+
 								
 							</tree>
 						</field>
@@ -483,6 +499,38 @@
 		<menuitem name="Internal Move Request" parent="sbm_inherit.mr_menu_ws" id="internal_move_req_ws_menu" action="action_internal_move_request" />
 		<menuitem name="Internal Move" parent="sbm_inherit.mr_menu_ws" id="internal_move_ws_menu" action="action_internal_move_confirmed" />
 
+
+
+		<record id="wizard_create_return_internal_move" model="ir.ui.view">
+		<field name="name">Create Return Internal Move</field>
+		<field name="model">create.return.internal.move</field>
+		<field name="arch" type="xml">
+			<form string="Create Return Internal Move" version="7.0">
+				<group>
+					<field name="name" readonly="True" />
+					<field name="internal_move_id" readonly="True" />
+					<field name="source" readonly="True" />
+					<field name="destination" readonly="True" />
+				</group>
+				<field name="lines">
+					<tree editable="bottom" string="Internal Move Lines">
+						<field name="product_id" readonly="True"/>
+						<field name="desc" readonly="True"/>
+						<field name="qty"/>
+						<field name="uom_id" readonly="True" />
+						<field name="source" readonly="True" />
+						<field name="destination" readonly="True" />
+						<field name="internal_move_line_id" readonly="True" />
+					</tree>
+				</field>
+				<footer>
+                    <button name="request_create_return_internal_move" string="Create Return Internal Move" type="object" class="oe_highlight"/>
+                    or
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+			</form>
+		</field>
+	</record>
 
 
 	</data>

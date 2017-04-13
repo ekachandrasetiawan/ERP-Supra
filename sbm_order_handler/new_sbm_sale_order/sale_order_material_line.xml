@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+
+		<record id="sale_order_material_line_tree_view" model="ir.ui.view">
+			<field name="name">sale.order.material.line.tree</field>
+			<field name="model">sale.order.material.line</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Sale Order Material Line" colors="gray:qty==procured_qty;">
+					<field name="sale_id"/>
+					<field name="product_id"/>
+					<field name="qty"/>
+					<field name="on_process_qty" string="Process Qty"/>
+					<field name="shipped_qty" string="Shipped Qty"/>
+                    <field name="procured_qty"/>
+					<field name="uom"/>
+					<field name="picking_location" string="Location"/>
+					<field name="status" string="Status"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_sale_order_material_line">
+			<field name="name">Sale Order Material Line</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">sale.order.material.line</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('product_id.type','!=','service')]</field> 
+			<field name="view_id" ref='sale_order_material_line_tree_view'/>
+		</record>
+
+		<menuitem parent="base.menu_sales" id="sale.menu_sale_order_material_line" action="action_sale_order_material_line" sequence="5" string="Sale Order Material Line"/>
+
+		<record id="view_sale_order_material_line" model="ir.ui.view">
+			<field name="name">Sale Order Material Line</field>
+			<field name="model">create.pb.material.line</field>
+			<field name="arch" type="xml">
+			   <form string="Create Purchase Requisition From Sale Order Material Line" version="7.0">
+					<sheet>
+						<group col="4" colspan="4">
+							<field name="name" readonly="1"/>
+							<field name="client_order_ref" readonly="1"/>
+						</group>
+						<notebook colspan="4">
+							<page string="Product Detail">
+								<field name="detail_ids" nolabel="1" colspan="4" string="Detail Product">
+									<tree string="Product" editable="bottom">
+										<field name="product_id" readonly="1"/>
+										<field name="qty"/>
+										<field name="uom" readonly="1"/>
+										<field name="notes"/>
+										<field name="sale_order_material_line_id" invisible="1"/>
+									</tree>
+								</field>
+							</page>
+						</notebook>
+					</sheet>
+					<footer>
+						<button name="create_pb" string="Create Purchase Requisition" type="object" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel" />
+					</footer>
+				</form>
+			</field>
+		</record>
+
+		<act_window name="Create Purchase Requisition With Selected Product"
+			res_model="create.pb.material.line"
+			src_model="sale.order.material.line"
+			view_mode="form"
+			target="new"
+			multi="True"
+			key2="client_action_multi"
+			id="action_create_pb_sale_material_line"
+			groups="sbm_order_handler.group_admin_ho,base.group_admin_support"/>
+
+
+		<record id="view_inherit_pembelian_barang" model="ir.ui.view">
+		   <field name="name">pembelian.barang.form</field>
+		   <field name="model">pembelian.barang</field>
+		   <field name="type">form</field>
+		   <field name="inherit_id" ref="sbm_purchase.view_pb_form"/>
+		   <field name="arch" type="xml">
+		   	    <xpath expr="//button[@string='Import Sale Order Line']" position="replace"/>
+
+		   	    <xpath expr="//button[@name='action_cancel_item']" position="replace">
+		   	    	<button name="action_cancel_item" states="draft" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional" icon="STOCK_CANCEL"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@string='Print Purchase Requisition']" position="replace">
+		   	    	<button name="%(sbm_purchase.reportpb)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition" type="action" icon="gtk-print" groups="sbm_purchase.group_jobdesc_position_dept_chief,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@string='Print Purchase Requisition A5']" position="replace">
+		   	    	<button name="%(sbm_purchase.reportpbA5)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition A5" type="action" icon="gtk-print" groups="sbm_purchase.group_jobdesc_position_dept_chief,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
+		   	    </xpath>
+
+
+		   	    <xpath expr="//button[@name='submit']" position="replace">
+		   	    	<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief,purchase.group_purchase_user,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@name='confirm']" position="replace">
+		   	    	<button name="confirm" states="confirm" string="Approve" type="object" icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_ho"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@name='confirm2']" position="replace">
+		   	    	<button name="confirm2" states="confirm2" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_spv"  icon="gtk-apply"/>
+		   	    </xpath>
+
+		   	    <xpath expr="//button[@name='setdraft']" position="replace">
+		   	    	<button name="setdraft" states="confirm,confirm2" string="Set to Draft" type="object"  icon="gtk-jump-to" groups="purchase.group_purchase_manager,purchase.group_purchase_user,sbm_order_handler.group_admin_spv,sbm_order_handler.group_admin_ho"/>
+		   	    </xpath>
+
+				<field name="destination_location_request_id" position="replace">
+					<field name="destination_location_request_id" required="True"/>
+				</field>
+				<field name="department_id" position="replace">
+					<field name="department_id" required="True"/>
+				</field>
+				<field name="name" position="replace">
+					<field name="name" colspan="4"/>
+				</field>
+				<field name="name" position="after">
+					<field name="proc_type" colspan="2"/>
+					<field name="source_model" colspan="2"/>
+				</field>
+
+				<field name="detail_pb_ids" position="replace">
+					<field name="detail_pb_ids" nolabel="1" colspan="4" context="{'default_source_model' : source_model}">
+                        <tree string="Product Detail" editable="none">
+                        	<field name="no"/>
+                          	<field name="name" on_change="setvariants(name)"/>
+                          	<field name="desc"/>
+                          	<field name="variants"/>
+                            <field name="part_no"/>
+                            <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
+                            <field name="qty_available"/>
+                            <field name="satuan" on_change="onchange_product_new(name, satuan)"/>
+                            <field name="stok"/>
+                            <field name="processed_items"/>
+							<field name="delivery_items"/>
+			   				<field name="keterangan"/>
+                            <field name="state"/>
+                        </tree>
+                        <form string="Product Detail Purchase Requisition">
+                        	<field name="no" colspan="4"/>
+                    		<field name="name" on_change="setvariants(name)" colspan="4"/>
+                    		<field name="desc" colspan="4"/>
+                        	<field name="variants"/>
+                            <field name="part_no"/>
+                            <field name="jumlah_diminta" on_change="jmlQty(jumlah_diminta)"/>
+                            <field name="satuan" on_change="onchange_product_new(name, satuan)" string="UOM"/>
+                            <field name="keterangan" colspan="4"/>
+                            
+                            <field name="sale_order_material_line_id" colspan="2" string="Material Line" on_change="onchange_material_line(sale_order_material_line_id)" attrs="{'required':[('source_model', '=', 'sales')]}"/>
+                            <field name="sale_line_ids" colspan="2" string="Sales Line"/>
+                            
+                            <field name="qty_available"/>
+                            <field name="stok" readonly="1"/>
+                            <field name="processed_items"/>
+							<field name="delivery_items"/>
+                            <field name="state"/>
+                            <field name="source_model" invisible="1"/>
+                            <groups colspan="4">
+                            	<field name="po_line_ids">
+	                            	<tree>
+	                            		<field name="order_id"/>
+	                            		<field name="product_qty"/>
+	                            		<field name="received_items"/>
+	                            	</tree>
+	                            </field>
+                            </groups>
+                        </form>
+                    </field>
+				</field>
+
+				<xpath expr="//field[@name='detail_pb_ids']/tree" position="attributes">
+					<attribute name="editable"/>
+				</xpath>
+		   </field>
+		</record>
+
+		<record id="seq_purchase_requisition_sales" model="ir.sequence.type">
+			<field name="name">Purchase Requisition Sales</field>
+			<field name="code">pembelian.barang.sales</field>
+		</record>
+
+		<record id="seq_purchase_requisition_sales_request" model="ir.sequence">
+			<field name="name">Purchase Requisition Sales</field>
+			<field name="code">pembelian.barang.sales</field>
+			<field name="prefix">/</field>
+			<field name="padding">4</field>
+		</record>
+
+		<record id="seq_purchase_requisition_internal" model="ir.sequence.type">
+			<field name="name">Purchase Requisition Internal</field>
+			<field name="code">pembelian.barang.internal</field>
+		</record>
+
+		<record id="seq_purchase_requisition_internal_request" model="ir.sequence">
+			<field name="name">Purchase Requisition Internal</field>
+			<field name="code">pembelian.barang.internal</field>
+			<field name="prefix">/</field>
+			<field name="padding">4</field>
+		</record>
+	</data>
+</openerp>

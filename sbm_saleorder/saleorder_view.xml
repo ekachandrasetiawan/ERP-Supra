@@ -10,6 +10,9 @@
 					<button name="action_create_pb" states="progress,manual" string="Create PB" type="object"/>
 					<button name="action_create_pb_subcount" states="progress,manual" string="Create PB Subcount" type="object"/>
 				</xpath>
+				<xpath expr="//button[@name='action_view_invoice']" position="replace">
+					<button name="action_view_invoice" string="View Invoice" type="object" class="oe_highlight" attrs="{'invisible': [('invoice_exists', '=', False)]}" groups="base.group_user,base.group_sales_admin,base.group_admin_support,sbm_inherit.group_sales_admin_regional"/>
+                </xpath>
 			</field>
 		</record>
 
@@ -25,8 +28,8 @@
 						<tree editable="bottom" string="Purchase Requsition">
 							<field name="so_line_id" invisible="1" />
 							<field name="product_id" readonly="True" />
-							<field name="description" readonly="True" />
-							<field name="qty" readonly="True" />
+							<field name="description" readonly="False" />
+							<field name="qty" readonly="False" />
 							<field name="uom" readonly="True" />
 						</tree>
 					</field>

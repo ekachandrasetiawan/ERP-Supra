@@ -81,7 +81,7 @@ class WizardCreatePB(osv.osv_memory):
 
 	def _load_so_line(self, cr, uid, line):
 		so_item = {
-			'so_line_id'			: line.id,
+			'so_line_id'		: line.id,
 			'product_id'		: line.product_id.id,
 			'description'		: line.name,
 			'uom'				: line.product_uom.id,
@@ -102,25 +102,32 @@ class WizardCreatePB(osv.osv_memory):
 		else:
 			duedate=time.strftime("%Y-%m-%d")
 
+		empl=self.pool.get('hr.employee').search(cr,uid,[('user_id', '=' ,uid)])
+		employee=self.pool.get('hr.employee').browse(cr,uid,empl)[0]
+
 		sid = pembelian_barang.create(cr, uid, {
-										'name':self.pool.get('ir.sequence').get(cr, uid, 'pembelian.barang'),
-										'employee_id': uid,
+										'name':'/',
+										'proc_type':'sales',
+										'source_model':'sales',
+										'employee_id':employee.id,
+										'department_id':employee.department_id.id,
 										'spk_no':sale.client_order_ref,
 										'tanggal':time.strftime("%Y-%m-%d"),
 										'ref_pb':sale.client_order_ref,
 										'duedate':duedate,
-										'notes':sale.note
+										'notes':val.note,
+										'state':'draft'
 									   })
-		
 		for line in val.lines:
 			detail_pb.create(cr, uid, {
 										 'name':line.product_id.id,
+										 'desc':line.description,
 										 'detail_pb_id':sid,
 										 'part_number':line.product_id.default_code,
 										 'jumlah_diminta':line.qty,
 										 'satuan':line.uom.id,
-										 'keterangan':line.description,
-										 'sale_line_ids':line.so_line_id.id
+										 'sale_line_ids':line.so_line_id.id,
+										 'sale_order_material_line_id':line.id,
 										 })
 
 

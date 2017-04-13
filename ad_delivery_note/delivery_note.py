@@ -11,6 +11,9 @@ import openerp.addons.decimal_precision as dp
 from openerp import netsvc
 from openerp.tools.float_utils import float_compare
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class sale_order(osv.osv):
 	_inherit = "sale.order"
 	_columns = {
@@ -39,6 +42,7 @@ class sale_order(osv.osv):
 			
 		res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
 		res_id = res and res[1] or False,
+
 
 		return {
 			'name': _('Customer Invoices'),
@@ -369,8 +373,9 @@ class stock_picking(osv.osv):
 				# END UNCOMMENT FOR LIVE
 		return self.write(cr,uid,ids,{'state':'warehouse'})
 		# return False
-	def draft_force_assign(self,cr,uid,ids,context=None):
-		return self.write(cr,uid,ids,{'state':'confirmed'})
+	def draft_force_assign(self, cr, uid, ids, *args):
+		self.write(cr,uid,ids,{'state':'confirmed'})
+		return super(stock_picking, self).draft_force_assign(cr, uid, ids, *args)
 
 	def setdraft(self,cr,uid,ids,context=None):
 		return self.write(cr,uid,ids,{'state':'draft'})
@@ -945,6 +950,18 @@ class procurement_order(osv.osv):
 procurement_order()
 
 class delivery_note(osv.osv):
+
+	def _employee_get(obj, cr, uid, context=None):
+		if context is None:
+			context = {}
+		ids = obj.pool.get('hr.employee').search(cr, uid, [('user_id', '=', uid)], context=context)
+		dept = obj.pool.get('hr.department').search(cr, uid, [('name', '=', 'SALES ADMIN')], context=context)
+		employee = obj.pool.get('hr.department').browse(cr, uid, dept, context=context)[0]
+
+		if employee:
+			return employee.manager_id.id
+		return False
+		
 	def print_dn_out(self,cr,uid,ids,context=None):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
@@ -993,13 +1010,14 @@ class delivery_note(osv.osv):
 		'note': fields.text('Notes'),
 		'terms':fields.text('Terms & Condition'),
 		'attn':fields.many2one('res.partner',string="Attention"),
+		'signature':fields.many2one('hr.employee', string='Signature'),
 		'refund_id':fields.many2one('stock.picking',string="Refund No", domain=[('type','=', 'in')], readonly=True),
 		'note_return_ids': fields.many2many('stock.picking','delivery_note_return','delivery_note_id',string="Note Return",readonly=True),
 		'note_return_ids_proses': fields.many2many('stock.picking.in','delivery_note_return','delivery_note_id',string="Note Return",readonly=True,states={'torefund': [('readonly', False)]}),
 	}
 	_defaults = {
 		'name': '/',
-		'state': 'draft', 
+		'state': 'draft',
 	}
 	# to add mail thread in footer
 	_inherit = ['mail.thread']
@@ -1057,37 +1075,27 @@ class delivery_note(osv.osv):
 				'datas': data,
 				'nodestroy':True
 		}
-	
-	 
-	# def create(self, cr, uid, vals, context=None):
-	# 	# validate dn input
-		
-	# 	prepareExists = self.search(cr,uid,[('prepare_id','=',vals['prepare_id']),('state','not in',['cancel'])])
-		
-	# 	if prepareExists and vals['special']==False:
-	# 		no = ""
-	# 		for nt in self.browse(cr,uid,prepareExists,context):
-	# 			no += "["+nt.name+"]\n"
-	# 		raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
 
+	def get_old_no(self, cr, uid, the_id, context={}):
+		vals = self.browse(cr, uid, the_id, context=context) #return single browse record
 
-	# 	if vals['special']==True:
-	# 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-	# 		# saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
-	# 		usa = 'SPC'
-	# 		val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-	# 		use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-	# 		vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-	# 		return super(delivery_note, self).create(cr, uid, vals, context=context)
-	# 	else:    
-	# 		# ex: 000001C/SBM-ADM/JH-NR/X/13
-	# 		rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
-	# 		saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
-	# 		usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
-	# 		val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
-	# 		use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
-	# 		vals['name'] =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
-	# 		return super(delivery_note, self).create(cr, uid, vals, context=context)
+		if vals.special==True:
+			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+			# saleid = self.pool.get('order.preparation').browse(cr, uid, vals['prepare_id']).sale_id.id
+			usa = 'SPC'
+			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+			res =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+			# return super(delivery_note, self).create(cr, uid, vals, context=context)
+		else:    
+			# ex: 000001C/SBM-ADM/JH-NR/X/13
+			rom = [0, 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+			saleid = self.pool.get('order.preparation').browse(cr, uid, vals.prepare_id.id).sale_id.id
+			usa = str(self.pool.get('sale.order').browse(cr, uid, saleid).user_id.initial)
+			val = self.pool.get('ir.sequence').get(cr, uid, 'delivery.note').split('/')
+			use = str(self.pool.get('res.users').browse(cr, uid, uid).initial)
+			res =time.strftime('%y')+ val[-1]+'C/SBM-ADM/'+usa+'-'+use+'/'+rom[int(val[2])]+'/'+val[1]
+		return res
 			
 	def package_draft(self, cr, uid, ids, context=None):
 		self.write(cr, uid, ids, {'state': 'draft'})
@@ -1099,15 +1107,20 @@ class delivery_note(osv.osv):
 		 
 	def package_confirm(self, cr, uid, ids, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
-
-		if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
-			raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
+		
+		if not val.special:
+			if val.prepare_id.sale_id.state == 'cancel' or val.prepare_id.sale_id.state == 'draft':
+				raise osv.except_osv(_('Error'),_('Can\'t Change Document State, Please make sure Sale Order has been confirmed'))
 
 
 		for x in val.note_lines:
 			if x.product_qty <= 0:
 				raise osv.except_osv(('Perhatian !'), ('Quantity product harus lebih besar dari 0 !'))
-		self.write(cr, uid, ids, {'state': 'approve'})
+		no = val.name
+		if val.name=="/":
+			no = self.get_old_no(cr, uid, val.id, context=context)
+
+		self.write(cr, uid, ids, {'state': 'approve', 'name':no})
 		return True
 		 
 	def unlink(self, cr, uid, ids, context=None):
@@ -1115,8 +1128,24 @@ class delivery_note(osv.osv):
 		if val.state != 'draft':
 			raise osv.except_osv(('Invalid action !'), ('Cannot delete a delivery note which is in state \'%s\'!') % (val.state,))
 		return super(delivery_note, self).unlink(cr, uid, ids, context=context)
-		  
+	
+	#check is prepare id has active dn document to process
+	def check_is_processed_queue(self, cr, uid, prepare_id, special=False, validasi=False, context={}):
+		res=True
+		# validate dn input
+		prepareExists = self.search(cr,uid,[('prepare_id','=',prepare_id),('state','not in',['cancel'])])
+		
+		if prepareExists and special==False and validasi==False:
+			no = ""
+			for nt in self.browse(cr,uid,prepareExists,context):
+				no += "["+nt.name+"]\n"
+			raise osv.except_osv(_("Error!!!"),_("Deliver Note ref to requested DO NO is Exist On NO "+no))
+			# return super(delivery_note, self).create(cr, uid, vals, context=context)
+		return res
+
 	def prepare_change(self, cr, uid, ids, pre):
+		# self.check_is_processed_queue(cr, uid, pre, False, {}) #special still static, please fix it
+
 		if pre :
 			res = {}; line = []
 			data = self.pool.get('order.preparation').browse(cr, uid, pre)
@@ -1261,7 +1290,7 @@ class delivery_note(osv.osv):
 					self.write(cr, uid, ids, {'state': 'done'})
 
 					print "OP PICKING TO BE",id_done[0][1]['delivered_picking']
-					raise osv.except_osv('errr','eerrr')
+					# raise osv.except_osv('errr','eerrr')
 					# raise osv.except_osv(_("TEST"),_("TEST"))
 
 
@@ -1426,7 +1455,7 @@ class delivery_note_line(osv.osv):
 				refunded_total += refund.product_qty
 
 			if item.product_qty == refunded_total:
-				self.write(cr,uid,[item.id],{'state':'donerefund'})
+				self.write(cr,uid,[item.id],{'state':'refunded'})
 			res[item.id] = refunded_total
 		return res
 
@@ -1564,7 +1593,7 @@ class stock_move(osv.osv):
 			if addr_rec:
 				lang = addr_rec and addr_rec.lang or False
 		ctx = {'lang': lang}
-
+		
 		product = self.pool.get('product.product').browse(cr, uid, [prod_id], context=ctx)[0]
 		uos_id  = product.uos_id and product.uos_id.id or False
 		result = {
@@ -1845,15 +1874,22 @@ class stock_return_picking(osv.osv_memory):
 		if context.get('active_model') == 'delivery.note':
 			op_line = self.pool.get('order.preparation.line')
 			dn_line = self.pool.get('delivery.note.line')
-
+		_logger.error((val_id),"OOOOOOOOOOOO")
 		for v in val_id:
 			data_get = data_obj.browse(cr, uid, v, context=context)
 			mov_id = data_get.move_id.id
 			
 			# search op and dn
 			if context.get('active_model') == 'delivery.note':
+				_logger.error((mov_id,"aaaaa<<<<<<<<<<<<<<<<"))
+
 				op_line_id = op_line.search(cr,uid,[('move_id','=',mov_id)],context=context)
-				dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id[0])],context=context)[0]
+				if type(op_line_id)==list:
+					op_line_id = op_line_id[0]
+
+				dn_line_id = dn_line.search(cr,uid,[('op_line_id','=',op_line_id)],context=context)
+				if type(dn_line_id)==list and len(dn_line_id)>0:
+					dn_line_id = dn_line_id[0]
 
 			if not mov_id:
 				raise osv.except_osv(_('Warning !'), _("You have manually created product lines, please delete them to proceed"))
@@ -2130,7 +2166,7 @@ class stock_partial_picking(osv.osv_memory):
 	
 	_inherit = "stock.partial.picking"
 
-	def _partial_move_for(self, cr, uid, move):
+	def _partial_move_for(self, cr, uid, move, context={}):
 		partial_move = {
 			'product_id' : move.product_id.id,
 			'product_name':move.name,

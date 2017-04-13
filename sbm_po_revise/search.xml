@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+  		<record id="view_purchase_order_filter_inherit" model="ir.ui.view">
+		<field name="name">purchase.order.list.select</field>
+		<field name="model">purchase.order</field>
+		<field name="type">search</field>
+		<field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+		<field name="arch" type="xml">
+			<search string="Search Purchase Order">
+				<group expand="!" string="Filter Invoice State">
+					<filter string="Waiting" name="wait" icon="terp-check" domain="[('invoice_status','=','wait')]"/>
+					<filter string="Partial Invoiced" name="partial" icon="terp-check" domain="[('invoice_status','=','partial')]"/>
+					<filter string="Full Invoiced" name="full" icon="terp-check" domain="[('invoice_status','=','full')]"/>
+				</group>
+				
+				<group expand="!" string="Filter Receiving Status">
+					<filter string="Waiting" name="wait" icon="terp-check" domain="[('receiving_status','=','wait')]"/>
+					<filter string="Partial Received" name="partial" icon="terp-check" domain="[('receiving_status','=','partial')]"/>
+					<filter string="Full Received" name="full" icon="terp-check" domain="[('receiving_status','=','full')]"/>
+				</group>
+
+				<group expand="0" string="Group By...">
+					<field name="invoice_status" select="1" string="Invoiced Status"/>
+					<field name="receiving_status" select="1" string="Received Status"/>
+				</group>
+
+				<newline/>
+			</search>
+		</field>
+	</record> 
+    </data>
+</openerp>

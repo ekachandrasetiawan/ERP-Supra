@@ -3,6 +3,8 @@ from datetime import date, timedelta, datetime
 import netsvc
 from tools.translate import _
 from osv import osv, fields
+from email.message import Message
+from email.header import Header
 
 class Pembelian_Barang(osv.osv):
 	
@@ -40,7 +42,8 @@ class Pembelian_Barang(osv.osv):
 				res[data.id] = "purchase"
 			elif action_state == "draft":
 				res[data.id] = "draft"
-
+			elif action_state == "cancel":
+				res[data.id] = "cancel"
 		return res
 
 
@@ -118,6 +121,35 @@ class Pembelian_Barang(osv.osv):
 
 	_order = 'id DESC'
 
+
+	def send_email_validate(self, cr, uid, ids, context={}):
+		val = self.browse(cr, uid, ids)[0]
+
+		body = """\
+		<html>
+		  <head></head>
+		  <body>
+			<p>
+				Dear %s!<br><br>
+				Purchase Requisition Nomor <b># %s </b> Telah mendapat Approval oleh Purchaser 
+				dan PO akan segera di release. <br/>
+				Sistem ERP akan memberi notifikasi selanjutnya pada saat PO terkait pb tersebut di release.<br>
+			</p>
+			<br>
+			Best Regards,<br>
+			Administrator ERP
+		  </body>
+		</html>
+		""" % (val.employee_id.name, val.name)
+
+		email_to = val.employee_id.user_id.email
+		if email_to:
+			subject = 'Purchase Requisition Reject No #' + val.name
+			partner_id = val.employee_id.user_id.partner_id.id
+			
+			send_email = self.send_email(cr, uid, ids, val.id, subject, email_to, partner_id, body, context={})
+
+		return True
 
 
 	def action_cancel_item(self,cr,uid,ids,context=None):
@@ -206,6 +238,9 @@ class Pembelian_Barang(osv.osv):
 #			raise osv.except_osv(('Perhatian..!!'), ('Harus Atasannya langsung ..'))
 		context.update(action_state='confirm2')
 		cr.execute('Update detail_pb Set state=%s Where detail_pb_id=%s', ('onproses',ids[0]))
+
+		# Send Email 
+		self.send_email_validate(cr, uid, ids, context=context)
 		return self.write(cr,uid,ids,{'state':'purchase'},context=context)
 
 	def purchase(self,cr,uid,ids,context={}):
@@ -226,22 +261,87 @@ class Pembelian_Barang(osv.osv):
 			'datas': datas,
 			}
 
+
+	def reportpbA5(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		datas = {'ids': context.get('active_ids', [])}
+		datas['model'] = 'pembelian.barang'
+		datas['form'] = self.read(cr, uid, ids)[0]
+		
+		return {
+			'type': 'ir.actions.report.xml',
+			'report_name': 'print.pb.A5',
+			'report_type': 'webkit',
+			'datas': datas,
+			}
+
+	def send_email(self, cr, uid, ids, pb_id, subject, email_to, partner_id, body, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		mail_mail = self.pool.get('mail.mail')
+		obj_usr = self.pool.get('res.users')
+		obj_partner = self.pool.get('res.partner')	
+		username = obj_usr.browse(cr, uid, uid)
+
+		mail_id = mail_mail.create(cr, uid, {
+			'model': 'pembelian.barang',
+			'res_id': pb_id,
+			'subject': subject,
+			'body_html': body,
+			'auto_delete': True,
+			}, context=context)
+
+		mail_mail.send(cr, uid, [mail_id], recipient_ids=[partner_id], context=context)
+
+		return True
+
 Pembelian_Barang()
 
 
 class ClassName(osv.osv):
-	
 	def action_cancel_item(self,cr,uid,ids,context=None):
+		cr.execute("SELECT create_uid FROM pembelian_barang WHERE id = %s", ids)
+		id_user_create = map(lambda id: id[0], cr.fetchall())
+
+		for x in id_user_create:
+			if x != uid:
+				user_name = self.pool.get('res.users').browse(cr, uid, x)
+				raise osv.except_osv(('Warning..!!'), ('Cancellation can only Perform Document author' + ' "' + user_name.name + '"'))
+
 		if context is None:
 			context = {}
 		
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_purchase', 'wizard_pr_cancel_form')
 
-		# print "<<<<<<<<<<<<<<<<<<<<",view_id
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'status':'cancel',
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_pr_cancel_form',
+			'res_model': 'wizard.pr.cancel.item',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
+
+	def action_reject_pb(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_purchase', 'wizard_pr_cancel_form')
 
 		context.update({
 			'active_model': self._name,
 			'active_ids': ids,
+			'status':'reject',
 			'active_id': len(ids) and ids[0] or False
 		})
 		return {
@@ -265,34 +365,72 @@ class WizardPRCancelItem(osv.osv_memory):
 	def default_get(self, cr, uid, fields, context=None):
 		if context is None: context = {}
 		pb_ids = context.get('active_ids', [])
-		# print '====================',pb_ids
 		active_model = context.get('active_model')
 		res = super(WizardPRCancelItem, self).default_get(cr, uid, fields, context=context)
 		if not pb_ids or len(pb_ids) != 1:
-			# Partial Picking Processing may only be done for one picking at a time
 			return res
 		pb_id, = pb_ids
 		if pb_id:
 			res.update(pb_id=pb_id)
 			pb = self.pool.get('pembelian.barang').browse(cr, uid, pb_id, context=context)
-			# linesData = []
-			# linesData += [self._load_po_line(cr, uid, l) for l in po.order_line if l.state not in ('done','cancel')]
-			# res.update(lines=linesData)
-		print res,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 		return res
 
+	def template_email_reject(self, cr, uid, ids, user, pb_no, alasan, context={}):
+		res = """\
+		<html>
+		  <head></head>
+		  <body>
+			<p>
+				Dear %s!<br><br>
+				Purchase Requisition Nomor <b># %s </b> Telah di Reject.<br>
+				<b>Dengan Alasan :</b> %s 
+			</p>
+			<br>
+			Best Regards,<br>
+			Administrator ERP
+		  </body>
+		</html>
+		""" % (user, pb_no, alasan)
+		return res
 
 	def request_cancel(self,cr,uid,ids,context=None):
-		print "CALLING request_cancel_item method"
 		data = self.browse(cr,uid,ids,context)[0]
+		obj_pb = self.pool.get('pembelian.barang')
+		if context is None: 
+			context = {}
 
-		lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
-		dp = self.pool.get('detail.pb').browse(cr, uid, lines)
-		for x in dp:
-			self.pool.get('detail.pb').write(cr,uid,x.id,{'state':'cancel'})
+		context.update(action_state='cancel')
+
+		if context.get('status',False) == 'reject':
+
+			email_to = data.pb_id.employee_id.user_id.email
+			if email_to:
+				subject = 'Purchase Requisition Reject No #' + data.pb_id.name
+				partner_id = data.pb_id.employee_id.user_id.partner_id.id
+
+				template_email = self.template_email_reject(cr, uid, ids, data.pb_id.employee_id.name, data.pb_id.name, data.cancel_reason, context={})
+				send_email = obj_pb.send_email(cr, uid, ids, data.pb_id.id, subject, email_to, partner_id, template_email, context={})
+
+			if email_to and send_email == True:
+				lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
+				dp = self.pool.get('detail.pb').browse(cr, uid, lines)
+				for x in dp:
+					cr.execute('Update detail_pb SET state=%s Where detail_pb_id=%s', ('cancel',data.pb_id.id))
+
+				# Create By Log
+				msg = _(template_email)
+				obj_pb.message_post(cr, uid, [data.pb_id.id], body=msg, context=context)
+
+				res = obj_pb.write(cr,uid,data.pb_id.id,{'state':'cancel'},context=context)
+		else:
+			lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
+			dp = self.pool.get('detail.pb').browse(cr, uid, lines)
+			for x in dp:
+				cr.execute('Update detail_pb SET state=%s Where detail_pb_id=%s', ('cancel',data.pb_id.id))
 			
-		return self.pool.get('pembelian.barang').write(cr,uid,data.pb_id.id,{'cancel_reason':data.cancel_reason,'state':'cancel'})
+			res = obj_pb.write(cr,uid,data.pb_id.id,{'cancel_reason':data.cancel_reason,'state':'cancel'},context=context)
 
+		return res 
 
 	_name="wizard.pr.cancel.item"
 	_description="Wizard Cancel Item On PR"
@@ -401,6 +539,11 @@ class Detail_PB(osv.osv):
 				res[data.id] = "onproses"
 		return res
 
+	def _get_cek_state_pb(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.pool.get('detail.pb').browse(cr, uid, ids, context=context):
+			result[line.detail_pb_id.id] = True
+		return result.keys()
 
 	def _get_cek_state_detail_pb(self, cr, uid, ids, context=None):
 		result = {}
@@ -418,6 +561,7 @@ class Detail_PB(osv.osv):
 	_name = 'detail.pb'
 	_columns = {
 		'name':fields.many2one('product.product','Product',track_visibility='onchange'),
+		'desc':fields.text('Desc'),
 		'variants':fields.many2one('product.variants','variants',track_visibility='onchange'),
 		'part_no':fields.char('Part No',track_visibility='onchange'),
 		'jumlah_diminta':fields.float('Qty',track_visibility='onchange'),
@@ -435,7 +579,7 @@ class Detail_PB(osv.osv):
 				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
 				'purchase.order.line': (_get_cek_po_line, ['state'], 20),
 			}),
-		'delivery_items': fields.function(_get_delivery_items,string="Received Items",type="float",
+		'delivery_items': fields.function(_get_delivery_items,string="Supplied Items",type="float",
 			store={
 				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
 				'order.requisition.delivery.line':(_get_cek_delivery_item,['state'],20),
@@ -443,7 +587,8 @@ class Detail_PB(osv.osv):
 		'processed_items': fields.function(_get_processed_items,string="Processed Items",type="float",store=False),
 		'state':fields.function(_getParentState,method=True,string="State",type="selection",selection=STATES,
 			store={
-				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
+				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id','state'], 20),
+				'pembelian.barang': (_get_cek_state_pb, ['state'], 20),
 				'order.requisition.delivery.line': (_get_cek_state_detail_pb, ['state'], 20),
 				'purchase.order.line': (_get_cek_state_po_line, ['state'], 20),
 			}),
@@ -519,7 +664,7 @@ class Set_PO(osv.osv):
 	_columns ={
 		'name':fields.many2one('res.partner','Supplier',required=True, domain=[('supplier','=',True),('is_company', '=', True)]),
 		'pricelist_id':fields.many2one('product.pricelist', 'Pricelist', required=True, domain=[('type','=','purchase')]),
-		'order_type':fields.selection([('1','Normal Order'),('2','Petty Order')],'Order Type',required=True),
+		'order_type':fields.selection([('1','Normal Order'), ('2','Import J'), ('3','Import S'), ('3','Petty Order')],'Order Type',required=True),
 		'permintaan': fields.many2many('detail.pb', 'pre_item_rel', 'item_id', 'permintaan_id', 'Detail Permintaan',domain=[('state','=','onproses'),('qty_available','>',0)]),
 	}
 	
@@ -543,14 +688,18 @@ class Set_PO(osv.osv):
 		for x in set(pb):
 			detailpb += x[:5] + ', '
 
-		
-		if val.order_type == 1 :
+		seq =int(time.time())
+		if val.order_type == '1':
 			jenis = 'loc'
-			seq =int(time.time())
+		elif val.order_type == '2':
+			jenis = 'impj'
+		elif val.order_type == '3':
+			jenis = 'imps'
 		else:
 			jenis = 'loc-petty'
-			seq =int(time.time())
-			
+
+		payment_term = val.name.term_payment
+		
 		sid = obj_purchase.create(cr, uid, {
 										'name':seq,
 										'date_order': time.strftime("%Y-%m-%d"),
@@ -561,20 +710,26 @@ class Set_PO(osv.osv):
 										'location_id': 12,
 										'origin':detailpb,
 										'type_permintaan':'1',
-										'term_of_payment':val.name.term_payment
+										'term_of_payment':payment_term
 									   })
 		noline=1
-		for line in val.permintaan:
+		pb_line_id = []
+		for x in val.permintaan:
+			pb_line_id += [int(x.id)]
+
+		# for line in val.permintaan:
+		for l in sorted(pb_line_id):
+			line = self.pool.get('detail.pb').browse(cr, uid, l, context=None)
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.name.supplier_taxes_id))
 			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
-			print "Callling PO Line Create----------------------"
+
 			obj_purchase_line.create(cr, uid, {
 										 'no':noline,
 										 'date_planned': time.strftime("%Y-%m-%d"),
 										 'order_id': sid,
 										 #'pb_id': products[line]['name'],
-										 # 'pb_id': line.detail_pb_id.id,
+										 #'pb_id': line.detail_pb_id.id,
 										 'product_id': line.name.id,
 										 'variants':line.variants.id,
 										 'name':line.name.name,
@@ -587,11 +742,13 @@ class Set_PO(osv.osv):
 										 'taxes_id': [(6,0,taxes_ids)],
 										 })
 			noline=noline+1
-			print '===================TEST NO====================',noline
-
+			
 		# purchase ==> Nama Module nya purchase_order_form ==> Nama Id Form nya
 		pool_data=self.pool.get("ir.model.data")
-		action_model,action_id = pool_data.get_object_reference(cr, uid, 'purchase', "purchase_order_form")     
+		if jenis in ['impj','imps']:
+			action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_purchase_import', "view_purchase_order_import_form")
+		else:
+			action_model,action_id = pool_data.get_object_reference(cr, uid, 'purchase', "purchase_order_form")
 		action_pool = self.pool.get(action_model)
 		res_id = action_model and action_id or False
 		action = action_pool.read(cr, uid, action_id, context=context)

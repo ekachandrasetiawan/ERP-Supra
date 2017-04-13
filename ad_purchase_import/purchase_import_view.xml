@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-		<report id="purchase_importj" string="Import J" 
-				model="purchase.order" name="purchase.importj" 
-				rml="ad_purchase_import/report/importj.rml"
-				auto="False" menu="False"/>
-
-		<report id="purchase_imports" string="Import S" 
-				model="purchase.order" name="purchase.imports" 
-				rml="ad_purchase_import/report/imports.rml"
-				auto="False" menu="False"/>
 		
         <record id="purchase_order_form_view_report" model="ir.ui.view">
             <field name="name">purchase.order.form</field>
@@ -47,13 +38,8 @@
             	</xpath>
 
                 <button name="print_quotation" position="after">
-                     <button name="print_po_import_out" type="object" states="approved,draft" string="Print Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchaseorder.group_purchase_chief,purchase.group_purchase_user"/>
+                     <button name="print_po_import_out" type="object" states="approved,draft" string="Print Import" icon="gtk-print" groups="purchase.group_purchase_manager,sbm_purchase.group_purchase_chief,purchase.group_purchase_user"/>
                 </button>
-
-            	<button string="Print" position="replace">
-					<button name="%(purchase_importj)d" type="action" states="draft,approved,done" string="Import J" icon="gtk-print"/>
-	                <button name="%(purchase_imports)d" type="action" states="draft,approved,done" string="Import S" icon="gtk-print"/>
-				</button>
             </field>
         </record>
         
@@ -62,7 +48,7 @@
 	        <field name="name">Purchase Order Import</field>
 	        <field name="type">ir.actions.act_window</field>
 	        <field name="res_model">purchase.order</field>
-	        <field name="domain">[('jenis','!=','loc')]</field>
+	        <field name="domain">[('jenis','not in',['loc','loc-petty'])]</field>
 	        <field name="context">{'default_jenis': 'impj', 'default_type_permintaan': '1'}</field>
             <field name="view_type">form</field>
 	        <field name="view_mode">tree,form</field>

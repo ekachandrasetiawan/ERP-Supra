@@ -100,6 +100,7 @@ class groups_sales(osv.osv):
 					('cmp','CMP'),
 					('adm','ADM'),
 					('kpc','KPC'),
+					('regkalimantan','Regional Kalimanan'),
 				], 
 			'REG/PSM', 
 			required=True
@@ -385,6 +386,7 @@ class week_status(osv.osv):
 					('sulkristanto','Sulawesi Kristanto'),
 					('suldedison','Sulawesi Dedison'),
 					('suljansen','Sulawesi Jansen'),
+					('regkalimantan','Regional Kalimanan'),
 				], 'REG/PSM', required=True),
 		'user_id': fields.many2one('res.users', 'PIC', required=True),
 		'state': fields.selection([('draft', 'Draft')], 'State', readonly=True),

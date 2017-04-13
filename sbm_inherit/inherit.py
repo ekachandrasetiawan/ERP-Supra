@@ -1,5 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from stock import stock
+from openerp import pooler
 import math
 import time
 import webbrowser
@@ -7,7 +9,11 @@ import netsvc
 import openerp.exceptions
 from osv import osv, fields
 from openerp.tools.translate import _
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
 import openerp.addons.decimal_precision as dp
+
+
+from openerp import netsvc
 class stock_picking(osv.osv):
 	def open_full_record(self, cr, uid, ids, context=None):
 		data= self.browse(cr, uid, ids, context=context)
@@ -88,8 +94,12 @@ class PurchaseOrder(osv.osv):
 		
 		orders= self.browse(cr, uid, ids, context=context)
 		for order in orders:
-			dis[order.id]=order.amount_bruto-order.amount_untaxed
-		
+			discount = order.amount_bruto-order.amount_untaxed
+			# if rupiah and discount < 999
+			if discount < 999 and order.pricelist_id.id==2:
+				discount = 0.00
+			dis[order.id]=discount
+			
 		return dis
 
 
@@ -99,7 +109,10 @@ class PurchaseOrder(osv.osv):
 		for order in orders:
 			total[order.id] = 0
 			for line in order.order_line:
-				subtotal = line.product_qty*line.price_unit
+				if line.product_qty==1 and order.pricelist_id.id==2:
+					subtotal = line.price_subtotal
+				else:
+					subtotal = line.product_qty*line.price_unit
 				total[order.id] = total[order.id]+subtotal
 
 		return total
@@ -123,6 +136,34 @@ class PurchaseOrder(osv.osv):
 	_defaults = {
 		'total_discount': _default_total_discount
 	}
+
+
+
+	def invoice_dp_bank_statment(self, cr, uid, ids, context=None):
+		mod_obj = self.pool.get('ir.model.data')
+		act_obj = self.pool.get('ir.actions.act_window')
+		act_acc_line = self.pool.get('account.bank.statement.line')
+
+		result = mod_obj.get_object_reference(cr, uid, 'account', 'action_bank_statement_tree')
+		id = result and result[1] or False
+		result = act_obj.read(cr, uid, [id], context=context)[0]
+		inv_ids = []
+		
+		po_id=act_acc_line.search(cr,uid,[('po_id', '=' ,ids)])
+		data_po=act_acc_line.browse(cr,uid,po_id)
+		for po in data_po:
+			inv_ids+= [po.statement_id.id]
+		if not inv_ids:
+			raise osv.except_osv(_('Error!'), _('No Invoice DP.'))
+		if len(inv_ids)>1:
+			result['domain'] = "[('id','in',["+','.join(map(str, inv_ids))+"])]"
+		else:
+			res = mod_obj.get_object_reference(cr, uid, 'account', 'view_bank_statement_form')
+			result['views'] = [(res and res[1] or False, 'form')]
+			result['res_id'] = inv_ids and inv_ids[0] or False
+		return result
+
+		
 PurchaseOrder()
 
 class PurchaseOrderLine(osv.osv):
@@ -222,9 +263,9 @@ class PurchaseOrderFullInvoice(osv.osv):
 			'account_analytic_id': order_line.account_analytic_id.id or False,
 			# 'amount_discount':order_line.discount_nominal
 		}
-	def _prepare_inv_line_for_discount(self, cr, uid, account_id,discountNominal, invoiceLineTaxId, context=None):
-		
+	def _prepare_inv_line_for_discount(self, cr, uid, account_id,discountNominal, invoiceLineTaxId, product_discount, context=None):			
 		return {
+			'product_id': product_discount,
 			'name': "Discount",
 			'account_id': account_id,
 			'price_unit': discountNominal or 0.0,
@@ -234,12 +275,22 @@ class PurchaseOrderFullInvoice(osv.osv):
 	def _makeInvoiceLine(self,cr,uid,taxesId,acc_discount_id,discountNominal,context=None):
 		if context is None:
 			context = {}
+
+		product_discount = False
+		obj_product = self.pool.get('product.product').search(cr, uid, [('default_code', '=', 'DISCPEMBELIAN')])
+		if obj_product:
+			product = self.pool.get('product.product').browse(cr, uid, obj_product)[0]
+			product_discount = product.id
+		else:
+			raise osv.except_osv(_('Information!'),
+				_('Please Create Master Product dengan Part Number DISCPEMBELIAN'))
+
 		journal_obj = self.pool.get('account.journal')
 		inv_obj = self.pool.get('account.invoice')
 		inv_line_obj = self.pool.get('account.invoice.line')
 
 		invoiceLineTaxId = taxesId
-		inv_line_discount_data = self._prepare_inv_line_for_discount(cr, uid, acc_discount_id, discountNominal, invoiceLineTaxId, context=context)
+		inv_line_discount_data = self._prepare_inv_line_for_discount(cr, uid, acc_discount_id, discountNominal, invoiceLineTaxId, product_discount, context=context)
 		
 		return inv_line_obj.create(cr, uid, inv_line_discount_data, context=context)
 		
@@ -403,6 +454,32 @@ class account_invoice_line(osv.osv):
 		'price_subtotal': fields.function(_amount_line, string='Amount', type="float",digits_compute= dp.get_precision('Account'), store=True),
 		'state':fields.related('invoice_id','state',type='char',store=False,string="State"),
 	}
+
+
+	def move_line_get_item(self, cr, uid, line, context=None):
+
+		if line.name:
+			a = line.name
+		else:
+			a = '[ ' + line.product_id.default_code + ' ] ' + line.product_id.name 
+
+		desc = a.split('\n')[0][:64]
+
+		return {
+			'type':'src',
+			'name': desc,
+			'price_unit':line.price_unit,
+			'quantity':line.quantity,
+			'price':line.price_subtotal,
+			'account_id':line.account_id.id,
+			'product_id':line.product_id.id,
+			'uos_id':line.uos_id.id,
+			'account_analytic_id':line.account_analytic_id.id,
+			'taxes':line.invoice_line_tax_id,
+		}
+
+		
+account_invoice_line()
 
 # INHERIT CLASS FOR ACCOUNT BANK STATEMENT LINE
 # For Bank Statment Size
@@ -616,15 +693,18 @@ class account_invoice(osv.osv):
 
 	def action_cancel(self,cr,uid,ids,context={}):
 		ir_model_data_group = self.pool.get('ir.model.data').search(cr,uid,[('model','=','res.groups'),('name','=','group_customer_invoice_administrator'),('module','=','sbm_inherit')],context=context)
-		if ir_model_data_group:
+		ir_model_data_group_finance = self.pool.get('ir.model.data').search(cr,uid,[('model','=','res.groups'),('name','=','group_account_manager'),('module','=','account')],context=context)
+		if ir_model_data_group or ir_model_data_group_finance:
 			data = self.pool.get('ir.model.data').browse(cr,uid,ir_model_data_group[0],context=context)
-			
+			data_finance = self.pool.get('ir.model.data').browse(cr,uid,ir_model_data_group_finance[0],context=context)
 			res_id = data.res_id
+			res_id_finance = data_finance.res_id
 			# check if user in group customer invoice administrator ?
 			# only customer invoice administrator can cancel the invoice
 			group = self.pool.get('res.groups').search(cr,uid,[('id','=',res_id),('users','in',uid)])
+			group_finance = self.pool.get('res.groups').search(cr,uid,[('id','=',res_id_finance),('users','in',uid)])
 			
-			if group:
+			if group or group_finance:
 				return super(account_invoice,self).action_cancel(cr,uid,ids,context)
 			else:
 				raise osv.except_osv(_('Error!'),_('Your\'re not Authorized to Canceling Invoice!'))
@@ -813,6 +893,7 @@ class SaleOrder(osv.osv):
 		# Care for deprecated _inv_get() hook - FIXME: to be removed after 6.1
 		invoice_vals.update(self._inv_get(cr, uid, order, context=context))
 		return invoice_vals
+
 
 	def getGroupByUser(self,cr,uid,ids,user_id,context={}):
 		user = self.pool.get('res.users').browse(cr,uid,user_id,context)
@@ -1396,12 +1477,12 @@ class stock_move(osv.osv):
 	}
 
 # Fixing bug min_date on picking when null it will be filled timestamp
-class stockPicking(osv.osv):
-	_inherit = 'stock.picking'
-	_columns = {
-		# 'min_date': fields.function(get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date", store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"),
-		'min_date':fields.datetime(string="Delivery Date",help="Delivered Date shipment",required=False)
-	}
+# class stockPicking(osv.osv):
+# 	_inherit = 'stock.picking'
+# 	_columns = {
+# 		# 'min_date': fields.function(get_min_max_date, fnct_inv=_set_minimum_date, multi="min_max_date", store=True, type='datetime', string='Scheduled Time', select=1, help="Scheduled time for the shipment to be processed"),
+# 		'min_date':fields.datetime(string="Delivery Date",help="Delivered Date shipment",required=False)
+# 	}
 
 
 #START NEW INTERNAL MOVE MODULES DEVELOPMENT
@@ -1495,6 +1576,23 @@ class InternalMoveRequest(osv.osv):
 		'lines':fields.one2many('internal.move.request.line','internal_move_request_id',string="Items Request"),
 	}
 
+	def SetDraft(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		internal_move = self.pool.get('internal.move')
+
+		cek = internal_move.search(cr,uid,[('internal_move_request_id', '=' ,ids)])
+
+		if cek:
+			data = internal_move.browse(cr, uid, cek, context=None)
+			for x in data:
+				if x.state == 'cancel' or x.state == 'draft':
+					return self.write(cr,uid,ids,{'state':'draft'})
+				else:
+					raise osv.except_osv(('Information !!!'), ('Please Cancel or Set to Draft Internal Move '+ x.name ))
+		else:
+			return self.write(cr,uid,ids,{'state':'draft'})
+
+		return True
 
 	def _getUID(self,cr,uid,ids,context=None):
 		return uid
@@ -1535,7 +1633,7 @@ class InternalMoveRequestLine(osv.osv):
 	def _getProcessedItem(self,cr,uid,ids,field_name,args,context={}):
 		res={}
 
-		query = "SELECT SUM(a.qty) AS total FROM internal_move_line AS a JOIN internal_move as b ON a.internal_move_id = b.id WHERE a.internal_move_request_line_id = %s AND b.state not in ('cancel')"
+		query = "SELECT SUM(a.qty) AS total FROM internal_move_line AS a JOIN internal_move as b ON a.internal_move_id = b.id WHERE a.internal_move_request_line_id = %s AND b.state not in ('cancel','draft')"
 		for tid in ids:
 			cr.execute(query,[tid])
 			theRes = cr.fetchone()
@@ -1606,9 +1704,9 @@ class InternalMove(osv.osv):
 
 		return res
 
-	def _loadLines(self,cr,uid,request):
+	def _loadLines(self,cr,uid,request,context={}):
 		
-		res = [(0,0,self._im_line_preparation(cr,uid,line)) for line in request.lines if (line.qty-line.processed_item_qty) > 0]
+		res = [(0,0,self._im_line_preparation(cr,uid,line,context=context)) for line in request.lines if (line.qty-line.processed_item_qty) > 0]
 
 		return res
 	def prepareBomLine(self,cr,uid,bom_line,im_line):
@@ -1625,8 +1723,6 @@ class InternalMove(osv.osv):
 		return res
 	# to load internal move line detail automatic by detecting product is has set phantom bom
 	def _loadLineDetail(self,cr,uid,line):
-
-		
 		mrp = self.checkSet(cr,uid,line.product_id)
 		res = []
 		if mrp:
@@ -1636,7 +1732,7 @@ class InternalMove(osv.osv):
 
 
 
-	def _im_line_preparation(self,cr,uid,line):
+	def _im_line_preparation(self,cr,uid,line,context={}):
 		# check for sets
 		# set = self.checkSet(cr,uid,line.product_id)
 		res = {
@@ -1648,20 +1744,31 @@ class InternalMove(osv.osv):
 			'qty_available':line.product_id.qty_available,
 			'internal_move_request_line_id':line.id,
 			'detail_ids':self._loadLineDetail(cr,uid,line),
-			'state':'draft'
+			'state':'draft',
+			'source':context['location'],
+			'destination':context['destination']
 
 		}
 		return res
 
-	def load_request(self,cr,uid,ids,req_id,context={}):
+	def load_request(self, cr, uid, ids, req_id, source=None, context={}):
 		
 		res = {'value':{}}
 		data = self.pool.get('internal.move.request').browse(cr,uid,req_id,context)
 		if data:
-			
+			if not source:
+				context['location']=data.source.id
+				context['location_id']=data.source.id
+			else:
+				context['location']=source
+				context['location_id']=source
+
+			context['destination']=data.destination.id #set destination for im line
+
 			res['value'] = {
-				'source':data.source.id,'destination':data.destination.id,'due_date_transfer':data.due_date,
-				'lines':self._loadLines(cr,uid,data),
+				'source':source or data.source.id,
+				'destination':data.destination.id,'due_date_transfer':data.due_date,
+				'lines':self._loadLines(cr,uid,data,context=context),
 				'manual_pb_no':data.manual_pb_no,
 				'ref_no':data.ref_no,
 				'state':'draft',
@@ -1730,19 +1837,20 @@ class InternalMove(osv.osv):
 						# check available by batch number
 						if detail.qty > detail.stock_prod_lot_id.stock_available:
 							res = False
-							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" on "+detail.stock_prod_lot_id.name+" is "+detail.stock_prod_lot_id.stock_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+str(detail.product_id.name_template)+" on "+str(detail.stock_prod_lot_id.name)+" is "+str(detail.stock_prod_lot_id.stock_available)+" "+str(detail.product_id.uom_id.name)+". Requested Item is "+str(detail.qty)+" "+str(detail.uom_id.name)+"!"))
 					else:
 						# else set not batches
 						if detail.qty > detail.product_id.qty_available:
 							res = False
-							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+detail.product_id.name_template+" is "+detail.product_id.qty_available+" "+detail.product_id.uom_id.name+". Requested Item is "+detail.qty+" "+detail.uom_id.name+"!"))
+							raise osv.except_osv(_("Error !!!"),_("Available Stock For "+str(detail.product_id.name_template)+" is "+str(detail.product_id.qty_available)+" "+str(detail.product_id.uom_id.name)+". Requested Item is "+str(detail.qty)+" "+str(detail.uom_id.name)+"!"))
 			else:
 				# if not has detail
 				if line.qty>line.product_id.qty_available:
 					res = False
-					raise osv.except_osv(_("Error !!!"),_("Available Stock For "+line.product_id.name_template+" is "+str(line.product_id.qty_available)+" "+line.product_id.uom_id.name+". Requested Item is "+str(line.qty)+" "+line.uom_id.name+"!"))
+					raise osv.except_osv(_("Error !!!"),_("Available Stock For "+str(line.product_id.name_template)+" is "+str(line.product_id.qty_available)+" "+line.product_id.uom_id.name+". Requested Item is "+str(line.qty)+" "+str(line.uom_id.name)+"!"))
 
 		return res
+
 
 	def checkedInternalMove(self,cr,uid,ids,context={}):
 		res = True
@@ -1751,11 +1859,13 @@ class InternalMove(osv.osv):
 	def confirmInternalMove(self,cr,uid,ids,context={}):
 		res = True
 		valid = True
-
 		# loop each ids
-		for data in self.browse(cr,uid,ids,context):
+		for pre_data in self.browse(cr,uid,ids,context):
+			context['location'] = pre_data.source.id
+			context['location_id'] = pre_data.source.id
+
+			data = self.browse(cr,uid,pre_data.id, context=context)
 			getPrefixStorage = self._get_prefix_storage_code(cr,uid,data.id,context)
-			
 			if data.source == data.destination:
 				res = False
 				raise osv.except_osv(_('Error !'),_('Source and Destination Location is Not Valid..!Please Check!'))
@@ -1763,10 +1873,9 @@ class InternalMove(osv.osv):
 			prepare_picking = {
 				'name':self.pool.get('ir.sequence').get(cr, uid, 'stock.picking.inernal.move.seq'),
 				'origin':data.manual_pb_no+", "+data.internal_move_request_id.name,
-				'state':'confirmed',
+				'state':'draft',
 				'internal_move_id':data.id
 			}
-
 			picking_id = self.pool.get('stock.picking').create(cr,uid,prepare_picking,context)
 
 			moves_for_line = []
@@ -1783,45 +1892,32 @@ class InternalMove(osv.osv):
 				if line.detail_ids:
 					for detail in line.detail_ids:
 						move_detail = self._prepare_move(data,detail,picking_id)
-						
-						# if line.product_id.track_outgoing:
 						if detail.type =='sets':
-							# if sets
 							if detail.product_id.track_outgoing:
-								# if set and has batches then must pick batch
-								
 								if not detail.stock_prod_lot_id:
 									res = False
 									raise osv.except_osv(('Error!!!'),_('Batch Must picked in '+str(detail.product_id.name)+'!'))
 								else:
-									# prepare move with batch sets
 									move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
 									res = True
 							else:
-								# if sets
 								move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
 								res= True
 							self._write_autovalidate(cr,uid,move_line_id,{})
-
 						elif detail.type=='batch':
-							move_line = False # dont add move_line into db cause batch roduct splitter in table
-
+							move_line = False
 							valid = self.validateLot(line)
 							res = valid
 							if valid:
 								# self.pool.get('stock.move').unlink(cr,uid,move_line_id)
 								move_detail = self._prepare_move(data,detail,picking_id,detail.stock_prod_lot_id.id,move_line_id)
-								line_to_delete = [move_line_id]
-
+								# line_to_delete = [move_line_id]
+								line_to_delete.append(move_line_id)
 						if valid:
 							move_detail_id = self.pool.get('stock.move').create(cr,uid,move_detail,{})
 							self._update_im_line_stock_move(cr,uid,detail.id,move_detail_id,'line.detail',context)
-					
-				
 			if res:
-				self._finalyCheckQty(cr,uid,data)
-
-				# add doc number
+				self._finalyCheckQty(cr,uid,data, context=context)
 				updateIm = {}
 				if not data.name:
 					im_no = getPrefixStorage+self.pool.get('ir.sequence').get(cr, uid, 'internal.move')
@@ -1833,17 +1929,22 @@ class InternalMove(osv.osv):
 			if len(line_to_delete):
 				self.pool.get('stock.move').unlink(cr,uid,line_to_delete)
 		# raise osv.except_osv(('Error !!!'), ('The Qty that Requested in Item is '))
-
+		wf_service = netsvc.LocalService("workflow")
+		wf_service.trg_validate(uid, 'stock.picking', picking_id, 'button_confirm', cr)
 		return res
-
 
 	def setAsReady(self,cr,uid,ids,context={}):
 		res = {}
 		pick = self.pool.get('stock.picking')
 
-		for tid in self.browse(cr,uid,ids,context):
-			pick.action_assign(cr,uid,[tid.picking_id.id])
-			tid.write({'state':'ready','date_prepared':time.strftime('%Y-%m-%d')})
+		for pre_data in self.browse(cr,uid,ids,context):
+			context['location'] = pre_data.source.id
+			context['location_id'] = pre_data.source.id
+
+			tid = self.browse(cr, uid, pre_data.id, context=context)
+			if self._finalyCheckQty(cr, uid, tid, context=context):
+				pick.action_assign(cr, uid,  [tid.picking_id.id])
+				tid.write({'state':'ready', 'date_prepared':time.strftime('%Y-%m-%d')})
 		return res
 
 
@@ -1856,15 +1957,19 @@ class InternalMove(osv.osv):
 			trsLoc = searchLoc[0]
 		else:
 			raise osv.except_osv(_('ERROR!!!'),_("Please Define Transition with \"TRS\" code and type is Transit"))
-		
 
-		for data in self.browse(cr,uid,ids,context):
-			for move in data.picking_id.move_lines:
-				move.write({'location_dest_id':trsLoc})
-			# data.picking.action_move
-			# self.action_move(cr, uid, [new_picking], context=context)
-			self.pool.get('stock.picking').action_move(cr,uid,[data.picking_id.id],context)
-			data.picking_id.write({'state':'done'})
+		for pre_data in self.browse(cr,uid,ids,context=context):
+			context['location'] = pre_data.source.id
+			context['location_id'] = pre_data.source.id
+			data = self.browse(cr, uid, pre_data.id, context=context)
+
+			if self._finalyCheckQty(cr, uid, data, context=context):
+				for move in data.picking_id.move_lines:
+					move.write({'location_dest_id':trsLoc})
+
+			self.pool.get('stock.picking').force_assign(cr, uid, [data.picking_id.id])
+			wf_service = netsvc.LocalService("workflow")
+			wf_service.trg_validate(uid, 'stock.picking', data.picking_id.id, 'button_done', cr)
 			data.write({'state':'transfered','date_transfered':time.strftime('%Y-%m-%d')})
 			res = True
 		return res
@@ -1929,7 +2034,8 @@ class InternalMove(osv.osv):
 
 	def _prepare_move(self,data,detail,picking_id=False,prodlot_id=None,move_dest_id=None):
 		
-		move_detail = {			'location_id':data.source.id,
+		move_detail = {			
+			'location_id':data.source.id,
 			'location_dest_id':data.destination.id,
 			'no':detail.no,
 			'product_id':detail.product_id.id,
@@ -1938,7 +2044,7 @@ class InternalMove(osv.osv):
 			'origin':"PB No : "+data.manual_pb_no,
 			'name':detail.product_id.name_template,
 			'desc':detail.desc,
-			'state':'confirmed',
+			'state':'draft',
 		}
 		if detail.desc:
 			move_detail['name'] += ". "+detail.desc
@@ -1955,9 +2061,6 @@ class InternalMove(osv.osv):
 				move_detail['internal_move_line_detail_id'] = detail.id
 		except Exception, e:
 			move_detail['internal_move_line_id'] = detail.id
-
-
-
 		return move_detail
 			
 
@@ -1979,6 +2082,7 @@ class InternalMove(osv.osv):
 	_columns={
 		'name':fields.char('I.M No.'),
 		'internal_move_request_id':fields.many2one('internal.move.request',string='Request No',required=True,domain=[('state','in',['confirmed','onprocess'])]),
+		'return_ref_id':fields.many2one('internal.move', string="Return Ref"),
 		'due_date_transfer':fields.date('Transfer Due Date'),
 		'due_date_preparation':fields.date('Preparation Due Date'),
 		'date_prepared':fields.date('Prepared Date'),
@@ -2047,6 +2151,132 @@ class InternalMove(osv.osv):
 			},
 		}
 
+	def action_cancel(self,cr,uid,ids,context={}):
+		stock_picking_object = self.pool.get('stock.picking')
+		stock_move_object = self.pool.get('stock.move')
+		val = self.browse(cr, uid, ids, context={})[0]
+		
+		get_stock_move_id = self.pool.get('stock.move').search(cr,uid,[('picking_id', '=' , val.picking_id.id)])
+
+		# Update state cancel pada stock move
+		for i in get_stock_move_id:
+			stock_move_object.write(cr,uid,i,{'state':'cancel'})
+		
+		# Update state cancel pada stock picking
+		stock_picking_object.write(cr,uid,val.picking_id.id,{'state':'cancel'})
+		
+		# Update state cancel pada internal move
+		self.write(cr,uid,ids,{'state':'cancel'},context=context)
+
+		return True
+
+	def action_cancel_to_draft(self,cr,uid,ids,context=None):
+		# Update state draft pada internal move
+		self.write(cr,uid,ids,{'state':'draft', 'picking_id':None},context=context)
+
+		return True
+
+	def action_reload_line(self,cr,uid,ids,context={}):
+
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		data = val.internal_move_request_id
+		
+		context['location'] = val.source.id
+		context['location_id'] = val.source.id
+
+		context['destination'] = val.destination.id
+		context['destination_id'] = val.destination.id
+
+		will_load = self._loadLines(cr,uid,data,context=context) #ini yang belum di load dari mr
+
+		# ambil lines current
+		current_lines = val.lines
+
+		# harus di dapat internal_move_request_line_id yang akan di append ke internal_move_line
+		mr_lines = data.lines
+
+		for mr_line in mr_lines:
+			# loop each mr_lines
+			qty = mr_line.qty - mr_line.processed_item_qty
+			
+			in_current_lines = self.pool.get('internal.move.line').search(cr, uid, [('internal_move_request_line_id','=',mr_line.id), ('internal_move_id','=',val.id)])
+
+			if in_current_lines:
+				# jika found di current_lines
+				current_processed = 0.0
+				for found_line in self.pool.get('internal.move.line').browse(cr, uid, in_current_lines, context=context):
+					if val.state in ["confirmed", "checked","ready","transfered","done"]:
+						current_processed += found_line.qty
+						
+				qty = qty+current_processed
+
+			if qty>0:
+				if len(will_load)==0:
+					will_load.append((0,0,{
+						'no':mr_line.no,
+						'product_id':mr_line.product_id.id,
+						'desc':mr_line.desc,
+						'uom_id':mr_line.uom_id.id,
+						'qty':qty,
+						'qty_available':mr_line.product_id.qty_available,
+						'internal_move_request_line_id':mr_line.id,
+						'detail_ids':self._loadLineDetail(cr,uid,mr_line),
+						'state':'draft',
+						'source':context['location'],
+						'destination':context['destination']
+					}));
+				else :
+					found_in_load  = False
+					for w_load in will_load :
+						c_wload = len(w_load)
+						if mr_line.id == w_load[(c_wload-1)]['internal_move_request_line_id']:
+							w_load[(c_wload-1)]['qty'] = qty;
+							found_in_load = True
+					if not found_in_load:
+						will_load.append((0,0,{
+							'no':mr_line.no,
+							'product_id':mr_line.product_id.id,
+							'desc':mr_line.desc,
+							'uom_id':mr_line.uom_id.id,
+							'qty':qty,
+							'qty_available':mr_line.product_id.qty_available,
+							'internal_move_request_line_id':mr_line.id,
+							'detail_ids':self._loadLineDetail(cr,uid,mr_line),
+							'state':'draft',
+							'source':context['location'],
+							'destination':context['destination']
+						}));
+						
+		lines_ids = self.pool.get('internal.move.line').search(cr, uid, [('internal_move_id','=',val.id)], context=context)
+		self.pool.get('internal.move.line').unlink(cr, uid, lines_ids, context=context)
+
+		self.pool.get('internal.move').write(cr,uid,ids,{'lines':will_load},context=context)
+
+		return True			
+
+	def action_create_return(self,cr,uid,ids,context=None):
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_inherit', 'wizard_create_return_internal_move')
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_create_return_internal_move',
+			'res_model': 'create.return.internal.move',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
 class InternalMoveLine(osv.osv):
 	_description = "Internal Move Line"
 	def create(self,cr,uid,vals,context={}):
@@ -2090,8 +2320,9 @@ class InternalMoveLine(osv.osv):
 		'name':fields.char('Name'),
 		'no':fields.integer('No',required=False),
 		'desc':fields.text('Description'),
-		'internal_move_id':fields.many2one('internal.move',string='Internal Move No',required=True,ondelete="CASCADE",onupdate="CASCADECR."),
+		'internal_move_id':fields.many2one('internal.move',string='Internal Move No',required=True,ondelete="CASCADE",onupdate="CASCADE"),
 		'internal_move_request_line_id':fields.many2one('internal.move.request.line',string="IM Req Line"),
+		'return_line_ref_id':fields.many2one('internal.move.line',string="Return Line Ref"),
 		'product_id':fields.many2one('product.product',string="Product",required=True),
 		'uom_id':fields.many2one('product.uom',string="UOM",required=True),
 		'qty':fields.float('Qty',required=True),
@@ -2108,7 +2339,10 @@ class InternalMoveLine(osv.osv):
 								   ('assigned', 'Available'),
 								   ('done', 'Done'),
 								   ]),
+		'source':fields.many2one('stock.location',required=False,string="Source Location"),
+		'destination':fields.many2one('stock.location',required=False,string="Destination Location"),
 	}
+
 	_defaults={
 		'state':'draft',
 	}
@@ -2142,6 +2376,39 @@ class InternalMoveLine(osv.osv):
 				}
 			}
 		return res
+
+	def on_change_source_line(self, cr, uid, ids, source, detail_ids, context={}):
+		print "ON Change Source Linesssssssssssss",source, detail_ids
+		context['location']=source
+		context['location_id']=source
+		detail_res = []
+		if type(detail_ids)==list:
+			
+			for detail in detail_ids:
+				detail_obj_res = [detail[0],detail[1],{}]
+
+				detail_obj = detail[2]
+				item_to_pick = self.pool.get('product.product').browse(cr, uid, detail_obj['product_id'], context=context)
+				qty_available = item_to_pick.qty_available
+				if detail_obj['type'] == 'batch' and detail_obj['stock_prod_lot_id']:
+					item_to_pick = self.pool.get('stock.production.lot').browse(cr, uid, detail_obj['stock_prod_lot_id'],context=context) #result as browse non list
+					qty_available = item_to_pick.stock_available
+
+				detail_obj['qty_available'] = qty_available
+				detail_obj_res[2] = detail_obj
+				detail_res.append(detail_obj_res)
+		res = {
+			'value':{
+				'detail_ids':detail_res
+			}
+			
+		}
+		print res, "<RESULLLLLLLLLLLLLLLLLLTTTTTTT"
+		return res
+
+
+
+
 
 class InternalMoveLineDetail(osv.osv):
 	_description = "Internal Move Line Detail"
@@ -2274,10 +2541,12 @@ class InternalMoveLineDetail(osv.osv):
 					}
 					
 		return res
-	def on_change_batch(self,cr,uid,ids,batch=None):
+	def on_change_batch(self,cr,uid,ids,batch=None,source=None,context={}):
 		res = {}
+		context['location']=source
+		context['location_id']=source
 		if batch:
-			data = self.pool.get('stock.production.lot').browse(cr,uid,batch,{})
+			data = self.pool.get('stock.production.lot').browse(cr,uid,batch,context=context)
 
 			if data:
 				if data.exp_date:
@@ -2357,11 +2626,62 @@ class sale_advance_payment_inv(osv.osv_memory):
 	_inherit = "sale.advance.payment.inv"
 	_description = "Sales Advance Payment Invoice"
 
+	def create_invoices(self, cr, uid, ids, context=None):
+		sale_obj = self.pool.get('sale.order')
+		invoice_obj = self.pool.get('account.invoice')
+		invoice_line_obj = self.pool.get('account.invoice.line')
+		wizard = self.browse(cr, uid, ids[0], context)
+
+		sale_ids = context.get('active_ids', [])
+
+		so = sale_obj.browse(cr, uid, sale_ids)[0]
+
+		cr.execute("SELECT invoice_id FROM sale_order_invoice_rel WHERE order_id = %s", sale_ids)
+		invoice = map(lambda x: x[0], cr.fetchall())
+
+		dp_percentage = 0
+		amount_total = 0
+		
+		for x in invoice:
+			inv = invoice_obj.browse(cr, uid, x)
+			
+			if inv.state <> 'cancel':
+				dp_percentage += inv.dp_percentage
+				amount_total += inv.amount_total
+
+				if inv.state == 'draft':
+					raise osv.except_osv(_('Informasi!'),
+					_('Has been found to invoice with draft status'))
+
+				if inv.picking_ids:
+					raise osv.except_osv(_('Informasi!'),
+					_('Invoice has been created from picking Consolidate'))
+
+		if dp_percentage == 100:
+			raise osv.except_osv(_('Informasi'),
+				_('Invoice Complate'))
+		elif dp_percentage == 0 and amount_total >= so.amount_total:
+			raise osv.except_osv(_('Informasi'),
+				_('Invoice Complete'))
+		elif amount_total >= so.amount_total:
+			raise osv.except_osv(_('Informasi'),
+				_('Invoice Complete'))
+		elif dp_percentage + wizard.amount > 100:
+			raise osv.except_osv(_('Warning'),
+				_('invoice can not be in the process, the percentage is too large'))
+		else:
+			print '==========ok===='
+
+		res = super(sale_advance_payment_inv,self).create_invoices(cr,uid,ids,context=context)
+		return res
+
 	def _check_is_invoice_by_delivery_note_exist(self,cr,uid,ids,sale_obj):
 		
 		return True
 
 	def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
+
+		print '==========&&&&&&&&&&&&&&&&&&&&&&&&&&=============='
 		if context is None:
 			context = {}
 		sale_obj = self.pool.get('sale.order')
@@ -2455,3 +2775,281 @@ class sale_advance_payment_inv(osv.osv_memory):
 
 			result.append((sale.id, inv_values))
 		return result
+
+class purchase_partial_invoice(osv.osv_memory):
+	_inherit = "purchase.partial.invoice"
+
+	def _prepare_advance_invoice_vals(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		purchase_obj = self.pool.get('purchase.order')
+		inv_line_obj = self.pool.get('account.invoice.line')
+		wizard = self.browse(cr, uid, ids[0], context)
+		purchase_ids = context.get('active_ids', [])
+
+		id_product=self.pool.get('product.product').search(cr,uid,[('default_code', '=' ,'PAYADV')])
+
+		if id_product == []:
+			raise osv.except_osv(_('Informasi'), _('Please Create Product PAYADV'))
+
+		data_product =self.pool.get('product.product').browse(cr,uid,id_product)[0]
+
+		result = []
+		for purchase in purchase_obj.browse(cr, uid, purchase_ids, context=context):
+			val = inv_line_obj.product_id_change(cr, uid, [], purchase.order_line[0].product_id.id, uom_id=False, partner_id=purchase.partner_id.id, fposition_id=purchase.fiscal_position.id)
+			if val:
+				res = val['value']
+				set_account_id = res.get('account_id',data_product.property_account_expense.id)
+				set_uom_id = res.get('uos_id', False)
+			else:
+				set_account_id = data_product.property_account_expense.id
+				set_uom_id = data_product.uom_id.id
+
+			if wizard.amount <= 0.00:
+				raise osv.except_osv(_('Incorrect Data'), _('The value of Advance Amount must be positive.'))
+			
+			inv_amount = purchase.amount_untaxed * wizard.amount / 100
+
+			# create the invoice
+			inv_line_values = {
+				'name': data_product.name + ' ' + str(wizard.amount) + '%',
+				'origin': purchase.name,
+				'account_id': set_account_id,
+				'price_unit': inv_amount,
+				'quantity': 1.0,
+				'uos_id': set_uom_id,
+				'product_id': data_product.id,
+				'invoice_line_tax_id': False
+			}
+			
+			inv_values = {
+				'name': purchase.partner_ref or purchase.name,
+				'origin': purchase.name,
+				'type': 'in_invoice',
+				'account_id': purchase.partner_id.property_account_payable.id,
+				'partner_id': purchase.partner_id.id,
+				'invoice_line': [(0, 0, inv_line_values)],
+				'currency_id': purchase.pricelist_id.currency_id.id,
+				'fiscal_position': purchase.fiscal_position.id or purchase.partner_id.property_account_position.id
+			}
+			result.append((purchase.id, inv_values))
+
+		return result
+
+
+purchase_partial_invoice()
+
+
+class account_bank_statement(osv.osv):
+	_inherit = "account.bank.statement"
+	_columns = {
+		'line_ids': fields.one2many('account.bank.statement.line','statement_id', 'Statement lines',states={'confirm':[('readonly', True)]}),
+		'po_id': fields.related('line_ids','po_id', type='many2one', relation='purchase.order', string='Purchase Order'),
+		'account_id': fields.related('line_ids','account_id', type='many2one', relation='account.account', string='Account Name'),
+		'obi_name': fields.related('line_ids','name', type='string', string='OBI Name'),
+		'state': fields.selection([
+									('draft', 'New'),
+									('open','Open'),
+									('confirm', 'Closed'),
+									('cancel','Cancel')],
+								   'Status', required=True, readonly="1",
+								   help='When new statement is created the status will be \'Draft\'.\n'
+										'And after getting confirmation from the bank it will be in \'Confirmed\' status.'),
+	}
+
+	def action_cancel(self, cr, uid, ids, context={}):
+		res = self.write(cr,uid,ids,{'state':'cancel'},context=context)
+		return res
+
+account_bank_statement()
+
+
+
+class create_return_internal_move(osv.osv_memory):
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: 
+			context = {}
+
+		active_ids = context['active_ids']
+		active_model = context.get('active_model')
+
+		res = super(create_return_internal_move, self).default_get(cr, uid, fields, context=context)
+		
+		linesData = []
+		if active_ids:
+			move_data =self.pool.get('internal.move').browse(cr,uid,active_ids)[0]
+			if context.get('active_model','') == 'internal.move':
+				for x in move_data.lines:
+					data =self.pool.get('internal.move.line').browse(cr,uid,x.id)
+
+					p = self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,data.id)])
+
+					if p:
+						qty_available = data.qty
+						
+						move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
+
+						for x in move_line:
+							qty_available = qty_available - x.qty
+
+						if qty_available <> 0:
+							linesData += [self._load_so_line(cr, uid, data)]
+					else:
+						linesData += [self._load_so_line(cr, uid, data)]
+
+			res.update(name=move_data.name)
+			res.update(internal_move_id=move_data.id)
+
+			# Dikarnakan Proses Return Maka Source & Destination di sesuaikan
+			res.update(source=move_data.destination.id)
+			res.update(destination=move_data.source.id)
+
+			res.update(lines=linesData)
+
+		return res
+
+	def _load_so_line(self, cr, uid, line):
+		move_line_item = {}
+		qty_available = line.qty
+
+		p=self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,line.id)])
+		if p:
+			move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
+			for x in move_line:
+				qty_available = qty_available - x.qty
+
+		if qty_available <> 0:
+			move_line_item = {
+				'product_id'			: line.product_id.id,
+				'desc'					: line.desc,
+				'qty'					: qty_available,
+				'uom_id'				: line.uom_id.id,
+				'source'				: line.source.id,
+				'destination'			: line.destination.id,
+				'internal_move_line_id'	: line.id,
+			}
+
+		return move_line_item
+
+	def validasi_product_return(self, cr, uid, data, qty, context=None):
+		nilai = 0
+		p=self.pool.get('internal.move.line').search(cr,uid,[('return_line_ref_id', '=' ,data.id)])
+
+		if p:	
+			move_line=self.pool.get('internal.move.line').browse(cr,uid,p)
+			for x in move_line:
+				nilai += x.qty
+
+			if qty > nilai:
+				raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty")
+		else:
+			move_line=self.pool.get('internal.move.line').browse(cr,uid,data.id)
+
+			if qty > move_line.qty:
+				raise openerp.exceptions.Warning("Prouct Qty " + data.product_id.default_code + " Melebihi Qty Pengiriman")	
+
+		
+
+		return True
+
+	def request_create_return_internal_move(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids)[0]
+
+		obj_im = self.pool.get("internal.move")
+		obj_im_line = self.pool.get("internal.move.line")
+		lines = []
+
+		for line in val.lines:
+			data = obj_im_line.browse(cr, uid, line.internal_move_line_id.id)
+			material_line = []
+			for x in data.detail_ids:
+				material_line.append((0,0,{
+						'no':x.no,
+						'name':x.name,
+						'desc':x.desc,
+						'internal_move_line_id':line.id,
+						'product_id':x.product_id.id,
+						'uom_id':x.uom_id.id,
+						'qty':line.qty,
+						'stock_move_id':x.stock_move_id.id,
+						'stock_prod_lot_id':x.stock_prod_lot_id.id,
+						'type':x.type,
+					}))
+
+			validasi = self.validasi_product_return(cr, uid, data, line.qty, context=None)
+
+			if validasi == True:
+				lines.append((0,0,{
+						'internal_move_request_line_id':data.internal_move_request_line_id.id,
+						'return_line_ref_id':data.id,
+						'name':data.name,
+						'no':data.no,
+						'desc':data.desc,
+						'product_id':data.product_id.id,
+						'uom_id':data.uom_id.id,
+						'qty':line.qty,
+						'source':val.source.id,
+						'destination':val.destination.id,
+						'detail_ids':material_line,
+					}))
+
+		
+		im_id = obj_im.create(cr, uid, {
+										'name':'',
+										'internal_move_request_id':val.internal_move_id.internal_move_request_id.id,
+										'return_ref_id':val.internal_move_id.id,
+										'source':val.source.id,
+										'destination':val.destination.id,
+										'manual_pb_no':val.internal_move_id.manual_pb_no,
+										'ref_no':val.internal_move_id.ref_no,
+										'lines':lines,
+										'state':'draft'
+									   })
+
+		pool_data=self.pool.get("ir.model.data")
+		action_model,action_id = pool_data.get_object_reference(cr, uid, 'sbm_inherit', "internal_move_form")     
+		action_pool = self.pool.get(action_model)
+		res_id = action_model and action_id or False
+		action = action_pool.read(cr, uid, action_id, context=context)
+		action['name'] = 'internal.move.form'
+		action['view_type'] = 'form'
+		action['view_mode'] = 'form'
+		action['view_id'] = [res_id]
+		action['res_model'] = 'internal.move'
+		action['type'] = 'ir.actions.act_window'
+		action['target'] = 'current'
+		action['res_id'] = im_id
+		return action
+
+	_name = "create.return.internal.move"
+	_description = "Create Return Internal Move"
+	_columns = {
+		'name':fields.char(string='I.M No.'),
+		'internal_move_id':fields.many2one('internal.move',required=True,string="Internal Move ID"),
+		'source':fields.many2one('stock.location',required=True,string="Source Location"),
+		'destination':fields.many2one('stock.location',required=True,string="Destination Location"),
+		'lines':fields.one2many('create.return.internal.move.line','lines_id',string="Lines"),
+	}
+
+create_return_internal_move()
+
+
+class create_return_internal_move_line(osv.osv_memory):
+	_name="create.return.internal.move.line"
+	_description="Create Return Internal Move Line"
+	_columns={
+		'lines_id':fields.many2one('create.return.internal.move',string="Wizard",required=True,ondelete='CASCADE',onupdate='CASCADE'),
+		'name':fields.char('Name'),
+		'product_id':fields.many2one('product.product',string="Product",required=True),
+		'desc':fields.text('Description'),
+		'qty':fields.float('Qty',required=True),
+		'uom_id':fields.many2one('product.uom',string="UOM",required=True),
+		'source':fields.many2one('stock.location',required=False,string="Source Location"),
+		'destination':fields.many2one('stock.location',required=False,string="Destination Location"),
+		'internal_move_line_id':fields.many2one('internal.move.line',string="Internal Move Line"),
+	}
+
+	_rec_name = 'lines_id'
+
+create_return_internal_move_line()

@@ -36,7 +36,6 @@ class sale_order(osv.osv):
 			data = self.pool.get('account.tax').compute_all(cr, uid, line.tax_id, harga, 1, line.product_id, line.order_id.partner_id)['taxes']
 		for c in data:
 			val += c.get('amount', 0.0)
-		print "**************************************************000000000000000000000000000000",val
 		return val
 
 	def _get_order(self, cr, uid, ids, context=None):
@@ -46,7 +45,6 @@ class sale_order(osv.osv):
 		return result.keys()
 
 	def _amount_all(self, cr, uid, ids, field_name, arg, context=None):
-		print "AAAAAAAAAAAAAAAAAAAAA---->"
 		user = self.pool.get('res.users').browse(cr, uid, uid, {})
 		cur_obj = self.pool.get('res.currency')
 		res = {}
@@ -68,25 +66,12 @@ class sale_order(osv.osv):
 				for line in order.order_line:
 					val1 += round(line.price_subtotal)
 
-					print "------------------------------------->>>>>>>>>>>>>>>>>>>>"
-					val += math.floor(self._amount_line_tax(cr, uid, line, context=context))
-
-				# pajak =round((val1*10)/100)
-
-				# if pajak==val:
-				# 	val=val
-				# else:
-				# 	val=pajak
-				#issue
-				# print '===1=====================',val1
-				# print '===2=====================',val
-				# print '===3=====================',pajak
+					val += self._amount_line_tax(cr, uid, line, context=context)
 			else:
 				for line in order.order_line:
 					val1 += line.price_subtotal
 					val += self._amount_line_tax(cr, uid, line, context=context)
-			print val,"&&&&&&&&&&&&&&&&&",val1
-			print order.pricelist_id.currency_id.id, "======", user.company_id.currency_id.id
+
 			if order.pricelist_id.currency_id.id==user.company_id.currency_id.id:
 				res[order.id]['amount_tax'] = math.floor(val)
 			else:
@@ -94,26 +79,26 @@ class sale_order(osv.osv):
 
 			res[order.id]['amount_untaxed'] = cur_obj.round(cr, uid, cur, val1)
 			res[order.id]['amount_total'] = res[order.id]['amount_untaxed'] + res[order.id]['amount_tax']
-		print res,"PPPPP"
+			
 		return res
 
 
 	_columns = {       
 		'amount_untaxed': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Untaxed Amount',
 			store={
-				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 10),
+				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line','pricelist_id'], 10),
 				'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
 			},
 			multi='sums', help="The amount without tax.", track_visibility='always'),
 		'amount_tax': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Taxes',
 			store={
-				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 10),
+				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line','pricelist_id'], 10),
 				'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
 			},
 			multi='sums', help="The tax amount."),
 		'amount_total': fields.function(_amount_all, digits_compute=dp.get_precision('Account'), string='Total',
 			store={
-				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line'], 10),
+				'sale.order': (lambda self, cr, uid, ids, c={}: ids, ['order_line','pricelist_id'], 10),
 				'sale.order.line': (_get_order, ['price_unit', 'tax_id', 'discount', 'product_uom_qty'], 10),
 			},
 			multi='sums', help="The total amount."),

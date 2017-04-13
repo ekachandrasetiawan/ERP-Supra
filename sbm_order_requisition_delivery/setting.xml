@@ -21,7 +21,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_order_requisition_delivery_purchase_manager">
 	        <field name="name">Access Order Requisition Delivery Purchase Manager</field>
@@ -52,7 +52,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_order_requisition_delivery_line_purchase_manager">
 	        <field name="name">Access Order Requisition Delivery Line Purchase Manager</field>
@@ -82,7 +82,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_product_variants_purchase_manager">
 	        <field name="name">Access Product Variants Purchase Manager</field>
@@ -112,7 +112,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_detail_pb_purchase_manager">
 	        <field name="name">Access Detail PB Purchase Manager</field>
@@ -141,7 +141,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_mrp_bom_purchase_manager">
 	        <field name="name">Access MRP BOM Purchase Manager</field>
@@ -170,7 +170,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_detail_order_line_purchase_manager">
 	        <field name="name">Access Detail Order Line Purchase Manager</field>
@@ -199,7 +199,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="True"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_stock_partial_picking_line_purchase_manager">
 	        <field name="name">Access Stock Partial Picking Line Purchase Manager</field>
@@ -229,7 +229,7 @@
 	        <field name="perm_write" eval="True"/>
 	        <field name="perm_unlink" eval="False"/>
 	        <field name="perm_create" eval="True"/>
-	        <field name="groups" eval="[(4, ref('sbm_purchaseorder.group_purchase_chief'))]"/>
+	        <field name="groups" eval="[(4, ref('sbm_purchase.group_purchase_chief'))]"/>
 	    </record>
 	   	<record model="ir.model.access" id="ir_access_order_requisition_delivery_line_po_purchase_manager">
 	        <field name="name">Access Order Requisition Delivery Line PO Purchase Manager</field>

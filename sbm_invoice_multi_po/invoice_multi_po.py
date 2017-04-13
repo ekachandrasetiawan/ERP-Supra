@@ -203,6 +203,9 @@ class purchase_order(osv.osv):
 			raise osv.except_osv(_('Warning!'),
 			_('Purchase Order Sudah Memiliki Invoice ' + no_kwitansi))
 
+
+		print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+
 		return super(purchase_order,self).action_invoice_create(cr,uid,ids,context=context)
 
 class purchase_partial_invoice(osv.osv_memory):

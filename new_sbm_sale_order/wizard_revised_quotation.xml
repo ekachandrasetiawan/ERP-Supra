@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-
+		<record id="quotation_count_revised_form_view" model="ir.ui.view">
+			<field name="name">quotation.form</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="quotation_form_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//page[@string='Revision History']/field[@name='revised_histories']" position="before">
+					<field name="count_revised"/>
+				</xpath>
+			</field>
+		</record>
 		<record id="revise_quotation_wizard" model='ir.ui.view'>
 			<field name='name'>revise.quotation.wizard</field>
 			<field name='model'>wizard.revise.quotation</field>

@@ -12,6 +12,10 @@ from openerp.tools.translate import _
 from osv import osv, fields
 from xml.etree import ElementTree as ET
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class hr_attendance_type(osv.osv):
 	_name = 'hr.attendance.type'
@@ -140,11 +144,18 @@ class hr_employee(osv.osv):
 		machine_ids = machine_obj._get_online_list(cr,uid)
 
 		machines = machine_obj.browse(cr,uid,machine_ids,context=context)
+
+		uids = []
 		for emp in emps:
 			if not self.delete_att_pin_machine(cr,uid,emp.att_pin,machine_ids,context=context):
 				raise osv.except_osv(_('Failed!'),_('Failed to delete user on finger!'))
-
-		self.write(cr,uid,ids,{'active':False})
+			if emp.user_id:
+				uids.append(emp.user_id.id)
+		#set as non active employee
+		self.write(cr,uid,ids,{'active':False}, context=context)
+		
+		#set as non active users
+		self.pool.get('res.users').write(cr, uid, uids, {'active':False}, context=context)
 
 		return True
 
@@ -206,6 +217,12 @@ class hr_employee(osv.osv):
 		print "---------------",res
 		return res
 
+class res_users(osv.osv):
+	_inherit = 'res.users'
+	_columns = {
+		'admin_of_attendance_machine_ids': fields.one2many('hr.attendance.machine.admin', 'user_id',string='Admin of Attendance Machines')
+	}
+
 
 class hr_attendance_machine(osv.osv):
 	_name = 'hr.attendance.machine'
@@ -217,6 +234,7 @@ class hr_attendance_machine(osv.osv):
 		'port': fields.char('Port', required=True),
 		'key': fields.char('Key',help="Key to Communicate with Machine", required=True),
 		'online':fields.boolean('Online State'),
+		'admin_ids':fields.one2many('hr.attendance.machine.admin','machine_id',string="Admins"),
 	}
 	_sql_constraints = [
 		('unique_machine_id', 'unique(machine_id)', "Machine ID already defined on other machine, Machine ID must be Unique"),
@@ -293,91 +311,98 @@ class hr_attendance_machine(osv.osv):
 			log_tree = ET.fromstring(response)
 			dictResponse = xmltodict.parse(response) # JSON Formatted Log from machine
 
-			dictRowsResponse = dictResponse['GetAttLogResponse']['Row'] #[0]['PIN']
-			uniq_eid = list(set(int(row['PIN']) for row in dictRowsResponse))
-			
-			
 
-			check_existance_employee = hr_employee.check_employee_ids_on_machine(cr,uid,uniq_eid,context)
+			GetAttLogResponse = dictResponse.get('GetAttLogResponse',False)
+			dictRowsResponse = False
+			if GetAttLogResponse:
+				dictRowsResponse = GetAttLogResponse.get('Row',False)
 
-			flag_to_act = False # to flag is this request will be action to insert log data into OpenERP Database ?
+			# dictRowsResponse = dictResponse['GetAttLogResponse']['Row'] #[0]['PIN']
+			if dictRowsResponse:
+				uniq_eid = list(set(int(row['PIN']) for row in dictRowsResponse))
+				
+				
 
-			if not check_existance_employee['not_available']:
-				# print 'All Employee is Match on OpenERP System'
-				flag_to_act = True
-			else:
-				# if some data not sync between machine and db
-				err_msg = ""
-				xml_pin = ""
-				for not_av in check_existance_employee['not_available']:
-					xml_pin += """<Arg><PIN xsi:type="xsd:integer">{pin}</PIN></Arg>""".format(pin=not_av)
-				flag_to_act = False
-				xml_get_user = """<GetUserInfo>
-						<ArgComKey xsi:type="xsd:integer">{machine_key}</ArgComKey>
-						{PINS}
-					</GetUserInfo>""".format(machine_key=mac.key,PINS=xml_pin)
-				res_get_user = self._request_to_machine(cr,uid, mac.ip, headers, xml_get_user,context=context)
-				dictResponseUser = xmltodict.parse(res_get_user) # JSON Formatted User INfo from machine
+				check_existance_employee = hr_employee.check_employee_ids_on_machine(cr,uid,uniq_eid,context)
 
-				if dictResponseUser['GetUserInfoResponse']:
-					flag_to_act = False
-					dictRowsResponseUser = dictResponseUser['GetUserInfoResponse']['Row']
+				flag_to_act = False # to flag is this request will be action to insert log data into OpenERP Database ?
+
+				if not check_existance_employee['not_available']:
+					# print 'All Employee is Match on OpenERP System'
+					flag_to_act = True
 				else:
-					# user not exist on machine too
-					dictRowsResponseUser = False
-					flag_to_act = True #set flag action to True it means the log data can be inserted into OpenERP database
-					print dictResponseUser['GetUserInfoResponse'],'NOt exists ----------------------------'
-				if dictRowsResponseUser:
-					# if many users not exits it will be response as list so we need check the data type
-					if type(dictRowsResponseUser) is list:
-						for uinfo in dictRowsResponseUser:
-							err_msg += uinfo['Name']+" ("+uinfo['PIN2']+")\r\n"
-							# print uinfo
+					# if some data not sync between machine and db
+					err_msg = ""
+					xml_pin = ""
+					for not_av in check_existance_employee['not_available']:
+						xml_pin += """<Arg><PIN xsi:type="xsd:integer">{pin}</PIN></Arg>""".format(pin=not_av)
+					flag_to_act = False
+					xml_get_user = """<GetUserInfo>
+							<ArgComKey xsi:type="xsd:integer">{machine_key}</ArgComKey>
+							{PINS}
+						</GetUserInfo>""".format(machine_key=mac.key,PINS=xml_pin)
+					res_get_user = self._request_to_machine(cr,uid, mac.ip, headers, xml_get_user,context=context)
+					dictResponseUser = xmltodict.parse(res_get_user) # JSON Formatted User INfo from machine
+
+					if dictResponseUser['GetUserInfoResponse']:
+						flag_to_act = False
+						dictRowsResponseUser = dictResponseUser['GetUserInfoResponse']['Row']
 					else:
-						if dictRowsResponseUser['Name']:
-							err_msg += dictRowsResponseUser['Name']+" ("+dictRowsResponseUser['PIN2']+")\r\n"
+						# user not exist on machine too
+						dictRowsResponseUser = False
+						flag_to_act = True #set flag action to True it means the log data can be inserted into OpenERP database
+						print dictResponseUser['GetUserInfoResponse'],'NOt exists ----------------------------'
+					if dictRowsResponseUser:
+						# if many users not exits it will be response as list so we need check the data type
+						if type(dictRowsResponseUser) is list:
+							for uinfo in dictRowsResponseUser:
+								err_msg += uinfo['Name']+" ("+uinfo['PIN2']+")\r\n"
+								# print uinfo
 						else:
-							flag_to_act = True
-					if not flag_to_act:
-						raise osv.except_osv(_('Processing Error!'), _('1 OR MORE EMPLOYEE DATA IS NOT EXISTS ON OPENERP SYSTEM:\r\n(%s)') \
-										% (err_msg))
+							if dictRowsResponseUser['Name']:
+								err_msg += dictRowsResponseUser['Name']+" ("+dictRowsResponseUser['PIN2']+")\r\n"
+							else:
+								flag_to_act = True
+						if not flag_to_act:
+							raise osv.except_osv(_('Processing Error!'), _('1 OR MORE EMPLOYEE DATA IS NOT EXISTS ON OPENERP SYSTEM:\r\n(%s)') \
+											% (err_msg))
 
-			# unique_eid = set(row for row in dictRowsResponse)
-			att_log_obj = self.pool.get('hr.attendance.log')
-			# print flag_to_act
-			if flag_to_act:
-				# user validation success then in this condition we must check every log are already on database or not ?
-				log_to_insert = []
-				for row in log_tree:
-					# INDEX 0 FOR <PIN>
-					# 1 FOR <DateTime>
-					# 2 FOR <Verified>
-					# 3 For <Status>
-					# 4 For <WorkCode>
-					datetime_log = int(time.mktime(time.strptime(row[1].text, '%Y-%m-%d %H:%M:%S')))
-					name = time.strftime('%Y/%m')+"/"+row[0].text+"/"+str(datetime_log)
-					att_pin = int(row[0].text)
-					employee_id = hr_employee.search(cr,uid,[('att_pin','=',att_pin)])
+				# unique_eid = set(row for row in dictRowsResponse)
+				att_log_obj = self.pool.get('hr.attendance.log')
+				# print flag_to_act
+				if flag_to_act:
+					# user validation success then in this condition we must check every log are already on database or not ?
+					log_to_insert = []
+					for row in log_tree:
+						# INDEX 0 FOR <PIN>
+						# 1 FOR <DateTime>
+						# 2 FOR <Verified>
+						# 3 For <Status>
+						# 4 For <WorkCode>
+						datetime_log = int(time.mktime(time.strptime(row[1].text, '%Y-%m-%d %H:%M:%S')))
+						name = time.strftime('%Y/%m')+"/"+row[0].text+"/"+str(datetime_log)
+						att_pin = int(row[0].text)
+						employee_id = hr_employee.search(cr,uid,[('att_pin','=',att_pin)])
 
-					if employee_id:
-						att_data = {
-							'name': name,
-							'employee_id': employee_id[0],
-							'att_pin': att_pin,
-							'datetime_log': datetime_log,
-							'm_verified': row[2].text,
-							'm_status': row[3].text,
-							'm_work_code': row[4].text,
-							'state':'3',
-							'machine_id':mac.id,
-						}
-					# check if log already exists
-					if not att_log_obj.check_is_log_exists(cr,uid,row[0].text,datetime_log,context=context):
-						log_to_insert.append(att_data)
-				# print log_to_insert
-				# insert only the filtered log
-				print log_to_insert
-				att_log_obj.creates(cr,uid,log_to_insert,context=context)
+						if employee_id:
+							att_data = {
+								'name': name,
+								'employee_id': employee_id[0],
+								'att_pin': att_pin,
+								'datetime_log': datetime_log,
+								'm_verified': row[2].text,
+								'm_status': row[3].text,
+								'm_work_code': row[4].text,
+								'state':'3',
+								'machine_id':mac.id,
+							}
+						# check if log already exists
+						if not att_log_obj.check_is_log_exists(cr,uid,row[0].text,datetime_log,context=context):
+							log_to_insert.append(att_data)
+					# print log_to_insert
+					# insert only the filtered log
+					print log_to_insert
+					att_log_obj.creates(cr,uid,log_to_insert,context=context)
 		print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",failed_connection
 		if len(failed_connection)>0:
 			msg = ""
@@ -390,20 +415,72 @@ class hr_attendance_machine(osv.osv):
 		res = False
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
-		urlTo = str(browseConf.value)+"attendance/first-and-last-scan"
+		url = str(browseConf.value)
+		# user_ids = self.pool.get('res.users').search(cr,uid,uid,context=context)
+		userBrowse = self.pool.get('res.users').browse(cr,uid,uid,context=context)
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_users', 'group_using_public_ip_address')
+		groupBrowse = self.pool.get('res.groups').browse(cr,uid,view_id,context=context)
+
+		# _logger.error((">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",userBrowse.employee_ids))
+		employee = False
+		for emp in userBrowse.employee_ids:
+			employee = userBrowse.employee_ids[0]
+		if employee:
+			work_addr = employee.address_id.id
+
+			for usergroup in groupBrowse.users :
+				if usergroup.id == uid:
+					searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
+					browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
+					url = str(browseConf.value)
+
+			if work_addr:			
+				urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
+			else :			
+				urlTo = url+"attendance/first-and-last-scan"
+			
+			return {
+				'type'	: 'ir.actions.client',
+				'target': 'new',
+				'tag'	: 'print.out',
+				'params': {
+					# 'id'	: ids[0],
+					'redir'	: urlTo
+				},
+			}
+		else:
+			raise osv.except_osv(_('Employee Null!'),_('You must be an Employee to access the page!'))
+		return res
+
+	def openprint_min_max_site(self,cr,uid,ids,context={}):
+		res = False
+		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
+		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
+		url = str(browseConf.value)
 		# user_ids = self.pool.get('res.users').search(cr,uid,uid,context=context)
 		userBrowse = self.pool.get('res.users').browse(cr,uid,uid,context=context)
 
-		employee = userBrowse.employee_ids[0]
+		if not userBrowse.employee_ids:
+			raise Warning(_('Please contact Your System Administrator to tell this error messege!\n\nUser not related to any employee!'))
+			
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_users', 'group_using_public_ip_address')
+		groupBrowse = self.pool.get('res.groups').browse(cr,uid,view_id,context=context)
 
+		employee = userBrowse.employee_ids[0]
 		work_addr = employee.address_id.id
 
-		if work_addr:
-
-			searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.'+str(work_addr))], context=context)
-			if searchConfSite:
+		for usergroup in groupBrowse.users :
+			if usergroup.id == uid:
+				searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
 				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
-				urlTo = str(browseConf.value)+"attendance/first-and-last-scan&site="+str(work_addr)
+				url = str(browseConf.value)
+
+		if work_addr:
+			urlTo = url+"attendance/first-and-last-scan-site&site="+str(work_addr)
+		else :
+			urlTo = url+"attendance/first-and-last-scan-site"
+
 		
 		return {
 			'type'	: 'ir.actions.client',
@@ -416,17 +493,50 @@ class hr_attendance_machine(osv.osv):
 		}
 		return res
 
+class hr_attendance_machine_admin(osv.osv):
+	_name = 'hr.attendance.machine.admin'
+	_columns = {
+		'machine_id':fields.many2one('hr.attendance.machine', "Machine", required=True),
+		'user_id':fields.many2one('res.users', 'User', required=True),
+	}
+
+	rec_name = "user_id"
 
 class import_attendance_log(osv.osv):
+
+	def cancel_import(self, cr, uid, ids, context={}):
+		return self.write(cr, uid, ids, {'state':'cancel'})
+
 	_name = 'hr.attendance.import.attendance.log'
 	_columns = {
+		'name':fields.char('Doc No', requried=False),
 		'machine_id': fields.many2one('hr.attendance.machine',string="Machine"),
 		'data':fields.binary('File',required=True),
 		'state':fields.selection([('draft','Draft'),('done','Done'),('cancel','Cancel')],string="State"),
 	}
 
+	def _default_machine(self, cr, uid, context={}):
+		res = False
+		machine = self.pool.get('hr.attendance.machine.admin').search(cr,uid,[('user_id', '=' ,uid)])
+		mac = self.pool.get('hr.attendance.machine.admin').browse(cr, uid, machine)[0]
+
+		return mac.machine_id.id
+
+	def _default_name(self, cr, uid, context={}):
+		res_user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+		initial = False
+		if res_user.initial:
+			initial = 'NN'
+		else:
+			print "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< nothing initial"
+		res = time.strftime('%Y/%m')+"/"+initial
+		return res
+
+
 	_defaults = {
-		'state':'draft'
+		'name':_default_name,
+		'state':'draft',
+		'machine_id':_default_machine
 	}
 
 
@@ -577,6 +687,7 @@ class hr_attendance_log(osv.osv):
 		'notes': fields.text(string="Notes", required=False),
 		'log_time': fields.function(_get_log_time_from_epoch, method=True, string="Log Time", store=True, type="datetime"),
 		'machine_id': fields.many2one('hr.attendance.machine',string='Machine ID',required=True),
+		'date_extra_out': fields.date('Date Extra Out'),
 	}
 
 	def check_is_log_exists(self,cr,uid,eid,datetime_log,context={}):
@@ -585,6 +696,62 @@ class hr_attendance_log(osv.osv):
 		# print "searching ",eid," and ",datetime_log
 		# print res,"---------->>RES"
 		return res
+
+	def action_update_date(self,cr,uid,ids,context=None):
+		val = self.browse(cr, uid, ids, context={})[0]
+		hr=self.pool.get('hr.attendance.log')
+
+		if context is None:
+			context = {}
+		
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_hr_attendance', 'wizard_hr_attendance_form')
+
+		context.update({
+			'active_model': self._name,
+			'active_ids': ids,
+			'active_id': len(ids) and ids[0] or False
+		})
+		return {
+			'view_mode': 'form',
+			'view_id': view_id,
+			'view_type': 'form',
+			'view_name':'wizard_hr_attendance_form',
+			'res_model': 'wizard.hr.attendance.log',
+			'type': 'ir.actions.act_window',
+			'target': 'new',
+			'context': context,
+			'nodestroy': True,
+		}
+
+class WizardAttendanceLog(osv.osv_memory):
+
+	def default_get(self, cr, uid, fields, context=None):
+		if context is None: context = {}
+		log_ids = context.get('active_ids', [])
+		active_model = context.get('active_model')
+		res = super(WizardAttendanceLog, self).default_get(cr, uid, fields, context=context)
+		if not log_ids or len(log_ids) != 1:
+			return res
+		log_id, = log_ids
+		if log_id:
+			res.update(log_id=log_id)
+			log = self.pool.get('hr.attendance.log').browse(cr, uid, log_id, context=context)	
+		return res
+
+	def update_date_hr_log(self,cr,uid,ids,context=None):
+		data = self.browse(cr,uid,ids,context)[0]
+		print '===================',data.log_id.id
+		hr_log = self.pool.get('hr.attendance.log')
+		return hr_log.write(cr,uid,data.log_id.id,{'date_extra_out':data.date_extra_out},context=context)
+
+	_name="wizard.hr.attendance.log"
+	_description="Wizard HR Attendance LOG"
+	_columns = {
+		'log_id':fields.many2one('hr.attendance.log',string="Attendance LOG"),
+		'date_extra_out': fields.date('Date Extra Out'),
+	}
+
+WizardAttendanceLog()
 
 class hr_attendance_min_max_log(osv.osv):
 	_name = "hr.attendance.min.max.log"

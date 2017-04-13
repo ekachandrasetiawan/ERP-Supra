@@ -7,7 +7,9 @@ from tools.translate import _
 from osv import fields, osv
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, DATETIME_FORMATS_MAP, float_compare
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class res_users(osv.osv):
     _inherit = "res.users"
@@ -164,7 +166,6 @@ class order_preparation(osv.osv):
     def create(self, cr, uid, vals, context=None):
         # check = self.search(cr,uid,[('sale_id','=',vals['sale_id']),('picking_id','=',vals['picking_id']),('state','!=','cancel')])
         check = self.search(cr,uid,[('sale_id','=',vals['sale_id']),('state','in',('draft','approve'))])
-        print '===================',check
         OPs = self.browse(cr,uid,check,context=None)
         if check:
             allOp = []
@@ -195,9 +196,15 @@ class order_preparation(osv.osv):
          
     def preparation_confirm(self, cr, uid, ids, context=None):
         val = self.browse(cr, uid, ids)[0]
+        if val.picking_id.state == 'cancel':
+            raise osv.except_osv(('Warning'), ('Delivery Order Status Cancel, Please Refresh Delivery Order '))
+            
         notActiveProducts = []
         for x in val.prepare_lines:
-            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id)
+            context['location'] = x.move_id.location_id.id
+            context['location_id'] = x.move_id.location_id.id
+
+            product =self.pool.get('product.product').browse(cr, uid, x.product_id.id,context=context)
 
             # if product is not active then register in list
             if not product.active:
@@ -208,13 +215,26 @@ class order_preparation(osv.osv):
 
             if product.not_stock == False:
                  # print '=========================',product.qty_available
+
                 mm = ' ' + product.default_code + ' '
                 stock = ' ' + str(product.qty_available) + ' '
                 msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
 
-                if x.product_qty > product.qty_available:
-                    raise openerp.exceptions.Warning(msg)
-                    return False
+                if product.track_production:
+                    for batch in x.prodlot_id:
+                        prodlot_browse = self.pool.get('stock.production.lot').browse(cr, uid, batch.name.id, context=context)
+                        stock_batch = prodlot_browse.stock_available
+                        # _logger.error(('Tesss---------------------',batch.qty,'--',stock_batch, context, prodlot_browse))
+                        if batch.qty > stock_batch:
+                            stock = ' ' + str(stock_batch) + ' '
+                            msg = 'Stock Product' + mm + ' '+batch.name.name+' Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+                            raise openerp.exceptions.Warning(msg)
+                            return False
+                else:
+                    
+                    if x.product_qty > product.qty_available:
+                        raise openerp.exceptions.Warning(msg)
+                        return False
 
 
         if len(notActiveProducts) > 0:

@@ -64,149 +64,7 @@ class res_partner_extention(osv.osv):
 				# print "--------------------------------------------------------ELSEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",context
 				res.append((index,result))
 
-		# print tmp
-		# print results[0],"<<<<<<<<<<<<<<<<<<<<<<"
 		return res
-
-		
-
-
-		# print res
-		# for record in self.browse(cr, uid, ids, context=context):
-		# 	name = record.name
-		# 	state=""
-		# 	country=""
-		# 	if record.state_id.name:
-		# 		state =record.state_id.name
-		# 	if record.country_id.name:
-		# 		country = record.country_id.name
-		# 	if record.parent_id and not record.is_company:
-		# 		name = "%s %s %s" % (name,state,country)
-
-		# 	if context.get('show_address'):
-		# 		name = name + "\n" + self._display_address(cr, uid, record, without_company=True, context=context)
-		# 		name = name.replace('\n\n','\n')
-		# 		name = name.replace('\n\n','\n')
-		# 	if context.get('invoice'):
-		# 		name = "%s %s %s" % (name,state,country)
-		# 	if context.get('attention'):
-		# 		name ="%s"%(record.name) 
-		# 	if context.get('show_email') and record.email:
-		# 		name = "%s <%s>" % (name, record.email)
-		# 	res.append((record.id, name))
-		# 	print res
-		# return res
-
-	# def name_get(self,cr,uid,ids,context=None):
-	
-	# 	if context is None:
-	# 		context = {}
-	# 	if isinstance(ids, (int, long)):
-	# 		ids = [ids]
-	# 	res = []
-	# 	res = super(res_partner_extention,self).name_get(cr, uid, ids, context)
-	# 	for i in res:
-	# 		res.remove(i)
-		
-	# 	for record in self.browse(cr, uid, ids, context=context):
-	# 		name = record.name
-	# 		state=""
-	# 		country=""
-	# 		if record.state_id.name:
-	# 			state =record.state_id.name
-	# 		if record.country_id.name:
-	# 			country = record.country_id.name
-	# 		if record.parent_id and not record.is_company:
-	# 			name = "%s %s %s" % (name,state,country)
-	# 		if context.get('show_address'):
-	# 			name = name+" "+state+ "\n" + self._display_address(cr, uid, record, without_company=True, context=context)
-	# 			name = name.replace('\n\n','\n')
-	# 			name = name.replace('\n\n','\n')
-	# 		if context.get('invoice'):
-	# 			name = "%s %s %s" % (name,state,country)
-	# 		if context.get('attention'):
-	# 			name ="%s"%(record.name) 
-	# 		if context.get('show_email') and record.email:
-	# 			name = "%s <%s>" % (name, record.email)
-	# 		res.append((record.id, name))
-
-	# 	return res
-
-# 		# result = {}
-# 		# print context
-# 		# print context.get('show_address',"cek")
-# 		# print context.get('default_type',False),"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
-# 		# if context.get('default_type',False) == "delivery":
-# 		# 	for partner in self.browse(cr,uid,ids,context=context):
-# 		# 		# print partner.city,"sebelum"
-# 		# 		if partner.city:
-# 		# 			city =" "+partner.city
-# 		# 		else:
-# 		# 			city=""
-
-# 		# 		if partner.street:
-# 		# 			street =partner.street
-# 		# 		else:
-# 		# 			street=""
-# 		# 		if partner.street2:
-# 		# 			street2 =partner.street2
-# 		# 		else:
-# 		# 			street2=""
-# 		# 		if partner.state_id:
-# 		# 			state_id = 
-
-# 		# 		if partner.is_company:
-# 		# 			result[partner.id] = partner.name+city+"\n"+street+street2
-# 		# 		else:
-# 		# 			if partner.parent_id.name:
-# 		# 				is_name =partner.parent_id.name+" "
-# 		# 			else:
-# 		# 				is_name=""
-# 		# 			result[partner.id] = is_name+partner.name
-# 		# 		print result.items(),"+==========+",result[partner.id]
-# 		# 	return result.items()
-			
-# 		# elif context.get('default_type',False) == "invoice":
-# 		# 	for partner in self.browse(cr,uid,ids,context=context):
-
-
-# 		# 		if partner.parent_id.name:
-# 		# 			is_name =partner.parent_id.name
-# 		# 		else:
-# 		# 			is_name=""
-# 		# 		result[partner.id] = is_name+partner.name
-# 		# 	return result.items()
-# 		# elif context.get('default_type',False) == False:
-# 		# 	for partner in self.browse(cr,uid,ids,context=context):
-# 		# 		if partner.city:
-# 		# 			city =" "+partner.city
-# 		# 		else:
-# 		# 			city=""
-
-# 		# 		if partner.street:
-# 		# 			street =partner.street
-# 		# 		else:
-# 		# 			street=""
-# 		# 		if partner.street2:
-# 		# 			street2 =partner.street2
-# 		# 		else:
-# 		# 			street2=""
-
-# 		# 		if partner.is_company:
-# 		# 			result[partner.id] = partner.name+city+"\n"+street+street2
-# 		# 		else:
-# 		# 			if partner.parent_id.name:
-# 		# 				is_name =partner.parent_id.name+" "
-# 		# 			else:
-# 		# 				is_name=""
-# 		# 			result[partner.id] = is_name+partner.name
-
-# 		# 		print result.items(),"+==========+",result[partner.id]
-
-# 			# return result.items()
-# 		test = self.browse(cr,uid,ids,context=context)[0]
-# 		print test.name_get()
-# 		return test.name_get()
 
 
 class Sale_order(osv.osv):	
@@ -236,13 +94,12 @@ class Sale_order(osv.osv):
 		rec = self.browse(cr,uid,ids,context)[0]
 		isi_line = []
 		isi_tax = []
-		isi_material=[]
-
-
+		
 		for line in rec.order_line:
 			for taxid in line.tax_id:
 				isi_tax.append((taxid.id))
-			print isi_tax
+			
+			isi_material=[]
 			for material in line.material_lines:
 				isi_material.append((0,0,
 					{
@@ -296,9 +153,6 @@ class Sale_order(osv.osv):
 
 		}
 
-
-
-			
 		ListScope1 = []
 		ListScope2 = []
 		ListTerms = []
@@ -315,21 +169,27 @@ class Sale_order(osv.osv):
 		prepareNewSO['term_condition'] = [(6,0,ListTerms)]
 
 		newOrderId = self.create(cr,uid,prepareNewSO,context)
-		print prepareNewSO
+
+		# set old order reference id
+		self._set_repeat_so_id(cr,uid,newOrderId,rec.id,context=context)
 
 		
-		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sale', 'view_order_form')
+		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'new_sbm_sale_order', 'quotation_form_view')
 		return {
 			'view_mode': 'form',
 			'view_id': view_id,
 			'view_type': 'form',
-			'view_name':'sale.order.form',
+			'view_name':'quotation.form',
 			'res_model': 'sale.order',
 			'type': 'ir.actions.act_window',
 			'target': 'current',
 			'res_id':newOrderId,
 			'domain': "[('id','=',"+str(newOrderId)+")]",
 		}
+
+	# To set repeat_so_id field
+	def _set_repeat_so_id(self,cr,uid,ids,old_so_id,context={}):
+		return self.write(cr,uid,ids,{'repeat_so_id':old_so_id},context)
 
 	def _check_before_save(self,cr,uid,order_line):
 		# print order_line, "<.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.><.>"
@@ -472,7 +332,8 @@ class Sale_order(osv.osv):
 			},
 			multi="line"
 
-			)
+			),
+		'repeat_so_id': fields.many2one('sale.order', 'Old Order Ref', ondelete="RESTRICT", onupdate="CASCADE", track_visibility="onchange"),
 	}
 	_sql_constraints = [
 		('quotation_no_unique', 'unique(quotation_no)', 'The quotation_no must be unique !')
@@ -797,34 +658,10 @@ class sale_order_material_line(osv.osv):
 	}
 
 	def _get_ho_location(self,cr,uid,ids,context={}):
-		test_obj = self.pool.get("sale.order")
-		
-		# print ["file.sql",],"aaaaaaaaaaaaaa"
-		# return False
-		
-# def default_get(self, cr, uid, picking_location, context=None):
-#    		 data = super(sale_order_material_line, self).default_get(cr, uid, picking_location, context=context)
-#    		 data['picking_location']=64
-#    		 return data
-
-	# 	# product_obj = cr.execute('SELECT "id" FROM "stock_location" where "name" like "HO" ')
-
-	# 	# args=["HO"]
-	# 	# sql='SELECT id FROM stock_location WHERE name IN (%s)' 
-	# 	# in_p=', '.join(list(map(lambda x: '%s', args)))
-	# 	# sql = sql % in_p
-	# 	# product_obj = cr.execute(sql, args)
-	# 	# print product_obj,"aaaaaaaaaaaaaaaaaaaaaaaaaa"
-		
-		# args=['%HO%']
-		# sql='SELECT id FROM stock_location WHERE name like (%s)' 
-		# # name=', '.join(map(lambda x: '%s', args))
-		# # sql = sql % name
-		# product_obj = cr.execute(sql, args)
-
-		# cari id dari stock.location where name like 'HO'
-		seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')]) 
-		return seq_id
+		objname, location_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'stock_location_stock')
+		if not location_id:
+			raise osv.except_osv(_('Error'),_('Please Define Default Stock Location'))
+		return location_id
 	_defaults={
 		
 		'picking_location':_get_ho_location,
@@ -1023,10 +860,7 @@ class sale_order_line(osv.osv):
 		print old_material_ids,">>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 		if product_id:
-			seq_id = self.pool.get('stock.location').search(cr, uid, [('name','=','HO')])
-
-			if len(seq_id):
-				seq_id = seq_id[0]
+			seq_id = self.pool.get('sale.order.material.line')._get_ho_location(cr,uid,ids,context={})
 
 			product= self.pool.get('product.product').browse(cr,uid,product_id,{})
 			
@@ -1388,6 +1222,6 @@ class detail_pb(osv.osv):
 	_inherit="detail.pb"
 	_columns={
 		
-		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=True),
+		'sale_order_material_line_id':fields.many2one('sale.order.material.line','Item Line',required=False),
 	}
 		

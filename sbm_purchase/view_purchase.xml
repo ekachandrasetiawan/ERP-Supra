@@ -4,6 +4,8 @@
 		 <report id="reportpb" string="Report" model="pembelian.barang" name="print.pb"
         rml="addons/sbm_purchase/report/report_pb.rml" auto="False" menu="True"/>
 
+		 <report id="reportpbA5" string="Report" model="pembelian.barang" name="print.pb.A5"
+        rml="addons/sbm_purchase/report/report_pbA5.rml" auto="False" menu="True"/>
 
 		<record id="pb_draft" model="mail.message.subtype">
 			<field name="name">Document as Draft</field>
@@ -28,7 +30,6 @@
 			<field name="default" eval="False"/>
 			<field name="res_model">pembelian.barang</field>
 		</record>
-
 
     	<record id="view_pb_tree" model="ir.ui.view">
             <field name="name">pembelian.barang.tree</field>
@@ -55,16 +56,21 @@
             <field name="arch" type="xml">
             	<form string="Regular Requisition New" version="7.0">
             	<header>
-            		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief"/>
-            		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply" />
+            		<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief,purchase.group_purchase_user"/>
             		<button name="setdraft" states="confirm,confirm2" string="Set to Draft" type="object"  icon="gtk-jump-to"/>
-            		<button name="confirm" states="confirm" string="Approve" type="object"   icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager"/>
+            		<button name="confirm" states="confirm" string="Approve" type="object" icon="gtk-apply" groups="sbm_purchase.group_jobdesc_position_dept_manager,purchase.group_purchase_user"/>
             		<button name="confirm2" states="confirm2" string="Validate" type="object"  groups="purchase.group_purchase_manager,purchase.group_purchase_user"  icon="gtk-apply"/>
             		<button name="confirm3" states="edit" string="Update" type="object" />
             		<button name="edit" states="purchase" string="Edit PB" type="object" />
-
             		<button name="action_cancel_item" states="confirm" string="Cancel Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="terp-stock_effects-object-colorize"/>
+            		
+            		<button name="action_reject_pb" states="confirm,confirm2" string="Reject Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="STOCK_CLOSE" confirm="Are you sure to Reject Purchase Requisition"/>
+
             		<button name="%(reportpb)d" states="purchase" string="Print Purchase Requisition" type="action" icon="gtk-print"/>
+
+            		<button name="%(reportpbA5)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition A5" type="action" icon="gtk-print"/>
+
+
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm,confirm2,purchase,done"/>
                 </header>
             		<sheet>
@@ -123,7 +129,6 @@
             </field>
          </record>
 		
-
 		<record id="wizard_pr_cancel_form" model="ir.ui.view">
 			<field name="name">Wizard Cancel Purchase Requisition</field>
 			<field name="model">wizard.pr.cancel.item</field>
@@ -133,19 +138,16 @@
 						<field name="pb_id" readonly="True" />
 					</group>
 					<group>
-						<field name="cancel_reason" />
+						<field name="cancel_reason" string="Cancel / Reject Notes"/>
 					</group>
 					<footer>
-                        <button name="request_cancel" string="Submit" type="object" class="oe_highlight"/>
+                        <button name="request_cancel" string="Cancel/Reject Purchase Requisition" type="object" class="oe_highlight"/>
                         or
                         <button string="Cancel" class="oe_link" special="cancel"/>
                     </footer>
 				</form>
 			</field>
 		</record>
-
-
-
 		
     	<record model="ir.actions.act_window" id="master_pb_list_action">
 			<field name="name">Regular Requisition</field>
@@ -213,7 +215,6 @@
             </field>
          </record>
 
-
 		<record model="ir.actions.act_window" id="master_wizard_list_action">
             <field name="name">Regular Requisition Process</field>
             <field name="res_model">set.po</field>
@@ -258,7 +259,6 @@
 			                <field name="qty_available"/>
 			                <field name="satuan" colspan="4"/>
 			                <field name="state"/>
-
 			            </group>
 			            <div class="oe_clear"/>
                             <field name="keterangan" class="oe_inline" placeholder="Terms and conditions..."/>
@@ -267,14 +267,12 @@
             </field>
         </record>
 
-
-	<record model="ir.actions.act_window" id="master_list_barang_action">
+		<record model="ir.actions.act_window" id="master_list_barang_action">
 			<field name="name">Product List Regular Requisition</field>
 			<field name="res_model">detail.pb</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>			
 		</record>
-
 
 		<record id="view_product_variants_tree" model="ir.ui.view">
             <field name="name">product.variants.tree</field>
@@ -315,5 +313,6 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>			
 		</record>
-    </data>
+
+	</data>
 </openerp>

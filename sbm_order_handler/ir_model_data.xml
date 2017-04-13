@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+		<delete model="workflow.transition" id="sale_stock.trans_router_wait_ship" />
+		
+	</data>
+</openerp>

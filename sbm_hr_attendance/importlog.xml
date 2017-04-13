@@ -6,6 +6,7 @@
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
 				<tree string="import log absen tree">
+					<field name="name" />
 					<field name="machine_id" />
 					<field name="data" />
 				</tree>
@@ -20,10 +21,12 @@
 				<form string="import log absen" version="7.0">
 					<header>
 						<button name="import_uploaded_file" string="Sync" type="object" states="draft" />
+						<button name="cancel_import" string="Cancel" type="object" states="draft" />
 						<field name="state" widget="statusbar" statusbar_visible="draft,done"/>
 					</header>
 					<sheet>
 						<group>
+							<field name="name" />
 							<field name="machine_id" />
 							<field name="data" />
 						</group>
@@ -32,12 +35,28 @@
 			</field>
 		</record>
 
+		<record id="import_attendance_search" model="ir.ui.view">
+            <field name="name">import.attendance.search</field>
+            <field name="model">hr.attendance.import.attendance.log</field>
+            <field name="type">search</field>
+
+            <field name="arch" type="xml">
+                <search string="Attendance">
+                    <group expand="!" string="Synced">
+                        <filter string="Synced" name="synced" icon="terp-check" domain="[('state','=','done')]"/>
+                        <filter string="Draft" name="draft" icon="terp-check" domain="[('state','=','draft')]"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
 		<record model="ir.actions.act_window" id="action_import_log_absen">
 			<field name="name">Import Log Absen</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">hr.attendance.import.attendance.log</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
+			<field name="context">{'search_default_draft':1}</field>
 		</record>
 
 

@@ -1,10 +1,14 @@
 from osv import osv, fields
 from tools.translate import _
+import time
+from ad_account_optimization.report.common_report_header import common_report_header
+from report import report_sxw
 
 class partner(osv.osv):
 	_inherit = ["res.partner","mail.thread"]
 	_name = "res.partner"
 	_columns = {
+			'create_uid': fields.many2one('res.users', 'Creator', required=True, readonly=True),
 			'npwp' : fields.char('No. NPWP', size=20, required=False, help='Misal 01.540.674.7.431-000',track_visibility='onchange'),
 			'name' : fields.char('Name',track_visibility='onchange'),
 			'blok':fields.char('Blok',track_visibility='onchange'),
@@ -50,7 +54,45 @@ class partner(osv.osv):
 
 	def write(self,cr,uid,ids,vals,context={}):
 		cek=self.pool.get('res.partner').search(cr,uid,[('id', '=' ,ids)])
+		user_id=self.pool.get('res.users').search(cr,uid,[('id', '=' ,uid)])
+		# Harus Administrator
+		if 'name' in vals:
+			if uid <> 1: # Yang merubah harus Administrator
+				raise osv.except_osv(('Warning..!!'), ('Please Contact Administrator To Change Customer Name ..'))	
+
+		user_a =self.pool.get('res.partner').browse(cr,uid,user_id)
+		# user_name=self.pool.get('res.users').browse(cr,uid,[('id', '=' ,user_id)])
+
 		for hasil in self.pool.get('res.partner').browse(cr,uid,cek):
+			if 'npwp' in vals:
+				#  Jika dia Supplier Invoice
+				n  = self.pool.get('ir.model.data')
+				# id_group_supplier = n.get_object(cr, uid, 'sbm_inherit', 'group_customer_invoice_admin_creator').id
+				user_group_supplier = self.pool.get('res.groups').browse(cr, uid, 85)
+
+				b = False
+				for x in user_group_supplier.users:
+					if x.id == uid:
+						b = True
+
+				#  Jika dia Admin Invoice
+				m  = self.pool.get('ir.model.data')
+				id_group = m.get_object(cr, uid, 'sbm_inherit', 'group_customer_invoice_admin_creator').id
+				user_group = self.pool.get('res.groups').browse(cr, uid, id_group)
+
+				a = False
+				for x in user_group.users:
+					if x.id == uid:
+						a = True
+
+				print '=============Cek Admin Invoice====',a
+				print '=============Cek Supplier Invoice====',b
+
+				if uid <> 1:
+					if uid <> hasil.create_uid.id: # Jika bukan yang buat
+						if a == False and b == False: # Jika bukan admin invoice
+							raise osv.except_osv(('Warning..!!'), ('Please Contact Creator Customer '+ hasil.name +' To Change Customer NPWP..'))
+
 			if hasil['is_company']==True:
 				# NPWP di awal tidak ada, maka hasilnya False
 				if hasil['npwp']==False:

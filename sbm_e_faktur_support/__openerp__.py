@@ -6,6 +6,8 @@
 		"hr",
 		"account",
 		"product",
+		"ad_account_finance",
+		"sbm_inherit",
 		"sbm_account_invoice_line_tax_amount"
 	],
 	"author": "IT Dev Team @ Suprabakti Mandiri",

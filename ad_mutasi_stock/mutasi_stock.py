@@ -16,7 +16,7 @@ class MutasiStock(osv.osv_memory):
                 'date_to' : fields.date('To'),
                 'data_eksport': fields.binary('File', readonly=True),
                 'name': fields.char('File Name', 16),
-                'report': fields.selection((('del','Delivery Order'), ('inc','Incoming Shipment')), 'Report'),
+                'report': fields.selection((('del','Delivery Order'), ('inc','Incoming Shipment'), (('int','Internal Move'))), 'Report'),
     }   
     
     _defaults = {

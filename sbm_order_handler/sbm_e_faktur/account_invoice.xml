@@ -1,0 +1,35 @@
+<openerp>
+	<data>
+		<record id='sbm_faktur_inherit' model='ir.ui.view'>
+			<field name="name">sbm.faktur.inherit</field>
+			<field name='model'>account.invoice</field>
+			<field name='type'>form</field>
+			<field name='inherit_id' ref='account.invoice_form'/>
+			<field name='arch' type='xml'>
+				<!-- actionInvoiceRefund -->
+				<field name="date_invoice" position="attributes">
+					<attribute name="on_change">onchange_date_invoice(date_invoice,is_tax_replacement,tax_no_2,date_invoice)</attribute>
+					<attribute name="required">"True"</attribute>
+				</field>
+
+				<field name="partner_id" position="attributes">
+					<attribute name="domain">['&amp;',('customer','=', True),'|',('is_company','=',True),('type','=','invoice')]</attribute>
+				</field>
+
+				<field name='journal_id' position='after'>
+					<field name='tax_transaction_type' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,False)"/>
+					
+					<field name='is_tax_replacement' attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'is_tax_replacement')" />
+
+					<field name='tax_no_1' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,'tax_no_1')"/>
+
+					<field name='tax_year' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,tax_year)"/>
+
+					<field name='tax_no_2' required="True" attrs="{'readonly':[('state','not in',['draft'])]}" on_change="onchange_tax_no(date_invoice,tax_transaction_type,is_tax_replacement,tax_no_1,tax_year,tax_no_2,tax_no_2)"/>
+				</field>
+
+			</field>
+		</record>
+
+	</data>
+</openerp>

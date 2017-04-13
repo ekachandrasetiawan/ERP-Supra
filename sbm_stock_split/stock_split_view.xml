@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+<data>
+
+	<record model="ir.ui.view" id="product_view">
+		<field name="name">product.product</field>
+		<field name="model">product.product</field>
+		<field name="type">form</field>
+		<field name="inherit_id" ref="product.product_normal_form_view"/>
+		<field name="arch" type="xml">
+			<xpath expr="//page[@string='Accounting']" position="after">
+				  <page string="Stock Split">
+					  <group>
+						   <field name='split_product_ids'>
+								<form string="STOCK SPLIT" version="7.0">
+									<header>
+										<button name="stock_split_active" states="draft" string="Active" type="object"  icon="gtk-apply" confirm="Are you sure to Active"/>
+
+										<button name="stock_split_inactive" states="active" string="Inactive" type="object"  icon="gtk-apply" confirm="Are you sure to Validate"/>
+
+										<field name="state" widget="statusbar" statusbar_visible="draft,active,inactive"/>
+									</header>
+									<sheet>
+										<group col="4" colspan="4">
+											<field name="item_to_split" colspan="4"/>
+											<field name="item_splited_to" colspan="4"/>
+											<field name="result_qty_fix" colspan="4"/>
+											<field name="split_into_batch" colspan="4"/>
+										</group>
+									</sheet>
+								</form>
+								<tree>
+									<field name="item_to_split"/>
+									<field name="item_splited_to"/>
+									<field name="result_qty_fix"/>
+									<field name="split_into_batch"/>
+									<field name="state"/>
+								</tree>
+						   </field>
+					  </group>
+				 </page>
+			</xpath>
+		</field>
+	</record>
+
+	<record model="ir.ui.view" id="action_stock_split_tree">
+		<field name="name">stock.split.tree</field>
+		<field name="model">stock.split</field>
+		<field name="type">tree</field>
+		<field name="arch" type="xml">
+			<tree string="STOCK SPLIT">
+				<field name="no" colspan="4"/>
+				<field name="date_order"/>
+				<field name="date_done"/>
+				<field name="picking_id"/>
+				<field name="location"/>
+				<field name="state"/>
+			</tree>
+		</field>
+	</record>
+	<record model="ir.ui.view" id="action_stock_split_form">
+		<field name="name">stock.split.form</field>
+		<field name="model">stock.split</field>
+		<field name="type">form</field>
+		<field name="arch" type="xml">
+			<form string="STOCK SPLIT" version="7.0">
+				<header>
+					<button name="stock_split_submited" states="draft" string="Submited" type="object"  icon="gtk-apply" confirm="Are you sure to Submited"/>
+
+					<button name="stock_split_approved" states="submited" string="Approved" type="object"  icon="gtk-apply" confirm="Are you sure to Approved" groups="sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager"/>
+
+					<button name="stock_split_cancel" states="submited" string="Cancel" type="object"  icon="STOCK_CANCEL" confirm="Are you sure to Cancel Stock Split" groups="sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager"/>
+
+	        		<button name="stock_split_set_draft" states="submited" string="Set To Draft" type="object"  icon="gtk-jump-to" confirm="Are you sure to Set To Draft Stock Split" groups="sbm_delivery_note.group_admin_spv,sbm_work_order.group_admin_manager"/>
+
+					<button name="stock_split_processed" states="approved" string="Processed" type="object"  icon="gtk-apply" confirm="Are you sure to Processed" groups="stock.group_stock_user,stock.group_stock_manager,sbm_order_preparation.group_admin_warehouse"/>
+
+					<button name="stock_split_validate" states="processed" string="Validate" type="object"  icon="gtk-apply" confirm="Are you sure to Validate" groups="stock.group_stock_user,stock.group_stock_manager,sbm_order_preparation.group_admin_warehouse"/>
+
+					<button name="print_stock_split" type="object" states="approved,processed,done" string="Print Stock Split" icon="gtk-dnd-multiple"/>
+
+					<field name="state" widget="statusbar" statusbar_visible="draft,submited,approved,processed,done"/>
+				</header>
+				<sheet>
+					<div class="oe_title">
+						<h1>
+							<label string="STOCK SPLIT"/>
+							<separator string=""/>
+							<field name="stock_split_no" class="oe_inline" colspan="4"/>
+						</h1>
+					</div>
+					<group col="4" colspan="4">
+						<field name="date_order"/>
+						<field name="date_done"/>
+						<field name="location"/>
+						<field name="picking_id"/>
+					</group>
+					<notebook colspan="4">
+						<page string="Detail Item">
+							<field name="item_output">
+								<tree string="Detail Item">
+									<field name="product_split_id"/>
+									<field name="qty"/>
+									<field name="uom_id"/>
+									<field name="convert_type"/>
+									<field name="prodlot_id"/>
+								</tree>
+								<form string="Detail Item">
+									<field name="product_split_id" colspan="4" on_change="change_product_split(product_split_id)" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])], 'required':True}"/>
+									<field name="qty" attrs="{'required':True, 'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="uom_id" on_change="change_product_split(product_split_id)" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="convert_type" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="qty_on_results" attrs="{'readonly':[('state', 'in', ['submited','processed','done'])]}"/>
+									<field name="item_to_split_id" invisible="1"/>
+									<field name="state" invisible="1"/>
+										<notebook colspan="4">
+											<page string="Child">
+												<field name="child_ids" nolabel="1" context="{'item_to_split_id':product_split_id}">
+												<!-- <field name="child_ids" nolabel="1" on_change="change_child(child_ids,product_split_id,qty,uom_id)"> -->
+													<tree string="Child" editable="buttom" context="{'item_to_split_id':product_split_id}">
+														<field name="state_child" invisible="1"/>
+														<field name="qty_on_results" invisible="1"/>
+														<field name="product_split_id" invisible="1"/>
+														<field name="item_to_split_id" attrs="{'readonly':[('state_child', 'in', ['submited','processed','done'])]}"/>
+														<field name="item_splited_to_id" attrs="{'readonly':[('state_child', 'in', ['submited','processed','done'])]}"/>
+														<field name="prodlot_id" domain="[('product_id', '=', item_splited_to_id)]" attrs="{'readonly':[('state_child', 'in', ['submited','processed','done'])]}"/>
+														<field name="qty" attrs="{'invisible':[('qty_on_results', '=', True),('state_child', '=', 'draft')],'readonly':[('qty_on_results', '=', False),('state_child', '=', 'processed')], 'required':[('qty_on_results', '=', False)]}"/>
+														<field name="uom_id" attrs="{'readonly':[('state_child', 'in', ['submited','processed','done'])]}"/>
+													</tree>
+												</field>
+											</page>
+										</notebook>
+									
+								</form>
+							</field>
+						</page>
+					</notebook>
+					<div class="oe_clear"/>
+					<field name="notes" class="oe_inline" placeholder="Notes..."/>
+				</sheet>
+				<div class="oe_chatter">
+					<field name="message_follower_ids" widget="mail_followers"/>
+					<field name="message_ids" widget="mail_thread"/>
+				</div>
+			</form>
+		</field>
+	</record>
+
+	<record model="ir.actions.act_window" id="action_stock_split">
+		<field name="name">Stock Split</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">stock.split</field>
+		<field name="view_type">form</field>
+		<field name="view_mode">tree,form</field>
+	</record>
+	
+	<record id="seq_type_stock_split_no_req" model="ir.sequence.type">
+		<field name="name">Stock Split No</field>
+		<field name="code">stock.split.no</field>
+	</record>
+
+	<record id="seq_stock_split_no_req" model="ir.sequence">
+		<field name="name">Stock Split No</field>
+		<field name="code">stock.split.no</field>
+		<field name="padding">4</field>
+	</record>
+
+
+
+	<!-- Log History Button -->
+	<record id="stock_split_submited" model="mail.message.subtype">
+		<field name="name">Stock Split Submited</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">stock.split</field>
+	</record>
+	<record id="stock_split_approved" model="mail.message.subtype">
+		<field name="name">Stock Split Approved</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">stock.split</field>
+	</record>
+
+	<record id="stock_split_processed" model="mail.message.subtype">
+		<field name="name">Stock Split Processed</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">stock.split</field>
+	</record>
+
+	<record id="stock_split_done" model="mail.message.subtype">
+		<field name="name">Stock Split Done</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">stock.split</field>
+	</record>
+	<record id="stock_split_draft" model="mail.message.subtype">
+		<field name="name">Stock Split Set to Draft</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">stock.split</field>
+	</record>
+	<record id="stock_split_cancel" model="mail.message.subtype">
+		<field name="name">Stock Split Cancel</field>
+		<field name="default" eval="False"/>
+		<field name="res_model">stock.split</field>
+	</record>
+
+	<menuitem name="Stock Split" parent="stock.menu_stock_root" id="menu_stock_split" sequence="3" />
+
+	<menuitem name="Stock Split" parent="menu_stock_split" id="menu_stock_split_menu" action="action_stock_split" />
+</data>
+</openerp>

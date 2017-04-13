@@ -8,7 +8,7 @@
 				<field name="arch" type="xml">
 
 					<field name="default_code" position="replace">
-						<field name="default_code" on_change="code_change(default_code)"/>
+						<field name="default_code" on_change="code_change(default_code)" required="True"/>
 					</field>
 					 <xpath expr="//div[@name='buttons']" position="inside">
 					 	<button type="object" name="disable_product" string="Disable Product"  groups="sbm_product.group_product_admin" attrs="{'invisible':[('active','=',False)]}"/>
@@ -66,33 +66,30 @@
 			<field name="name">Product Admin</field>
 		</record>
 
-		<record model="res.groups" id="sbm_work_order.group_admin_support">
-			
-			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
-		</record>
-
 		<record model="res.groups" id="base.group_sale_manager">
-			
 			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
 		</record>
 
 		<record model="res.groups" id="sbm_inherit.group_customer_invoice_admin_supervisor">
-			
 			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
 		</record>
 
-		<record model="res.groups" id="group_rmpsm">
-			<field name="name">RMPSM</field>
-			<field name="category_id" ref="base.module_category_sales_management"/>
-			
-		</record>
+		<record id="product_search_form_view_filter" model="ir.ui.view">
+            <field name="name">product.product.select</field>
+            <field name="model">product.product</field>
+            <field name="type">search</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+                <search string="Product">
+                    <group string="Filter">
+                    	<field name="name" position="replace">
+                    		<field name="name" string="Full Search Product" filter_domain="['|', ('name','ilike', self), '|', ('default_code', 'ilike', self),('partner_code', 'ilike', self)]"/>
+                    	</field>
+                    </group>
+					<newline/>
+				</search>
+            </field>
+        </record> 
 
-		<record model="res.groups" id="group_rmpsm">
-			
-			<field name="implied_ids" eval="[(6,0,[ref('group_product_admin')])]" />
-		</record>
-
-
-		
 	</data>
 </openerp>

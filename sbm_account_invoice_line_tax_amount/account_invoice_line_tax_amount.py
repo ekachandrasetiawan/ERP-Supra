@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 import math
 from osv import osv, fields
@@ -21,7 +22,6 @@ class account_invoice_line_tax_amount(osv.osv):
 		ailta = self.pool.get('account.invoice.line.tax.amount')
 
 		# raise osv.except_osv(_('Error'),_('Error!!!'))
-		print "call Ailta createeeeeeeee-----------------------",vals
 		return ailta.create(cr,uid,vals,context=context)
 
 	def write(self,cr,uid,ids,vals,context={}):

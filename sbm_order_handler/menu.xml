@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+        <!-- Category Admin HO -->
+        <record model="res.groups" id="group_admin_ho">
+        <field name="category_id" ref="base.module_category_sales_management"/>
+            <field name="name">Admin HO</field>
+        </record>
+
+        <record model="res.groups" id="group_admin_warehouse">
+        <field name="category_id" ref="base.module_category_warehouse_management"/>
+            <field name="name">Admin Warehouse</field>
+        </record>
+
+        <record id="base_group_admin_support" model="ir.model.data">
+                <field name="name">group_admin_support</field>
+                <field name="module">base</field>
+                <field name="noupdate">TRUE</field>
+                <field name="display_name">group_admin_support</field>
+                <field name="model">res.groups</field>
+                <field name="res_id" model="res.groups" search="[('id', '=', '61')]"/>
+        </record>
+
+        <record model="res.groups" id="group_admin_manager">
+            <field name="category_id" ref="base.module_category_sales_management"/>
+            <field name="name">Admin Manager</field>
+        </record>
+
+        <record model="res.groups" id="group_admin_workshop">
+        <field name="category_id" ref="base.module_category_sales_management"/>
+            <field name="name">Admin Workshop</field>
+        </record>
+
+        <!-- Menu Sales -->
+        <record id="quotation_history_report_action" model="ir.actions.client">
+            <field name="name">Quotation History</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=sale-order/report-quotation"
+                }
+            </field>
+        </record>
+
+        <menuitem action="quotation_history_report_action" id="quotation_history_tracker_menu" parent="base.next_id_64" sequence="3"  groups="base.group_sale_manager"/>
+
+
+        <record id="summary_quotation_report_action" model="ir.actions.client">
+            <field name="name">Yearly Summary Quotation</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=sale-order/year-summary-quotation"
+                }
+            </field>
+        </record>
+
+        <menuitem action="summary_quotation_report_action" id="summary_quotation_tracker_menu" parent="base.next_id_64" sequence="4"  groups="base.group_sale_manager"/>
+
+        <record id="salesAmount_status_report_action" model="ir.actions.client">
+            <field name="name">SalesAmount Status</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=sale-order/sales-amount-status"
+                }
+            </field>
+        </record>
+
+        <menuitem action="salesAmount_status_report_action" id="salesAmount_status_tracker_menu" parent="base.next_id_64" sequence="5"  groups="base.group_sale_manager"/>
+
+
+        <!-- Menu Warehouse -->
+
+        <record id="reportkpi_report_action" model="ir.actions.client">
+            <field name="name">Delivery Note Summary</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=delivery-note/reportkpi"
+                }
+            </field>
+        </record>
+
+        <menuitem parent="stock.next_id_61" action="reportkpi_report_action" id="menu_reportkpi" sequence="40" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_warehouse,stock.group_stock_manager"/>
+
+
+
+	   <record id="year_summary_kpi_report_action" model="ir.actions.client">
+            <field name="name">Delivery Note Yearly Status</field>
+            <field name="tag">print.out</field>
+            <field name="params">
+                {
+                    "redir":"http://192.168.9.26/OpenPrint/web/index.php?r=delivery-note/year-summary-kpi"
+                }
+            </field>
+        </record>
+
+        <menuitem parent="stock.next_id_61" action="year_summary_kpi_report_action" id="menu_year_summary_kpi" sequence="50" groups="sbm_order_handler.group_admin_ho,sbm_order_handler.group_admin_manager,sbm_order_handler.group_admin_warehouse,stock.group_stock_manager"/>
+
+
+    </data>
+</openerp>

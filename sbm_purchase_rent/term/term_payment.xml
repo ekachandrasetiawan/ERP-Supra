@@ -29,7 +29,7 @@
 			<field name="inherit_id" ref="sbm_purchaseorder.view_po_form_set"/>
 			<field name="arch" type="xml">
 				<field name="origin" position="after">
-					<field name="term_of_payment" />
+					<field name="term_of_payment" required="True" />
 				</field>
 			</field>
 		</record>

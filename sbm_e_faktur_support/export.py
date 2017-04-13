@@ -73,6 +73,11 @@ class acount_invoice(osv.osv):
 				else:
 					res=  True
 
+			# check submit only from draft
+			if d.state!='draft':
+				res = False
+				raise osv.except_osv(_('Error'),_("Hanya bisa mensubmit dokumen yang status awalnya adalah Draft"))
+
 
 		if res:
 			self.write(cr,uid,d.id,{'state':'submited'},context=context)

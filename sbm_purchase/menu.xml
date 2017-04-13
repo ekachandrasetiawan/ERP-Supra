@@ -2,7 +2,22 @@
 <openerp>
 	<data>
 
+		<menuitem id="purchase.menu_procurement_management_inventory" name="Incoming Products" parent="base.menu_purchase_root" sequence="4" groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
 
+        <menuitem id="purchase.menu_procurement_management_invoice" name="Invoice Control" parent="base.menu_purchase_root" sequence="6" 
+        groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
+
+		<menuitem id="purchase_order_menu" name="Purchase Order" parent="base.menu_purchase_root" sequence="2" icon="terp-purchase" groups="purchase.group_purchase_manager,purchase.group_purchase_user"/>
+
+		<menuitem id="purchase_requistion_menu" name="Purchase Requisition" parent="base.menu_purchase_root" sequence="2" groups="group_jobdesc_position_dept_chief,group_jobdesc_position_dept_manager"/>
+
+		<menuitem id="regular_requisition_menu" name="Regular Requisition" parent="purchase_requistion_menu" sequence="1" groups="group_jobdesc_position_dept_chief,group_jobdesc_position_dept_manager" action="master_pb_list_action"/>
+
+		<menuitem id="wizard_reguler_order_menu" groups="base.group_user" name="Create by Regular Requisition" web_icon="static/image/texas.png" parent="purchase_order_menu" action="master_wizard_list_action"/>
+
+		<menuitem name="Product List Regular Requisition" parent="purchase.menu_procurement_management" id="list_barang" action="master_list_barang_action"/>
+
+		<menuitem name="Product Variants" parent="purchase.menu_procurement_management" id="product_variants" action="master_product_variants_action"/>
 
 	</data>
 </openerp>
