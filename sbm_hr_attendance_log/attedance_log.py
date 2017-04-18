@@ -15,6 +15,9 @@ class attencance_log(osv.osv):
 	_inherit = 'hr.attendance.log'
 	_columns ={
 		'date_extra_out': fields.date('Date Extra Out'),
+		'date_extra_in': fields.date('Date Extra In'),
+		'date_in': fields.date('Date In'),
+		'date_out': fields.date('Date Out'),
 	}
 
 	# def unlink(cr, uid, ids, context=None):
