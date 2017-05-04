@@ -282,13 +282,16 @@ class merge_pickings(osv.osv_memory):
 		data = self.browse(cr, uid, ids, context=context)[0]
 		picking_ids = [x.id for x in data['picking_ids']]
 		partner_obj = data['partner_id']
-
+		print data,"=++++++++++++++++++++++"
 		# Valisasi Invoice Picking Cek Po apakah sudah ada Invoice
 		for x in picking_ids:
 			pick =pool_picking.browse(cr,uid,x)
-
-			cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [pick.purchase_id.id])
-			invoice = map(lambda x: x[0], cr.fetchall())
+			invoice = []
+			print pick.purchase_id.id,"::::::::::::::::::"
+			if pick.purchase_id.id:
+				print "AAAAAAAA"
+				cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", [pick.purchase_id.id])
+				invoice = map(lambda x: x[0], cr.fetchall())
 			
 			if invoice:
 				raise osv.except_osv(_('Warning!'),
@@ -365,8 +368,9 @@ class merge_pickings(osv.osv_memory):
 			if add_po_id.index(e) == i
 		]
 
-		for a in add_po_id:
-			cr.execute('insert into purchase_invoice_rel (purchase_id,invoice_id) values (%s,%s)', (a, invoice_id))
+		if data.type=='in':
+			for a in add_po_id:
+				cr.execute('insert into purchase_invoice_rel (purchase_id,invoice_id) values (%s,%s)', (a, invoice_id))
 		
 		for picking in pool_picking.browse(cr, uid, picking_ids, context=context):
 			pool_picking.write(cr, uid, [picking.id], {'invoice_state': 'invoiced', 'invoice_id': invoice_id}) 

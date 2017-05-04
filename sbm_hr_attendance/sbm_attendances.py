@@ -687,8 +687,26 @@ class hr_attendance_log(osv.osv):
 		'notes': fields.text(string="Notes", required=False),
 		'log_time': fields.function(_get_log_time_from_epoch, method=True, string="Log Time", store=True, type="datetime"),
 		'machine_id': fields.many2one('hr.attendance.machine',string='Machine ID',required=True),
+		# di bawah adalah date manual
 		'date_extra_out': fields.date('Date Extra Out'),
+		'date_extra_in': fields.date('Date Extra In'),
+		'date_in': fields.date('Date In'),
+		'date_out': fields.date('Date Out'),
 	}
+
+
+	def update_date_manual(self, cr, uid, ids, date, aksi, context=None):
+
+		date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+		if aksi == 'date_extra_out':
+			date = date - datetime.timedelta(days=1)
+		list_extra_out = self.search(cr,uid,[(aksi,'=',date)], context=context)
+		for eo in list_extra_out:
+			self.write(cr, uid, eo,{aksi:None},context=context)
+		self.write(cr, uid, ids,{aksi:date},context=context)
+
+
+		return {}
 
 	def check_is_log_exists(self,cr,uid,eid,datetime_log,context={}):
 

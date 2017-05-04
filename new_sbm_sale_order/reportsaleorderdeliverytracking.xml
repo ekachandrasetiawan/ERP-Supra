@@ -1,0 +1,54 @@
+<openerp>
+	<data>
+		<record id="tree_order_material_delivery_tracking" model="ir.ui.view">
+			<field name='name'>order material delivery tracking</field>
+			<field name='model'>sale.order.material.line</field>
+			<field name='type'>tree</field>
+			<field name='arch' type='xml'>
+				<tree string="Order Material Delivery Tracking">
+					<field name='name_so' string="So No"/>
+					<field name='product_id' width="10"/>
+					<field name='desc'/>
+					<field name='qty'/>
+					<field name='uom'/>
+					<!-- <field name="shipped_qty"/> -->
+					<!-- <field name="returned_qty"/> -->
+					<!-- <field name="shipped_qty"/> -->
+					<!-- <field name="returned_qty"/> -->
+					
+					<field name='status' string='Status'/>
+				</tree>
+			</field>
+		</record>
+
+	<!-- 	<record model="ir.actions.act_window" id="action_report_material">
+			<field name="name">Action report material</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">sale.order.material.line</field>
+			<field name="view_type">tree</field>
+			<field name="view_mode">tree</field>
+		</record> -->
+
+
+		<record model="ir.actions.act_window" id="action_report_material_line">
+			<field name="name">Report Order Material Delivery Tracking</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">sale.order.material.line</field>
+			<field name="view_type">tree</field>
+			<field name="view_mode">tree</field>
+		</record>
+
+		<!-- <record model="ir.actions.act_window.view" id="tree_order_material">
+	    	<field eval="1" name="sequence"/>
+	    	<field name="view_mode">tree</field>
+	    	<field name="view_id" ref="tree_order_material_delivery_tracking"/>
+	    	<field name="act_window_id" ref="action_report_material_line"/>
+		</record> -->
+	
+
+
+		<menuitem parent="sbm_inherit.sales_report"  name="Order Material Delivery Tracking" id="report_odr_dlv_track" action="action_report_material_line"/>
+			
+	
+	</data>
+</openerp>
