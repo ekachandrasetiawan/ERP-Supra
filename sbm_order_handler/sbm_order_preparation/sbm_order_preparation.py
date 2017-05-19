@@ -784,8 +784,11 @@ class order_preparation_line(osv.osv):
 	}
 
 	def change_item(self, cr, uid, ids, item, context={}):
-		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
-		return {'value':{'product_uom':product.uom_id.id}}
+		if item:
+			product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+			return {'value':{'product_uom':product.uom_id.id}}
+		else:
+			return False
 
 	def check_item_material(self, cr, uid, ids, item, context={}):
 
