@@ -49,7 +49,7 @@
         <field name="inherit_id" ref="ad_sales_project.view_sale_order_project" />
         <field name="arch" type="xml">
         	<xpath expr="//button[@name='action_button_confirm']" position="replace">
-				<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager,base.group_sale_salesman_all_leads,base.group_user" icon="STOCK_APPLY" confirm="Are you sure to Confirm Document RFQ"/>
+				<button name="action_button_confirm" states="draft,sent" string="Confirm Sale" type="object" groups="base.group_sale_manager,base.group_admin_support,sbm_inherit.group_sales_admin_regional,sbm_order_handler.group_admin_ho" icon="STOCK_APPLY" confirm="Are you sure to Confirm Document RFQ"/>
 		    </xpath>
         </field>
     	</record>
