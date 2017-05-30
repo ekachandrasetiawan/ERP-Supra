@@ -698,12 +698,12 @@ class hr_attendance_log(osv.osv):
 	def update_date_manual(self, cr, uid, ids, date, aksi, context=None):
 
 		date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-		if aksi == 'date_extra_out':
-			date = date - datetime.timedelta(days=1)
+		# if aksi == 'date_extra_out':
+		# 	date = date - datetime.timedelta(days=1)
 		list_extra_out = self.search(cr,uid,[(aksi,'=',date)], context=context)
-		for eo in list_extra_out:
-			self.write(cr, uid, eo,{aksi:None},context=context)
-		self.write(cr, uid, ids,{aksi:date},context=context)
+		# for eo in list_extra_out:
+		self.write(cr, uid, ids, {'date_extra_out':None, 'date_extra_in':None, 'date_in':None, 'date_out':None},context=context)
+		self.write(cr, uid, ids, {aksi:date},context=context)
 
 
 		return {}
