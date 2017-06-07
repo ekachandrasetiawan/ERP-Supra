@@ -22,7 +22,7 @@
 							        </tree>
 							    </field>
 							</page>
-							</notebook>						
+							</notebook>
 						</sheet>
 						<footer>
 							<button name='action_open_state' type='object' string='Submit' confirm="Are you sure to Open State Document Sale Order" />
