@@ -1,1 +1,2 @@
 import inherit
+import wizard_packing_notes
