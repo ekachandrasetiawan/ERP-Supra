@@ -93,6 +93,11 @@
 		   	    	<button name="%(sbm_purchase.reportpb)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition" type="action" icon="gtk-print" groups="sbm_purchase.group_jobdesc_position_dept_chief,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
 		   	    </xpath>
 
+		   	    <xpath expr="//button[@string='Print Purchase Requisition A5']" position="replace">
+		   	    	<button name="%(sbm_purchase.reportpbA5)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition A5" type="action" icon="gtk-print" groups="sbm_purchase.group_jobdesc_position_dept_chief,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
+		   	    </xpath>
+
+
 		   	    <xpath expr="//button[@name='submit']" position="replace">
 		   	    	<button name="submit" states="draft" string="Submit" type="object"  icon="gtk-apply"  groups="sbm_purchase.group_jobdesc_position_dept_chief,purchase.group_purchase_user,base.group_admin_support,sbm_order_handler.group_admin_ho,sbm_inherit.group_sales_admin_regional"/>
 		   	    </xpath>

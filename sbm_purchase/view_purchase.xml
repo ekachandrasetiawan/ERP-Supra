@@ -4,6 +4,9 @@
 		 <report id="reportpb" string="Report" model="pembelian.barang" name="print.pb"
         rml="addons/sbm_purchase/report/report_pb.rml" auto="False" menu="True"/>
 
+		 <report id="reportpbA5" string="Report" model="pembelian.barang" name="print.pb.A5"
+        rml="addons/sbm_purchase/report/report_pbA5.rml" auto="False" menu="True"/>
+
 		<record id="pb_draft" model="mail.message.subtype">
 			<field name="name">Document as Draft</field>
 			<field name="default" eval="False"/>
@@ -64,6 +67,10 @@
             		<button name="action_reject_pb" states="confirm,confirm2" string="Reject Purchase Requisition" type="object" groups="sbm_purchase.group_jobdesc_position_dept_chief" icon="STOCK_CLOSE" confirm="Are you sure to Reject Purchase Requisition"/>
 
             		<button name="%(reportpb)d" states="purchase" string="Print Purchase Requisition" type="action" icon="gtk-print"/>
+
+            		<button name="%(reportpbA5)d" states="confirm,confirm2,purchase" string="Print Purchase Requisition A5" type="action" icon="gtk-print"/>
+
+
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirm,confirm2,purchase,done"/>
                 </header>
             		<sheet>

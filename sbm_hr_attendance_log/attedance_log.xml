@@ -55,7 +55,51 @@
             </field>
         </record>
 
-		
+		<record id='inherit_tree_attendance_log' model='ir.ui.view'>
+			<field name="name">inherit tree attendance log</field>
+			<field name='model'>hr.attendance.log</field>
+			<field name='type'>tree</field>
+			<field name='inherit_id' ref='sbm_hr_attendance.sbm_attendance_log_tree'/>
+			<field name='arch' type='xml'>
+				<field name='name' position='replace'>
+				</field>
+				<field name='m_status' position='replace'>
+				</field>
+				<field name='m_work_code' position='replace'>
+				</field>
+				<field name='manual_reason_id' position='replace'>
+				</field>
+				<!-- <field name='state' position='replace'> -->
+				<!-- </field> -->
+
+
+				
+			</field>
+		</record>
+
+		<record id='inherit_form_attendance_log' model='ir.ui.view'>
+			<field name="name">inherit form attendance log</field>
+			<field name='model'>hr.attendance.log</field>
+			<field name='type'>form</field>
+			<field name='inherit_id' ref='sbm_hr_attendance.sbm_attendance_log_form'/>
+			<field name='arch' type='xml'>
+				<field name='name' position='replace'>
+				</field>
+				<field name='m_status' position='replace'>
+				</field>
+				<field name='m_work_code' position='replace'>
+				</field>
+				<field name='manual_reason_id' position='replace'>
+				</field>
+				<field name='manual_log_time' position='replace'>
+				</field>
+				<field name='state' position='replace'>
+				</field>
+
+
+				
+			</field>
+		</record>
 
 	</data>
 </openerp>

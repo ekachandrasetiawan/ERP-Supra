@@ -26,10 +26,10 @@
 				<button name='actionInvoiceRefund' position='replace'>
 				</button> -->
 				<!-- </xpath> -->
-				<field name='kwitansi' position='replace'>
-				</field>
-				<field name='faktur_pajak_no' position='replace'>
-				</field>
+				<!-- <field name='kwitansi' position='replace' /> -->
+				
+				<!-- <field name='faktur_pajak_no' position='replace'>
+				</field> -->
 				
 
 				<field name='journal_id' position='after'>

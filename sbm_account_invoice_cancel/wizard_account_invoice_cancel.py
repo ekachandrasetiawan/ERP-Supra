@@ -15,7 +15,7 @@ class wizard_acount_invoice(osv.osv_memory):
 		'cancel_reason':fields.text("Cancel Reason", required=True),
 		'cancel_stage':fields.many2one('sbmcancel',string="Cancel Stage", required=False)
 	}
-	def confirm_cancel(self,cr,uid,ids,context={}):
+	def confirm_(self,cr,uid,ids,context={}):
 		print context,'context----'
 		res = {}
 
@@ -24,7 +24,7 @@ class wizard_acount_invoice(osv.osv_memory):
 		print ids,"======================================",datas
 		
 		# udpate account_invoice set cancel_reason='', cancel_stage='' where account_invoice.id=id
-		self.pool.get('account.invoice').write(cr,uid,context['active_id'],{'cancel_reason':datas.cancel_reason,'cancel_stage':datas.cancel_stage.id,'state':'cancel'},context=context)
+		# self.pool.get('sale.order').write(cr,uid,context['active_id'],{'cancel_reason':datas.cancel_reason,'cancel_stage':datas.cancel_stage.id,'state':'cancel'},context=context)
 		# print datas.cancel_reason
 
 

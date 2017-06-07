@@ -643,7 +643,7 @@ class order_preparation(osv.osv):
 						for batch in x.prodlot_id:
 							prodlot_browse = self.pool.get('stock.production.lot').browse(cr, uid, batch.name.id, context=context)
 							stock_batch = prodlot_browse.stock_available
-							_logger.error(('Tesss---------------------',batch.qty,'--',stock_batch, context, prodlot_browse))
+
 							if batch.qty > stock_batch:
 								stock = ' ' + str(stock_batch) + ' '
 								msg = 'Stock Product' + prodlot_browse.product_id.name_template + ' '+batch.name.name+' Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
@@ -651,11 +651,35 @@ class order_preparation(osv.osv):
 								return False
 					else:
 						raise openerp.exceptions.Warning("Please select batch")
-				else:
-					if x.product_qty > product.qty_available:
+
+					# Validasi Stock Product Count
+
+					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('product_id', '=', x.product_id.id), ('preparation_id','=',ids)])
+					data_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
+
+					count_qty_line = 0
+					for line in data_line:
+						count_qty_line += line.product_qty
+
+					if count_qty_line > product.qty_available:
 						mm = ' ' + product.default_code + ' '
 						stock = ' ' + str(product.qty_available) + ' '
-						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock + '. Permintaan = '+ count_qty_line+' available = '+ product.qty_available
+						raise openerp.exceptions.Warning(msg)
+						return False
+				else:
+					op_line = self.pool.get('order.preparation.line').search(cr, uid, [('product_id', '=', x.product_id.id), ('preparation_id','=',ids)])
+					data_line = self.pool.get('order.preparation.line').browse(cr, uid, op_line)
+
+					count_qty_line = 0
+					for line in data_line:
+						count_qty_line += line.product_qty
+
+					if count_qty_line > product.qty_available:
+						mm = ' ' + product.default_code + ' '
+						stock = ' ' + str(product.qty_available) + ' '
+						# msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock 
+						msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' On Hand Qty '+ stock + '. Permintaan = '+ str(count_qty_line)+' available = '+ str(product.qty_available)
 						raise openerp.exceptions.Warning(msg)
 						return False
 
@@ -669,7 +693,7 @@ class order_preparation(osv.osv):
 						for line_batch in x.prodlot_id:
 							qty_bacth += line_batch.qty
 
-						if qty_bacth < qty_note_line:
+						if qty_bacth < qty_note_line or qty_bacth > qty_note_line:
 							raise osv.except_osv(('Warning..!!'), ('Please Check Qty Product Bacth'))
 					else:
 						raise osv.except_osv(('Warning..!!'), ('Please Input Batch Product'))
@@ -760,8 +784,11 @@ class order_preparation_line(osv.osv):
 	}
 
 	def change_item(self, cr, uid, ids, item, context={}):
-		product = self.pool.get('product.product').browse(cr, uid, item, context=None)
-		return {'value':{'product_uom':product.uom_id.id}}
+		if item:
+			product = self.pool.get('product.product').browse(cr, uid, item, context=None)
+			return {'value':{'product_uom':product.uom_id.id}}
+		else:
+			return False
 
 	def check_item_material(self, cr, uid, ids, item, context={}):
 
@@ -814,11 +841,7 @@ class WizardOrderPreparation(osv.osv_memory):
 	}
 
 	def _getNotes(self,cr,uid,ids,context=None):
-		body = """\
-			<html>
-			<head></head>
-			<body>
-				<table border="0">
+		body = """<table border="0">
 					<tr>
 						<td width="100"></td>
 						<td width="200">MEASUREMENT</td>
@@ -844,10 +867,7 @@ class WizardOrderPreparation(osv.osv_memory):
 						<td width="200"></td>
 						<td width="100"></td>
 					</tr>
-				</table>
-			</body>
-			</html>
-		"""
+				</table>"""
 		return body
 
 	_rec_name="op_id"

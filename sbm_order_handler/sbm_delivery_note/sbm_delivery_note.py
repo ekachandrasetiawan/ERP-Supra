@@ -126,20 +126,20 @@ class delivery_note(osv.osv):
 		res = {}
 		self._getRequestDocNo(cr, uid, ids, field_name,args,context={})
 		for item in self.browse(cr,uid,ids,context=context):
-			if val.state == 'draft':
-				if val.name:
-					RequestNo = val.name
+			if item.state == 'draft':
+				if item.name:
+					RequestNo = item.name
 				else:
 					RequestNo = '/'
 			else:
-				if val.seq_no:
-					RequestNo = val.seq_no+val.request_doc_no
+				if item.seq_no:
+					RequestNo = item.seq_no+item.request_doc_no
 				else:
 					# jika dn lama jika name sudah ada maka pasti name = nomor DN
-					if val.name != '/' and val.name.strip() != '':
-						RequestNo = val.name
+					if item.name != '/' and item.name.strip() != '':
+						RequestNo = item.name
 						# set up seq_no = name[:6]
-						self.write(cr, uid, ids, {'seq_no':val.name[:6]})
+						self.write(cr, uid, ids, {'seq_no':item.name[:6]})
 					else:
 						raise osv.except_osv(_('Error'), _("Failed to update name code on Delivery Note,, Please Contat System Administrator!"))
 			res[item.id] = RequestNo
@@ -191,14 +191,24 @@ class delivery_note(osv.osv):
 			if val.prepare_id.location_id.id:
 				loc = val.prepare_id.location_id.id
 
+			note_line_ids = self.pool.get('delivery.note.line').search(cr, uid, [('note_id','=',ids)])
+			
 			for line in val.note_lines:
 				for x in line.note_lines_material:
 					if not context:
 						context = {}
-						
+					
 					context['location'] = loc
 					context['location_id'] = loc
 					product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
+
+					dn_line = self.pool.get('delivery.note.line.material').search(cr, uid, [('product_id', '=', x.product_id.id), ('note_line_id','in',note_line_ids)])
+					data_line = self.pool.get('delivery.note.line.material').browse(cr, uid, dn_line)
+
+					count_qty = 0
+					for l in data_line:
+						count_qty += l.qty
+
 					if product.not_stock == False:
 						if x.prodlot_id:
 							prodlot = self.pool.get('stock.production.lot').browse(cr, uid, x.prodlot_id.id, context=context)
@@ -207,8 +217,16 @@ class delivery_note(osv.osv):
 								stock = ' ' + str(prodlot.stock_available) + ' '
 								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
 								raise openerp.exceptions.Warning(msg)
+
+							if count_qty > product.qty_available:
+								mm = ' ' + product.default_code + ' '
+								stock = ' ' + str(product.qty_available) + ' '
+								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
+
+								raise openerp.exceptions.Warning(msg)
 						else:
-							if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
+							# if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
+							if count_qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
 								mm = ' ' + product.default_code + ' '
 								stock = ' ' + str(product.qty_available) + ' '
 								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
@@ -405,6 +423,7 @@ class delivery_note(osv.osv):
 									'location_id':dline.picking_location.id,
 									'op_line_id':dopline.id
 									}))
+
 
 				line.append((0,0,{
 					'no': y.sequence,
@@ -1030,7 +1049,7 @@ class delivery_note_line(osv.osv):
 
 	def _get_refunded_item(self,cr,uid,ids,field_name,arg,context={}):
 
-		return False
+		return 0
 
 	_inherit = "delivery.note.line"
 	_columns = {
@@ -1043,8 +1062,7 @@ class delivery_note_line(osv.osv):
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=True),
 		'note_line_return_ids': fields.many2many('stock.move','delivery_note_line_return','delivery_note_line_id',string="Note Line Returns"),
-		
-		'state':fields.related('note_id', 'state', type='selection', store=False, string='State'),
+		'state':fields.related('note_id', 'state', type='char',relation='delivery.note', store=False, string='State'),
 		'note_lines_material': fields.one2many('delivery.note.line.material', 'note_line_id', 'Note Lines Material', readonly=False),
 		'sale_line_id': fields.many2one('sale.order.line',required=True, string="Sale Line"),
 	}
@@ -1096,7 +1114,8 @@ class delivery_note_line_material(osv.osv):
 		'op_line_id':fields.many2one('order.preparation.line','OP Line',required=False),
 		'note_line_material_return_ids': fields.many2many('stock.move','delivery_note_line_material_return','delivery_note_line_material_id',string="Note Line Material Returns"),
 		'refunded_item': fields.function(_get_refunded_item, string='Refunded Item', store=False),
-		'state': fields.related('note_line_id','state', type='selection', relation='delivery.note.line', string='State'),
+		'state': fields.related('note_line_id','state', type='char', relation='delivery.note.line', string='State'),
+		'note_id': fields.related('note_line_id','note_id', type='many2one', relation='delivery.note', string="Doc NO"),
 	}
 
 	_rec_name = 'product_id';

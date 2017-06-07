@@ -261,6 +261,21 @@ class Pembelian_Barang(osv.osv):
 			'datas': datas,
 			}
 
+
+	def reportpbA5(self, cr, uid, ids, context=None):
+		if context is None:
+			context = {}
+		datas = {'ids': context.get('active_ids', [])}
+		datas['model'] = 'pembelian.barang'
+		datas['form'] = self.read(cr, uid, ids)[0]
+		
+		return {
+			'type': 'ir.actions.report.xml',
+			'report_name': 'print.pb.A5',
+			'report_type': 'webkit',
+			'datas': datas,
+			}
+
 	def send_email(self, cr, uid, ids, pb_id, subject, email_to, partner_id, body, context=None):
 		val = self.browse(cr, uid, ids)[0]
 		mail_mail = self.pool.get('mail.mail')
@@ -396,7 +411,7 @@ class WizardPRCancelItem(osv.osv_memory):
 				template_email = self.template_email_reject(cr, uid, ids, data.pb_id.employee_id.name, data.pb_id.name, data.cancel_reason, context={})
 				send_email = obj_pb.send_email(cr, uid, ids, data.pb_id.id, subject, email_to, partner_id, template_email, context={})
 
-			if send_email == True:
+			if email_to and send_email == True:
 				lines = self.pool.get('detail.pb').search(cr, uid, [('detail_pb_id', '=', data.pb_id.id)])
 				dp = self.pool.get('detail.pb').browse(cr, uid, lines)
 				for x in dp:
@@ -698,16 +713,23 @@ class Set_PO(osv.osv):
 										'term_of_payment':payment_term
 									   })
 		noline=1
-		for line in val.permintaan:
+		pb_line_id = []
+		for x in val.permintaan:
+			pb_line_id += [int(x.id)]
+
+		# for line in val.permintaan:
+		for l in sorted(pb_line_id):
+			line = self.pool.get('detail.pb').browse(cr, uid, l, context=None)
 			taxes = account_tax.browse(cr, uid, map(lambda line: line.id, line.name.supplier_taxes_id))
 			fpos = fiscal_position_id and account_fiscal_position.browse(cr, uid, fiscal_position_id, context=context) or False
 			taxes_ids = account_fiscal_position.map_tax(cr, uid, fpos, taxes)
+
 			obj_purchase_line.create(cr, uid, {
 										 'no':noline,
 										 'date_planned': time.strftime("%Y-%m-%d"),
 										 'order_id': sid,
 										 #'pb_id': products[line]['name'],
-										 # 'pb_id': line.detail_pb_id.id,
+										 #'pb_id': line.detail_pb_id.id,
 										 'product_id': line.name.id,
 										 'variants':line.variants.id,
 										 'name':line.name.name,
@@ -720,7 +742,7 @@ class Set_PO(osv.osv):
 										 'taxes_id': [(6,0,taxes_ids)],
 										 })
 			noline=noline+1
-
+			
 		# purchase ==> Nama Module nya purchase_order_form ==> Nama Id Form nya
 		pool_data=self.pool.get("ir.model.data")
 		if jenis in ['impj','imps']:

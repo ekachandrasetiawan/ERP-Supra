@@ -201,6 +201,7 @@
 					<header>
 						<field name="state" widget="statusbar" />
 						<button name="confirmRequest" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Confirm Request ?" />
+						<button name="SetDraft" type="object" string="Set To Draft" icon="gtk-jump-to" states="confirmed,onprocess,done" confirm="Are You Sure To Set to Draft" />
 					</header>
 					<sheet>
 						<group col="4" colspan="4">
@@ -258,7 +259,7 @@
 							<field name="no" attrs="{'readonly':[('state','not in',['draft','confirmed'])]}" />
 							<field name="product_id" on_change="on_change_product(product_id)" attrs="{'readonly':[('state','!=','draft')]}"/>
 							<field name="qty" attrs="{'readonly':[('state','!=','draft')]}"/>
-							<field name="uom_id" attrs="{'readonly':[('state','!=','draft')]}"/>
+							<field name="uom_id" readonly="1"/>
 							<field name="desc" attrs="{'readonly':[('state','!=','draft')]}" />
 
 							

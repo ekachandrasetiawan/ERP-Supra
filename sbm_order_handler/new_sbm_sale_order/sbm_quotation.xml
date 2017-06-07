@@ -749,7 +749,7 @@
 								<field name="partner_invoice_id" options="{&quot;always_reload&quot;: True}" domain="[('parent_id', '=', partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice','default_type':'delivery','search_default_customer':1, 'show_address': 1,'address_invoice':1}" attrs="{'readonly':[('quotation_state','not in',['draft','confirmed'])]}"/>
 							</group>
 						<group>
-							<field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)" attrs="{'readonly':[('quotation_state','not in',['draft','confirmed'])]}"/>>
+							<field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)" attrs="{'readonly':[('quotation_state','not in',['draft','confirmed'])]}"/>
 
 							<field name="date_order" on_change="onchange_dateorder(date_order)" attrs="{'readonly':[('quotation_state','not in',['draft','confirmed'])]}"/>
 

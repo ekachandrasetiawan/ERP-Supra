@@ -73,7 +73,7 @@ class ReportPB(report_sxw.rml_parse):
 					part_no = "\r\n\r\n"+x.name.default_code
 
 				if len(part_no) > 10:
-					part_no = "\r\n\r\n"+x.part_no
+					part_no = "\r\n\r\n"+part_no
 
 			keterangan =  x.keterangan
 			if x.keterangan and len(x.keterangan)>64:
@@ -87,3 +87,4 @@ class ReportPB(report_sxw.rml_parse):
 		return res
 
 report_sxw.report_sxw('report.print.pb', 'pembelian.barang', 'addons/sbm_purchase/report/report_pb.rml', parser = ReportPB, header = False)
+report_sxw.report_sxw('report.print.pb.A5', 'pembelian.barang', 'addons/sbm_purchase/report/report_pbA5.rml', parser = ReportPB, header = False)

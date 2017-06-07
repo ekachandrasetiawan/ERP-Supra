@@ -12,6 +12,10 @@ from openerp.tools.translate import _
 from osv import osv, fields
 from xml.etree import ElementTree as ET
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class hr_attendance_type(osv.osv):
 	_name = 'hr.attendance.type'
@@ -418,29 +422,35 @@ class hr_attendance_machine(osv.osv):
 		dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'sbm_users', 'group_using_public_ip_address')
 		groupBrowse = self.pool.get('res.groups').browse(cr,uid,view_id,context=context)
 
-		employee = userBrowse.employee_ids[0]
-		work_addr = employee.address_id.id
+		# _logger.error((">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",userBrowse.employee_ids))
+		employee = False
+		for emp in userBrowse.employee_ids:
+			employee = userBrowse.employee_ids[0]
+		if employee:
+			work_addr = employee.address_id.id
 
-		for usergroup in groupBrowse.users :
-			if usergroup.id == uid:
-				searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
-				browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
-				url = str(browseConf.value)
+			for usergroup in groupBrowse.users :
+				if usergroup.id == uid:
+					searchConfSite = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print.public')], context=context)
+					browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConfSite,context=context)[0]
+					url = str(browseConf.value)
 
-		if work_addr:			
-			urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
-		else :			
-			urlTo = url+"attendance/first-and-last-scan"
-		
-		return {
-			'type'	: 'ir.actions.client',
-			'target': 'new',
-			'tag'	: 'print.out',
-			'params': {
-				# 'id'	: ids[0],
-				'redir'	: urlTo
-			},
-		}
+			if work_addr:			
+				urlTo = url+"attendance/first-and-last-scan&site="+str(work_addr)
+			else :			
+				urlTo = url+"attendance/first-and-last-scan"
+			
+			return {
+				'type'	: 'ir.actions.client',
+				'target': 'new',
+				'tag'	: 'print.out',
+				'params': {
+					# 'id'	: ids[0],
+					'redir'	: urlTo
+				},
+			}
+		else:
+			raise osv.except_osv(_('Employee Null!'),_('You must be an Employee to access the page!'))
 		return res
 
 	def openprint_min_max_site(self,cr,uid,ids,context={}):
@@ -677,8 +687,26 @@ class hr_attendance_log(osv.osv):
 		'notes': fields.text(string="Notes", required=False),
 		'log_time': fields.function(_get_log_time_from_epoch, method=True, string="Log Time", store=True, type="datetime"),
 		'machine_id': fields.many2one('hr.attendance.machine',string='Machine ID',required=True),
+		# di bawah adalah date manual
 		'date_extra_out': fields.date('Date Extra Out'),
+		'date_extra_in': fields.date('Date Extra In'),
+		'date_in': fields.date('Date In'),
+		'date_out': fields.date('Date Out'),
 	}
+
+
+	def update_date_manual(self, cr, uid, ids, date, aksi, context=None):
+
+		date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+		# if aksi == 'date_extra_out':
+		# 	date = date - datetime.timedelta(days=1)
+		list_extra_out = self.search(cr,uid,[(aksi,'=',date)], context=context)
+		# for eo in list_extra_out:
+		self.write(cr, uid, ids, {'date_extra_out':None, 'date_extra_in':None, 'date_in':None, 'date_out':None},context=context)
+		self.write(cr, uid, ids, {aksi:date},context=context)
+
+
+		return {}
 
 	def check_is_log_exists(self,cr,uid,eid,datetime_log,context={}):
 

@@ -1576,6 +1576,23 @@ class InternalMoveRequest(osv.osv):
 		'lines':fields.one2many('internal.move.request.line','internal_move_request_id',string="Items Request"),
 	}
 
+	def SetDraft(self, cr, uid, ids, context=None):
+		val = self.browse(cr, uid, ids)[0]
+		internal_move = self.pool.get('internal.move')
+
+		cek = internal_move.search(cr,uid,[('internal_move_request_id', '=' ,ids)])
+
+		if cek:
+			data = internal_move.browse(cr, uid, cek, context=None)
+			for x in data:
+				if x.state == 'cancel' or x.state == 'draft':
+					return self.write(cr,uid,ids,{'state':'draft'})
+				else:
+					raise osv.except_osv(('Information !!!'), ('Please Cancel or Set to Draft Internal Move '+ x.name ))
+		else:
+			return self.write(cr,uid,ids,{'state':'draft'})
+
+		return True
 
 	def _getUID(self,cr,uid,ids,context=None):
 		return uid
@@ -1616,7 +1633,7 @@ class InternalMoveRequestLine(osv.osv):
 	def _getProcessedItem(self,cr,uid,ids,field_name,args,context={}):
 		res={}
 
-		query = "SELECT SUM(a.qty) AS total FROM internal_move_line AS a JOIN internal_move as b ON a.internal_move_id = b.id WHERE a.internal_move_request_line_id = %s AND b.state not in ('cancel')"
+		query = "SELECT SUM(a.qty) AS total FROM internal_move_line AS a JOIN internal_move as b ON a.internal_move_id = b.id WHERE a.internal_move_request_line_id = %s AND b.state not in ('cancel','draft')"
 		for tid in ids:
 			cr.execute(query,[tid])
 			theRes = cr.fetchone()
@@ -1706,8 +1723,6 @@ class InternalMove(osv.osv):
 		return res
 	# to load internal move line detail automatic by detecting product is has set phantom bom
 	def _loadLineDetail(self,cr,uid,line):
-
-		
 		mrp = self.checkSet(cr,uid,line.product_id)
 		res = []
 		if mrp:
@@ -2192,8 +2207,9 @@ class InternalMove(osv.osv):
 				# jika found di current_lines
 				current_processed = 0.0
 				for found_line in self.pool.get('internal.move.line').browse(cr, uid, in_current_lines, context=context):
-					current_processed += found_line.qty
-
+					if val.state in ["confirmed", "checked","ready","transfered","done"]:
+						current_processed += found_line.qty
+						
 				qty = qty+current_processed
 
 			if qty>0:
