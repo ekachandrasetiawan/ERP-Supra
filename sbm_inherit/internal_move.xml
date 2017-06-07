@@ -147,6 +147,33 @@
 			<field name="padding">4</field>
 		</record>
 
+		<!-- Fungsi menampilkan wizard untuk mengisi Notes ketika state akan berubah ke Ready   -->
+		<record id="packing_notes_wizard" model='ir.ui.view'>
+			<field name='name'>packing.notes.wizard</field>
+			<field name='model'>wizard.packing.notes</field>
+			<field name='type'>form</field>
+			<field name='arch' type='xml'>
+					<form string='Packing Notes' version='7.0'>
+						<sheet>
+							<field name='im_id' invisible="True"/>
+							<field name='packing_notes' required="True"/>
+						</sheet>
+						<footer>
+							<button name='action_packing_notes' type='object' string='Submit'/>
+						</footer>
+					</form>
+			</field>
+		</record>
+
+		<record model='ir.actions.act_window' id="wizard_packing_notes_form">
+			<field name="name">wizard.packing.notes.form</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">wizard.packing.notes</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="packing_notes_wizard"/>
+			<field name="target">new</field>
+		</record>
 
 		<record id="internal_move_request_tree" model="ir.ui.view">
 			<field name="name">internal.move.request.tree</field>
@@ -314,7 +341,8 @@
 
 						<button name="setAsDraftInternalMove" type="object" string="Set to Draft" icon="gtk-apply" states="confirmed,ready,checked" confirm="Are You Sure to set This Document to Draft ? If this confirmed then the confirmed process will be closed and stock will be refunded!" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
-						<button name="setAsReady" type="object" string="Ready To Deliver" icon="gtk-apply" states="checked" confirm="Sure ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+						<!-- <button name="setAsReady" type="object" string="Ready To Deliver" icon="gtk-apply" states="checked" confirm="Sure ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" /> -->
+						<button name='%(wizard_packing_notes_form)d' type="action" string="Ready To Deliver" states="checked" icon="gtk-apply" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager"/>
 
 						<button name="transferMove" type="object" string="Transfer Move" icon="gtk-apply" states="ready" confirm="Sure ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
@@ -368,6 +396,7 @@
 							</field>
 
 							<field name="notes"/>
+							<field name="packing_notes" attrs="{'invisible':[('state','not in',['ready','transfered','done'])]}" readonly="1"/>
 
 							<!-- <field name="detail_ids">
 								<tree string="Details">
