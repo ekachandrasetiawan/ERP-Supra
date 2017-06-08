@@ -1944,7 +1944,7 @@ class InternalMove(osv.osv):
 			tid = self.browse(cr, uid, pre_data.id, context=context)
 			if self._finalyCheckQty(cr, uid, tid, context=context):
 				pick.action_assign(cr, uid,  [tid.picking_id.id])
-				tid.write({'state':'ready', 'date_prepared':time.strftime('%Y-%m-%d')})
+				tid.write({'state':'ready', 'date_prepared':time.strftime('%Y-%m-%d'), 'packing_notes':context['packing_notes']})
 		return res
 
 
@@ -2097,6 +2097,7 @@ class InternalMove(osv.osv):
 		'manual_pb_no':fields.char('PB No',required=False),
 		'ref_no':fields.char('Ref No',required=False),
 		'notes':fields.text('Notes',required=False),
+		'packing_notes':fields.text('Packing Notes',required=False),
 		# 'internal_move_line_detail_ids':fields.one2many()
 	}
 
