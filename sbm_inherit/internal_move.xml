@@ -334,27 +334,26 @@
 				<form string="Internal Move Form" version="7.0">
 					<header>
 						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,checked,ready,transfered,done" />
-						<button name="confirmInternalMove" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_set,sbm_inherit.group_im_confirmer" />
+						<button name="confirmInternalMove" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_set,sbm_inherit.group_im_confirmer,sbm_order_handler.group_admin_ho"/>
 
 						<button name="action_reload_line" type="object" string="Reload" icon="STOCK_REFRESH" states="draft" groups="base.group_no_one" />
 
-						<button name="checkedInternalMove" type="object" string="Checked" icon="gtk-apply" states="confirmed" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
+						<button name="checkedInternalMove" type="object" string="Checked" icon="gtk-apply" states="confirmed" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_order_handler.group_admin_ho" />
 
 						<button name="setAsDraftInternalMove" type="object" string="Set to Draft" icon="gtk-apply" states="confirmed,ready,checked" confirm="Are You Sure to set This Document to Draft ? If this confirmed then the confirmed process will be closed and stock will be refunded!" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
 						<!-- <button name="setAsReady" type="object" string="Ready To Deliver" icon="gtk-apply" states="checked" confirm="Sure ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" /> -->
-						<button name='%(wizard_packing_notes_form)d' type="action" string="Ready To Deliver" states="checked" icon="gtk-apply" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager"/>
+						<button name='%(wizard_packing_notes_form)d' type="action" string="Ready To Deliver" icon="gtk-apply" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" attrs="{'invisible':['|',('print_delivery_count','=',0),('state','!=','checked')]}"/>
 
-						<button name="transferMove" type="object" string="Transfer Move" icon="gtk-apply" states="ready" confirm="Sure ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
+						<button name="transferMove" type="object" string="Transfer Move" icon="gtk-apply" states="ready" confirm="Sure ?" groups="sbm_inherit.group_im_manager,stock.group_stock_user,sbm_order_handler.group_admin_warehouse"/>
 
-
-						<button name="receiveMove" type="object" string="Receive" icon="gtk-apply" states="transfered" confirm="Receive ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager" />
+						<button name="receiveMove" type="object" string="Receive" icon="gtk-apply" states="transfered" confirm="Receive ?" groups="sbm_inherit.group_im_ws_checker,sbm_inherit.group_im_manager,sbm_hr_attendance.group_site_admin" />
 
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation" icon="gtk-print" states="confirmed,checked,ready"  groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_inherit.group_im_set"/>
 
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation WS" icon="gtk-print" states="checked,ready,transfered,done"  groups="sbm_inherit.group_im_ws_checker"/>
 
-						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager" />
+						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="checked,ready,transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager,sbm_order_handler.group_admin_ho" />
 
 						<button name="action_cancel" type="object" string="Cancel" states="transfered" icon="STOCK_CANCEL" groups="base.group_no_one" />
 
@@ -398,6 +397,7 @@
 
 							<field name="notes"/>
 							<field name="packing_notes" attrs="{'invisible':[('state','not in',['ready','transfered','done'])]}" readonly="1"/>
+							<field name="print_delivery_count" invisible="1"/>
 
 							<!-- <field name="detail_ids">
 								<tree string="Details">
