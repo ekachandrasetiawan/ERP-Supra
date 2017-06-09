@@ -2098,11 +2098,13 @@ class InternalMove(osv.osv):
 		'ref_no':fields.char('Ref No',required=False),
 		'notes':fields.text('Notes',required=False),
 		'packing_notes':fields.text('Packing Notes',required=False),
+		'print_delivery_count':fields.integer('Print Delivery Count',required=False),
 		# 'internal_move_line_detail_ids':fields.one2many()
 	}
 
 	_defaults={
 		'state':"draft",
+		'print_delivery_count':0
 	}
 
 	_track = {
@@ -2142,6 +2144,23 @@ class InternalMove(osv.osv):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"moves/print-internal-move&id="+str(ids[0])+"&uid="+str(uid)
+
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		# Update Count dari print delivery
+		print_delivery_count = val.print_delivery_count
+		print_delivery_count += 1
+
+		self.write(cr,uid,ids,{'print_delivery_count':print_delivery_count},context=context)
+
+		# Menambahkan Log Informasi User yang print document
+		im_object = self.pool.get('internal.move')
+		user_obj = self.pool.get('res.users')
+		user_value = user_obj.browse(cr, uid, uid)
+		msg = _("<em>%s</em>, has Print Delivery.") % (user_value.login)
+
+		im_object.message_post(cr, uid, [val.id], body=msg, context=context)
+
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
