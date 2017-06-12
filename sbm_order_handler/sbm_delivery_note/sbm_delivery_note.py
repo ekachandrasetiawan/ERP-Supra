@@ -297,6 +297,7 @@ class delivery_note(osv.osv):
 				product = self.pool.get('product.product').browse(cr, uid, [got_line[2]['product_id']])[0]
 				raise osv.except_osv(_("Error!!!"),_("Product Qty "+ product.default_code + " Not '0'"))
 		print vals,"______________________________"
+		vals['document_date'] = time.strftime('%Y-%m-%d')
 		return super(delivery_note, self).create(cr, uid, vals, context=context)
 
 
