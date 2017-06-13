@@ -336,7 +336,7 @@
 						<field name="state" widget="statusbar" statusbar_visible="draft,confirmed,checked,ready,transfered,done" />
 						<button name="confirmInternalMove" type="object" string="Confirm" icon="gtk-apply" states="draft" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_set,sbm_inherit.group_im_confirmer,sbm_order_handler.group_admin_ho"/>
 
-						<button name="action_reload_line" type="object" string="Reload" icon="STOCK_REFRESH" states="draft" groups="base.group_no_one" />
+						<button name="action_reload_line" type="object" string="Reload" icon="STOCK_REFRESH" states="draft" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer" />
 
 						<button name="checkedInternalMove" type="object" string="Checked" icon="gtk-apply" states="confirmed" confirm="Are You Sure to Confirm This Document ?" groups="sbm_inherit.group_im_manager,sbm_inherit.group_im_confirmer,sbm_order_handler.group_admin_ho" />
 
