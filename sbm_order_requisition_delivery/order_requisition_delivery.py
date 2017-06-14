@@ -366,6 +366,7 @@ class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	_columns = {
 	        'purchase_line_id': fields.many2one('purchase.order.line','Purchase Order Line', ondelete='set null', select=True,readonly=True),
+	        'ref_po_no': fields.related('purchase_line_id', 'no', string='Ref Po No', type='text', store=True),
 			'regular_pb_line_id': fields.related('purchase_line_id','line_pb_general_id', type='many2one', relation='detail.pb', string='Regular PB ID'),
 			'regular_pb_id': fields.related('regular_pb_line_id','detail_pb_id', type='many2one', relation='pembelian.barang', string='Regular PB No'),
 			'regular_pb_no': fields.related('regular_pb_id','name', type='char', string='Regular PB No'),
@@ -379,3 +380,35 @@ class stock_move(osv.osv):
 
 
 stock_move()
+
+class stock_partial_picking_line(osv.osv):
+
+	_inherit = "stock.partial.picking.line"
+	_columns = {
+		'move_id' : fields.many2one('stock.move', "Move", ondelete='CASCADE'),
+		'ref_po_no': fields.related('move_id', 'ref_po_no', string='Ref No', type='text', store=False),
+	}
+
+
+stock_partial_picking_line()
+
+
+class stock_partial_picking(osv.osv_memory):
+	
+	_inherit = "stock.partial.picking"
+
+	def _partial_move_for(self, cr, uid, move, context={}):
+		partial_move = {
+			'ref_po_no':move.ref_po_no,
+			'product_id' : move.product_id.id,
+			'product_name':move.name,
+			'quantity' : move.product_qty if move.state == 'assigned' or move.picking_id.type == 'in' else 0,
+			'product_uom' : move.product_uom.id,
+			'prodlot_id' : move.prodlot_id.id,
+			'move_id' : move.id,
+			'location_id' : move.location_id.id,
+			'location_dest_id' : move.location_dest_id.id,
+		}
+		if move.picking_id.type == 'in' and move.product_id.cost_method == 'average':
+			partial_move.update(update_cost=True, **self._product_cost_for_average_update(cr, uid, move))
+		return partial_move
