@@ -353,7 +353,7 @@
 
 						<button name="printInternalMovePreparation" type="object" string="Print Preparation WS" icon="gtk-print" states="checked,ready,transfered,done"  groups="sbm_inherit.group_im_ws_checker"/>
 
-						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="checked,ready,transfered" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager,sbm_order_handler.group_admin_ho" />
+						<button name="printInternalMoveNotes" type="object" string="Print Delivery" icon="gtk-print" states="ready" groups="sbm_inherit.group_im_confirmer,sbm_inherit.group_im_manager,sbm_order_handler.group_admin_ho" />
 
 						<button name="action_cancel" type="object" string="Cancel" states="transfered" icon="STOCK_CANCEL" groups="base.group_no_one" />
 
