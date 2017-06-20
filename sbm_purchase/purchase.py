@@ -576,12 +576,12 @@ class Detail_PB(osv.osv):
 		'sale_line_ids':fields.many2one('sale.order.line','SaleId'),
 		'qty_available': fields.function(_get_qty_available,string="Qty Available",type="float", readonly=False, track_visibility='always',
 			store={
-				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
+				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id','jumlah_diminta'], 20),
 				'purchase.order.line': (_get_cek_po_line, ['state'], 20),
 			}),
 		'delivery_items': fields.function(_get_delivery_items,string="Supplied Items",type="float",
 			store={
-				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id'], 20),
+				'detail.pb': (lambda self, cr, uid, ids, c={}: ids, ['detail_pb_id','jumlah_diminta'], 20),
 				'order.requisition.delivery.line':(_get_cek_delivery_item,['state'],20),
 			}),
 		'processed_items': fields.function(_get_processed_items,string="Processed Items",type="float",store=False),
