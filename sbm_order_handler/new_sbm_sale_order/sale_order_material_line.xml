@@ -9,7 +9,10 @@
 			<field name="arch" type="xml">
 				<tree string="Sale Order Material Line" colors="gray:qty==procured_qty;">
 					<field name="sale_id"/>
+					<field name="partner_id"/>
+					<field name="client_order_ref"/>
 					<field name="product_id"/>
+					<field name="product_categ"/>
 					<field name="qty"/>
 					<field name="on_process_qty" string="Process Qty"/>
 					<field name="shipped_qty" string="Shipped Qty"/>

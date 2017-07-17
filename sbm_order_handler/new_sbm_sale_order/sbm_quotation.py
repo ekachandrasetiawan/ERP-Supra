@@ -619,14 +619,26 @@ class sale_order_material_line(osv.osv):
 
 					res[res_id] = item.id
 		return res
-		
-
 
 	def _get_cek_so_state(self, cr, uid, ids, context=None):
 		result = {}
 		for line in self.browse(cr, uid, ids, context=context):
 			result[line.id] = True
 		return result.keys()
+
+
+	def _get_cek_clinet_order_ref(self, cr, uid, ids, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			result[line.id] = True
+		return result.keys()
+
+
+	def _getProductCateg(self,cr,uid,ids,field_name,args,context={}):
+		res = {}
+		for item in self.browse(cr,uid,ids,context=context):
+			res[item.id] = item.product_id.product_tmpl_id.categ_id.id
+		return res
 
 	_columns = {
 		'no':fields.integer('No'),
@@ -642,10 +654,17 @@ class sale_order_material_line(osv.osv):
 				'sale.order.material.line': (lambda self, cr, uid, ids, c={}: ids, ['sale_order_id','sale_order_line_id'], 20),
 				'sale.order': (_get_cek_so_state, ['state','quotation_state'], 20),
 			}),
+		'product_categ': fields.function(_getProductCateg, method=True, string="Product Category",type="many2one", relation='product.category',
+			store={
+				'sale.order.material.line': (lambda self, cr, uid, ids, c={}: ids, ['product_id'], 20),
+			}),
+		'client_order_ref': fields.related('sale_order_line_id','client_order_ref', type='char', string='Nomor PO', store=True),
+		'partner_id': fields.related('sale_order_line_id','partner_id', type='many2one', relation='res.partner', string='Partner', store=True),
 		'sale_id': fields.related('sale_order_line_id','order_id', type='many2one', relation='sale.order', string='Sale Order'),
 		'procured_qty':fields.function(_count_procured_qty, string="Procured Qty", store=False),
 		'status': fields.related('sale_order_line_id','state', type='char', relation='sale.order'),
 	}
+
 
 	def _get_ho_location(self,cr,uid,ids,context={}):
 		objname, location_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'stock', 'stock_location_stock')
@@ -801,8 +820,11 @@ class sale_order_line(osv.osv):
 			store={
 				'sale.order.line': (lambda self, cr, uid, ids, c={}: ids, ['base_total','tax_id','discount','discount_nominal'], 1),
 			}	
-		),		
+		),
+		'order_id': fields.many2one('sale.order', 'Order Reference', required=True, ondelete='cascade', select=True, readonly=True, states={'draft':[('readonly',False)]}),	
 		'material_lines':fields.one2many('sale.order.material.line','sale_order_line_id'),
+		'client_order_ref': fields.related('order_id','client_order_ref', type='char', string='Nomor PO'),
+		'partner_id': fields.related('order_id','partner_id', type='many2one', relation='res.partner', string='Partner'),
 		'name':fields.text(string='Description',required=False)	
 	}
 	

@@ -627,7 +627,7 @@ class order_preparation(osv.osv):
 		notActiveProducts = []
 		for x in val.prepare_lines:
 			if not context:
-				context = {}
+				context = {}																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																											
 			context['location'] = val.location_id.id
 			context['location_id'] = val.location_id.id
 			product =self.pool.get('product.product').browse(cr, uid, x.product_id.id, context=context)
