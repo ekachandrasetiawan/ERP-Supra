@@ -117,7 +117,10 @@
 						<filter icon="terp-dolar_ok!" string="Posted" domain="[('status','not in',['draft','cancel'])]" help="Posted" name="filter_posted"/>
 				    	<filter icon="terp-dolar_ok!" string="Non Posted" domain="[('status','in',['draft','cancel'])]" help="Non Posted" name="filter_nonposted"/>
 					  	<field name="sale_id" filter_domain="[('sale_id','ilike',self)]" string="No Sale Order"/>
+					  	<field name="partner_id" filter_domain="[('partner_id','ilike',self)]"/>
+					  	<field name="client_order_ref" filter_domain="[('client_order_ref','ilike',self)]"/>
 		     	    	<field name="product_id" filter_domain="[('product_id','ilike',self)]"/>
+		     	    	<field name="product_categ" filter_domain="[('product_categ','ilike',self)]"/>
 				   		<field name="status" filter_domain="[('status','ilike',self)]" string="Status"/>
                     </group>
                     
