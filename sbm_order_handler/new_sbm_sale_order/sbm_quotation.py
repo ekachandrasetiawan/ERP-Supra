@@ -976,7 +976,7 @@ class sale_order_line(osv.osv):
 		res={}
 		mrp_obj = self.pool.get('mrp.bom')
 
-		if product_uom_qty == False or product_uom_qty<1:
+		if product_uom_qty == False or product_uom_qty < 0 or product_uom_qty == 0:
 			res["warning"]={'title':"Error",'message':'Quantity tidak boleh kosong'}
 			res['value'] = {				
 				"product_uom_qty":1

@@ -217,13 +217,14 @@ class delivery_note(osv.osv):
 								stock = ' ' + str(prodlot.stock_available) + ' '
 								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
 								raise openerp.exceptions.Warning(msg)
+							
 
-							if count_qty > product.qty_available:
-								mm = ' ' + product.default_code + ' '
-								stock = ' ' + str(product.qty_available) + ' '
-								msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
+							# if count_qty > product.qty_available:
+							# 	mm = ' ' + product.default_code + ' '
+							# 	stock = ' ' + str(product.qty_available) + ' '
+							# 	msg = 'Stock Product' + mm + 'Tidak Mencukupi.!\n'+ ' Qty Available'+ stock 
 
-								raise openerp.exceptions.Warning(msg)
+							# 	raise openerp.exceptions.Warning(msg)
 						else:
 							# if x.qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
 							if count_qty > product.qty_available and not re.match(r'service',product.categ_id.name,re.M|re.I) and not re.match(r'on it maintenance service',product.categ_id.name,re.M|re.I):
