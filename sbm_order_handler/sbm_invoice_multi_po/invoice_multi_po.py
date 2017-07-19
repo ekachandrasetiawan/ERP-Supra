@@ -177,7 +177,7 @@ class purchase_order(osv.osv):
 	def action_invoice_create(self, cr, uid, ids, context=None):
 		obj_pick = self.pool.get('stock.picking')
 
-		cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", ids)
+		cr.execute("SELECT pir.invoice_id FROM purchase_invoice_rel AS pir JOIN account_invoice AS ai ON ai.id = pir.invoice_id WHERE pir.purchase_id = %s AND ai.state NOT IN('cancel')", ids)
 		invoice = map(lambda x: x[0], cr.fetchall())
 
 		data_invoice =self.pool.get('account.invoice').browse(cr,uid,invoice)

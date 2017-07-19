@@ -177,7 +177,7 @@ class purchase_order(osv.osv):
 	def action_invoice_create(self, cr, uid, ids, context=None):
 		obj_pick = self.pool.get('stock.picking')
 
-		cr.execute("SELECT invoice_id FROM purchase_invoice_rel WHERE purchase_id = %s", ids)
+		cr.execute("SELECT pir.invoice_id FROM purchase_invoice_rel AS pir JOIN account_invoice AS ai ON ai.invoice_id = pir.invoice_id WHERE pir.purchase_id = %s AND ai.state NOT IN('cancel')", ids)
 		invoice = map(lambda x: x[0], cr.fetchall())
 
 		data_invoice =self.pool.get('account.invoice').browse(cr,uid,invoice)
@@ -198,13 +198,14 @@ class purchase_order(osv.osv):
 		for c in data_invoice:
 			if c.kwitansi:
 				no_kwitansi += c.kwitansi + ', '
+		print "tes"
 
 		if invoice:
 			raise osv.except_osv(_('Warning!'),
-			_('Purchase Order Sudah Memiliki Invoice ' + no_kwitansi))
+			_('Purchase Order Sudah Memiliki Invoice aaaaaa' + no_kwitansi))
 
 
-		print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		
 
 		return super(purchase_order,self).action_invoice_create(cr,uid,ids,context=context)
 
