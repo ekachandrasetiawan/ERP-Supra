@@ -366,7 +366,7 @@ class Purchase_Order(osv.osv):
 				Sequence Purchase Order Bermasalah<br>
 				<table border="1">
 					<tr><th># Before</th><th># After</th><<th>Selisih</th></tr>
-					<tr><th>%s/th><th>%s</th><th>%s Number</th></tr>
+					<tr><th>%s</th><th>%s</th><th>%s Number</th></tr>
 				</table><br>
 			</p>
 			<br>
@@ -429,7 +429,7 @@ class Purchase_Order(osv.osv):
 	def check_get_sequence(self, cr, uid, ids, context=None):
 		email = ['jay@beltcare.com','chandra@beltcare.com']
 
-		cr.execute("SELECT replace(substring(name,1,6), '/','') as name FROM purchase_order WHERE jenis ='loc' AND rev_counter=0 AND state <> 'draft' and name <> 'CANCEL' AND char_length(replace(substring(name,1,6), '/','')) = 6 ORDER BY replace(substring(name,1,6), '/','') DESC LIMIT 30",())
+		cr.execute("SELECT replace(substring(name,1,6), '/','') as name FROM purchase_order WHERE jenis ='loc' AND rev_counter=0 and name <> 'CANCEL' AND char_length(replace(substring(name,1,6), '/','')) = 6 AND char_length(name) > 10 ORDER BY replace(substring(name,1,6), '/','') DESC LIMIT 50",())
 		name = cr.fetchall()
 		po_name = [('id', 'in', map(lambda x: x[0], name))]
 
