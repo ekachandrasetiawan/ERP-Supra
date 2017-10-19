@@ -4,6 +4,7 @@ from stock import stock
 from openerp import pooler
 import math
 import time
+from datetime import datetime, timedelta
 import webbrowser
 import netsvc
 import openerp.exceptions
@@ -2136,7 +2137,7 @@ class InternalMove(osv.osv):
 		im_object 	= self.pool.get('internal.move')
 		user_obj 	= self.pool.get('res.users')
 		user_value 	= user_obj.browse(cr, uid, uid)
-		msg = _("<em>%s</em>, has Print Delivery. ( %s )" ) % (user_value.login, time.strftime('%d-%m-%Y %H:%M:%S'))
+		msg = _("<em>%s</em>, has Print Delivery. ( %s )" ) % (user_value.login, (datetime.now() + timedelta(hours=7)).strftime("%d-%m-%Y %H:%M:%S"))
 
 		im_object.message_post(cr, uid, [val.id], body=msg, context=context)
 
@@ -2168,7 +2169,7 @@ class InternalMove(osv.osv):
 		im_object = self.pool.get('internal.move')
 		user_obj = self.pool.get('res.users')
 		user_value = user_obj.browse(cr, uid, uid)
-		msg = _("<em>%s</em>, has Print Delivery.( %s )") % (user_value.login, time.strftime('%d-%m-%Y %H:%M:%S'))
+		msg = _("<em>%s</em>, has Print Delivery.( %s )") % (user_value.login, (datetime.now() + timedelta(hours=7)).strftime("%d-%m-%Y %H:%M:%S"))
 
 		im_object.message_post(cr, uid, [val.id], body=msg, context=context)
 
