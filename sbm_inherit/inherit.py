@@ -2129,6 +2129,17 @@ class InternalMove(osv.osv):
 		searchConf = self.pool.get('ir.config_parameter').search(cr, uid, [('key', '=', 'base.print')], context=context)
 		browseConf = self.pool.get('ir.config_parameter').browse(cr,uid,searchConf,context=context)[0]
 		urlTo = str(browseConf.value)+"moves/print-internal-move-preparation&id="+str(ids[0])+"&uid="+str(uid)
+
+		val = self.browse(cr, uid, ids, context={})[0]
+
+		# Menambahkan Log Informasi User yang print document
+		im_object 	= self.pool.get('internal.move')
+		user_obj 	= self.pool.get('res.users')
+		user_value 	= user_obj.browse(cr, uid, uid)
+		msg = _("<em>%s</em>, has Print Delivery. ( %s )" ) % (user_value.login, time.strftime('%d-%m-%Y %H:%M:%S'))
+
+		im_object.message_post(cr, uid, [val.id], body=msg, context=context)
+
 		return {
 			'type'	: 'ir.actions.client',
 			'target': 'new',
@@ -2157,7 +2168,7 @@ class InternalMove(osv.osv):
 		im_object = self.pool.get('internal.move')
 		user_obj = self.pool.get('res.users')
 		user_value = user_obj.browse(cr, uid, uid)
-		msg = _("<em>%s</em>, has Print Delivery.") % (user_value.login)
+		msg = _("<em>%s</em>, has Print Delivery.( %s )") % (user_value.login, time.strftime('%d-%m-%Y %H:%M:%S'))
 
 		im_object.message_post(cr, uid, [val.id], body=msg, context=context)
 
