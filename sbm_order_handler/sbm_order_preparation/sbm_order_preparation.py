@@ -748,6 +748,7 @@ class order_preparation(osv.osv):
 		return self.write(cr, uid, ids, vals)
 		return True
 
+
 	def reload_sale_order(self, cr, uid, ids, sale, loc=False, context=None):
 		val = self.browse(cr, uid, ids, context={})[0]
 		res={}
@@ -766,6 +767,12 @@ class order_preparation(osv.osv):
 
 		evt_sale_change = self.sale_change(cr, uid, ids, val.sale_id.id, loc, reload=True, context=None)
 
+		op_object 	= self.pool.get('order.preparation')
+		user_obj 	= self.pool.get('res.users')
+		user_value 	= user_obj.browse(cr, uid, uid)
+		msg = _("<em>%s</em>, Reload Order Preparation. ( %s )" ) % (user_value.login, (datetime.now() + timedelta(hours=7)).strftime("%d-%m-%Y %H:%M:%S"))
+
+		op_object.message_post(cr, uid, [val.id], body=msg, context=context)
 
 		return True
 
